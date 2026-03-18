@@ -57,6 +57,38 @@ nav {
 .nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); letter-spacing: 0.01em; transition: color .2s; }
 .nav-links a:hover { color: var(--black); }
 
+/* hamburger button */
+.nav-burger {
+  display: none; flex-direction: column; justify-content: center; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px;
+}
+.nav-burger span {
+  display: block; height: 2px; background: var(--black);
+  transition: transform .3s ease, opacity .3s ease;
+}
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* mobile drawer */
+.nav-drawer {
+  display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99;
+  background: rgba(255,255,255,0.98); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  flex-direction: column; padding: 0;
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease;
+}
+.nav-drawer.open { max-height: 400px; }
+.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
+.nav-drawer a {
+  display: block; padding: 0.9rem 2rem;
+  font-size: 0.9rem; text-decoration: none; color: var(--black);
+  font-family: var(--font-sans); letter-spacing: 0.01em;
+  transition: background .15s;
+}
+.nav-drawer a:hover { background: var(--gray-50); }
+
 /* ─── LAYOUT ──────────────────────────────────────────── */
 .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
 
@@ -349,11 +381,32 @@ details[open] summary::before { content: '−'; }
 #canvas-container { margin-top: 1rem; }
 #canvas-3d { touch-action: none; }
 
+/* ─── BASE OVERFLOW FIX ───────────────────────────────── */
+html, body { overflow-x: hidden; max-width: 100%; }
+svg { max-width: 100%; height: auto; }
+.svg-stage { overflow: hidden; width: 100%; }
+pre { overflow-x: auto; max-width: 100%; }
+table { display: block; overflow-x: auto; max-width: 100%; }
+
 /* ─── RESPONSIVE ──────────────────────────────────────── */
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   .ko-grid { grid-template-columns: 1fr; }
   .sheaf-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .nav-drawer { display: flex; }
+  .bar-label { width: 80px; font-size: 0.74rem; }
+  .results-table { font-size: 0.78rem; }
+  .results-table th, .results-table td { padding: 0.5rem 0.5rem; }
+  .cmp-table th, .cmp-table td { padding: 0.4rem 0.4rem; font-size: 0.74rem; }
+  h1.hero-title { font-size: 2.4rem; }
+  .algo-box { font-size: 0.72rem; padding: 1rem; }
+  .container { padding: 0 1.2rem; }
+  .hero-tagline { font-size: 1.1rem; }
+  .math-block { padding: 1.2rem 1rem; }
+  .sheaf-grid { display: block; }
+  .slider-row label { font-size: 0.75rem; }
+  #canvas-3d { height: 320px !important; }
 }
 </style>
 </head>
@@ -371,7 +424,23 @@ details[open] summary::before { content: '−'; }
     <li><a href="#results">Results</a></li>
     <li><a href="#architecture">Architecture</a></li>
   </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE DRAWER -->
+<ul class="nav-drawer" id="nav-drawer">
+  <li><a href="#problem"    onclick="closeMenu()">§1 &nbsp;Problem</a></li>
+  <li><a href="#ko"         onclick="closeMenu()">§3 &nbsp;Knowledge Objects</a></li>
+  <li><a href="#distance"   onclick="closeMenu()">§4 &nbsp;Distance</a></li>
+  <li><a href="#topology"   onclick="closeMenu()">§5 &nbsp;Topology</a></li>
+  <li><a href="#sheaves"    onclick="closeMenu()">§6 &nbsp;Sheaves</a></li>
+  <li><a href="#viz3d"      onclick="closeMenu()">§3D &nbsp;3D Visualization</a></li>
+  <li><a href="#results"    onclick="closeMenu()">§8 &nbsp;Results</a></li>
+  <li><a href="#architecture" onclick="closeMenu()">§9 &nbsp;Architecture</a></li>
+  <li><a href="#conclusion" onclick="closeMenu()">§11 Conclusion</a></li>
+</ul>
 
 <!-- HERO -->
 <section id="hero">
@@ -508,7 +577,7 @@ path_score: 0.97</pre>
     </div>
 
     <div class="svg-stage reveal" style="height:280px;" id="umbrella-stage">
-      <svg id="umbrella-svg" width="740" height="260" viewBox="0 0 740 260">
+      <svg id="umbrella-svg" width="100%" height="260" viewBox="0 0 740 260" preserveAspectRatio="xMidYMid meet" style="max-width:740px;">
         <defs>
           <marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
             <path d="M0,0 L0,7 L7,3.5 z" fill="#000"/>
@@ -1135,6 +1204,27 @@ results = db.query(
 </footer>
 
 <script>
+// ─── MOBILE MENU ───────────────────────────────────────────────────────────
+function toggleMenu() {
+  const burger = document.getElementById('nav-burger');
+  const drawer = document.getElementById('nav-drawer');
+  burger.classList.toggle('open');
+  drawer.classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-burger').classList.remove('open');
+  document.getElementById('nav-drawer').classList.remove('open');
+}
+// Close drawer on outside tap
+document.addEventListener('click', e => {
+  const burger = document.getElementById('nav-burger');
+  const drawer = document.getElementById('nav-drawer');
+  if (!burger.contains(e.target) && !drawer.contains(e.target)) {
+    burger.classList.remove('open');
+    drawer.classList.remove('open');
+  }
+});
+
 // ─── TYPEWRITER ────────────────────────────────────────────────────────────
 const phrase = "Stop measuring distances. Start understanding adjacency.";
 const tw = document.getElementById('typewriter');
