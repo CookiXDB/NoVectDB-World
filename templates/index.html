@@ -335,6 +335,20 @@ details[open] summary::before { content: '−'; }
 
 .footer-sig { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-500); }
 
+/* ─── 3D VIZ ──────────────────────────────────────────── */
+.viz-tabs { display:flex; gap:0; margin:1.5rem 0 0; border-bottom: 2px solid var(--black); }
+.viz-tab {
+  background: none; border: 1px solid var(--gray-200); border-bottom: none;
+  padding: 0.5rem 1.4rem; font-family: var(--font-mono); font-size: 0.8rem;
+  cursor: pointer; letter-spacing: 0.04em; margin-right: 4px;
+  transition: background .2s, color .2s;
+}
+.viz-tab.active { background: var(--black); color: var(--white); border-color: var(--black); }
+.viz-tab:hover:not(.active) { background: var(--gray-100); }
+.viz-desc { margin: 1rem 0 0; }
+#canvas-container { margin-top: 1rem; }
+#canvas-3d { touch-action: none; }
+
 /* ─── RESPONSIVE ──────────────────────────────────────── */
 @media (max-width: 640px) {
   .ko-grid { grid-template-columns: 1fr; }
@@ -782,6 +796,47 @@ path_score: 0.97</pre>
       \[S_\pi = \mathcal{F}_{e_k} \circ \cdots \circ \mathcal{F}_{e_1}\]
       \[\|S_a \circ_\pi S_b\| = \|S_\pi(x_a) - x_b\|_2\]
       <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">The <em>composition residual</em> measures how well \(\mathcal{K}_a\)'s semantics arrive at \(\mathcal{K}_b\) via path \(\pi\). Small residual = high semantic compatibility along the relational chain.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §3D VISUALIZATION -->
+<section id="viz3d">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 3D</div>
+      <h2 class="section-title">Interactive 3D<br/>Visualization</h2>
+      <p>Explore the two core mathematical structures of NoVectDB in three dimensions. Drag to orbit, scroll to zoom.</p>
+    </div>
+
+    <div class="viz-tabs reveal">
+      <button class="viz-tab active" id="tab-sheaf" onclick="switchTab('sheaf')">Sheaf Structure</button>
+      <button class="viz-tab" id="tab-filtration" onclick="switchTab('filtration')">Vietoris–Rips Filtration</button>
+    </div>
+
+    <div id="viz-sheaf-desc" class="viz-desc reveal">
+      <p style="font-size:0.88rem;color:var(--gray-700);">A <strong>cellular sheaf</strong> assigns a vector space (stalk) to each Knowledge Object and a linear map (restriction) to each edge. The wireframe cube at each node represents its local semantic frame \(\mathcal{F}(v) \cong \mathbb{R}^3\). Hover a node to highlight its stalk and outgoing restriction maps.</p>
+    </div>
+    <div id="viz-filtration-desc" class="viz-desc reveal" style="display:none;">
+      <p style="font-size:0.88rem;color:var(--gray-700);">The <strong>Vietoris–Rips filtration</strong> builds a simplicial complex from a point cloud by connecting points within radius \(\varepsilon\). As \(\varepsilon\) grows, edges, triangles (2-simplices), and tetrahedra (3-simplices) appear. The persistent features that survive long encode the topological signature \(T(\mathcal{K})\).</p>
+    </div>
+
+    <div id="canvas-container" class="reveal" style="position:relative;">
+      <canvas id="canvas-3d" style="width:100%;height:500px;display:block;cursor:grab;background:#fff;border:1px solid var(--gray-200);"></canvas>
+      <!-- Filtration controls -->
+      <div id="filt-controls" style="display:none;position:absolute;bottom:16px;left:16px;right:16px;">
+        <div style="display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,0.95);padding:0.7rem 1rem;border:1px solid var(--gray-200);">
+          <label style="font-family:var(--font-mono);font-size:0.78rem;white-space:nowrap;">\(\varepsilon\)</label>
+          <input type="range" id="eps-slider" min="0" max="100" value="0" style="flex:1;accent-color:#000;"/>
+          <span id="eps-val" style="font-family:var(--font-mono);font-size:0.78rem;width:3.5rem;">0.00</span>
+          <button id="filt-play" style="background:#000;color:#fff;border:none;padding:0.3rem 0.8rem;font-family:var(--font-mono);font-size:0.75rem;cursor:pointer;white-space:nowrap;">▶ Play</button>
+        </div>
+        <div id="betti-nums" style="margin-top:0.5rem;font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-700);background:rgba(255,255,255,0.95);padding:0.5rem 1rem;border:1px solid var(--gray-200);">
+          β₀ (components): — &nbsp;|&nbsp; β₁ (loops): — &nbsp;|&nbsp; β₂ (voids): —
+        </div>
+      </div>
+      <!-- Sheaf label overlay -->
+      <div id="sheaf-label" style="display:none;position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.95);border:1px solid var(--gray-200);padding:0.6rem 0.9rem;font-family:var(--font-mono);font-size:0.78rem;max-width:220px;"></div>
     </div>
   </div>
 </section>
@@ -1280,6 +1335,415 @@ const cmpObs = new IntersectionObserver((entries) => {
 }, { threshold: 0.2 });
 const ct = document.getElementById('cmp-table');
 if (ct) cmpObs.observe(ct);
+</script>
+
+<!-- THREE.JS 3D VISUALIZATION -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas = document.getElementById('canvas-3d');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0xffffff, 1);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+
+const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / 500, 0.1, 100);
+camera.position.set(0, 1.5, 6);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 2;
+controls.maxDistance = 14;
+
+// ── RESIZE ──
+function resize() {
+  const w = canvas.clientWidth, h = 500;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ══════════════════════════════════════════════════
+// SCENE A: SHEAF STRUCTURE
+// ══════════════════════════════════════════════════
+const sheafGroup = new THREE.Group();
+
+const nodeData = [
+  { name: 'umbrella', pos: [0, 0, 0],    stalk: 'F(v₀) ≅ ℝ³\n→ prevents, shields' },
+  { name: 'rain',     pos: [2.2, 0.4, -0.5], stalk: 'F(v₁) ≅ ℝ³\n→ wets, causes' },
+  { name: 'raincoat', pos: [2.2,-1.2, 0.6],  stalk: 'F(v₂) ≅ ℝ³\n→ protects' },
+  { name: 'water',    pos: [-2, 0.8, 0.5],   stalk: 'F(v₃) ≅ ℝ³\n→ is_a, flows' },
+  { name: 'storm',    pos: [-1.8,-1, -0.8],  stalk: 'F(v₄) ≅ ℝ³\n→ causes, produces' },
+];
+
+const edgeData = [
+  { from: 0, to: 1, type: 'prevents' },
+  { from: 1, to: 2, type: 'wets' },
+  { from: 3, to: 1, type: 'is_a' },
+  { from: 4, to: 1, type: 'causes' },
+  { from: 4, to: 3, type: 'produces' },
+];
+
+const matSphere  = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.4, metalness: 0.1 });
+const matSphereH = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.3, metalness: 0.2 });
+const matWire    = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+const matEdge    = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1.5 });
+const matEdgeH   = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 3 });
+const matGray    = new THREE.LineBasicMaterial({ color: 0xaaaaaa, linewidth: 1 });
+
+// Ambient + directional light
+const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+dirLight.position.set(5, 8, 5);
+scene.add(ambLight, dirLight);
+
+// Build nodes
+const nodeMeshes = [];
+const stalkGroups = [];
+nodeData.forEach((nd, i) => {
+  const geo = new THREE.SphereGeometry(0.18, 24, 24);
+  const mesh = new THREE.Mesh(geo, matSphere.clone());
+  mesh.position.set(...nd.pos);
+  mesh.userData = { index: i, name: nd.name, stalk: nd.stalk };
+  sheafGroup.add(mesh);
+  nodeMeshes.push(mesh);
+
+  // Stalk = wireframe cube
+  const cGeo = new THREE.BoxGeometry(0.55, 0.55, 0.55);
+  const cWire = new THREE.Mesh(cGeo, matWire.clone());
+  cWire.position.set(...nd.pos);
+  cWire.userData.baseOpacity = 0.25;
+  cWire.material.opacity = 0.25;
+  cWire.material.transparent = true;
+  sheafGroup.add(cWire);
+  stalkGroups.push(cWire);
+
+  // Axis arrows (stalk ℝ³ frame) – thin lines
+  const axes = [
+    { dir: [0.35, 0, 0] },
+    { dir: [0, 0.35, 0] },
+    { dir: [0, 0, 0.35] },
+  ];
+  axes.forEach(ax => {
+    const pts = [
+      new THREE.Vector3(...nd.pos),
+      new THREE.Vector3(nd.pos[0]+ax.dir[0], nd.pos[1]+ax.dir[1], nd.pos[2]+ax.dir[2])
+    ];
+    const lg = new THREE.BufferGeometry().setFromPoints(pts);
+    const lm = new THREE.LineBasicMaterial({ color: 0xbbbbbb });
+    const line = new THREE.Line(lg, lm);
+    line.userData.isAxis = true;
+    sheafGroup.add(line);
+  });
+});
+
+// Build edges (directed with arrowhead)
+const edgeMeshes = [];
+edgeData.forEach(ed => {
+  const a = new THREE.Vector3(...nodeData[ed.from].pos);
+  const b = new THREE.Vector3(...nodeData[ed.to].pos);
+  const dir = b.clone().sub(a).normalize();
+  const start = a.clone().add(dir.clone().multiplyScalar(0.2));
+  const end   = b.clone().sub(dir.clone().multiplyScalar(0.2));
+  const pts = [start, end];
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const line = new THREE.Line(geo, matEdge.clone());
+  line.userData = { from: ed.from, to: ed.to, type: ed.type };
+  sheafGroup.add(line);
+  edgeMeshes.push(line);
+
+  // Arrow cone
+  const coneGeo = new THREE.ConeGeometry(0.06, 0.18, 8);
+  const coneMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const cone = new THREE.Mesh(coneGeo, coneMat);
+  cone.position.copy(end);
+  const up = new THREE.Vector3(0, 1, 0);
+  const q = new THREE.Quaternion().setFromUnitVectors(up, dir);
+  cone.setRotationFromQuaternion(q);
+  sheafGroup.add(cone);
+
+  // Restriction map — small plane halfway, tilted
+  const mid = start.clone().lerp(end, 0.5);
+  const planeGeo = new THREE.PlaneGeometry(0.18, 0.18);
+  const planeMat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true, transparent: true, opacity: 0.5 });
+  const plane = new THREE.Mesh(planeGeo, planeMat);
+  plane.position.copy(mid);
+  plane.lookAt(b);
+  plane.rotateX(Math.PI / 2);
+  sheafGroup.add(plane);
+});
+
+sheafGroup.position.y = -0.2;
+scene.add(sheafGroup);
+
+// ── Raycaster for hover ──
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let hoveredNode = -1;
+const labelEl = document.getElementById('sheaf-label');
+
+canvas.addEventListener('pointermove', e => {
+  if (currentTab !== 'sheaf') return;
+  const rect = canvas.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  pointer.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(nodeMeshes);
+  if (hits.length > 0) {
+    const idx = hits[0].object.userData.index;
+    if (idx !== hoveredNode) {
+      // Reset previous
+      if (hoveredNode >= 0) {
+        nodeMeshes[hoveredNode].material.color.set(0x000000);
+        stalkGroups[hoveredNode].material.opacity = 0.25;
+      }
+      hoveredNode = idx;
+      nodeMeshes[idx].material.color.set(0x333333);
+      stalkGroups[idx].material.opacity = 1.0;
+      // Show label
+      const nd = nodeData[idx];
+      labelEl.innerHTML = `<strong>${nd.name}</strong><br/>${nd.stalk.replace('\n','<br/>')}`;
+      labelEl.style.display = 'block';
+    }
+    canvas.style.cursor = 'pointer';
+  } else {
+    if (hoveredNode >= 0) {
+      nodeMeshes[hoveredNode].material.color.set(0x000000);
+      stalkGroups[hoveredNode].material.opacity = 0.25;
+      hoveredNode = -1;
+    }
+    labelEl.style.display = 'none';
+    canvas.style.cursor = 'grab';
+  }
+});
+
+// ══════════════════════════════════════════════════
+// SCENE B: VIETORIS–RIPS FILTRATION
+// ══════════════════════════════════════════════════
+const filtGroup = new THREE.Group();
+
+// Fixed seed point cloud (deterministic) in unit sphere
+const rawPts = [
+  [ 0.8,  0.2, -0.3], [-0.7,  0.5,  0.2], [ 0.1, -0.8,  0.4],
+  [ 0.5,  0.7,  0.5], [-0.3, -0.4, -0.7], [ 0.6, -0.3,  0.6],
+  [-0.5,  0.1, -0.5], [ 0.2,  0.6, -0.6], [-0.1, -0.6,  0.1],
+  [ 0.3,  0.0,  0.8], [-0.8, -0.2,  0.3]
+];
+const fPts = rawPts.map(p => new THREE.Vector3(...p).multiplyScalar(2.2));
+
+// Precompute all pairwise distances
+const nP = fPts.length;
+const dists = Array.from({length: nP}, () => new Array(nP).fill(0));
+for (let i = 0; i < nP; i++)
+  for (let j = i+1; j < nP; j++)
+    dists[i][j] = dists[j][i] = fPts[i].distanceTo(fPts[j]);
+
+// Max distance
+let maxDist = 0;
+for (let i = 0; i < nP; i++) for (let j = i+1; j < nP; j++) maxDist = Math.max(maxDist, dists[i][j]);
+
+// Node spheres
+const fNodeMeshes = [];
+const fNodeMat = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.5 });
+fPts.forEach(p => {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 16), fNodeMat);
+  m.position.copy(p);
+  filtGroup.add(m);
+  fNodeMeshes.push(m);
+});
+
+// Edge pool (all pairs)
+const edgePool = [];
+for (let i = 0; i < nP; i++) {
+  for (let j = i+1; j < nP; j++) {
+    const geo = new THREE.BufferGeometry().setFromPoints([fPts[i], fPts[j]]);
+    const mat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0 });
+    const line = new THREE.Line(geo, mat);
+    line.userData = { i, j, dist: dists[i][j] };
+    filtGroup.add(line);
+    edgePool.push(line);
+  }
+}
+
+// Triangle pool (all triples)
+const triPool = [];
+for (let i = 0; i < nP; i++) {
+  for (let j = i+1; j < nP; j++) {
+    for (let k = j+1; k < nP; k++) {
+      const maxSide = Math.max(dists[i][j], dists[j][k], dists[i][k]);
+      const verts = new Float32Array([
+        ...fPts[i].toArray(), ...fPts[j].toArray(), ...fPts[k].toArray(),
+        ...fPts[i].toArray(), ...fPts[k].toArray(), ...fPts[j].toArray(),
+      ]);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+      geo.computeVertexNormals();
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0x000000, transparent: true, opacity: 0,
+        side: THREE.DoubleSide, depthWrite: false
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.userData = { i, j, k, maxSide };
+      filtGroup.add(mesh);
+      triPool.push(mesh);
+    }
+  }
+}
+
+// Tetra pool (all quadruples) – just wireframe outline
+const tetraPool = [];
+for (let i = 0; i < nP; i++) {
+  for (let j = i+1; j < nP; j++) {
+    for (let k = j+1; k < nP; k++) {
+      for (let l = k+1; l < nP; l++) {
+        const maxSide = Math.max(dists[i][j],dists[i][k],dists[i][l],dists[j][k],dists[j][l],dists[k][l]);
+        if (maxSide > maxDist * 0.55) continue; // skip sparse tetras
+        const pairs = [[i,j],[i,k],[i,l],[j,k],[j,l],[k,l]];
+        const group = new THREE.Group();
+        group.userData = { maxSide };
+        pairs.forEach(([a,b]) => {
+          const geo = new THREE.BufferGeometry().setFromPoints([fPts[a], fPts[b]]);
+          const mat = new THREE.LineBasicMaterial({ color: 0x555555, transparent: true, opacity: 0 });
+          const ln = new THREE.Line(geo, mat);
+          group.add(ln);
+        });
+        filtGroup.add(group);
+        tetraPool.push(group);
+      }
+    }
+  }
+}
+
+filtGroup.visible = false;
+scene.add(filtGroup);
+
+// ── Filtration controls ──
+const slider = document.getElementById('eps-slider');
+const epsVal = document.getElementById('eps-val');
+const bettiEl = document.getElementById('betti-nums');
+const playBtn = document.getElementById('filt-play');
+
+let playInterval = null;
+let playing = false;
+
+function setEps(val) {
+  const t = val / 100;
+  const eps = t * maxDist;
+  epsVal.textContent = eps.toFixed(2);
+  slider.value = val;
+
+  edgePool.forEach(l => {
+    const show = l.userData.dist <= eps;
+    l.material.opacity = show ? 0.9 : 0;
+  });
+  triPool.forEach(m => {
+    const show = m.userData.maxSide <= eps;
+    m.material.opacity = show ? 0.07 : 0;
+  });
+  tetraPool.forEach(g => {
+    const show = g.userData.maxSide <= eps;
+    g.children.forEach(c => { c.material.opacity = show ? 0.4 : 0; });
+  });
+
+  // Crude Betti approximation via Union-Find
+  const parent = Array.from({length:nP},(_,i)=>i);
+  function find(x){ return parent[x]===x?x:parent[x]=find(parent[x]); }
+  let loops = 0, edges = 0;
+  edgePool.forEach(l => {
+    if (l.userData.dist <= eps) {
+      const {i,j} = l.userData;
+      const pi = find(i), pj = find(j);
+      if (pi !== pj) { parent[pi] = pj; }
+      else { loops++; }
+      edges++;
+    }
+  });
+  const components = new Set(Array.from({length:nP},(_,i)=>find(i))).size;
+  const voids = tetraPool.filter(g => g.userData.maxSide <= eps).length;
+  bettiEl.textContent = `β₀ (components): ${components}  |  β₁ (loops): ${loops}  |  β₂ (voids): ${voids}`;
+}
+
+slider.addEventListener('input', () => setEps(parseInt(slider.value)));
+
+playBtn.addEventListener('click', () => {
+  playing = !playing;
+  playBtn.textContent = playing ? '⏸ Pause' : '▶ Play';
+  if (playing) {
+    if (parseInt(slider.value) >= 100) slider.value = 0;
+    playInterval = setInterval(() => {
+      let v = parseInt(slider.value) + 1;
+      if (v > 100) { v = 100; playing = false; playBtn.textContent = '▶ Play'; clearInterval(playInterval); }
+      setEps(v);
+    }, 60);
+  } else {
+    clearInterval(playInterval);
+  }
+});
+
+// ══════════════════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════════════════
+let currentTab = 'sheaf';
+window.switchTab = function(tab) {
+  currentTab = tab;
+  document.getElementById('tab-sheaf').classList.toggle('active', tab==='sheaf');
+  document.getElementById('tab-filtration').classList.toggle('active', tab==='filtration');
+  document.getElementById('viz-sheaf-desc').style.display = tab==='sheaf' ? '' : 'none';
+  document.getElementById('viz-filtration-desc').style.display = tab==='filtration' ? '' : 'none';
+  document.getElementById('filt-controls').style.display = tab==='filtration' ? '' : 'none';
+  document.getElementById('sheaf-label').style.display = 'none';
+
+  sheafGroup.visible = (tab === 'sheaf');
+  filtGroup.visible  = (tab === 'filtration');
+
+  if (tab === 'sheaf') {
+    camera.position.set(0, 1.5, 6);
+    controls.target.set(0, 0, 0);
+  } else {
+    camera.position.set(0, 2, 7);
+    controls.target.set(0, 0, 0);
+    setEps(parseInt(slider.value));
+  }
+  controls.update();
+};
+
+// ── Animate ──
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  t += 0.005;
+  controls.update();
+
+  if (currentTab === 'sheaf') {
+    // Gently rotate stalk cubes
+    stalkGroups.forEach((c, i) => {
+      c.rotation.x = t * 0.4 + i * 0.5;
+      c.rotation.y = t * 0.3 + i * 0.7;
+    });
+    // Pulse node scale slightly
+    nodeMeshes.forEach((m, i) => {
+      const s = 1 + 0.06 * Math.sin(t * 1.5 + i);
+      m.scale.setScalar(s);
+    });
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
 </script>
 </body>
 </html>
