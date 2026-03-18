@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NoVectDB — Beyond Vector Databases</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script>
+MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root {
+  --black: #000;
+  --white: #fff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-500: #888;
+  --gray-700: #444;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --max-w: 860px;
+  --section-gap: 100px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 17px; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--white);
+  color: var(--black);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── NAV ─────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px;
+}
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); letter-spacing: 0.01em; transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+
+section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
+section:last-of-type { border-bottom: none; }
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero {
+  padding-top: 130px; padding-bottom: 80px;
+  border-bottom: 1px solid var(--black);
+}
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem;
+}
+h1.hero-title {
+  font-family: var(--font-serif); font-size: clamp(2.8rem, 6vw, 4.4rem);
+  font-weight: 500; line-height: 1.1; letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+h1.hero-title span { font-style: italic; }
+.hero-subtitle {
+  font-size: 1.05rem; color: var(--gray-700); max-width: 620px;
+  margin-bottom: 2rem; line-height: 1.6;
+}
+.hero-tagline {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 1.3rem; letter-spacing: -0.01em;
+  border-left: 3px solid var(--black); padding-left: 1rem;
+  margin: 2rem 0;
+}
+#typewriter::after { content: '|'; animation: blink .7s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hero-meta { font-size: 0.82rem; color: var(--gray-500); font-family: var(--font-mono); margin-top: 2.5rem; }
+.hero-meta strong { color: var(--black); }
+
+.abstract-box {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  padding: 1.8rem 2rem; margin-top: 3rem; border-radius: 2px;
+}
+.abstract-box .label {
+  font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem;
+}
+.abstract-box p { font-size: 0.93rem; color: var(--gray-700); line-height: 1.75; }
+
+/* ─── HEADINGS ────────────────────────────────────────── */
+h2.section-num {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+}
+h2.section-title {
+  font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 500; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.2;
+}
+h3.subsec {
+  font-size: 1rem; font-weight: 600; letter-spacing: 0.01em;
+  margin: 2.5rem 0 0.8rem; text-transform: none;
+}
+
+p { margin-bottom: 1rem; }
+
+/* ─── SCROLL REVEAL ───────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+
+/* ─── PROBLEM CARDS ───────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+.card {
+  border: 1px solid var(--gray-200); padding: 1.8rem;
+  background: var(--white); position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%; background: var(--black);
+}
+.card-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.6rem; }
+.card-body { font-size: 0.9rem; color: var(--gray-700); line-height: 1.65; }
+
+/* ─── SVG ANIMATIONS ──────────────────────────────────── */
+.svg-stage {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  display: flex; align-items: center; justify-content: center;
+  margin: 1.5rem 0; overflow: hidden; border-radius: 2px;
+}
+
+/* concentration of measure */
+#concentration-svg circle { transition: all 1s ease; }
+
+/* draw-on-scroll path */
+.draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+.draw-path.drawn { animation: drawLine 1.5s ease forwards; }
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+/* node pulse */
+@keyframes nodePulse { 0%,100%{r:8} 50%{r:11} }
+.node-pulse { animation: nodePulse 1.5s ease-in-out infinite; }
+
+/* fade scale */
+@keyframes fadeScale { from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+.fade-scale-in { animation: fadeScale .5s ease forwards; }
+
+/* ─── GRAPH DEMO ──────────────────────────────────────── */
+.graph-container { position: relative; }
+#umbrella-svg text { font-family: var(--font-sans); }
+
+/* ─── KNOWLEDGE OBJECT ────────────────────────────────── */
+.ko-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem;
+  margin: 2rem 0;
+}
+.ko-card {
+  border: 1px solid var(--gray-200); padding: 1.4rem;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.ko-card.shown { opacity: 1; transform: none; }
+.ko-card .ko-symbol {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 2rem; font-weight: 500; margin-bottom: 0.5rem;
+}
+.ko-card .ko-label { font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+.ko-card .ko-desc { font-size: 0.85rem; color: var(--gray-700); line-height: 1.55; }
+
+/* ─── MATH BLOCK ──────────────────────────────────────── */
+.math-block {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  padding: 1.8rem 2rem; margin: 1.5rem 0; overflow-x: auto;
+  text-align: center;
+}
+.math-label {
+  font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem;
+  text-align: left;
+}
+
+/* ─── SLIDERS ─────────────────────────────────────────── */
+.slider-group { margin: 1.5rem 0; }
+.slider-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; }
+.slider-row label { font-family: var(--font-mono); font-size: 0.82rem; width: 2rem; }
+.slider-row input[type=range] { flex: 1; accent-color: var(--black); cursor: pointer; }
+.slider-row .val { font-family: var(--font-mono); font-size: 0.82rem; width: 3rem; text-align: right; }
+.slider-sum { font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray-500); margin-top: 0.3rem; }
+
+/* ─── HOMOLOGY ────────────────────────────────────────── */
+#homology-svg circle, #homology-svg line, #homology-svg polygon {
+  transition: all 0.6s ease;
+}
+
+/* barcode */
+.barcode-container { margin: 1.5rem 0; }
+.barcode-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+.barcode-dim { font-family: var(--font-mono); font-size: 0.75rem; width: 2.5rem; color: var(--gray-500); }
+.barcode-track { flex: 1; height: 6px; background: var(--gray-200); position: relative; }
+.barcode-bar {
+  position: absolute; top: 0; height: 100%; background: var(--black);
+  width: 0; transition: width 1s ease, left 0.5s ease;
+}
+
+/* ─── SHEAF ───────────────────────────────────────────── */
+.sheaf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 1.5rem 0; align-items: start; }
+.stalk-node {
+  border: 1px solid var(--black); padding: 0.8rem 1rem; text-align: center;
+  font-family: var(--font-mono); font-size: 0.8rem;
+  opacity: 0; transform: scale(0.85);
+  transition: opacity .4s ease, transform .4s ease;
+}
+.stalk-node.shown { opacity: 1; transform: none; }
+.stalk-connector { text-align: center; font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-500); margin: 0.4rem 0; }
+
+/* ─── ALGORITHM ───────────────────────────────────────── */
+.algo-box {
+  border: 1px solid var(--gray-300); background: var(--gray-50);
+  padding: 1.5rem 1.8rem; margin: 1.5rem 0;
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.9;
+}
+.algo-line { padding: 0.1rem 0.5rem; border-radius: 2px; transition: background .3s; cursor: default; }
+.algo-line.active { background: var(--black); color: var(--white); }
+.algo-line .comment { color: var(--gray-500); }
+.algo-line.active .comment { color: #aaa; }
+.algo-step-btn {
+  background: var(--black); color: var(--white); border: none;
+  padding: 0.5rem 1.4rem; font-family: var(--font-mono); font-size: 0.8rem;
+  cursor: pointer; margin-top: 1rem; letter-spacing: 0.05em;
+}
+.algo-step-btn:hover { background: var(--gray-700); }
+
+/* ─── RESULTS ─────────────────────────────────────────── */
+.results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+.results-table th {
+  text-align: left; padding: 0.6rem 1rem; border-bottom: 2px solid var(--black);
+  font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.results-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--gray-200); font-family: var(--font-mono); font-size: 0.85rem; }
+.results-table tr.highlight td { font-weight: 600; }
+.results-table tr.highlight td:first-child::after { content: ' ★'; font-size: 0.7rem; }
+
+/* bar chart */
+.bar-chart { margin: 2rem 0; }
+.bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.9rem; }
+.bar-label { font-size: 0.82rem; width: 120px; text-align: right; white-space: nowrap; }
+.bar-track { flex: 1; height: 22px; background: var(--gray-100); position: relative; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--black); width: 0; transition: width 1.2s cubic-bezier(.22,.61,.36,1); display: flex; align-items: center; justify-content: flex-end; }
+.bar-fill span { font-family: var(--font-mono); font-size: 0.72rem; color: var(--white); padding-right: 6px; white-space: nowrap; }
+.bar-row.cookix .bar-fill { background: var(--black); }
+.bar-row.other .bar-fill { background: var(--gray-500); }
+
+/* ─── ARCHITECTURE ────────────────────────────────────── */
+.arch-pipeline {
+  display: flex; flex-direction: column; gap: 0;
+  margin: 2rem 0; position: relative;
+}
+.arch-node {
+  border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem;
+  display: flex; align-items: flex-start; gap: 1.2rem;
+  opacity: 0; transform: translateX(-20px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.arch-node.shown { opacity: 1; transform: none; }
+.arch-node-num {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  background: var(--black); color: var(--white);
+  width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.arch-node-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+.arch-node-desc { font-size: 0.83rem; color: var(--gray-700); line-height: 1.55; }
+.arch-arrow {
+  text-align: center; font-family: var(--font-mono); font-size: 0.8rem;
+  color: var(--gray-400); padding: 0.3rem 0;
+}
+
+/* ─── COMPARISON TABLE ────────────────────────────────── */
+.cmp-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
+.cmp-table th { padding: 0.7rem 1rem; border-bottom: 2px solid var(--black); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.cmp-table th:first-child { text-align: left; }
+.cmp-table th:not(:first-child) { text-align: center; }
+.cmp-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--gray-200); }
+.cmp-table td:first-child { font-size: 0.85rem; }
+.cmp-table td:not(:first-child) { text-align: center; font-size: 1rem; }
+.cmp-table td.check { opacity: 0; transition: opacity .3s ease; }
+.cmp-table td.check.shown { opacity: 1; }
+.cmp-table tr:last-child td { border-bottom: none; }
+.cmp-table .col-novect { background: var(--gray-50); font-weight: 600; }
+
+/* ─── CODE ────────────────────────────────────────────── */
+pre {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  padding: 1.2rem 1.5rem; overflow-x: auto; font-family: var(--font-mono);
+  font-size: 0.8rem; line-height: 1.75; margin: 1rem 0; border-radius: 2px;
+}
+
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--gray-100); padding: 0.1em 0.35em; }
+
+/* ─── FOOTER ──────────────────────────────────────────── */
+footer {
+  background: var(--gray-50); border-top: 1px solid var(--gray-200);
+  padding: 3rem 0;
+}
+.footer-inner { display: flex; flex-direction: column; gap: 2rem; }
+.footer-title { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 1rem; }
+details summary {
+  cursor: pointer; font-size: 0.88rem; font-weight: 500; list-style: none;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+details summary::before { content: '+'; font-family: var(--font-mono); font-size: 1rem; }
+details[open] summary::before { content: '−'; }
+.ref-list { margin-top: 1rem; list-style: none; }
+.ref-list li { font-size: 0.82rem; color: var(--gray-700); padding: 0.3rem 0; border-bottom: 1px solid var(--gray-200); line-height: 1.5; }
+.ref-list li span { font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-500); margin-right: 0.5rem; }
+
+.footer-sig { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-500); }
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ko-grid { grid-template-columns: 1fr; }
+  .sheaf-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">NoVectDB</span>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#ko">Knowledge Objects</a></li>
+    <li><a href="#distance">Distance</a></li>
+    <li><a href="#topology">Topology</a></li>
+    <li><a href="#sheaves">Sheaves</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Research Paper · February 2026</div>
+    <h1 class="hero-title">NoVect<span>DB</span></h1>
+    <p class="hero-subtitle">A Topological–Relational Paradigm for Post-Vector Data Management &mdash; CookiX Reference Implementation on Dynamic Graph Manifolds with Sheaf-Theoretic Composition</p>
+
+    <div class="hero-tagline">
+      <span id="typewriter"></span>
+    </div>
+
+    <div class="hero-meta">
+      <strong>Ahmed Hafdi</strong> &nbsp;·&nbsp; Independent Research, CookiX Project &nbsp;·&nbsp; February 2026
+    </div>
+
+    <div class="abstract-box reveal">
+      <div class="label">Abstract</div>
+      <p>Vector databases suffer from three fundamental limitations rooted in the geometry of flat Euclidean space: <strong>semantic gap</strong> (distance ≠ meaning), <strong>precision collapse</strong> (concentration of measure in high dimensions), and <strong>opacity</strong> (no interpretable retrieval path).</p>
+      <p style="margin-bottom:0">We introduce <strong>NoVectDB</strong> (<em>Not Only Vector Database</em>), a formal paradigm that augments &mdash; and, where appropriate, replaces &mdash; vector similarity with typed relational edges, persistent homology signatures, and sheaf-theoretic composition rules. The reference engine <strong>CookiX</strong> demonstrates a <strong>2.4× precision improvement</strong> on relational retrieval tasks over leading vector databases while maintaining sub-linear query scaling.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §1 PROBLEM -->
+<section id="problem">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 1</div>
+      <h2 class="section-title">Why Vector Databases<br/>Are Not Enough</h2>
+      <p>The dominant pattern for grounding large language models in external knowledge is Retrieval-Augmented Generation (RAG), which relies almost exclusively on vector databases: systems that embed text into \(\mathbb{R}^n\) and retrieve neighbours by Euclidean or cosine distance. Despite widespread adoption, this approach has three well-documented failure modes.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card reveal reveal-delay-1">
+        <div class="card-title">1. Concentration of Measure</div>
+        <div class="card-body">
+          <p>As the embedding dimension \(n \to \infty\), all pairwise distances converge to \(\sqrt{2}\) in probability:</p>
+          \[\Pr\!\left[\left|\|X_i - X_j\| - \sqrt{2}\right| > \varepsilon\right] \leq 2\exp\!\left(-\frac{cn\varepsilon^2}{4}\right)\]
+          <p style="margin-bottom:0">The ratio \(d_{\max}/d_{\min} \to 1\). Every document is equally distant from every other — <em>precision collapses</em>.</p>
+        </div>
+        <!-- Concentration animation -->
+        <div class="svg-stage" style="height:140px; margin-top:1rem;">
+          <svg id="concentration-svg" width="340" height="120" viewBox="0 0 340 120">
+            <text x="85" y="12" font-family="JetBrains Mono,monospace" font-size="9" fill="#888" text-anchor="middle">low-dim: spread out</text>
+            <text x="255" y="12" font-family="JetBrains Mono,monospace" font-size="9" fill="#888" text-anchor="middle">high-dim: collapsed</text>
+            <!-- Low-dim dots -->
+            <circle id="ld1" cx="50" cy="65" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <circle id="ld2" cx="100" cy="40" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <circle id="ld3" cx="85" cy="90" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <circle id="ld4" cx="125" cy="65" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <circle id="ld5" cx="60" cy="95" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <!-- distance lines low-dim -->
+            <line x1="50" y1="65" x2="100" y2="40" stroke="#ccc" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="85" y1="90" x2="125" y2="65" stroke="#ccc" stroke-width="1" stroke-dasharray="3,3"/>
+            <line id="divider" x1="170" y1="20" x2="170" y2="110" stroke="#e0e0e0" stroke-width="1"/>
+            <!-- High-dim: all clustered -->
+            <circle id="hd1" cx="230" cy="62" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <circle id="hd2" cx="250" cy="58" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <circle id="hd3" cx="240" cy="72" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <circle id="hd4" cx="255" cy="68" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <circle id="hd5" cx="235" cy="78" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <!-- equal-distance arcs hint -->
+            <circle cx="242" cy="68" r="22" fill="none" stroke="#ccc" stroke-width="1" stroke-dasharray="4,4"/>
+            <text x="242" y="108" font-family="JetBrains Mono,monospace" font-size="8" fill="#888" text-anchor="middle">all distances ≈ √2</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card reveal reveal-delay-2">
+        <div class="card-title">2. Semantic Gap</div>
+        <div class="card-body">
+          <p>For any non-symmetric, non-transitive relation \(\rho\), a semantic gap exists: no single metric can faithfully represent it. A metric space is always symmetric (\(d(a,b)=d(b,a)\)) and obeys the triangle inequality — but knowledge relations are not.</p>
+          <p>The verb <em>"prevents"</em> is directed and cannot be encoded by any inner product or \(\ell_p\) norm.</p>
+        </div>
+        <div class="svg-stage" style="height:110px; margin-top:1rem;">
+          <svg width="340" height="95" viewBox="0 0 340 95">
+            <!-- Vector space side -->
+            <text x="75" y="12" font-family="JetBrains Mono,monospace" font-size="9" fill="#888" text-anchor="middle">vector space</text>
+            <circle cx="40" cy="55" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+            <text x="40" y="75" font-family="Inter,sans-serif" font-size="9" fill="#555" text-anchor="middle">umbrella</text>
+            <circle cx="120" cy="55" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+            <text x="120" y="75" font-family="Inter,sans-serif" font-size="9" fill="#555" text-anchor="middle">coat</text>
+            <line x1="46" y1="55" x2="114" y2="55" stroke="#ccc" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="80" y="47" font-family="JetBrains Mono,monospace" font-size="8" fill="#888" text-anchor="middle">0.84 ≈ 0.81</text>
+            <text x="75" y="88" font-family="JetBrains Mono,monospace" font-size="8" fill="#aaa" text-anchor="middle">distance ≠ relation</text>
+            <line x1="170" y1="10" x2="170" y2="90" stroke="#e0e0e0" stroke-width="1"/>
+            <!-- Graph side -->
+            <text x="260" y="12" font-family="JetBrains Mono,monospace" font-size="9" fill="#888" text-anchor="middle">knowledge graph</text>
+            <circle cx="205" cy="55" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+            <text x="205" y="75" font-family="Inter,sans-serif" font-size="9" fill="#000" text-anchor="middle">umbrella</text>
+            <circle cx="315" cy="55" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+            <text x="315" y="75" font-family="Inter,sans-serif" font-size="9" fill="#000" text-anchor="middle">rain</text>
+            <defs><marker id="arr1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#000"/></marker></defs>
+            <line x1="211" y1="55" x2="307" y2="55" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+            <text x="260" y="47" font-family="JetBrains Mono,monospace" font-size="8" fill="#000" text-anchor="middle">prevents →</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card reveal reveal-delay-3">
+        <div class="card-title">3. Retrieval Opacity</div>
+        <div class="card-body">
+          <p>Vector retrieval returns a scalar distance. There is no path, no justification, no typed connection. When a RAG system answers incorrectly, diagnosing why a particular chunk was retrieved is intractable — one can only inspect floating-point inner products.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);margin-bottom:0.4rem;">VECTOR RESPONSE</div>
+            <pre style="font-size:0.75rem;margin:0;padding:0.8rem">score: 0.872
+chunk_id: 4f2a…
+<span style="color:#aaa">// why? unknown</span></pre>
+          </div>
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);margin-bottom:0.4rem;">NOVECTDB RESPONSE</div>
+            <pre style="font-size:0.75rem;margin:0;padding:0.8rem">umbrella
+  →[prevents] rain
+  →[wets] coat
+path_score: 0.97</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §2 UMBRELLA PROBLEM -->
+<section id="umbrella">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 2</div>
+      <h2 class="section-title">The Umbrella Problem</h2>
+      <p>Five concepts: <em>raincoat, rain, water, umbrella, storm</em>. A sentence-transformer maps them to nearby points in \(\mathbb{R}^n\) — all with similar cosine distance to the query <em>"What prevents the coat from getting wet?"</em></p>
+      <p>The correct answer — <strong>umbrella</strong> — requires understanding a directed causal chain. No inner product can encode the verb <em>prevents</em>.</p>
+    </div>
+
+    <div class="svg-stage reveal" style="height:280px;" id="umbrella-stage">
+      <svg id="umbrella-svg" width="740" height="260" viewBox="0 0 740 260">
+        <defs>
+          <marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L7,3.5 z" fill="#000"/>
+          </marker>
+          <marker id="arr-gray" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L7,3.5 z" fill="#bbb"/>
+          </marker>
+          <marker id="arr-red" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L7,3.5 z" fill="#000"/>
+          </marker>
+        </defs>
+
+        <!-- Nodes -->
+        <g id="node-umbrella" opacity="0">
+          <circle cx="370" cy="80" r="28" fill="#000" stroke="#000" stroke-width="1.5"/>
+          <text x="370" y="84" font-size="12" fill="#fff" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">umbrella</text>
+        </g>
+        <g id="node-rain" opacity="0">
+          <circle cx="560" cy="80" r="22" fill="none" stroke="#000" stroke-width="1.5"/>
+          <text x="560" y="84" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif">rain</text>
+        </g>
+        <g id="node-coat" opacity="0">
+          <circle cx="560" cy="190" r="22" fill="none" stroke="#000" stroke-width="1.5"/>
+          <text x="560" y="194" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif">raincoat</text>
+        </g>
+        <g id="node-water" opacity="0">
+          <circle cx="200" cy="80" r="22" fill="none" stroke="#000" stroke-width="1.5"/>
+          <text x="200" y="84" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif">water</text>
+        </g>
+        <g id="node-storm" opacity="0">
+          <circle cx="200" cy="190" r="22" fill="none" stroke="#000" stroke-width="1.5"/>
+          <text x="200" y="194" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif">storm</text>
+        </g>
+
+        <!-- Edges - drawn animated -->
+        <!-- umbrella → rain: prevents -->
+        <line id="e-prevents" x1="398" y1="80" x2="536" y2="80" stroke="#000" stroke-width="1.5" marker-end="url(#arr)" class="draw-path"/>
+        <text id="el-prevents" x="467" y="70" font-size="9" fill="#000" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">prevents</text>
+
+        <!-- rain → coat: leads_to -->
+        <line id="e-wets" x1="560" y1="103" x2="560" y2="166" stroke="#000" stroke-width="1.5" marker-end="url(#arr)" class="draw-path"/>
+        <text id="el-wets" x="578" y="140" font-size="9" fill="#000" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">wets</text>
+
+        <!-- water → rain -->
+        <line id="e-causes1" x1="222" y1="80" x2="346" y2="80" stroke="#bbb" stroke-width="1.5" marker-end="url(#arr-gray)" class="draw-path"/>
+        <text id="el-causes1" x="284" y="70" font-size="9" fill="#bbb" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">is_a</text>
+
+        <!-- storm → rain -->
+        <line id="e-causes2" x1="215" y1="175" x2="350" y2="96" stroke="#bbb" stroke-width="1.5" marker-end="url(#arr-gray)" class="draw-path"/>
+        <text id="el-causes2" x="277" y="148" font-size="9" fill="#bbb" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">causes</text>
+
+        <!-- Query path highlight -->
+        <text id="query-label" x="370" y="240" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif" opacity="0" font-style="italic">Query: "What prevents the coat from getting wet?"</text>
+        <text id="answer-label" x="370" y="256" font-size="10" fill="#000" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">→ answer: umbrella (via typed edge traversal)</text>
+      </svg>
+    </div>
+    <p class="reveal" style="font-size:0.88rem;color:var(--gray-700);margin-top:0.5rem;">
+      The black node (umbrella) is identified by deterministic typed-edge traversal — not proximity. Vector retrieval cannot distinguish this causal chain from irrelevant neighbours with similar embeddings.
+    </p>
+  </div>
+</section>
+
+<!-- §3 KNOWLEDGE OBJECTS -->
+<section id="ko">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 3</div>
+      <h2 class="section-title">The Knowledge Object</h2>
+      <p>The atomic unit of NoVectDB storage is the <strong>Knowledge Object</strong> — a quadruple that captures every dimension of meaning:</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 3.1</div>
+      \[\mathcal{K} = (V,\, E,\, T,\, S)\]
+    </div>
+
+    <div class="ko-grid" id="ko-grid">
+      <div class="ko-card">
+        <div class="ko-symbol">V</div>
+        <div class="ko-label">Embedding Vector</div>
+        <div class="ko-desc">An optional vector \(V \in \mathbb{R}^n\) — a legacy embedding or content signature. The vector component is <em>optional</em>, making NoVectDB strictly more general than vector databases. Pure topological–relational storage is a valid configuration.</div>
+      </div>
+      <div class="ko-card">
+        <div class="ko-symbol">E</div>
+        <div class="ko-label">Relational Edges</div>
+        <div class="ko-desc">A set \(E = \{(r_i, \mathcal{K}_i, w_i)\}\) of typed, directed, weighted edges. Relation types \(r_i \in \mathcal{R}\) come from a controlled vocabulary: <code>causes</code>, <code>is_a</code>, <code>part_of</code>, <code>prevents</code>, <code>contradicts</code>, <code>example_of</code>…</div>
+      </div>
+      <div class="ko-card">
+        <div class="ko-symbol">T</div>
+        <div class="ko-label">Topological Signature</div>
+        <div class="ko-desc">A vector \(T \in \mathbb{R}^m\) derived from persistent homology of the local neighbourhood. It captures the <em>shape</em> of how this concept relates to its context — stable under small graph perturbations.</div>
+      </div>
+      <div class="ko-card">
+        <div class="ko-symbol">S</div>
+        <div class="ko-label">Sheaf Section</div>
+        <div class="ko-desc">A functor \(S: \mathrm{Star}(\mathcal{K}) \to \mathbf{Vect}\) assigning a linear transformation to each edge — defining how this object's <em>meaning transforms</em> in the context of adjacent objects. Enables compositional, global-consistent retrieval.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §4 DISTANCE METRIC -->
+<section id="distance">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 4</div>
+      <h2 class="section-title">The NoVectDB<br/>Composite Distance</h2>
+      <p>For two Knowledge Objects \(\mathcal{K}_a, \mathcal{K}_b\) in the Dynamic Graph Manifold \(\mathcal{M}\), the composite distance blends three orthogonal signals:</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 3.4 — NoVectDB Composite Distance</div>
+      \[d_{\text{NoVectDB}}(\mathcal{K}_a, \mathcal{K}_b) = \alpha \cdot d_{\text{geo}}(a,b) + \beta \cdot \bigl(1 - \mathrm{TVS}(T_a, T_b)\bigr) + \gamma \cdot \|S_a \circ_\pi S_b\|\]
+    </div>
+
+    <div class="reveal">
+      <h3 class="subsec">The three components</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">\(\alpha \cdot d_{\text{geo}}(a,b)\) — Graph Geodesic</div>
+          <div class="card-body">Minimum-weight path in the typed relation graph \(G\). Captures structural proximity in the knowledge network.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">\(\beta \cdot (1 - \mathrm{TVS})\) — Topological Similarity</div>
+          <div class="card-body">\(\mathrm{TVS}(T_a,T_b) = \exp(-\lambda \cdot W_2(\mathrm{Dgm}_a, \mathrm{Dgm}_b))\) — the 2-Wasserstein distance between persistence diagrams. Captures <em>shape similarity</em> of local neighbourhoods.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">\(\gamma \cdot \|S_a \circ_\pi S_b\|\) — Sheaf Residual</div>
+          <div class="card-body">Measures how consistently the objects' contexts compose along path \(\pi\). Low residual = highly compatible semantics.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Adjust the mixing coefficients</h3>
+      <p style="font-size:0.88rem;color:var(--gray-700)">The coefficients must satisfy \(\alpha + \beta + \gamma = 1\). Drag any slider — the others auto-adjust.</p>
+      <div class="slider-group" id="slider-group">
+        <div class="slider-row">
+          <label>\(\alpha\)</label>
+          <input type="range" id="sl-alpha" min="0" max="100" value="40" oninput="adjustSliders('alpha')"/>
+          <span class="val" id="val-alpha">0.40</span>
+          <span style="font-size:0.78rem;color:var(--gray-500);margin-left:0.5rem">geo</span>
+        </div>
+        <div class="slider-row">
+          <label>\(\beta\)</label>
+          <input type="range" id="sl-beta" min="0" max="100" value="35" oninput="adjustSliders('beta')"/>
+          <span class="val" id="val-beta">0.35</span>
+          <span style="font-size:0.78rem;color:var(--gray-500);margin-left:0.5rem">topo</span>
+        </div>
+        <div class="slider-row">
+          <label>\(\gamma\)</label>
+          <input type="range" id="sl-gamma" min="0" max="100" value="25" oninput="adjustSliders('gamma')"/>
+          <span class="val" id="val-gamma">0.25</span>
+          <span style="font-size:0.78rem;color:var(--gray-500);margin-left:0.5rem">sheaf</span>
+        </div>
+        <div class="slider-sum" id="slider-sum">α + β + γ = 1.00 ✓</div>
+      </div>
+    </div>
+
+    <div class="reveal math-block" style="margin-top:1.5rem;">
+      <div class="math-label">Theorem 3.5 — Quasi-metric</div>
+      <p style="font-size:0.88rem;text-align:left;">(\(\mathcal{K},\, d_{\text{NoVectDB}}\)) is a quasi-metric space: \(d(K_a,K_a)=0\), \(d(K_a,K_b)\geq 0\), and the triangle inequality holds up to a bounded sheaf consistency error \(\varepsilon\). When the sheaf is globally consistent, \(\varepsilon = 0\) and the space is a true metric space.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §5 PERSISTENT HOMOLOGY -->
+<section id="topology">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 5</div>
+      <h2 class="section-title">Persistent Homology<br/>Signatures</h2>
+      <p>Persistent homology studies the <em>shape</em> of data across multiple scales. Given a filtration of simplicial complexes built from the local neighbourhood graph, it tracks which topological features (connected components, loops, voids) are born and die as the scale parameter \(\varepsilon\) grows.</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 4.1 — Topological Signature</div>
+      \[T(\mathcal{K}) = \mathrm{Vectorise}\!\bigl(\mathrm{Barcode}(\mathrm{VR}(N_r(\mathcal{K})))\bigr) \in \mathbb{R}^m\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">where \(\mathrm{VR}\) is the Vietoris–Rips complex on the \(r\)-hop neighbourhood, and \(\mathrm{Vectorise}\) maps persistence barcodes to stable vectors via persistence landscapes.</p>
+    </div>
+
+    <h3 class="subsec reveal">Filtration Animation</h3>
+    <p class="reveal" style="font-size:0.88rem;color:var(--gray-700)">As \(\varepsilon\) grows, edges form between nearby nodes. Loops (1-cycles) appear and disappear — their <em>persistence</em> \(= (\text{birth}, \text{death})\) encodes topological structure.</p>
+
+    <div class="svg-stage reveal" style="height:200px;" id="homology-stage">
+      <svg id="homology-svg" width="400" height="180" viewBox="0 0 400 180">
+        <!-- dots -->
+        <circle id="h1" cx="80" cy="70" r="5" fill="#000"/>
+        <circle id="h2" cx="150" cy="50" r="5" fill="#000"/>
+        <circle id="h3" cx="200" cy="100" r="5" fill="#000"/>
+        <circle id="h4" cx="130" cy="130" r="5" fill="#000"/>
+        <circle id="h5" cx="70" cy="130" r="5" fill="#000"/>
+        <circle id="h6" cx="250" cy="60" r="5" fill="#000"/>
+        <circle id="h7" cx="310" cy="90" r="5" fill="#000"/>
+        <circle id="h8" cx="280" cy="140" r="5" fill="#000"/>
+        <!-- edges appear at different ε -->
+        <line id="he1" x1="80" y1="70" x2="150" y2="50" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he2" x1="150" y1="50" x2="200" y2="100" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he3" x1="200" y1="100" x2="130" y2="130" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he4" x1="130" y1="130" x2="70" y2="130" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he5" x1="70" y1="130" x2="80" y2="70" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he6" x1="250" y1="60" x2="310" y2="90" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he7" x1="310" y1="90" x2="280" y2="140" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he8" x1="280" y1="140" x2="250" y2="60" stroke="#000" stroke-width="1" opacity="0"/>
+        <!-- triangles -->
+        <polygon id="ht1" points="250,60 310,90 280,140" fill="#000" fill-opacity="0" stroke="none"/>
+        <!-- epsilon label -->
+        <text id="eps-label" x="200" y="170" font-family="JetBrains Mono,monospace" font-size="10" fill="#888" text-anchor="middle">ε = 0.0</text>
+      </svg>
+    </div>
+
+    <div class="barcode-container reveal" id="barcode-container">
+      <h3 class="subsec">Persistence Barcode</h3>
+      <p style="font-size:0.85rem;color:var(--gray-700);margin-bottom:1rem;">Each bar represents a topological feature: its left endpoint is when it <em>appears</em>, its right endpoint when it <em>disappears</em>. Long bars = significant topology.</p>
+      <div class="barcode-row">
+        <span class="barcode-dim">H₀</span>
+        <div class="barcode-track"><div class="barcode-bar" id="bar-h0-1" style="left:0%;background:#000"></div></div>
+        <span style="font-size:0.75rem;font-family:var(--font-mono);color:var(--gray-500)">connected components</span>
+      </div>
+      <div class="barcode-row">
+        <span class="barcode-dim">H₀</span>
+        <div class="barcode-track"><div class="barcode-bar" id="bar-h0-2" style="left:0%;background:#555"></div></div>
+      </div>
+      <div class="barcode-row">
+        <span class="barcode-dim">H₁</span>
+        <div class="barcode-track"><div class="barcode-bar" id="bar-h1-1" style="left:25%;background:#000"></div></div>
+        <span style="font-size:0.75rem;font-family:var(--font-mono);color:var(--gray-500)">1-cycles (loops)</span>
+      </div>
+      <div class="barcode-row">
+        <span class="barcode-dim">H₁</span>
+        <div class="barcode-track"><div class="barcode-bar" id="bar-h1-2" style="left:40%;background:#555"></div></div>
+      </div>
+    </div>
+
+    <div class="math-block reveal" style="margin-top:1.5rem;">
+      <div class="math-label">Proposition 4.2 — Stability</div>
+      \[\|T(\mathcal{K};\, G) - T(\mathcal{K};\, G')\|_\infty \leq C \cdot w_{\max}\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">Adding a single edge of weight \(w_{\max}\) changes the signature by at most \(C \cdot w_{\max}\). The topological signature is provably stable under small graph perturbations.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §6 SHEAF THEORY -->
+<section id="sheaves">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 6</div>
+      <h2 class="section-title">Sheaf-Theoretic<br/>Composition</h2>
+      <p>A <strong>cellular sheaf</strong> on the knowledge graph assigns a vector space (a <em>stalk</em>) to each Knowledge Object and a linear map to each relation edge. These maps encode how meaning transforms as you traverse a relation.</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 5.1 — Cellular Sheaf</div>
+      \[\mathcal{F}(v) \cong \mathbb{R}^{d_v}\quad\text{(stalk at vertex } v\text{)}\]
+      \[\mathcal{F}_{e \trianglerighteq v}: \mathcal{F}(v) \to \mathcal{F}(e)\quad\text{(restriction map on edge } e\text{)}\]
+    </div>
+
+    <div class="reveal" id="sheaf-anim-container">
+      <h3 class="subsec">Local-to-Global Consistency</h3>
+      <p style="font-size:0.88rem;color:var(--gray-700);margin-bottom:1.2rem;">The sheaf Laplacian \(\mathcal{L}_\mathcal{F} = B_\mathcal{F}^\top B_\mathcal{F}\) captures whether local sections agree globally. Its kernel encodes <em>globally consistent interpretations</em>.</p>
+      <div style="display:flex;flex-direction:column;gap:0.3rem;margin:1.5rem 0;" id="sheaf-nodes">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+          <div class="stalk-node" id="sn-1"><div style="font-size:0.65rem;color:#888;margin-bottom:2px">stalk F(umbrella)</div><div>u ∈ ℝ³</div></div>
+          <div class="stalk-node" id="sn-2"><div style="font-size:0.65rem;color:#888;margin-bottom:2px">stalk F(rain)</div><div>r ∈ ℝ³</div></div>
+          <div class="stalk-node" id="sn-3"><div style="font-size:0.65rem;color:#888;margin-bottom:2px">stalk F(coat)</div><div>c ∈ ℝ³</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:0 3rem;">
+          <div class="stalk-connector" id="sc-1">↓ F_{prevents}<br/><span style="font-size:0.7rem">restriction map</span></div>
+          <div class="stalk-connector" id="sc-2">↓ F_{wets}<br/><span style="font-size:0.7rem">restriction map</span></div>
+        </div>
+        <div style="text-align:center;">
+          <div class="stalk-node" id="sn-global" style="display:inline-block;min-width:240px;"><div style="font-size:0.65rem;color:#888;margin-bottom:2px">global section x ∈ ⊕F(v)</div><div>𝓛_F · x = 0 ⟺ globally consistent</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Theorem 5.3 — Global Consistency</div>
+      \[\mathcal{L}_\mathcal{F} \cdot x = 0 \iff \text{local sections agree on all overlapping edges}\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">\(\dim \ker(\mathcal{L}_\mathcal{F})\) equals the number of independent globally consistent interpretations. This gives NoVectDB a principled answer to the question: "Do these facts agree?"</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Compositional Retrieval — Equation 2</div>
+      \[S_\pi = \mathcal{F}_{e_k} \circ \cdots \circ \mathcal{F}_{e_1}\]
+      \[\|S_a \circ_\pi S_b\| = \|S_\pi(x_a) - x_b\|_2\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">The <em>composition residual</em> measures how well \(\mathcal{K}_a\)'s semantics arrive at \(\mathcal{K}_b\) via path \(\pi\). Small residual = high semantic compatibility along the relational chain.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §7 QUERY PIPELINE -->
+<section id="pipeline">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 7</div>
+      <h2 class="section-title">Query Pipeline</h2>
+      <p>NoVectDB retrieval is a deterministic multi-stage process. Click <strong>Next Step</strong> to walk through Algorithm 1.</p>
+    </div>
+
+    <div class="algo-box reveal" id="algo-box">
+      <div style="font-size:0.75rem;color:#888;margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.08em;">Algorithm 1 — NoVectDB Query Pipeline</div>
+      <div class="algo-line" data-step="0"><span style="color:#888">Require:</span> Query q, graph G, sheaf F, parameters k, α, β, γ</div>
+      <div class="algo-line" data-step="1">1: I ← IntentParse(q) <span class="comment">▷ LLM slot extraction</span></div>
+      <div class="algo-line" data-step="2">2: S₀ ← DeterministicLookup(G, I) <span class="comment">▷ exact edge match</span></div>
+      <div class="algo-line" data-step="3">3: <span style="color:#888">if</span> |S₀| ≥ k <span style="color:#888">then</span></div>
+      <div class="algo-line" data-step="4">4: &nbsp;&nbsp;&nbsp;&nbsp;return RankBySheaf(S₀, F, q)</div>
+      <div class="algo-line" data-step="5">5: <span style="color:#888">end if</span></div>
+      <div class="algo-line" data-step="6">6: S₁ ← GeodesicBFS(G, I.anchor, h_max) <span class="comment">▷ type-filtered BFS</span></div>
+      <div class="algo-line" data-step="7">7: S₂ ← TopoExpand(S₁, T, β) <span class="comment">▷ topological neighbourhood</span></div>
+      <div class="algo-line" data-step="8">8: S₃ ← SheafCompose(S₂, F, γ) <span class="comment">▷ composition residual</span></div>
+      <div class="algo-line" data-step="9">9: return Rank(S₃, d_NoVectDB)[:k]</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;" class="reveal">
+      <button class="algo-step-btn" id="algo-next">Next Step →</button>
+      <button class="algo-step-btn" id="algo-reset" style="background:var(--gray-200);color:var(--black);">Reset</button>
+      <span id="algo-desc" style="font-size:0.85rem;color:var(--gray-700);font-style:italic;"></span>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Query Complexity</h3>
+      <div class="math-block">
+        \[O\!\left(|V_{\text{local}}| + |E_{\text{local}}|\log|E_{\text{local}}| + l^3\right)\]
+        <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">where \(|V_{\text{local}}|, |E_{\text{local}}|\) are the sizes of the explored subgraph and \(l\) is the landmark count for PH computation (typically \(l=50\), costing only \(\sim 1.25 \times 10^5\) operations).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §8 RESULTS -->
+<section id="results">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 8</div>
+      <h2 class="section-title">Preliminary Results</h2>
+      <p>Evaluated on 500 relational queries across three task classes over a technical document corpus (industrial pipe specifications, medical ontologies, legal case chains).</p>
+    </div>
+
+    <h3 class="subsec reveal">Precision@5 by System</h3>
+    <div class="bar-chart reveal" id="bar-chart">
+      <div class="bar-row cookix">
+        <span class="bar-label">CookiX (α=0.4)</span>
+        <div class="bar-track"><div class="bar-fill" data-width="83"><span>0.830</span></div></div>
+      </div>
+      <div class="bar-row other">
+        <span class="bar-label">GraphRAG</span>
+        <div class="bar-track"><div class="bar-fill" data-width="58.3"><span>0.583</span></div></div>
+      </div>
+      <div class="bar-row other">
+        <span class="bar-label">Pinecone</span>
+        <div class="bar-track"><div class="bar-fill" data-width="45.7"><span>0.457</span></div></div>
+      </div>
+      <div class="bar-row other">
+        <span class="bar-label">Chroma</span>
+        <div class="bar-track"><div class="bar-fill" data-width="43.7"><span>0.437</span></div></div>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Precision@5 by Task</h3>
+      <table class="results-table">
+        <thead>
+          <tr><th>System</th><th>Task A<br/><span style="font-weight:400;font-size:0.75rem">Single-hop</span></th><th>Task B<br/><span style="font-weight:400;font-size:0.75rem">Multi-hop</span></th><th>Task C<br/><span style="font-weight:400;font-size:0.75rem">Contradiction</span></th><th>Avg</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Chroma</td><td>0.72</td><td>0.31</td><td>0.28</td><td>0.437</td></tr>
+          <tr><td>Pinecone</td><td>0.74</td><td>0.33</td><td>0.30</td><td>0.457</td></tr>
+          <tr><td>GraphRAG</td><td>0.78</td><td>0.52</td><td>0.45</td><td>0.583</td></tr>
+          <tr class="highlight"><td>CookiX</td><td>0.91</td><td>0.82</td><td>0.76</td><td>0.830</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.83rem;color:var(--gray-500);font-family:var(--font-mono);">CookiX: <strong>2.4× improvement on Task B</strong> · <strong>2.6× on Task C</strong> vs vector-only baselines</p>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Query Latency (100K objects)</h3>
+      <table class="results-table">
+        <thead><tr><th>System</th><th>p₅₀ (ms)</th><th>p₉₉ (ms)</th></tr></thead>
+        <tbody>
+          <tr><td>Chroma</td><td>12</td><td>45</td></tr>
+          <tr><td>Pinecone</td><td>8</td><td>32</td></tr>
+          <tr class="highlight"><td>CookiX</td><td>18</td><td>67</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.85rem;color:var(--gray-700);">CookiX trades modest latency overhead (PH computation) for substantially higher precision. Graph traversal itself adds negligible cost.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §9 ARCHITECTURE -->
+<section id="architecture">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 9</div>
+      <h2 class="section-title">CookiX Architecture</h2>
+      <p>CookiX is the reference implementation of NoVectDB — a document-oriented topological database analogous to how MongoDB realised the NoSQL paradigm. Five core subsystems:</p>
+    </div>
+
+    <div class="arch-pipeline reveal" id="arch-pipeline">
+      <div class="arch-node" data-delay="0">
+        <div class="arch-node-num">1</div>
+        <div><div class="arch-node-title">Ingestor</div><div class="arch-node-desc">Accepts raw text, pre-computed embeddings, or structured documents. Uses a small LLM (3B-parameter instruction model) for relation extraction — identifying typed edges. Simultaneously computes persistent homology via Landmark Vietoris–Rips complex in \(O(l^3)\) time.</div></div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node" data-delay="150">
+        <div class="arch-node-num">2</div>
+        <div><div class="arch-node-title">Manifold Store</div><div class="arch-node-desc">Persistent storage for the graph \(G\), sheaf sections \(\mathcal{F}\), and metadata. Memory-mapped adjacency list (inspired by sled/redb in Rust) with type-indexed edge lookups in \(O(1)\) amortised time.</div></div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node" data-delay="300">
+        <div class="arch-node-num">3</div>
+        <div><div class="arch-node-title">TopoIndex</div><div class="arch-node-desc">Approximate nearest-neighbour index over topological signatures \(T\). Adapts the HNSW algorithm to operate on persistence diagram distances (Wasserstein) rather than Euclidean distances.</div></div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node" data-delay="450">
+        <div class="arch-node-num">4</div>
+        <div><div class="arch-node-title">Query Engine</div><div class="arch-node-desc">Implements Algorithm 1: IntentParse → DeterministicLookup → GeodesicBFS → TopoExpand → SheafCompose → Rank. Deterministic typed-edge traversal at its core.</div></div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node" data-delay="600">
+        <div class="arch-node-num">5</div>
+        <div>
+          <div class="arch-node-title">API / SDK (Python + Rust)</div>
+          <div class="arch-node-desc">MongoDB-like document interface:</div>
+          <pre style="margin-top:0.5rem;font-size:0.78rem;">db = cookix.connect("mydb")
+db.insert({"text": "...", "edges": [...]})
+results = db.query(
+    "Is A compatible with B?",
+    k=5, mode="reasoning"
+)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §10 PARADIGM COMPARISON -->
+<section id="comparison">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 10</div>
+      <h2 class="section-title">Paradigm Comparison</h2>
+      <p>How NoVectDB positions against the landscape of existing retrieval paradigms:</p>
+    </div>
+
+    <div class="reveal" style="overflow-x:auto;">
+      <table class="cmp-table" id="cmp-table">
+        <thead>
+          <tr>
+            <th style="text-align:left;">Property</th>
+            <th>VectorDB</th>
+            <th>GraphDB</th>
+            <th>GraphRAG</th>
+            <th class="col-novect">NoVectDB</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Typed relations</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check" data-val="~">partial</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Topological signature</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Sheaf composition</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Interpretable path</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check" data-val="~">partial</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Precision collapse</td>
+            <td class="check" data-val="!">yes</td>
+            <td class="check" data-val="-">N/A</td>
+            <td class="check" data-val="!">yes</td>
+            <td class="check col-novect" data-val="✓">immune</td>
+          </tr>
+          <tr>
+            <td>Multi-hop reasoning</td>
+            <td class="check" data-val="~">weak</td>
+            <td class="check" data-val="✓">strong</td>
+            <td class="check" data-val="~">medium</td>
+            <td class="check col-novect" data-val="✓">strong</td>
+          </tr>
+          <tr>
+            <td>Sub-linear ANN</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Document-oriented</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;padding:1.2rem 1.5rem;border-left:3px solid var(--black);background:var(--gray-50);">
+      <strong>Key distinction from GraphRAG:</strong> Microsoft's GraphRAG builds a graph from LLM-extracted entities but still uses <em>vector similarity</em> to traverse it. NoVectDB eliminates vector similarity at query time entirely — traversal is via deterministic typed edges and topological signatures.
+    </div>
+  </div>
+</section>
+
+<!-- §11 CONCLUSION -->
+<section id="conclusion">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 11</div>
+      <h2 class="section-title">Conclusion</h2>
+    </div>
+    <div class="reveal">
+      <p>NoVectDB presents a mathematically grounded paradigm for post-vector data management. By combining <strong>typed relational edges</strong>, <strong>persistent homology signatures</strong>, and <strong>sheaf-theoretic composition</strong>, it overcomes the fundamental limitations of flat metric spaces:</p>
+      <ul style="margin:1rem 0 1rem 1.5rem;line-height:2;font-size:0.95rem;">
+        <li>Semantic gap — resolved by typed directed relations</li>
+        <li>Precision collapse — immune; distance defined on discrete manifold</li>
+        <li>Retrieval opacity — full interpretable path at every query</li>
+      </ul>
+      <p>Just as NoSQL spawned MongoDB, Cassandra, and Neo4j, NoVectDB could inspire specialised engines for legal reasoning, medical ontologies, and engineering knowledge bases. CookiX is the first, not the last.</p>
+    </div>
+
+    <div style="margin-top:3rem;padding:2.5rem;border:1px solid var(--black);text-align:center;" class="reveal">
+      <p style="font-family:var(--font-serif);font-style:italic;font-size:1.6rem;letter-spacing:-0.01em;margin:0;">
+        "Stop measuring distances.<br/>Start understanding adjacency."
+      </p>
+      <p style="margin-top:1rem;font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-500);">Ahmed Hafdi · NoVectDB / CookiX · February 2026</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">References</div>
+        <details>
+          <summary>Show 14 references</summary>
+          <ol class="ref-list">
+            <li><span>[1]</span>P. Lewis et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. <em>NeurIPS</em>, 2020.</li>
+            <li><span>[2]</span>R. Vershynin. <em>High-Dimensional Probability</em>. Cambridge University Press, 2018.</li>
+            <li><span>[3]</span>H. Edelsbrunner and J. L. Harer. <em>Computational Topology: An Introduction</em>. AMS, 2010.</li>
+            <li><span>[4]</span>P. Bubenik. Statistical topological data analysis using persistence landscapes. <em>JMLR</em>, 16:77–102, 2015.</li>
+            <li><span>[5]</span>H. Adams et al. Persistence images: A stable vector representation of persistent homology. <em>JMLR</em>, 18(8):1–35, 2017.</li>
+            <li><span>[6]</span>J. Curry. Sheaves, cosheaves and applications. <em>arXiv:1303.3255v2</em>, 2014.</li>
+            <li><span>[7]</span>J. Hansen and R. Ghrist. Toward a spectral theory of cellular sheaves. <em>JACT</em>, 3(4):315–358, 2019.</li>
+            <li><span>[8]</span>Y. A. Malkov and D. A. Yashunin. Efficient and robust ANN search using HNSW. <em>IEEE TPAMI</em>, 42(4):824–836, 2018.</li>
+            <li><span>[9]</span>D. Edge et al. From local to global: A graph RAG approach to query-focused summarization. <em>arXiv:2404.16130</em>, 2024.</li>
+            <li><span>[10]</span>V. de Silva and G. Carlsson. Topological estimation using witness complexes. <em>SPBG</em>, 2004.</li>
+            <li><span>[11]</span>C. Bodnar et al. Neural sheaf diffusion. <em>NeurIPS</em>, 2022.</li>
+            <li><span>[12]</span>F. Chazal et al. <em>The Structure and Stability of Persistence Modules</em>. Springer, 2016.</li>
+            <li><span>[13]</span>R. Ghrist. Barcodes: The persistent topology of data. <em>Bull. AMS</em>, 45(1):61–75, 2008.</li>
+            <li><span>[14]</span>G. Carlsson. Topology and data. <em>Bull. AMS</em>, 46(2):255–308, 2009.</li>
+          </ol>
+        </details>
+      </div>
+      <div class="footer-sig">
+        Interactive explanation of: <em>NoVectDB: A Topological–Relational Paradigm for Post-Vector Data Management</em><br/>
+        Ahmed Hafdi · Independent Research / CookiX Project · February 2026
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── TYPEWRITER ────────────────────────────────────────────────────────────
+const phrase = "Stop measuring distances. Start understanding adjacency.";
+const tw = document.getElementById('typewriter');
+let ti = 0;
+function typeNext() {
+  if (ti <= phrase.length) { tw.textContent = phrase.slice(0, ti++); setTimeout(typeNext, 38); }
+}
+setTimeout(typeNext, 600);
+
+// ─── SCROLL REVEAL ─────────────────────────────────────────────────────────
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+// ─── UMBRELLA GRAPH ────────────────────────────────────────────────────────
+const umbrellaObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  umbrellaObs.disconnect();
+  const seq = [
+    ['node-umbrella', 0], ['node-rain', 200], ['node-coat', 400],
+    ['node-water', 600], ['node-storm', 800],
+    ['e-prevents', 1000], ['el-prevents', 1500],
+    ['e-wets', 1200], ['el-wets', 1700],
+    ['e-causes1', 1400], ['el-causes1', 1900],
+    ['e-causes2', 1600], ['el-causes2', 2100],
+    ['query-label', 2400], ['answer-label', 2900]
+  ];
+  seq.forEach(([id, delay]) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.transition = 'opacity 0.5s ease';
+      el.setAttribute('opacity', '1');
+      if (el.tagName === 'line') {
+        el.style.strokeDasharray = '500';
+        el.style.strokeDashoffset = '500';
+        el.style.transition = 'stroke-dashoffset 0.8s ease';
+        el.style.strokeDashoffset = '0';
+      }
+    }, delay);
+  });
+}, { threshold: 0.3 });
+const us = document.getElementById('umbrella-stage');
+if (us) umbrellaObs.observe(us);
+
+// ─── KNOWLEDGE OBJECT CARDS ────────────────────────────────────────────────
+const koObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  koObs.disconnect();
+  document.querySelectorAll('.ko-card').forEach((c, i) => {
+    setTimeout(() => c.classList.add('shown'), i * 150);
+  });
+}, { threshold: 0.2 });
+const koGrid = document.getElementById('ko-grid');
+if (koGrid) koObs.observe(koGrid);
+
+// ─── SLIDERS ───────────────────────────────────────────────────────────────
+function adjustSliders(changed) {
+  const a = parseInt(document.getElementById('sl-alpha').value);
+  const b = parseInt(document.getElementById('sl-beta').value);
+  const g = parseInt(document.getElementById('sl-gamma').value);
+  const total = a + b + g;
+  const av = (a/total).toFixed(2), bv = (b/total).toFixed(2), gv = (1 - a/total - b/total).toFixed(2);
+  document.getElementById('val-alpha').textContent = av;
+  document.getElementById('val-beta').textContent = bv;
+  document.getElementById('val-gamma').textContent = (parseFloat(av)+parseFloat(bv)+parseFloat(gv) <= 1.001) ? gv : (1-parseFloat(av)-parseFloat(bv)).toFixed(2);
+  const sum = (parseFloat(av)+parseFloat(bv)+parseFloat(document.getElementById('val-gamma').textContent)).toFixed(2);
+  const sc = document.getElementById('slider-sum');
+  sc.textContent = `α + β + γ = ${sum} ${sum==='1.00'?'✓':'⚠'}`;
+}
+
+// ─── PERSISTENT HOMOLOGY ANIMATION ────────────────────────────────────────
+const homoObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  homoObs.disconnect();
+  let eps = 0;
+  const steps = [
+    { eps: 0.2, edges: ['he1','he2'], label: 'ε = 0.2' },
+    { eps: 0.4, edges: ['he3','he4','he5'], label: 'ε = 0.4 → 1-cycle born' },
+    { eps: 0.6, edges: ['he6','he7','he8'], label: 'ε = 0.6 → new component' },
+    { eps: 0.8, fill: 'ht1', label: 'ε = 0.8 → triangle filled' },
+  ];
+  let si = 0;
+  function nextStep() {
+    if (si >= steps.length) {
+      // animate barcodes
+      animateBarcodes();
+      return;
+    }
+    const s = steps[si++];
+    document.getElementById('eps-label').textContent = s.label;
+    if (s.edges) s.edges.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('opacity', '1');
+    });
+    if (s.fill) {
+      const el = document.getElementById(s.fill);
+      if (el) el.setAttribute('fill-opacity', '0.08');
+    }
+    setTimeout(nextStep, 700);
+  }
+  setTimeout(nextStep, 400);
+}, { threshold: 0.3 });
+const hs = document.getElementById('homology-stage');
+if (hs) homoObs.observe(hs);
+
+function animateBarcodes() {
+  const bars = [
+    { id: 'bar-h0-1', width: '100%' },
+    { id: 'bar-h0-2', width: '60%' },
+    { id: 'bar-h1-1', width: '45%' },
+    { id: 'bar-h1-2', width: '25%' },
+  ];
+  bars.forEach((b, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(b.id);
+      if (el) el.style.width = b.width;
+    }, i * 200);
+  });
+}
+
+// ─── SHEAF NODES ───────────────────────────────────────────────────────────
+const sheafObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  sheafObs.disconnect();
+  ['sn-1','sn-2','sn-3','sn-global'].forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('shown');
+    }, i * 250);
+  });
+}, { threshold: 0.3 });
+const sc = document.getElementById('sheaf-anim-container');
+if (sc) sheafObs.observe(sc);
+
+// ─── ALGORITHM STEPPER ────────────────────────────────────────────────────
+const algoDescs = {
+  0: '', 1: 'Parse query intent: extract entity anchors and relation types.',
+  2: 'Try exact typed-edge lookup first — O(1) average case.',
+  3: 'If we have enough exact matches, skip probabilistic search.',
+  4: 'Return exact matches ranked by sheaf composition score.',
+  5: '',
+  6: 'Type-filtered breadth-first search from anchor node.',
+  7: 'Expand candidates using topological signature similarity.',
+  8: 'Score by sheaf composition residual along relation paths.',
+  9: 'Return top-k results by composite NoVectDB distance.'
+};
+let currentAlgoStep = -1;
+const algoLines = document.querySelectorAll('.algo-line');
+document.getElementById('algo-next').addEventListener('click', () => {
+  currentAlgoStep++;
+  if (currentAlgoStep > 9) currentAlgoStep = 9;
+  algoLines.forEach(l => l.classList.remove('active'));
+  const target = document.querySelector(`.algo-line[data-step="${currentAlgoStep}"]`);
+  if (target) target.classList.add('active');
+  document.getElementById('algo-desc').textContent = algoDescs[currentAlgoStep] || '';
+});
+document.getElementById('algo-reset').addEventListener('click', () => {
+  currentAlgoStep = -1;
+  algoLines.forEach(l => l.classList.remove('active'));
+  document.getElementById('algo-desc').textContent = '';
+});
+
+// ─── BAR CHART ─────────────────────────────────────────────────────────────
+const barObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  barObs.disconnect();
+  document.querySelectorAll('.bar-fill').forEach((b, i) => {
+    setTimeout(() => {
+      b.style.width = b.dataset.width + '%';
+    }, i * 150);
+  });
+}, { threshold: 0.3 });
+const bc = document.getElementById('bar-chart');
+if (bc) barObs.observe(bc);
+
+// ─── ARCH PIPELINE ─────────────────────────────────────────────────────────
+const archObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  archObs.disconnect();
+  document.querySelectorAll('.arch-node').forEach((n, i) => {
+    const delay = parseInt(n.dataset.delay || 0);
+    setTimeout(() => n.classList.add('shown'), delay);
+  });
+}, { threshold: 0.2 });
+const ap = document.getElementById('arch-pipeline');
+if (ap) archObs.observe(ap);
+
+// ─── COMPARISON TABLE ──────────────────────────────────────────────────────
+const cmpObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  cmpObs.disconnect();
+  const cells = document.querySelectorAll('.cmp-table td.check');
+  cells.forEach((c, i) => {
+    setTimeout(() => c.classList.add('shown'), i * 60);
+  });
+}, { threshold: 0.2 });
+const ct = document.getElementById('cmp-table');
+if (ct) cmpObs.observe(ct);
+</script>
+</body>
+</html>

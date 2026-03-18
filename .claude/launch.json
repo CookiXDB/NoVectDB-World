@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "novectdb",
+      "runtimeExecutable": "/bin/zsh",
+      "runtimeArgs": ["/tmp/run_novectdb.sh"],
+      "port": 5050
+    }
+  ]
+}
