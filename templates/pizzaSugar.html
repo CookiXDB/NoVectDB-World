@@ -13,6 +13,14 @@ MathJax = {
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+  }
+}
+</script>
 <style>
 :root {
   --black: #000;
@@ -153,6 +161,7 @@ p { margin-bottom: 1rem; }
 }
 
 canvas { display: block; }
+#three-mount:active { cursor: grabbing; }
 
 /* Controls */
 .viz-controls {
@@ -425,42 +434,31 @@ details[open] summary::before { content: '−'; }
   <div class="viz-section-heading reveal">
     <h2 class="section-num">§ 3</h2>
     <h2 class="section-title">Interactive Sugar Loaf Model</h2>
-    <p style="font-size:0.9rem;color:var(--gray-700);max-width:600px;">Left: the 3D frustum decomposed into 12 horizontal layers. Right: top-view of the curved monohedral tiling for any single layer. Use the controls to explode the layers and switch polygon configurations.</p>
+    <p style="font-size:0.9rem;color:var(--gray-700);max-width:600px;">A real-time 3D model of the frustum decomposed into 12 horizontal layers of curved monohedral pieces. Drag to rotate, hover to inspect a piece, explode to reveal the layer structure. Each layer is an exact scaled copy of the base tiling — monohedral by construction.</p>
   </div>
 
-  <div class="viz-layout reveal">
-
-    <!-- LEFT: 3D FRUSTUM CANVAS -->
+  <div class="viz-full reveal">
     <div class="viz-panel">
       <div class="viz-panel-header">
-        <span class="viz-panel-title">Sugar Loaf — 3D Layer Decomposition</span>
+        <span class="viz-panel-title" id="three-panel-title">Sugar Loaf — Interactive 3D Model (7-gon · 14 pieces/layer)</span>
+        <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--gray-500);">Drag to rotate · Hover to highlight</span>
       </div>
-      <canvas id="frustum-canvas" width="400" height="420"></canvas>
+      <div id="three-mount" style="width:100%;height:500px;background:#1a1208;cursor:grab;overflow:hidden;display:block;"></div>
       <div class="viz-controls">
         <span class="ctrl-label">View:</span>
         <button class="ctrl-btn active" id="btn-solid" onclick="setSolid()">Solid</button>
-        <button class="ctrl-btn" id="btn-explode" onclick="setExplode()">Explode Layers</button>
+        <button class="ctrl-btn" id="btn-explode" onclick="setExplode()">Explode</button>
         <div class="ctrl-sep"></div>
         <span class="ctrl-label">n-gon:</span>
         <button class="ctrl-btn" id="btn-5" onclick="setNgon(5)">5</button>
         <button class="ctrl-btn active" id="btn-7" onclick="setNgon(7)">7</button>
         <button class="ctrl-btn" id="btn-9" onclick="setNgon(9)">9</button>
-      </div>
-    </div>
-
-    <!-- RIGHT: TOP-VIEW TILING CANVAS -->
-    <div class="viz-panel">
-      <div class="viz-panel-header">
-        <span class="viz-panel-title" id="tiling-panel-title">Layer Cross-Section — Heptagon (7-gon) Tiling</span>
-      </div>
-      <canvas id="tiling-canvas" width="400" height="420"></canvas>
-      <div class="viz-controls">
+        <div class="ctrl-sep"></div>
         <span class="ctrl-label">Layer:</span>
-        <input type="range" id="layer-slider" min="0" max="11" value="6" style="flex:1;accent-color:#000;" oninput="setLayer(this.value)">
-        <span id="layer-label" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);width:80px;text-align:right;">k=6, ρ=4.5cm</span>
+        <input type="range" id="layer-slider" min="0" max="11" value="11" style="flex:1;accent-color:#8B4513;" oninput="setLayer(this.value)">
+        <span id="layer-label" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);width:80px;text-align:right;">all layers</span>
       </div>
     </div>
-
   </div>
 
   <!-- Stats under viz -->
@@ -871,446 +869,9 @@ const effBars = document.getElementById('eff-bars');
 if (effBars) effObs.observe(effBars);
 
 /* ════════════════════════════════════════════════════
-   3D FRUSTUM + TILING CANVASES
+   THREE.JS SUGAR LOAF — INTERACTIVE 3D MODEL
 ════════════════════════════════════════════════════ */
-(function(){
 
-const FC = document.getElementById('frustum-canvas');
-const TC = document.getElementById('tiling-canvas');
-if (!FC || !TC) return;
-
-const fx = FC.getContext('2d');
-const tx = TC.getContext('2d');
-const FW = FC.width, FH = FC.height;
-const TW = TC.width, TH = TC.height;
-
-// Config
-const LAYERS = 12;
-const SCALE = 32;       // px per cm
-const EA = 0.30;        // ellipse y-compression (3D view angle)
-const LAYER_PX = 18;    // px per layer (stacked view)
-const DISC_THICK = 5;   // disc thickness px (exploded view)
-const SPREAD_MAX = 22;  // max extra px between layers when exploded
-
-// State
-let fExplode = 0;   // 0=solid, 1=exploded
-let fNgon = 7;
-let fLayer = 6;     // selected layer for top-view
-let fAnim = null;
-
-// Frustum params
-function layerR(k) {
-  // pixel radius of layer k (k=0 bottom, k=11 top)
-  return (6 - (6 - 3) * k / (LAYERS - 1)) * SCALE;
-}
-
-// ── TILING DRAWING ─────────────────────────────────
-// Draw 2n curved-piece monohedral tiling
-// ctx: canvas context, already centered & scaled
-function drawTilingRaw(ctx, R, n) {
-  const N = 2 * n;
-  for (let i = 0; i < N; i++) {
-    const a1 = (Math.PI * 2 * i) / N;
-    const a2 = (Math.PI * 2 * (i + 1)) / N;
-    // S-curve amplitude & direction
-    const dir = (i % 2 === 0) ? 1 : -1;
-    const amp = R * 0.22;
-    // Control points for curved edges (quadratic bezier from center)
-    const lcp = {
-      x: R * 0.52 * Math.cos(a1) + amp * dir * Math.cos(a1 + Math.PI / 2),
-      y: R * 0.52 * Math.sin(a1) + amp * dir * Math.sin(a1 + Math.PI / 2)
-    };
-    const rcp = {
-      x: R * 0.52 * Math.cos(a2) - amp * dir * Math.cos(a2 + Math.PI / 2),
-      y: R * 0.52 * Math.sin(a2) - amp * dir * Math.sin(a2 + Math.PI / 2)
-    };
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.quadraticCurveTo(lcp.x, lcp.y, R * Math.cos(a1), R * Math.sin(a1));
-    ctx.arc(0, 0, R, a1, a2, false);
-    ctx.quadraticCurveTo(rcp.x, rcp.y, 0, 0);
-    ctx.closePath();
-    const v = (i % 2 === 0) ? 18 : 155;
-    ctx.fillStyle = `rgb(${v},${v},${v})`;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.92)';
-    ctx.lineWidth = 0.9;
-    ctx.stroke();
-  }
-  // Center dot
-  ctx.beginPath();
-  ctx.arc(0, 0, Math.max(2, R * 0.045), 0, Math.PI * 2);
-  ctx.fillStyle = '#fff';
-  ctx.fill();
-}
-
-// Draw disc (ellipse + tiling) at a given canvas position
-function drawDisc(ctx, cx, cy, R, drawTiling) {
-  // Bottom face shadow
-  ctx.save();
-  ctx.translate(cx, cy + DISC_THICK);
-  ctx.scale(1, EA);
-  ctx.beginPath();
-  ctx.arc(0, 0, R, 0, Math.PI * 2);
-  ctx.fillStyle = '#aaa';
-  ctx.fill();
-  ctx.restore();
-
-  // Side (front half trapezoid)
-  ctx.beginPath();
-  ctx.moveTo(cx - R, cy);
-  ctx.lineTo(cx - R, cy + DISC_THICK);
-  ctx.ellipse(cx, cy + DISC_THICK, R, R * EA, 0, Math.PI, 0, true);
-  ctx.lineTo(cx + R, cy);
-  ctx.ellipse(cx, cy, R, R * EA, 0, 0, Math.PI, true);
-  ctx.fillStyle = '#c8c8c8';
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(120,120,120,0.5)';
-  ctx.lineWidth = 0.5;
-  ctx.stroke();
-
-  if (drawTiling) {
-    // Top face: scale to ellipse then draw tiling
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(1, EA);
-    // Clip to circle
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(0, 0, R, 0, Math.PI * 2);
-    ctx.clip();
-    drawTilingRaw(ctx, R, fNgon);
-    ctx.restore();
-    ctx.restore();
-  } else {
-    // Plain filled ellipse
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(1, EA);
-    ctx.beginPath();
-    ctx.arc(0, 0, R, 0, Math.PI * 2);
-    ctx.fillStyle = '#ddd';
-    ctx.fill();
-    ctx.restore();
-  }
-
-  // Ellipse outline
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale(1, EA);
-  ctx.beginPath();
-  ctx.arc(0, 0, R, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(80,80,80,0.5)';
-  ctx.lineWidth = 0.8;
-  ctx.stroke();
-  ctx.restore();
-}
-
-// ── FRUSTUM CANVAS: SOLID VIEW ──────────────────────
-function renderSolid() {
-  fx.clearRect(0, 0, FW, FH);
-  fx.fillStyle = '#f8f8f8';
-  fx.fillRect(0, 0, FW, FH);
-
-  const CX = FW / 2;
-  const CY = FH * 0.80;
-  const BR = layerR(0);
-  const TR = layerR(LAYERS - 1);
-  const totalH = (LAYERS - 1) * LAYER_PX;
-  const TY = CY - totalH;
-
-  // Drop shadow
-  fx.save();
-  fx.globalAlpha = 0.12;
-  fx.translate(CX, CY + 18);
-  fx.scale(1, 0.22);
-  fx.beginPath();
-  fx.arc(0, 0, BR * 0.9, 0, Math.PI * 2);
-  fx.fillStyle = '#000';
-  fx.fill();
-  fx.restore();
-
-  // Back half of bottom
-  fx.save();
-  fx.translate(CX, CY);
-  fx.scale(1, EA);
-  fx.beginPath();
-  fx.arc(0, 0, BR, Math.PI, 2 * Math.PI, false);
-  fx.fillStyle = '#b0b0b0';
-  fx.fill();
-  fx.restore();
-
-  // Back side surface
-  fx.beginPath();
-  fx.moveTo(CX - BR, CY);
-  fx.lineTo(CX - TR, TY);
-  fx.save();
-  fx.translate(CX, TY);
-  fx.scale(1, EA);
-  fx.arc(0, 0, TR, Math.PI, 2 * Math.PI, false);
-  fx.restore();
-  fx.lineTo(CX + BR, CY);
-  fx.fillStyle = '#c8c8c8';
-  fx.fill();
-
-  // Layer lines (back half)
-  for (let k = 1; k < LAYERS; k++) {
-    const r = layerR(k);
-    const y = CY - k * LAYER_PX;
-    fx.save();
-    fx.translate(CX, y);
-    fx.scale(1, EA);
-    fx.beginPath();
-    fx.arc(0, 0, r, Math.PI, 2 * Math.PI, false);
-    fx.strokeStyle = 'rgba(100,100,100,0.35)';
-    fx.lineWidth = 0.7;
-    fx.stroke();
-    fx.restore();
-  }
-
-  // Front side surface
-  fx.beginPath();
-  fx.moveTo(CX - BR, CY);
-  fx.lineTo(CX - TR, TY);
-  fx.save();
-  fx.translate(CX, TY);
-  fx.scale(1, EA);
-  fx.arc(0, 0, TR, Math.PI, 0, true);
-  fx.restore();
-  fx.lineTo(CX + BR, CY);
-  fx.fillStyle = '#dedede';
-  fx.fill();
-  fx.strokeStyle = '#aaa';
-  fx.lineWidth = 0.8;
-  fx.stroke();
-
-  // Layer lines (front half)
-  for (let k = 1; k < LAYERS; k++) {
-    const r = layerR(k);
-    const y = CY - k * LAYER_PX;
-    fx.save();
-    fx.translate(CX, y);
-    fx.scale(1, EA);
-    fx.beginPath();
-    fx.arc(0, 0, r, 0, Math.PI, false);
-    fx.strokeStyle = 'rgba(80,80,80,0.45)';
-    fx.lineWidth = 0.7;
-    fx.stroke();
-    fx.restore();
-  }
-
-  // Top face with tiling
-  fx.save();
-  fx.translate(CX, TY);
-  fx.scale(1, EA);
-  fx.save();
-  fx.beginPath();
-  fx.arc(0, 0, TR, 0, Math.PI * 2);
-  fx.clip();
-  drawTilingRaw(fx, TR, fNgon);
-  fx.restore();
-  fx.beginPath();
-  fx.arc(0, 0, TR, 0, Math.PI * 2);
-  fx.strokeStyle = '#888';
-  fx.lineWidth = 1;
-  fx.stroke();
-  fx.restore();
-
-  // Bottom ellipse (front)
-  fx.save();
-  fx.translate(CX, CY);
-  fx.scale(1, EA);
-  fx.beginPath();
-  fx.arc(0, 0, BR, 0, Math.PI, false);
-  fx.fillStyle = '#b8b8b8';
-  fx.fill();
-  fx.restore();
-
-  // Dimension labels
-  fx.fillStyle = '#777';
-  fx.font = '10px JetBrains Mono, monospace';
-  fx.textAlign = 'right';
-  fx.fillText('R = 6cm', CX - BR - 4, CY + 3);
-  fx.fillText('r = 3cm', CX - TR - 4, TY + 3);
-  fx.textAlign = 'left';
-  fx.fillText('H = 12cm', CX + BR + 6, (CY + TY) / 2 + 4);
-  // H line
-  fx.strokeStyle = '#ccc';
-  fx.lineWidth = 0.6;
-  fx.beginPath();
-  fx.moveTo(CX + BR + 4, CY);
-  fx.lineTo(CX + BR + 4, TY);
-  fx.stroke();
-
-  // Info
-  fx.fillStyle = '#999';
-  fx.font = '10px JetBrains Mono, monospace';
-  fx.textAlign = 'center';
-  const nlbl = {5:'5-gon · 10 pieces/layer', 7:'7-gon · 14 pieces/layer', 9:'9-gon · 18 pieces/layer'};
-  fx.fillText(nlbl[fNgon], FW / 2, FH - 10);
-}
-
-// ── FRUSTUM CANVAS: EXPLODED VIEW ───────────────────
-function renderExploded(t) {
-  fx.clearRect(0, 0, FW, FH);
-  fx.fillStyle = '#f8f8f8';
-  fx.fillRect(0, 0, FW, FH);
-
-  const CX = FW / 2;
-  const spread = t * SPREAD_MAX;
-  const baseStep = LAYER_PX + spread;
-  const totalH = (LAYERS - 1) * baseStep + DISC_THICK;
-  const baseY = FH * 0.88 - (totalH > FH * 0.8 ? totalH - FH * 0.8 : 0);
-
-  // Draw bottom → top (painter's: far layers first = top layers)
-  for (let k = LAYERS - 1; k >= 0; k--) {
-    const R = layerR(k);
-    const y = baseY - k * baseStep;
-    const showTile = t > 0.15;
-    drawDisc(fx, CX, y, R, showTile);
-
-    // Label when fully exploded
-    if (t > 0.8 && R > 24) {
-      const rk = (6 - (6 - 3) * k / (LAYERS - 1)).toFixed(1);
-      fx.fillStyle = 'rgba(120,120,120,0.9)';
-      fx.font = '8.5px JetBrains Mono, monospace';
-      fx.textAlign = 'left';
-      fx.fillText(`k=${k}  ρ=${rk}`, CX + R + 3, y + 3);
-    }
-  }
-
-  fx.textAlign = 'center';
-  fx.fillStyle = '#999';
-  fx.font = '10px JetBrains Mono, monospace';
-  const nlbl = {5:'5-gon · 10 pieces/layer', 7:'7-gon · 14 pieces/layer', 9:'9-gon · 18 pieces/layer'};
-  fx.fillText(nlbl[fNgon], FW / 2, 18);
-}
-
-// ── MAIN FRUSTUM RENDER ─────────────────────────────
-function renderFrustum() {
-  if (fExplode < 0.02) {
-    renderSolid();
-  } else {
-    renderExploded(fExplode);
-  }
-}
-
-// ── ANIMATE EXPLODE ─────────────────────────────────
-function animateTo(target) {
-  if (fAnim) cancelAnimationFrame(fAnim);
-  const start = fExplode;
-  const t0 = performance.now();
-  const dur = 900;
-  function step(t) {
-    let p = Math.min(1, (t - t0) / dur);
-    p = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
-    fExplode = start + (target - start) * p;
-    renderFrustum();
-    if (fExplode !== target) fAnim = requestAnimationFrame(step);
-  }
-  fAnim = requestAnimationFrame(step);
-}
-
-// ── TOP-VIEW TILING CANVAS ──────────────────────────
-function renderTiling() {
-  tx.clearRect(0, 0, TW, TH);
-  tx.fillStyle = '#f8f8f8';
-  tx.fillRect(0, 0, TW, TH);
-
-  const CX = TW / 2, CY = TH / 2 - 20;
-  const R = layerR(fLayer) * 1.3; // scale up for visibility
-
-  // Background circle
-  tx.save();
-  tx.translate(CX, CY);
-  tx.beginPath();
-  tx.arc(0, 0, R, 0, Math.PI * 2);
-  tx.fillStyle = '#e8e8e8';
-  tx.fill();
-  tx.restore();
-
-  // Tiling
-  tx.save();
-  tx.translate(CX, CY);
-  tx.save();
-  tx.beginPath();
-  tx.arc(0, 0, R, 0, Math.PI * 2);
-  tx.clip();
-  drawTilingRaw(tx, R, fNgon);
-  tx.restore();
-
-  // Circle outline
-  tx.beginPath();
-  tx.arc(0, 0, R, 0, Math.PI * 2);
-  tx.strokeStyle = '#888';
-  tx.lineWidth = 1.5;
-  tx.stroke();
-  tx.restore();
-
-  // Radius label
-  const rk = (6 - (6 - 3) * fLayer / (LAYERS - 1)).toFixed(2);
-  tx.fillStyle = '#888';
-  tx.font = '10px JetBrains Mono, monospace';
-  tx.textAlign = 'center';
-  tx.fillText(`Layer k=${fLayer}  ρ=${rk}cm  →  ${2 * fNgon} pieces`, TW / 2, CY + R + 22);
-
-  // N pieces count in center
-  tx.fillStyle = 'rgba(255,255,255,0.0)';
-  // Cut count overlay
-  tx.fillStyle = '#666';
-  tx.font = '9px JetBrains Mono, monospace';
-  tx.textAlign = 'center';
-
-  const nlabels = {5:'Pentagon: 10 curved pieces', 7:'Heptagon: 14 curved pieces', 9:'Nonagon: 18 curved pieces'};
-  tx.fillText(nlabels[fNgon], TW / 2, TH - 10);
-}
-
-// ── CONTROLS ────────────────────────────────────────
-const statData = {
-  5: {pieces:10, eff:'94.8%', waste:'41.2 cm³'},
-  7: {pieces:14, eff:'97.3%', waste:'21.4 cm³'},
-  9: {pieces:18, eff:'98.1%', waste:'15.0 cm³'}
-};
-
-function updateStats() {
-  const d = statData[fNgon];
-  document.getElementById('stat-num').textContent = d.pieces;
-  document.getElementById('stat-eff-num').textContent = d.eff;
-  document.getElementById('stat-waste-num').textContent = d.waste;
-}
-
-window.setSolid = function() {
-  document.getElementById('btn-solid').classList.add('active');
-  document.getElementById('btn-explode').classList.remove('active');
-  animateTo(0);
-};
-window.setExplode = function() {
-  document.getElementById('btn-explode').classList.add('active');
-  document.getElementById('btn-solid').classList.remove('active');
-  animateTo(1);
-};
-window.setNgon = function(n) {
-  fNgon = n;
-  [5,7,9].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===n));
-  const titles = {5:'Layer Cross-Section — Pentagon (5-gon) Tiling', 7:'Layer Cross-Section — Heptagon (7-gon) Tiling', 9:'Layer Cross-Section — Nonagon (9-gon) Tiling'};
-  document.getElementById('tiling-panel-title').textContent = titles[n];
-  updateStats();
-  renderFrustum();
-  renderTiling();
-};
-window.setLayer = function(k) {
-  fLayer = parseInt(k);
-  const rk = (6 - (6-3)*fLayer/(LAYERS-1)).toFixed(1);
-  document.getElementById('layer-label').textContent = `k=${fLayer}, ρ=${rk}cm`;
-  renderTiling();
-};
-
-// Initial render
-renderFrustum();
-renderTiling();
-updateStats();
-
-})(); // end 3D viz IIFE
 
 /* ─── PAPER EXPLORER ───────────────────────────────── */
 (function(){
@@ -1398,6 +959,387 @@ updateStats();
   }
 
   setTimeout(() => triggerBars(0), 600);
+})();
+</script>
+
+<script type="module">
+/* ═══════════════════════════════════════════════════
+   THREE.JS SUGAR LOAF — Interactive 3D Model
+═══════════════════════════════════════════════════ */
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js';
+
+(function () {
+
+/* ── CONSTANTS ──────────────────────────────────── */
+const LAYERS    = 12;
+const R_BOTTOM  = 6;    // cm
+const R_TOP     = 3;    // cm
+const CM        = 14;   // world units per cm
+const LAYER_H   = CM;   // 1 cm per layer → 14 world units
+// Color gradient: dark amber bottom → light cream top
+const H_BOT = 25,  S_BOT = 0.68, L_BOT = 0.34;
+const H_TOP = 46,  S_TOP = 0.88, L_TOP = 0.84;
+const ALT_DARKEN   = 0.11;   // alternating piece darkening
+const COLOR_HOVER  = 0xFFD700;
+const EXPLODE_RADIAL = 26;   // radial spread per piece (world units)
+const EXPLODE_VERT   = 14;   // vertical spread per layer gap
+
+/* ── STATE ──────────────────────────────────────── */
+let curNgon      = 7;
+let layerFocusK  = -1;   // -1 = show all
+let explodeT     = 0;
+let explodeTarget = 0;
+let explodeRaf   = null;
+let hoveredMesh  = null;
+
+/* ── MATH HELPERS ───────────────────────────────── */
+function layerRadius(k) {
+  return (R_BOTTOM - (R_BOTTOM - R_TOP) * k / (LAYERS - 1)) * CM;
+}
+function layerBaseY(k) {
+  return k * LAYER_H;
+}
+function layerColor(k, alternate) {
+  const t = k / (LAYERS - 1);
+  const h = H_BOT + (H_TOP - H_BOT) * t;
+  const s = S_BOT + (S_TOP - S_BOT) * t;
+  let   l = L_BOT + (L_TOP - L_BOT) * t;
+  if (alternate) l = Math.max(0.05, l - ALT_DARKEN);
+  return new THREE.Color().setHSL(h / 360, s, l);
+}
+function pieceCentroidAngle(i, n) {
+  const N = 2 * n;
+  const a1 = (Math.PI * 2 * i) / N;
+  const a2 = (Math.PI * 2 * (i + 1)) / N;
+  return (a1 + a2) / 2;
+}
+
+/* ── BUILD PIECE SHAPE (THREE.Shape) ────────────── */
+// Mirrors drawTilingRaw Bezier math exactly
+function buildPieceShape(R, i, n) {
+  const N   = 2 * n;
+  const a1  = (Math.PI * 2 * i) / N;
+  const a2  = (Math.PI * 2 * (i + 1)) / N;
+  const dir = (i % 2 === 0) ? 1 : -1;
+  const amp = R * 0.22;
+  const lcp = {
+    x: R * 0.52 * Math.cos(a1) + amp * dir * Math.cos(a1 + Math.PI / 2),
+    y: R * 0.52 * Math.sin(a1) + amp * dir * Math.sin(a1 + Math.PI / 2),
+  };
+  const rcp = {
+    x: R * 0.52 * Math.cos(a2) - amp * dir * Math.cos(a2 + Math.PI / 2),
+    y: R * 0.52 * Math.sin(a2) - amp * dir * Math.sin(a2 + Math.PI / 2),
+  };
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  shape.quadraticCurveTo(lcp.x, lcp.y, R * Math.cos(a1), R * Math.sin(a1));
+  shape.absarc(0, 0, R, a1, a2, false);
+  shape.quadraticCurveTo(rcp.x, rcp.y, 0, 0);
+  return shape;
+}
+
+/* ── SCENE SETUP ────────────────────────────────── */
+const mount = document.getElementById('three-mount');
+if (!mount) return;
+
+const W = mount.clientWidth || 800;
+const H = mount.clientHeight || 500;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setSize(W, H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x1a1208);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+mount.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x1a1208, 0.0008);
+
+const camera = new THREE.PerspectiveCamera(42, W / H, 1, 4000);
+camera.position.set(220, 155, 280);
+const centerY = (LAYERS * LAYER_H) / 2;
+camera.lookAt(0, centerY, 0);
+
+/* ── ORBIT CONTROLS ─────────────────────────────── */
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping   = true;
+controls.dampingFactor   = 0.055;
+controls.autoRotate      = true;
+controls.autoRotateSpeed = 0.5;
+controls.minDistance     = 80;
+controls.maxDistance     = 800;
+controls.target.set(0, centerY, 0);
+
+let idleTimer = null;
+controls.addEventListener('start', () => {
+  controls.autoRotate = false;
+  clearTimeout(idleTimer);
+});
+controls.addEventListener('end', () => {
+  idleTimer = setTimeout(() => { controls.autoRotate = true; }, 3500);
+});
+
+/* ── LIGHTING ───────────────────────────────────── */
+scene.add(new THREE.AmbientLight(0xffecd2, 0.6));
+
+const sun = new THREE.DirectionalLight(0xfff8f0, 1.3);
+sun.position.set(280, 450, 220);
+sun.castShadow = true;
+sun.shadow.mapSize.width  = 1024;
+sun.shadow.mapSize.height = 1024;
+sun.shadow.camera.near = 50;
+sun.shadow.camera.far  = 1200;
+sun.shadow.camera.left = -200;
+sun.shadow.camera.right = 200;
+sun.shadow.camera.top  = 300;
+sun.shadow.camera.bottom = -100;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+// Warm fill bounce from below-left
+const fill = new THREE.DirectionalLight(0xd47a0a, 0.28);
+fill.position.set(-180, -80, 120);
+scene.add(fill);
+
+// Subtle rim light from behind
+const rim = new THREE.DirectionalLight(0xffc875, 0.18);
+rim.position.set(0, 60, -300);
+scene.add(rim);
+
+/* ── MESH REGISTRY ──────────────────────────────── */
+let allMeshes   = [];
+let layerGroups = [];
+const frustumGroup = new THREE.Group();
+scene.add(frustumGroup);
+
+/* ── BUILD SCENE ────────────────────────────────── */
+const extrudeSettings = {
+  depth: LAYER_H * 0.90,
+  bevelEnabled: false,
+  curveSegments: 20,
+};
+
+function buildScene(ngon) {
+  // Dispose previous
+  allMeshes.forEach(m => { m.geometry.dispose(); m.material.dispose(); });
+  allMeshes = [];
+  layerGroups.forEach(g => frustumGroup.remove(g));
+  layerGroups = [];
+
+  const N = 2 * ngon;
+
+  for (let k = 0; k < LAYERS; k++) {
+    const R     = layerRadius(k);
+    const group = new THREE.Group();
+    group.position.y = layerBaseY(k);
+    frustumGroup.add(group);
+    layerGroups.push(group);
+
+    for (let i = 0; i < N; i++) {
+      const shape    = buildPieceShape(R, i, ngon);
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      // Rotate so extrusion goes upward (+Y) instead of along +Z
+      geometry.rotateX(-Math.PI / 2);
+
+      const baseColor = layerColor(k, i % 2 === 1);
+      const material  = new THREE.MeshStandardMaterial({
+        color:     baseColor,
+        roughness: 0.58,
+        metalness: 0.04,
+      });
+
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.castShadow    = true;
+      mesh.receiveShadow = true;
+
+      const angle = pieceCentroidAngle(i, ngon);
+      mesh.userData = {
+        layerK:     k,
+        pieceI:     i,
+        baseColor:  baseColor.clone(),
+        explodeDX:  Math.cos(angle) * EXPLODE_RADIAL,
+        explodeDZ:  Math.sin(angle) * EXPLODE_RADIAL,
+      };
+
+      group.add(mesh);
+      allMeshes.push(mesh);
+    }
+  }
+}
+
+/* ── EXPLODE ANIMATION ──────────────────────────── */
+function easeInOut(p) {
+  return p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+}
+
+function applyExplode() {
+  const t = explodeT;
+  const centerK = (LAYERS - 1) / 2;
+
+  layerGroups.forEach((group, k) => {
+    group.position.y = layerBaseY(k) + (k - centerK) * EXPLODE_VERT * t;
+  });
+
+  allMeshes.forEach(mesh => {
+    mesh.position.x = mesh.userData.explodeDX * t;
+    mesh.position.z = mesh.userData.explodeDZ * t;
+  });
+}
+
+function animateExplode(target) {
+  if (explodeRaf) cancelAnimationFrame(explodeRaf);
+  explodeTarget = target;
+  const startT = explodeT;
+  const t0     = performance.now();
+  const dur    = 1100;
+
+  function step(now) {
+    const p  = Math.min(1, (now - t0) / dur);
+    explodeT = startT + (target - startT) * easeInOut(p);
+    applyExplode();
+    if (p < 1) explodeRaf = requestAnimationFrame(step);
+    else { explodeT = target; explodeRaf = null; }
+  }
+  explodeRaf = requestAnimationFrame(step);
+}
+
+/* ── LAYER FOCUS ────────────────────────────────── */
+function applyLayerFocus(focusK) {
+  layerGroups.forEach((group, k) => {
+    const show = (focusK === -1 || k === focusK);
+    group.children.forEach(mesh => {
+      mesh.material.transparent = !show;
+      mesh.material.opacity     = show ? 1.0 : 0.07;
+      mesh.material.depthWrite  = show;
+    });
+  });
+}
+
+/* ── RAYCASTING / HOVER ─────────────────────────── */
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2(-9999, -9999);
+
+function onMouseMove(evt) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x =  ((evt.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((evt.clientY - rect.top)  / rect.height) * 2 + 1;
+}
+mount.addEventListener('mousemove', onMouseMove);
+mount.addEventListener('mouseleave', () => { mouse.set(-9999, -9999); });
+
+function updateHover() {
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(allMeshes);
+
+  const hit = hits.length > 0 ? hits[0].object : null;
+  if (hit === hoveredMesh) return;
+
+  // Un-hover previous
+  if (hoveredMesh) {
+    hoveredMesh.material.color.copy(hoveredMesh.userData.baseColor);
+    hoveredMesh.material.emissive.setHex(0x000000);
+    hoveredMesh.position.y = 0;
+  }
+  hoveredMesh = hit;
+  if (hit) {
+    hit.material.color.setHex(COLOR_HOVER);
+    hit.material.emissive.setHex(0x2a1800);
+    hit.position.y = 5;  // lift slightly
+    mount.style.cursor = 'pointer';
+  } else {
+    mount.style.cursor = explodeT > 0.02 ? 'grab' : 'grab';
+  }
+}
+
+/* ── RENDER LOOP ────────────────────────────────── */
+function animate() {
+  requestAnimationFrame(animate);
+  updateHover();
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+/* ── RESIZE ─────────────────────────────────────── */
+window.addEventListener('resize', () => {
+  const w = mount.clientWidth;
+  const h = mount.clientHeight;
+  if (!w || !h) return;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+/* ── PUBLIC API (matched to onclick= button wiring) */
+const statData = {
+  5: { pieces: 10, eff: '94.8%', waste: '41.2 cm³' },
+  7: { pieces: 14, eff: '97.3%', waste: '21.4 cm³' },
+  9: { pieces: 18, eff: '98.1%', waste: '15.0 cm³' },
+};
+
+function updateStats(n) {
+  const d = statData[n];
+  const numEl   = document.getElementById('stat-num');
+  const effEl   = document.getElementById('stat-eff-num');
+  const wasteEl = document.getElementById('stat-waste-num');
+  if (numEl)   numEl.textContent   = d.pieces;
+  if (effEl)   effEl.textContent   = d.eff;
+  if (wasteEl) wasteEl.textContent = d.waste;
+}
+
+window.setSolid = function () {
+  document.getElementById('btn-solid').classList.add('active');
+  document.getElementById('btn-explode').classList.remove('active');
+  animateExplode(0);
+};
+
+window.setExplode = function () {
+  document.getElementById('btn-explode').classList.add('active');
+  document.getElementById('btn-solid').classList.remove('active');
+  animateExplode(1);
+};
+
+window.setNgon = function (n) {
+  curNgon = n;
+  [5, 7, 9].forEach(x =>
+    document.getElementById('btn-' + x).classList.toggle('active', x === n)
+  );
+  const titles = {
+    5: 'Sugar Loaf — 3D Model (5-gon · 10 pieces/layer)',
+    7: 'Sugar Loaf — 3D Model (7-gon · 14 pieces/layer)',
+    9: 'Sugar Loaf — 3D Model (9-gon · 18 pieces/layer)',
+  };
+  document.getElementById('three-panel-title').textContent = titles[n];
+  updateStats(n);
+  const prevExplodeT = explodeT;
+  buildScene(n);
+  explodeT = prevExplodeT;
+  applyExplode();
+  applyLayerFocus(layerFocusK);
+};
+
+window.setLayer = function (k) {
+  const ki = parseInt(k);
+  // Slider at max (11) = show all
+  layerFocusK = (ki >= 11) ? -1 : ki;
+  const lbl = document.getElementById('layer-label');
+  if (layerFocusK === -1) {
+    if (lbl) lbl.textContent = 'all layers';
+  } else {
+    const rk = (R_BOTTOM - (R_BOTTOM - R_TOP) * ki / (LAYERS - 1)).toFixed(1);
+    if (lbl) lbl.textContent = `k=${ki}, ρ=${rk}cm`;
+  }
+  applyLayerFocus(layerFocusK);
+};
+
+/* ── INIT ───────────────────────────────────────── */
+buildScene(curNgon);
+updateStats(curNgon);
+animate();
+
 })();
 </script>
 </body>
