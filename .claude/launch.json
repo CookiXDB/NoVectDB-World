@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "novectdb",
-      "runtimeExecutable": "/Users/vpro/.pyenv/versions/3.10.6/bin/python3",
+      "runtimeExecutable": "/usr/bin/python3",
       "runtimeArgs": ["/Users/vpro/Desktop/novectdb_site/app.py"],
       "port": 5050
     }

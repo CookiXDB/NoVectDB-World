@@ -19,6 +19,10 @@ def novectdb():
 def hafdi_conjecture():
     return render_template("hafdiConjecture.html")
 
+@app.route("/papers/realistic")
+def realistic():
+    return render_template("realistic.html")
+
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)

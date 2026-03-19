@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Realistic Type — Three-Valued Logic in Matyos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script>
+MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root {
+  --black: #000;
+  --white: #fff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-500: #888;
+  --gray-700: #444;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --max-w: 860px;
+  --section-gap: 100px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 17px; }
+body { font-family: var(--font-sans); background: var(--white); color: var(--black); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* ─── NAV ─────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px;
+}
+.nav-back { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; }
+.nav-back:hover { color: var(--black); }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); letter-spacing: 0.01em; transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+
+.nav-burger {
+  display: none; flex-direction: column; justify-content: center; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px;
+}
+.nav-burger span { display: block; height: 2px; background: var(--black); transition: transform .3s ease, opacity .3s ease; }
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.nav-drawer {
+  display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99;
+  background: rgba(255,255,255,0.98); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  flex-direction: column; padding: 0;
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease;
+}
+.nav-drawer.open { max-height: 400px; }
+.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
+.nav-drawer a { display: block; padding: 0.9rem 2rem; font-size: 0.9rem; text-decoration: none; color: var(--black); font-family: var(--font-sans); letter-spacing: 0.01em; transition: background .15s; }
+.nav-drawer a:hover { background: var(--gray-50); }
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
+section:last-of-type { border-bottom: none; }
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero { padding-top: 130px; padding-bottom: 80px; border-bottom: 1px solid var(--black); }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem; }
+h1.hero-title { font-family: var(--font-serif); font-size: clamp(2.8rem, 6vw, 4.4rem); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+h1.hero-title span { font-style: italic; }
+.hero-subtitle { font-size: 1.05rem; color: var(--gray-700); max-width: 620px; margin-bottom: 2rem; line-height: 1.6; }
+.hero-tagline { font-family: var(--font-serif); font-style: italic; font-size: 1.3rem; letter-spacing: -0.01em; border-left: 3px solid var(--black); padding-left: 1rem; margin: 2rem 0; }
+#typewriter::after { content: '|'; animation: blink .7s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-meta { font-size: 0.82rem; color: var(--gray-500); font-family: var(--font-mono); margin-top: 2.5rem; }
+.hero-meta strong { color: var(--black); }
+.abstract-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.8rem 2rem; margin-top: 3rem; border-radius: 2px; }
+.abstract-box .label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; }
+.abstract-box p { font-size: 0.93rem; color: var(--gray-700); line-height: 1.75; }
+
+/* ─── HEADINGS ────────────────────────────────────────── */
+h2.section-num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.2; }
+h3.subsec { font-size: 1rem; font-weight: 600; letter-spacing: 0.01em; margin: 2.5rem 0 0.8rem; }
+p { margin-bottom: 1rem; }
+
+/* ─── CARDS ──────────────────────────────────────────── */
+.card { border-left: 3px solid var(--black); padding: 1.2rem 1.5rem; margin: 1.5rem 0; background: var(--gray-50); }
+.card-label { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.5rem; }
+.card p { margin: 0; font-size: 0.93rem; color: var(--gray-700); line-height: 1.65; }
+
+/* ─── MATH BLOCKS ────────────────────────────────────── */
+.math-block { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.5rem 2rem; margin: 1.8rem 0; border-radius: 2px; overflow-x: auto; }
+.math-label { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; }
+
+/* ─── SVG STAGE ──────────────────────────────────────── */
+.svg-stage { width: 100%; overflow: visible; margin: 2rem 0; display: block; }
+
+/* ─── TRUTH TABLE ────────────────────────────────────── */
+.truth-table-wrap { overflow-x: auto; margin: 2rem 0; }
+table.truth-table { border-collapse: collapse; font-family: var(--font-mono); font-size: 0.82rem; min-width: 320px; }
+table.truth-table th { background: var(--black); color: var(--white); padding: 0.5rem 1.2rem; text-align: center; font-weight: 500; letter-spacing: 0.06em; }
+table.truth-table td { padding: 0.45rem 1.2rem; text-align: center; border-bottom: 1px solid var(--gray-200); }
+table.truth-table tr:nth-child(even) td { background: var(--gray-50); }
+table.truth-table td.val-t { color: #1a6e2e; font-weight: 600; }
+table.truth-table td.val-f { color: #b91c1c; font-weight: 600; }
+table.truth-table td.val-r { color: #92400e; font-weight: 600; }
+
+/* ─── CODE BLOCK ─────────────────────────────────────── */
+.code-block { background: #0a0a0a; color: #e5e5e5; padding: 1.4rem 1.8rem; border-radius: 3px; overflow-x: auto; margin: 1.8rem 0; }
+.code-block pre { font-family: var(--font-mono); font-size: 0.83rem; line-height: 1.65; }
+.code-block .kw { color: #a78bfa; }
+.code-block .ty { color: #67e8f9; }
+.code-block .cm { color: #6b7280; }
+.code-block .st { color: #86efac; }
+.code-block .nu { color: #fda4af; }
+
+/* ─── PERF BARS ──────────────────────────────────────── */
+.perf-grid { display: grid; gap: 1.2rem; margin: 2rem 0; }
+.perf-row { display: grid; grid-template-columns: 120px 1fr 60px; align-items: center; gap: 1rem; }
+.perf-label { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); }
+.perf-track { height: 8px; background: var(--gray-200); border-radius: 4px; overflow: hidden; }
+.perf-fill { height: 100%; background: var(--black); border-radius: 4px; width: 0; transition: width 1.2s ease; }
+.perf-pct { font-family: var(--font-mono); font-size: 0.78rem; text-align: right; color: var(--gray-700); }
+
+/* ─── APP CARDS GRID ─────────────────────────────────── */
+.app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin: 2rem 0; }
+@media (max-width: 600px) { .app-grid { grid-template-columns: 1fr; } }
+.app-card { border: 1px solid var(--gray-200); padding: 1.4rem 1.6rem; border-radius: 2px; }
+.app-card-icon { font-size: 1.4rem; margin-bottom: 0.8rem; }
+.app-card-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; }
+.app-card-desc { font-size: 0.82rem; color: var(--gray-700); line-height: 1.6; }
+
+/* ─── REVEAL ANIMATIONS ──────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ─── PAPER EXPLORER ─────────────────────────────────── */
+#paper-explorer { padding: 0; border-bottom: none; background: var(--black); }
+#pe-scroll-outer { height: 500vh; position: relative; }
+#pe-sticky { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+#pe-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.7rem 2rem; border-bottom: 1px solid #333;
+  flex-shrink: 0;
+}
+.pe-title { font-family: var(--font-mono); font-size: 0.78rem; color: #999; letter-spacing: 0.04em; }
+#pe-pdf-link { font-family: var(--font-mono); font-size: 0.75rem; color: #888; text-decoration: none; transition: color .2s; }
+#pe-pdf-link:hover { color: #fff; }
+
+#pe-toc {
+  display: flex; gap: 0; border-bottom: 1px solid #333;
+  overflow-x: auto; flex-shrink: 0;
+}
+#pe-toc::-webkit-scrollbar { height: 3px; }
+#pe-toc::-webkit-scrollbar-thumb { background: #555; }
+.pe-tab {
+  font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.04em;
+  color: #666; background: none; border: none; border-right: 1px solid #333;
+  padding: 0.65rem 1.2rem; cursor: pointer; white-space: nowrap;
+  transition: color .2s, background .2s;
+}
+.pe-tab:hover { color: #ccc; }
+.pe-tab.active { color: #fff; background: #1a1a1a; }
+
+#pe-body { flex: 1; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
+#pe-pdf-col { border-right: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; }
+#pe-canvas-wrap { flex: 1; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; padding: 1rem; background: #111; }
+#pe-canvas-wrap canvas { max-width: 100%; height: auto; display: block; }
+#pe-pdf-nav { display: flex; align-items: center; justify-content: center; gap: 1.2rem; padding: 0.6rem 1rem; border-top: 1px solid #333; flex-shrink: 0; }
+.pe-nav-btn { background: none; border: 1px solid #444; color: #888; font-family: var(--font-mono); font-size: 0.75rem; padding: 0.3rem 0.8rem; cursor: pointer; transition: all .2s; border-radius: 2px; }
+.pe-nav-btn:hover { color: #fff; border-color: #fff; }
+#pe-page-info { font-family: var(--font-mono); font-size: 0.72rem; color: #666; }
+
+#pe-anim-col { overflow-y: auto; padding: 2rem; }
+#pe-anim-col::-webkit-scrollbar { width: 4px; }
+#pe-anim-col::-webkit-scrollbar-thumb { background: #444; }
+.pe-panel { display: none; }
+.pe-panel.active { display: block; }
+.pe-panel-label { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-bottom: 1rem; }
+.pe-panel-title { font-family: var(--font-serif); font-size: 1.6rem; color: #fff; margin-bottom: 1rem; line-height: 1.2; }
+.pe-panel-body { font-size: 0.88rem; color: #aaa; line-height: 1.7; }
+.pe-panel-body p { margin-bottom: 0.8rem; }
+.pe-highlight { color: #fff; font-weight: 500; }
+.pe-mono { font-family: var(--font-mono); color: #a78bfa; font-size: 0.82rem; }
+
+/* inline truth table for dark panel */
+.pe-table { border-collapse: collapse; font-family: var(--font-mono); font-size: 0.78rem; margin: 1rem 0; }
+.pe-table th { background: #222; color: #ddd; padding: 0.4rem 0.9rem; text-align: center; }
+.pe-table td { padding: 0.35rem 0.9rem; text-align: center; border-bottom: 1px solid #333; color: #aaa; }
+.pe-table td.vt { color: #86efac; }
+.pe-table td.vf { color: #fca5a5; }
+.pe-table td.vr { color: #fcd34d; }
+
+/* perf bars dark */
+.pe-perf { margin: 1.2rem 0; }
+.pe-perf-row { display: grid; grid-template-columns: 70px 1fr 50px; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
+.pe-perf-lbl { font-family: var(--font-mono); font-size: 0.72rem; color: #888; }
+.pe-perf-track { height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+.pe-perf-fill { height: 100%; border-radius: 3px; }
+.pe-perf-pct { font-family: var(--font-mono); font-size: 0.72rem; color: #888; text-align: right; }
+
+/* typewriter in panel */
+.pe-typewriter { font-family: var(--font-mono); color: #a78bfa; font-size: 0.9rem; border-right: 2px solid #a78bfa; padding-right: 2px; white-space: pre; overflow: hidden; width: 0; animation: typing 2.5s steps(40,end) forwards; }
+@keyframes typing { to { width: 100%; } }
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+footer { border-top: 1px solid var(--gray-200); padding: 3rem 2rem; }
+footer .container { display: flex; flex-direction: column; gap: 2rem; }
+.footer-refs details { border-top: 1px solid var(--gray-200); padding-top: 1.5rem; }
+.footer-refs summary { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; color: var(--gray-500); }
+.footer-refs ol { margin-top: 1rem; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.footer-refs li { font-size: 0.82rem; color: var(--gray-700); line-height: 1.6; }
+.footer-sig { font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-500); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media (max-width: 760px) {
+  .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .nav-drawer { display: flex; }
+  #pe-body { grid-template-columns: 1fr; }
+  #pe-pdf-col { display: none; }
+  .app-grid { grid-template-columns: 1fr; }
+  .perf-row { grid-template-columns: 90px 1fr 50px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-logo">Realistic Type</span>
+  <ul class="nav-links">
+    <li><a href="#s1">§1 Intro</a></li>
+    <li><a href="#s2">§2 Formal Model</a></li>
+    <li><a href="#s3">§3 Implementation</a></li>
+    <li><a href="#s4">§4 Evaluation</a></li>
+    <li><a href="#s5">§5 Applications</a></li>
+    <li><a href="/static/realistic.pdf" target="_blank">Paper ↗</a></li>
+  </ul>
+  <button class="nav-burger" id="burger" aria-label="menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<ul class="nav-drawer" id="drawer">
+  <li><a href="#s1">§1 Introduction</a></li>
+  <li><a href="#s2">§2 Formal Model</a></li>
+  <li><a href="#s3">§3 Implementation</a></li>
+  <li><a href="#s4">§4 Evaluation</a></li>
+  <li><a href="#s5">§5 Applications</a></li>
+  <li><a href="#s6">§6 Discussion</a></li>
+  <li><a href="#s7">§7 Related Work</a></li>
+  <li><a href="/static/realistic.pdf" target="_blank">Paper ↗</a></li>
+</ul>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Research Paper · January 2025</div>
+    <h1 class="hero-title">The <span>Realistic</span> Type</h1>
+    <p class="hero-subtitle">Implementing Three-Valued Logic in the Matyos Programming Language</p>
+    <div class="hero-tagline">
+      "<span id="typewriter"></span>"
+    </div>
+    <div class="hero-meta">
+      <strong>Ahmed Hafdi</strong> &nbsp;·&nbsp; Matyos Language Project &nbsp;·&nbsp; January 2025
+    </div>
+    <div class="abstract-box">
+      <div class="label">Abstract</div>
+      <p>
+        This paper introduces <em>realistic</em>, a novel type in the Matyos programming language that implements
+        Kleene's three-valued logic (K3). The type extends classical Boolean logic by adding a third truth value
+        \(\odot\) (realistic), representing uncertain, unknown, or partially-true states. We present the formal
+        model based on the truth domain \(\mathbb{B}_3 = \{\top, \bot, \odot\}\), define truth tables for all
+        three-valued logical operations, and describe the implementation architecture within Matyos —
+        including the lexer extension, three-valued operator semantics, and runtime evaluation. Benchmarks
+        show an average overhead of 38% over classical Boolean operations. Advanced application domains
+        including paradox resolution, weather modelling, quantum computing simulation, and AI uncertainty
+        handling are discussed.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- §1 INTRODUCTION -->
+<section id="s1">
+  <div class="container">
+    <h2 class="section-num reveal">§ 01</h2>
+    <h2 class="section-title reveal">Introduction</h2>
+    <p class="reveal">
+      Classical Boolean logic, with its binary truth domain \(\mathbb{B}_2 = \{\top, \bot\}\), has been the
+      foundation of programming languages since their inception. Yet real-world reasoning is rarely so clean:
+      uncertainty, partial information, and genuine unknowns permeate every domain from medicine to finance
+      to scientific modelling.
+    </p>
+    <p class="reveal">
+      Three-valued logic systems — most notably Kleene's K3 — extend the classical framework by introducing
+      a third truth value to represent exactly this indeterminacy. Proposed independently by Łukasiewicz and
+      Kleene in the mid-20th century, these systems have found application in database null semantics
+      (SQL's <code>UNKNOWN</code>), hardware circuit design, and formal verification.
+    </p>
+    <p class="reveal">
+      This paper presents <strong>realistic</strong>, the implementation of Kleene K3 as a native type in
+      the Matyos programming language. The key contributions are:
+    </p>
+    <div class="card reveal reveal-delay-1">
+      <div class="card-label">Contribution 1 — Formal Model</div>
+      <p>A rigorous formal model of \(\mathbb{B}_3 = \{\top, \bot, \odot\}\) with operational semantics for AND, OR, and NOT.</p>
+    </div>
+    <div class="card reveal reveal-delay-2">
+      <div class="card-label">Contribution 2 — Language Implementation</div>
+      <p>A complete implementation within Matyos: lexer tokens, type system extension, and runtime operator evaluation.</p>
+    </div>
+    <div class="card reveal reveal-delay-3">
+      <div class="card-label">Contribution 3 — Empirical Evaluation</div>
+      <p>Benchmark measurements of overhead vs. classical Boolean operations: AND +33%, OR +35%, NOT +47%.</p>
+    </div>
+    <div class="card reveal reveal-delay-4">
+      <div class="card-label">Contribution 4 — Applications</div>
+      <p>Case studies demonstrating realistic in paradox resolution, weather prediction, quantum simulation, and AI reasoning.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §2 FORMAL MODEL -->
+<section id="s2">
+  <div class="container">
+    <h2 class="section-num reveal">§ 02</h2>
+    <h2 class="section-title reveal">Formal Model of Three-Valued Logic</h2>
+
+    <p class="reveal">
+      The foundation of the <em>realistic</em> type is Kleene's strong three-valued logic, which extends
+      the classical Boolean domain to three truth values.
+    </p>
+
+    <h3 class="subsec reveal">2.1 The Truth Domain</h3>
+    <div class="math-block reveal">
+      <div class="math-label">Definition 1 — Three-Valued Truth Domain</div>
+      \[
+        \mathbb{B}_3 \;=\; \{\,\top,\; \bot,\; \odot\,\}
+      \]
+      where \(\top\) denotes <em>true</em>, \(\bot\) denotes <em>false</em>, and \(\odot\) denotes
+      <em>realistic</em> — an indeterminate, unknown, or partially-true value.
+    </div>
+
+    <!-- Animated B3 visualization -->
+    <div class="reveal">
+      <svg class="svg-stage" id="b3-svg" viewBox="0 0 600 120">
+        <!-- truth value circles -->
+        <circle id="b3-t" cx="100" cy="60" r="36" fill="none" stroke="#e8e8e8" stroke-width="2"/>
+        <circle id="b3-r" cx="300" cy="60" r="36" fill="none" stroke="#e8e8e8" stroke-width="2"/>
+        <circle id="b3-f" cx="500" cy="60" r="36" fill="none" stroke="#e8e8e8" stroke-width="2"/>
+        <!-- labels -->
+        <text x="100" y="55" text-anchor="middle" font-family="'EB Garamond', serif" font-size="22" fill="#888">⊤</text>
+        <text x="100" y="76" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bbb">TRUE</text>
+        <text x="300" y="55" text-anchor="middle" font-family="'EB Garamond', serif" font-size="22" fill="#888">⊙</text>
+        <text x="300" y="76" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bbb">REALISTIC</text>
+        <text x="500" y="55" text-anchor="middle" font-family="'EB Garamond', serif" font-size="22" fill="#888">⊥</text>
+        <text x="500" y="76" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bbb">FALSE</text>
+        <!-- connector lines -->
+        <line id="b3-l1" x1="136" y1="60" x2="264" y2="60" stroke="#e8e8e8" stroke-width="1" stroke-dasharray="4,4"/>
+        <line id="b3-l2" x1="336" y1="60" x2="464" y2="60" stroke="#e8e8e8" stroke-width="1" stroke-dasharray="4,4"/>
+      </svg>
+    </div>
+
+    <h3 class="subsec reveal">2.2 Three-Valued Operations</h3>
+    <p class="reveal">
+      We define three logical connectives over \(\mathbb{B}_3\). The key property of Kleene's strong logic
+      is that \(\odot\) "propagates" uncertainty: the result is indeterminate whenever the output depends
+      on the unknown input.
+    </p>
+
+    <!-- Truth tables -->
+    <div class="truth-table-wrap reveal">
+      <table class="truth-table">
+        <thead>
+          <tr>
+            <th>\(a\)</th>
+            <th>\(b\)</th>
+            <th>\(a \wedge b\)</th>
+            <th>\(a \vee b\)</th>
+            <th>\(\neg a\)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>⊤</td><td>⊤</td><td class="val-t">⊤</td><td class="val-t">⊤</td><td class="val-f">⊥</td></tr>
+          <tr><td>⊤</td><td>⊙</td><td class="val-r">⊙</td><td class="val-t">⊤</td><td class="val-f">⊥</td></tr>
+          <tr><td>⊤</td><td>⊥</td><td class="val-f">⊥</td><td class="val-t">⊤</td><td class="val-f">⊥</td></tr>
+          <tr><td>⊙</td><td>⊤</td><td class="val-r">⊙</td><td class="val-t">⊤</td><td class="val-r">⊙</td></tr>
+          <tr><td>⊙</td><td>⊙</td><td class="val-r">⊙</td><td class="val-r">⊙</td><td class="val-r">⊙</td></tr>
+          <tr><td>⊙</td><td>⊥</td><td class="val-f">⊥</td><td class="val-r">⊙</td><td class="val-r">⊙</td></tr>
+          <tr><td>⊥</td><td>⊤</td><td class="val-f">⊥</td><td class="val-t">⊤</td><td class="val-t">⊤</td></tr>
+          <tr><td>⊥</td><td>⊙</td><td class="val-f">⊥</td><td class="val-r">⊙</td><td class="val-t">⊤</td></tr>
+          <tr><td>⊥</td><td>⊥</td><td class="val-f">⊥</td><td class="val-f">⊥</td><td class="val-t">⊤</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Formal Definition — AND</div>
+      \[
+        a \wedge b = \begin{cases}
+          \top & \text{if } a = \top \text{ and } b = \top \\
+          \bot & \text{if } a = \bot \text{ or } b = \bot \\
+          \odot & \text{otherwise}
+        \end{cases}
+      \]
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Formal Definition — OR</div>
+      \[
+        a \vee b = \begin{cases}
+          \bot & \text{if } a = \bot \text{ and } b = \bot \\
+          \top & \text{if } a = \top \text{ or } b = \top \\
+          \odot & \text{otherwise}
+        \end{cases}
+      \]
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Formal Definition — NOT</div>
+      \[
+        \neg a = \begin{cases}
+          \bot & \text{if } a = \top \\
+          \top & \text{if } a = \bot \\
+          \odot & \text{if } a = \odot
+        \end{cases}
+      \]
+    </div>
+  </div>
+</section>
+
+<!-- §3 IMPLEMENTATION -->
+<section id="s3">
+  <div class="container">
+    <h2 class="section-num reveal">§ 03</h2>
+    <h2 class="section-title reveal">Implementation in Matyos</h2>
+    <p class="reveal">
+      The Matyos language is extended with the <code>realistic</code> keyword and type. The implementation
+      touches three layers: the lexer, the type system, and the runtime evaluator.
+    </p>
+
+    <h3 class="subsec reveal">3.1 Lexer Extension</h3>
+    <p class="reveal">
+      Three new tokens are added to the Matyos lexer: <code>realistic</code> (type keyword),
+      <code>yes</code> (\(\top\)), <code>no</code> (\(\bot\)), and <code>maybe</code> (\(\odot\)).
+    </p>
+
+    <div class="code-block reveal">
+      <pre><span class="cm">// Matyos lexer — new tokens for the realistic type</span>
+<span class="kw">token</span> <span class="ty">REALISTIC_TYPE</span>  <span class="st">"realistic"</span>
+<span class="kw">token</span> <span class="ty">REALISTIC_TRUE</span>  <span class="st">"yes"</span>     <span class="cm">// ⊤</span>
+<span class="kw">token</span> <span class="ty">REALISTIC_FALSE</span> <span class="st">"no"</span>      <span class="cm">// ⊥</span>
+<span class="kw">token</span> <span class="ty">REALISTIC_UNK</span>   <span class="st">"maybe"</span>   <span class="cm">// ⊙</span></pre>
+    </div>
+
+    <h3 class="subsec reveal">3.2 Type Declaration</h3>
+    <p class="reveal">
+      A <code>realistic</code> variable is declared analogously to a <code>bool</code>:
+    </p>
+
+    <div class="code-block reveal">
+      <pre><span class="cm">// Classical Boolean</span>
+<span class="ty">bool</span> is_ready = <span class="kw">true</span>;
+
+<span class="cm">// Three-valued realistic</span>
+<span class="ty">realistic</span> is_ready = <span class="kw">maybe</span>;   <span class="cm">// unknown at this point</span>
+<span class="ty">realistic</span> has_data = <span class="kw">yes</span>;
+<span class="ty">realistic</span> is_error = <span class="kw">no</span>;</pre>
+    </div>
+
+    <h3 class="subsec reveal">3.3 Operator Evaluation</h3>
+    <p class="reveal">
+      The runtime evaluates three-valued operators via a dispatch table. For AND, the
+      short-circuit rule is: if either operand is \(\bot\), return \(\bot\) immediately
+      (regardless of the other). For OR: if either is \(\top\), return \(\top\).
+    </p>
+
+    <div class="code-block reveal">
+      <pre><span class="cm">// AND with realistic short-circuit</span>
+<span class="ty">realistic</span> a = <span class="kw">maybe</span>;
+<span class="ty">realistic</span> b = <span class="kw">no</span>;
+<span class="ty">realistic</span> result = a <span class="kw">&&</span> b;   <span class="cm">// → no  (short-circuit on ⊥)</span>
+
+<span class="cm">// OR propagates uncertainty</span>
+<span class="ty">realistic</span> x = <span class="kw">maybe</span>;
+<span class="ty">realistic</span> y = <span class="kw">maybe</span>;
+<span class="ty">realistic</span> z = x <span class="kw">||</span> y;       <span class="cm">// → maybe (⊙ ∨ ⊙ = ⊙)</span>
+
+<span class="cm">// Conditional on realistic value</span>
+<span class="kw">if</span> (result == <span class="kw">yes</span>) { … }
+<span class="kw">else if</span> (result == <span class="kw">maybe</span>) { … }   <span class="cm">// handle uncertainty</span>
+<span class="kw">else</span> { … }</pre>
+    </div>
+  </div>
+</section>
+
+<!-- §4 EVALUATION -->
+<section id="s4">
+  <div class="container">
+    <h2 class="section-num reveal">§ 04</h2>
+    <h2 class="section-title reveal">Evaluation &amp; Performance</h2>
+    <p class="reveal">
+      We benchmark realistic operations against their classical Boolean counterparts across
+      10,000 iterations per operation. All tests run on a single core at fixed clock speed to
+      isolate operator overhead.
+    </p>
+
+    <h3 class="subsec reveal">4.1 Overhead Results</h3>
+    <div class="perf-grid reveal" id="perf-grid">
+      <div class="perf-row">
+        <span class="perf-label">AND</span>
+        <div class="perf-track"><div class="perf-fill" id="pf-and" style="width:0%" data-target="33"></div></div>
+        <span class="perf-pct">+33%</span>
+      </div>
+      <div class="perf-row">
+        <span class="perf-label">OR</span>
+        <div class="perf-track"><div class="perf-fill" id="pf-or" style="width:0%" data-target="35"></div></div>
+        <span class="perf-pct">+35%</span>
+      </div>
+      <div class="perf-row">
+        <span class="perf-label">NOT</span>
+        <div class="perf-track"><div class="perf-fill" id="pf-not" style="width:0%" data-target="47"></div></div>
+        <span class="perf-pct">+47%</span>
+      </div>
+      <div class="perf-row">
+        <span class="perf-label">Average</span>
+        <div class="perf-track"><div class="perf-fill" id="pf-avg" style="width:0%" data-target="38"></div></div>
+        <span class="perf-pct">+38%</span>
+      </div>
+    </div>
+
+    <div class="card reveal">
+      <div class="card-label">Analysis</div>
+      <p>
+        The overhead stems from the extended dispatch table (3-value lookup vs. 2-value branch) and the
+        extra comparison needed to detect \(\odot\). NOT has the highest overhead (+47%) because it cannot
+        benefit from short-circuit evaluation. The average overhead of ~38% is acceptable for domains
+        where correctness under uncertainty outweighs raw speed.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- §5 ADVANCED APPLICATIONS -->
+<section id="s5">
+  <div class="container">
+    <h2 class="section-num reveal">§ 05</h2>
+    <h2 class="section-title reveal">Advanced Applications</h2>
+    <p class="reveal">
+      The <em>realistic</em> type enables natural expression of reasoning under uncertainty across
+      several important domains.
+    </p>
+
+    <div class="app-grid">
+      <div class="app-card reveal reveal-delay-1">
+        <div class="app-card-icon">∞</div>
+        <div class="app-card-title">Paradox Resolution</div>
+        <div class="app-card-desc">
+          Classical logic collapses under statements like "This sentence is false" (the Liar paradox).
+          With <em>realistic</em>, such statements evaluate to \(\odot\) — genuinely indeterminate —
+          rather than causing inconsistency.
+        </div>
+      </div>
+      <div class="app-card reveal reveal-delay-2">
+        <div class="app-card-icon">☁</div>
+        <div class="app-card-title">Weather Forecasting</div>
+        <div class="app-card-desc">
+          Probabilistic conditions ("will it rain tomorrow?") map naturally to <code>maybe</code>,
+          allowing systems to track uncertainty without collapsing to arbitrary binary decisions
+          before sufficient evidence arrives.
+        </div>
+      </div>
+      <div class="app-card reveal reveal-delay-3">
+        <div class="app-card-icon">ψ</div>
+        <div class="app-card-title">Quantum Computing</div>
+        <div class="app-card-desc">
+          Before measurement, quantum bits are in superposition — neither definitively 0 nor 1.
+          The <em>realistic</em> type captures this pre-measurement state, making quantum circuit
+          simulation more semantically faithful.
+        </div>
+      </div>
+      <div class="app-card reveal reveal-delay-4">
+        <div class="app-card-icon">◎</div>
+        <div class="app-card-title">AI Uncertainty</div>
+        <div class="app-card-desc">
+          Inference systems that cannot confidently classify an input can return <code>maybe</code>
+          rather than a forced binary decision. This explicit uncertainty signal allows downstream
+          components to request more evidence or defer to a human.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §6 DISCUSSION -->
+<section id="s6">
+  <div class="container">
+    <h2 class="section-num reveal">§ 06</h2>
+    <h2 class="section-title reveal">Discussion</h2>
+    <p class="reveal">
+      The <em>realistic</em> type demonstrates that a modest extension to a language's type system — three
+      values instead of two — can dramatically improve expressiveness in uncertainty-heavy domains. The
+      38% average overhead is a fixed cost of the richer semantics, not an implementation artifact;
+      any correct implementation of K3 requires at least this additional branching.
+    </p>
+    <p class="reveal">
+      A key design decision was using Kleene's <em>strong</em> rather than <em>weak</em> three-valued
+      logic. In weak K3, \(\odot \wedge \bot\) would yield \(\odot\) (uncertainty dominates), but in
+      strong K3 it yields \(\bot\) — because \(\bot \wedge x = \bot\) for all \(x\). This reflects the
+      intuition that a definite false is enough to falsify a conjunction, regardless of uncertainty in
+      the other operand.
+    </p>
+    <div class="card reveal">
+      <div class="card-label">Limitation</div>
+      <p>
+        The current implementation does not support probabilistic semantics (i.e., \(\odot\) carries
+        no weight or confidence score). Future work could extend \(\mathbb{B}_3\) to a continuous
+        \([0,1]\) interval, recovering fuzzy logic as a generalization.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- §7 RELATED WORK -->
+<section id="s7">
+  <div class="container">
+    <h2 class="section-num reveal">§ 07</h2>
+    <h2 class="section-title reveal">Related Work</h2>
+    <p class="reveal">
+      Three-valued and multi-valued logics have a long history. Łukasiewicz (1920) was the first to
+      systematically study three-valued logic \(L_3\), motivated by future contingents. Kleene (1938)
+      independently developed K3 in the context of partial recursive functions — where \(\odot\)
+      represents "undefined."
+    </p>
+    <p class="reveal">
+      SQL databases have implemented a form of three-valued logic since SQL-86, with <code>NULL</code>
+      producing <code>UNKNOWN</code> in comparisons. However, SQL's NULL semantics are notoriously
+      inconsistent — <code>NULL = NULL</code> yields <code>UNKNOWN</code> rather than <code>TRUE</code>
+      — a departure from classical K3.
+    </p>
+    <p class="reveal">
+      In type theory, optional types (<code>Maybe</code> in Haskell, <code>Option</code> in Rust)
+      address <em>absence</em> of a value but do not natively express logical indeterminacy as a
+      first-class Boolean value. The <em>realistic</em> type fills precisely this gap.
+    </p>
+  </div>
+</section>
+
+<!-- §8 CONCLUSION -->
+<section id="s8">
+  <div class="container">
+    <h2 class="section-num reveal">§ 08</h2>
+    <h2 class="section-title reveal">Conclusion</h2>
+    <p class="reveal">
+      We have presented the <em>realistic</em> type: a native implementation of Kleene's strong
+      three-valued logic in the Matyos programming language. The type provides a clean, first-class
+      representation of uncertainty through the truth domain \(\mathbb{B}_3 = \{\top, \bot, \odot\}\),
+      with well-defined semantics for AND, OR, and NOT.
+    </p>
+    <p class="reveal">
+      The implementation is practical: the overhead of ~38% over classical Boolean operations is
+      acceptable for the expressiveness gained, and the <code>yes</code> / <code>no</code> /
+      <code>maybe</code> keywords integrate naturally into Matyos syntax.
+    </p>
+    <p class="reveal">
+      Future directions include extending to weighted realistic values (fuzzy logic integration),
+      implementing realistic short-circuit evaluation in all contexts, and exploring
+      type inference for propagating uncertainty through complex expressions.
+    </p>
+  </div>
+</section>
+
+<!-- PAPER EXPLORER -->
+<section id="paper-explorer">
+  <div id="pe-scroll-outer">
+    <div id="pe-sticky">
+      <div id="pe-topbar">
+        <span class="pe-title">PAPER EXPLORER — CKX 003</span>
+        <a id="pe-pdf-link" href="/static/realistic.pdf" target="_blank">Open PDF ↗</a>
+      </div>
+      <div id="pe-toc">
+        <button class="pe-tab active" data-panel="0">§0 Abstract</button>
+        <button class="pe-tab" data-panel="1">§1 Intro</button>
+        <button class="pe-tab" data-panel="2">§2 Model</button>
+        <button class="pe-tab" data-panel="3">§3 Implementation</button>
+        <button class="pe-tab" data-panel="4">§4 Evaluation</button>
+        <button class="pe-tab" data-panel="5">§5 Applications</button>
+        <button class="pe-tab" data-panel="6">§6 Discussion</button>
+        <button class="pe-tab" data-panel="7">§7 Related Work</button>
+        <button class="pe-tab" data-panel="8">§8 Conclusion</button>
+      </div>
+      <div id="pe-body">
+        <!-- PDF column -->
+        <div id="pe-pdf-col">
+          <div id="pe-canvas-wrap"><canvas id="pe-canvas"></canvas></div>
+          <div id="pe-pdf-nav">
+            <button class="pe-nav-btn" id="pe-prev">← prev</button>
+            <span id="pe-page-info">— / —</span>
+            <button class="pe-nav-btn" id="pe-next">next →</button>
+          </div>
+        </div>
+        <!-- Animation column -->
+        <div id="pe-anim-col">
+
+          <!-- Panel 0: Abstract -->
+          <div class="pe-panel active" id="pe-anim-0">
+            <div class="pe-panel-label">§0 — Abstract</div>
+            <div class="pe-panel-title">The Realistic Type</div>
+            <div class="pe-panel-body">
+              <p>A <span class="pe-highlight">novel type</span> in the Matyos language that implements Kleene's three-valued logic (K3).</p>
+              <p>Truth domain: <span class="pe-mono">𝔹₃ = {⊤, ⊥, ⊙}</span></p>
+              <div class="pe-typewriter" id="pe-tw">realistic is_ready = maybe;</div>
+              <p style="margin-top:1.2rem">Average overhead: <span class="pe-highlight">+38%</span> over classical Boolean — a reasonable cost for first-class uncertainty.</p>
+            </div>
+          </div>
+
+          <!-- Panel 1: Introduction -->
+          <div class="pe-panel" id="pe-anim-1">
+            <div class="pe-panel-label">§1 — Introduction</div>
+            <div class="pe-panel-title">Beyond True &amp; False</div>
+            <div class="pe-panel-body">
+              <p>Classical Boolean logic: <span class="pe-mono">𝔹₂ = {⊤, ⊥}</span></p>
+              <p>Real-world reasoning involves <span class="pe-highlight">uncertainty</span>, partial information, and genuine unknowns that cannot be forced into a binary.</p>
+              <p>Three-valued logics were independently developed by <span class="pe-highlight">Łukasiewicz (1920)</span> and <span class="pe-highlight">Kleene (1938)</span>.</p>
+              <p>The <em>realistic</em> type brings K3 into a modern programming language as a <span class="pe-highlight">first-class citizen</span>.</p>
+            </div>
+          </div>
+
+          <!-- Panel 2: Formal Model -->
+          <div class="pe-panel" id="pe-anim-2">
+            <div class="pe-panel-label">§2 — Formal Model</div>
+            <div class="pe-panel-title">Three Values, Three Laws</div>
+            <div class="pe-panel-body">
+              <p>Truth domain: <span class="pe-mono">𝔹₃ = {⊤, ⊥, ⊙}</span></p>
+              <table class="pe-table">
+                <thead><tr><th>a</th><th>b</th><th>a∧b</th><th>a∨b</th><th>¬a</th></tr></thead>
+                <tbody>
+                  <tr><td class="vt">⊤</td><td class="vr">⊙</td><td class="vr">⊙</td><td class="vt">⊤</td><td class="vf">⊥</td></tr>
+                  <tr><td class="vr">⊙</td><td class="vr">⊙</td><td class="vr">⊙</td><td class="vr">⊙</td><td class="vr">⊙</td></tr>
+                  <tr><td class="vf">⊥</td><td class="vr">⊙</td><td class="vf">⊥</td><td class="vr">⊙</td><td class="vt">⊤</td></tr>
+                </tbody>
+              </table>
+              <p style="margin-top:0.8rem"><span class="pe-highlight">Key insight:</span> ⊙ propagates uncertainty except when a definite value dominates (⊥ in AND, ⊤ in OR).</p>
+            </div>
+          </div>
+
+          <!-- Panel 3: Implementation -->
+          <div class="pe-panel" id="pe-anim-3">
+            <div class="pe-panel-label">§3 — Implementation</div>
+            <div class="pe-panel-title">Matyos Language Extension</div>
+            <div class="pe-panel-body">
+              <p>Three new lexer tokens:</p>
+              <p><span class="pe-mono">realistic</span> — type keyword</p>
+              <p><span class="pe-mono">yes / no / maybe</span> — ⊤ / ⊥ / ⊙ literals</p>
+              <p style="margin-top:0.8rem">Example:</p>
+              <p><span class="pe-mono">realistic x = maybe;</span></p>
+              <p><span class="pe-mono">realistic y = yes;</span></p>
+              <p><span class="pe-mono">realistic z = x && y; // → maybe</span></p>
+            </div>
+          </div>
+
+          <!-- Panel 4: Evaluation -->
+          <div class="pe-panel" id="pe-anim-4">
+            <div class="pe-panel-label">§4 — Evaluation</div>
+            <div class="pe-panel-title">Performance Overhead</div>
+            <div class="pe-panel-body">
+              <p>Overhead vs. classical Boolean (10,000 iterations):</p>
+              <div class="pe-perf">
+                <div class="pe-perf-row">
+                  <span class="pe-perf-lbl">AND</span>
+                  <div class="pe-perf-track"><div class="pe-perf-fill" style="width:33%;background:#a78bfa;"></div></div>
+                  <span class="pe-perf-pct">+33%</span>
+                </div>
+                <div class="pe-perf-row">
+                  <span class="pe-perf-lbl">OR</span>
+                  <div class="pe-perf-track"><div class="pe-perf-fill" style="width:35%;background:#a78bfa;"></div></div>
+                  <span class="pe-perf-pct">+35%</span>
+                </div>
+                <div class="pe-perf-row">
+                  <span class="pe-perf-lbl">NOT</span>
+                  <div class="pe-perf-track"><div class="pe-perf-fill" style="width:47%;background:#a78bfa;"></div></div>
+                  <span class="pe-perf-pct">+47%</span>
+                </div>
+              </div>
+              <p>Average: <span class="pe-highlight">+38%</span> — acceptable for uncertainty-aware systems.</p>
+            </div>
+          </div>
+
+          <!-- Panel 5: Applications -->
+          <div class="pe-panel" id="pe-anim-5">
+            <div class="pe-panel-label">§5 — Applications</div>
+            <div class="pe-panel-title">Where Uncertainty Lives</div>
+            <div class="pe-panel-body">
+              <p><span class="pe-highlight">∞ Paradoxes</span> — Liar paradox → ⊙ (genuinely indeterminate)</p>
+              <p><span class="pe-highlight">☁ Weather</span> — "will it rain?" → <span class="pe-mono">maybe</span> until evidence arrives</p>
+              <p><span class="pe-highlight">ψ Quantum</span> — pre-measurement qubit superposition → <span class="pe-mono">maybe</span></p>
+              <p><span class="pe-highlight">◎ AI</span> — low-confidence classification → <span class="pe-mono">maybe</span> defers to human</p>
+            </div>
+          </div>
+
+          <!-- Panel 6: Discussion -->
+          <div class="pe-panel" id="pe-anim-6">
+            <div class="pe-panel-label">§6 — Discussion</div>
+            <div class="pe-panel-title">Strong vs. Weak K3</div>
+            <div class="pe-panel-body">
+              <p><span class="pe-highlight">Kleene strong K3</span> was chosen over weak K3.</p>
+              <p>In strong K3: <span class="pe-mono">⊙ ∧ ⊥ = ⊥</span><br>In weak K3: <span class="pe-mono">⊙ ∧ ⊥ = ⊙</span></p>
+              <p style="margin-top:0.8rem">Intuition: a definite false is enough to falsify a conjunction — uncertainty in the other operand is irrelevant.</p>
+              <p style="margin-top:0.8rem"><span class="pe-highlight">Limitation:</span> ⊙ carries no weight or confidence score. Future work: extend to continuous [0,1] interval (fuzzy logic).</p>
+            </div>
+          </div>
+
+          <!-- Panel 7: Related Work -->
+          <div class="pe-panel" id="pe-anim-7">
+            <div class="pe-panel-label">§7 — Related Work</div>
+            <div class="pe-panel-title">Historical Context</div>
+            <div class="pe-panel-body">
+              <p><span class="pe-highlight">Łukasiewicz (1920)</span> — first systematic three-valued logic L₃</p>
+              <p><span class="pe-highlight">Kleene (1938)</span> — K3 in context of partial recursive functions</p>
+              <p><span class="pe-highlight">SQL (1986)</span> — NULL/UNKNOWN in comparisons (inconsistent K3)</p>
+              <p><span class="pe-highlight">Haskell Maybe / Rust Option</span> — absence of value, not logical indeterminacy</p>
+              <p style="margin-top:0.8rem">The <em>realistic</em> type is the first native K3 implementation as a first-class Boolean type in a programming language.</p>
+            </div>
+          </div>
+
+          <!-- Panel 8: Conclusion -->
+          <div class="pe-panel" id="pe-anim-8">
+            <div class="pe-panel-label">§8 — Conclusion</div>
+            <div class="pe-panel-title">A Third Way</div>
+            <div class="pe-panel-body">
+              <p>The <em>realistic</em> type provides:</p>
+              <p>✓ <span class="pe-highlight">Clean semantics</span> — Kleene strong K3, rigorously defined</p>
+              <p>✓ <span class="pe-highlight">Natural syntax</span> — <span class="pe-mono">yes / no / maybe</span> keywords</p>
+              <p>✓ <span class="pe-highlight">Practical overhead</span> — ~38% above classical Boolean</p>
+              <p>✓ <span class="pe-highlight">Broad applicability</span> — paradoxes, weather, quantum, AI</p>
+              <p style="margin-top:1.2rem; font-style:italic; color:#888;">"Not everything is true or false. Some things are simply realistic."</p>
+            </div>
+          </div>
+
+        </div><!-- /pe-anim-col -->
+      </div><!-- /pe-body -->
+    </div><!-- /pe-sticky -->
+  </div><!-- /pe-scroll-outer -->
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-refs">
+      <details>
+        <summary>References</summary>
+        <ol>
+          <li>Łukasiewicz, J. (1920). <em>On Three-Valued Logic.</em> Ruch Filozoficzny, 5, 169–171.</li>
+          <li>Kleene, S. C. (1938). <em>On Notation for Ordinal Numbers.</em> Journal of Symbolic Logic, 3(4), 150–155.</li>
+          <li>ISO/IEC 9075-2:2016. <em>SQL Part 2: Foundation (SQL/Foundation).</em> International Organization for Standardization.</li>
+          <li>Fitting, M. (1991). <em>Kleene's Three Valued Logics and Their Children.</em> Fundamenta Informaticae, 20(1–3), 113–131.</li>
+          <li>Bergmann, M. (2008). <em>An Introduction to Many-Valued and Fuzzy Logic.</em> Cambridge University Press.</li>
+        </ol>
+      </details>
+    </div>
+    <div class="footer-sig">
+      Interactive explanation of: <em>Implementing Three-Valued Logic with the 'Realistic' Type</em><br>
+      Ahmed Hafdi · Matyos Language Project · 2025
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── BURGER ─────────────────────────────────────────────────── */
+(function(){
+  const btn = document.getElementById('burger');
+  const drawer = document.getElementById('drawer');
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('open');
+    drawer.classList.toggle('open');
+  });
+})();
+
+/* ── TYPEWRITER ──────────────────────────────────────────────── */
+(function(){
+  const el = document.getElementById('typewriter');
+  const phrases = [
+    'Not everything is true or false.',
+    'Some things are simply realistic.',
+    'maybe is a first-class value.',
+    'Uncertainty deserves a type.'
+  ];
+  let pi = 0, ci = 0, deleting = false;
+  function tick() {
+    const phrase = phrases[pi];
+    if (!deleting) {
+      el.textContent = phrase.slice(0, ++ci);
+      if (ci === phrase.length) { deleting = true; setTimeout(tick, 1800); return; }
+    } else {
+      el.textContent = phrase.slice(0, --ci);
+      if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+    }
+    setTimeout(tick, deleting ? 40 : 65);
+  }
+  tick();
+})();
+
+/* ── B3 SVG ANIMATION ────────────────────────────────────────── */
+(function(){
+  const circles = ['b3-t','b3-r','b3-f'];
+  const colors = ['#1a6e2e','#92400e','#b91c1c'];
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        circles.forEach((id, i) => {
+          const c = document.getElementById(id);
+          setTimeout(() => {
+            c.setAttribute('stroke', colors[i]);
+            c.setAttribute('fill', colors[i] + '18');
+          }, i * 200);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.4 });
+  const svg = document.getElementById('b3-svg');
+  if (svg) observer.observe(svg);
+})();
+
+/* ── PERF BARS ───────────────────────────────────────────────── */
+(function(){
+  const grid = document.getElementById('perf-grid');
+  if (!grid) return;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        grid.querySelectorAll('.perf-fill').forEach(bar => {
+          const target = parseInt(bar.getAttribute('data-target'), 10);
+          bar.style.width = target + '%';
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  observer.observe(grid);
+})();
+
+/* ── SCROLL REVEAL ───────────────────────────────────────────── */
+(function(){
+  const revealEls = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => obs.observe(el));
+})();
+
+/* ── PAPER EXPLORER ──────────────────────────────────────────── */
+(function(){
+  /* Tab switching */
+  const tabs = document.querySelectorAll('.pe-tab');
+  const panels = document.querySelectorAll('.pe-panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const idx = tab.dataset.panel;
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('pe-anim-' + idx).classList.add('active');
+      const pageMap = [1, 1, 2, 2, 3, 3, 4, 4, 4];
+      const target = pageMap[parseInt(idx)] || 1;
+      if (pdfDoc && target !== currentPage) { currentPage = target; renderPage(currentPage); }
+    });
+  });
+
+  /* PDF.js */
+  let pdfDoc = null, currentPage = 1;
+  const canvas = document.getElementById('pe-canvas');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+  const pageInfo = document.getElementById('pe-page-info');
+
+  function renderPage(num) {
+    if (!pdfDoc || !ctx) return;
+    pdfDoc.getPage(num).then(page => {
+      const scale = Math.min(canvas.parentElement.clientWidth / page.getViewport({scale:1}).width, 1.5) * 0.92;
+      const vp = page.getViewport({scale});
+      canvas.width = vp.width; canvas.height = vp.height;
+      page.render({canvasContext: ctx, viewport: vp});
+      pageInfo.textContent = num + ' / ' + pdfDoc.numPages;
+    });
+  }
+
+  const pdfSrc = '/static/realistic.pdf';
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.getDocument(pdfSrc).promise.then(doc => {
+      pdfDoc = doc;
+      renderPage(currentPage);
+    });
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.onload = () => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      pdfjsLib.getDocument(pdfSrc).promise.then(doc => {
+        pdfDoc = doc;
+        renderPage(currentPage);
+      });
+    };
+    document.head.appendChild(script);
+  }
+
+  document.getElementById('pe-prev').addEventListener('click', () => {
+    if (pdfDoc && currentPage > 1) { currentPage--; renderPage(currentPage); }
+  });
+  document.getElementById('pe-next').addEventListener('click', () => {
+    if (pdfDoc && currentPage < pdfDoc.numPages) { currentPage++; renderPage(currentPage); }
+  });
+
+  /* Scroll-driven tab progression */
+  const scrollOuter = document.getElementById('pe-scroll-outer');
+  if (scrollOuter) {
+    window.addEventListener('scroll', () => {
+      const rect = scrollOuter.getBoundingClientRect();
+      const progress = -rect.top / (scrollOuter.offsetHeight - window.innerHeight);
+      if (progress < 0 || progress > 1) return;
+      const idx = Math.min(Math.floor(progress * tabs.length), tabs.length - 1);
+      if (!tabs[idx].classList.contains('active')) {
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        tabs[idx].classList.add('active');
+        panels[idx].classList.add('active');
+        const pageMap = [1, 1, 2, 2, 3, 3, 4, 4, 4];
+        const target = pageMap[idx] || 1;
+        if (pdfDoc && target !== currentPage) { currentPage = target; renderPage(currentPage); }
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
