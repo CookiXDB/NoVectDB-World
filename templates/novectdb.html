@@ -1,0 +1,2335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NoVectDB — Beyond Vector Databases</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script>
+MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root {
+  --black: #000;
+  --white: #fff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-500: #888;
+  --gray-700: #444;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --max-w: 860px;
+  --section-gap: 100px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 17px; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--white);
+  color: var(--black);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── NAV ─────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px;
+}
+.nav-back { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; }
+.nav-back:hover { color: var(--black); }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); letter-spacing: 0.01em; transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+
+/* hamburger button */
+.nav-burger {
+  display: none; flex-direction: column; justify-content: center; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px;
+}
+.nav-burger span {
+  display: block; height: 2px; background: var(--black);
+  transition: transform .3s ease, opacity .3s ease;
+}
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* mobile drawer */
+.nav-drawer {
+  display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99;
+  background: rgba(255,255,255,0.98); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  flex-direction: column; padding: 0;
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease;
+}
+.nav-drawer.open { max-height: 400px; }
+.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
+.nav-drawer a {
+  display: block; padding: 0.9rem 2rem;
+  font-size: 0.9rem; text-decoration: none; color: var(--black);
+  font-family: var(--font-sans); letter-spacing: 0.01em;
+  transition: background .15s;
+}
+.nav-drawer a:hover { background: var(--gray-50); }
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+
+section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
+section:last-of-type { border-bottom: none; }
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero {
+  padding-top: 130px; padding-bottom: 80px;
+  border-bottom: 1px solid var(--black);
+}
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem;
+}
+h1.hero-title {
+  font-family: var(--font-serif); font-size: clamp(2.8rem, 6vw, 4.4rem);
+  font-weight: 500; line-height: 1.1; letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+h1.hero-title span { font-style: italic; }
+.hero-subtitle {
+  font-size: 1.05rem; color: var(--gray-700); max-width: 620px;
+  margin-bottom: 2rem; line-height: 1.6;
+}
+.hero-tagline {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 1.3rem; letter-spacing: -0.01em;
+  border-left: 3px solid var(--black); padding-left: 1rem;
+  margin: 2rem 0;
+}
+#typewriter::after { content: '|'; animation: blink .7s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hero-meta { font-size: 0.82rem; color: var(--gray-500); font-family: var(--font-mono); margin-top: 2.5rem; }
+.hero-meta strong { color: var(--black); }
+
+.abstract-box {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  padding: 1.8rem 2rem; margin-top: 3rem; border-radius: 2px;
+}
+.abstract-box .label {
+  font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem;
+}
+.abstract-box p { font-size: 0.93rem; color: var(--gray-700); line-height: 1.75; }
+
+/* ─── HEADINGS ────────────────────────────────────────── */
+h2.section-num {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+}
+h2.section-title {
+  font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 500; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.2;
+}
+h3.subsec {
+  font-size: 1rem; font-weight: 600; letter-spacing: 0.01em;
+  margin: 2.5rem 0 0.8rem; text-transform: none;
+}
+
+p { margin-bottom: 1rem; }
+
+/* ─── SCROLL REVEAL ───────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+
+/* ─── PROBLEM CARDS ───────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+.card {
+  border: 1px solid var(--gray-200); padding: 1.8rem;
+  background: var(--white); position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%; background: var(--black);
+}
+.card-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.6rem; }
+.card-body { font-size: 0.9rem; color: var(--gray-700); line-height: 1.65; }
+
+/* ─── SVG ANIMATIONS ──────────────────────────────────── */
+.svg-stage {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  display: flex; align-items: center; justify-content: center;
+  margin: 1.5rem 0; overflow: hidden; border-radius: 2px;
+}
+
+/* concentration of measure */
+#concentration-svg circle { transition: all 1s ease; }
+
+/* draw-on-scroll path */
+.draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+.draw-path.drawn { animation: drawLine 1.5s ease forwards; }
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+/* node pulse */
+@keyframes nodePulse { 0%,100%{r:8} 50%{r:11} }
+.node-pulse { animation: nodePulse 1.5s ease-in-out infinite; }
+
+/* fade scale */
+@keyframes fadeScale { from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+.fade-scale-in { animation: fadeScale .5s ease forwards; }
+
+/* ─── GRAPH DEMO ──────────────────────────────────────── */
+.graph-container { position: relative; }
+#umbrella-svg text { font-family: var(--font-sans); }
+
+/* ─── KNOWLEDGE OBJECT ────────────────────────────────── */
+.ko-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem;
+  margin: 2rem 0;
+}
+.ko-card {
+  border: 1px solid var(--gray-200); padding: 1.4rem;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.ko-card.shown { opacity: 1; transform: none; }
+.ko-card .ko-symbol {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 2rem; font-weight: 500; margin-bottom: 0.5rem;
+}
+.ko-card .ko-label { font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+.ko-card .ko-desc { font-size: 0.85rem; color: var(--gray-700); line-height: 1.55; }
+
+/* ─── MATH BLOCK ──────────────────────────────────────── */
+.math-block {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  padding: 1.8rem 2rem; margin: 1.5rem 0; overflow-x: auto;
+  text-align: center;
+}
+.math-label {
+  font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem;
+  text-align: left;
+}
+
+/* ─── SLIDERS ─────────────────────────────────────────── */
+.slider-group { margin: 1.5rem 0; }
+.slider-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; }
+.slider-row label { font-family: var(--font-mono); font-size: 0.82rem; width: 2rem; }
+.slider-row input[type=range] { flex: 1; accent-color: var(--black); cursor: pointer; }
+.slider-row .val { font-family: var(--font-mono); font-size: 0.82rem; width: 3rem; text-align: right; }
+.slider-sum { font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray-500); margin-top: 0.3rem; }
+
+/* ─── HOMOLOGY ────────────────────────────────────────── */
+#homology-svg circle, #homology-svg line, #homology-svg polygon {
+  transition: all 0.6s ease;
+}
+
+/* barcode */
+.barcode-container { margin: 1.5rem 0; }
+.barcode-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+.barcode-dim { font-family: var(--font-mono); font-size: 0.75rem; width: 2.5rem; color: var(--gray-500); }
+.barcode-track { flex: 1; height: 6px; background: var(--gray-200); position: relative; }
+.barcode-bar {
+  position: absolute; top: 0; height: 100%; background: var(--black);
+  width: 0; transition: width 1s ease, left 0.5s ease;
+}
+
+/* ─── SHEAF ───────────────────────────────────────────── */
+.sheaf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 1.5rem 0; align-items: start; }
+.stalk-node {
+  border: 1px solid var(--black); padding: 0.8rem 1rem; text-align: center;
+  font-family: var(--font-mono); font-size: 0.8rem;
+  opacity: 0; transform: scale(0.85);
+  transition: opacity .4s ease, transform .4s ease;
+}
+.stalk-node.shown { opacity: 1; transform: none; }
+.stalk-connector { text-align: center; font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-500); margin: 0.4rem 0; }
+
+/* ─── ALGORITHM ───────────────────────────────────────── */
+.algo-box {
+  border: 1px solid var(--gray-300); background: var(--gray-50);
+  padding: 1.5rem 1.8rem; margin: 1.5rem 0;
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.9;
+}
+.algo-line { padding: 0.1rem 0.5rem; border-radius: 2px; transition: background .3s; cursor: default; }
+.algo-line.active { background: var(--black); color: var(--white); }
+.algo-line .comment { color: var(--gray-500); }
+.algo-line.active .comment { color: #aaa; }
+.algo-step-btn {
+  background: var(--black); color: var(--white); border: none;
+  padding: 0.5rem 1.4rem; font-family: var(--font-mono); font-size: 0.8rem;
+  cursor: pointer; margin-top: 1rem; letter-spacing: 0.05em;
+}
+.algo-step-btn:hover { background: var(--gray-700); }
+
+/* ─── RESULTS ─────────────────────────────────────────── */
+.results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+.results-table th {
+  text-align: left; padding: 0.6rem 1rem; border-bottom: 2px solid var(--black);
+  font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.results-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--gray-200); font-family: var(--font-mono); font-size: 0.85rem; }
+.results-table tr.highlight td { font-weight: 600; }
+.results-table tr.highlight td:first-child::after { content: ' ★'; font-size: 0.7rem; }
+
+/* bar chart */
+.bar-chart { margin: 2rem 0; }
+.bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.9rem; }
+.bar-label { font-size: 0.82rem; width: 120px; text-align: right; white-space: nowrap; }
+.bar-track { flex: 1; height: 22px; background: var(--gray-100); position: relative; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--black); width: 0; transition: width 1.2s cubic-bezier(.22,.61,.36,1); display: flex; align-items: center; justify-content: flex-end; }
+.bar-fill span { font-family: var(--font-mono); font-size: 0.72rem; color: var(--white); padding-right: 6px; white-space: nowrap; }
+.bar-row.cookix .bar-fill { background: var(--black); }
+.bar-row.other .bar-fill { background: var(--gray-500); }
+
+/* ─── ARCHITECTURE ────────────────────────────────────── */
+.arch-pipeline {
+  display: flex; flex-direction: column; gap: 0;
+  margin: 2rem 0; position: relative;
+}
+.arch-node {
+  border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem;
+  display: flex; align-items: flex-start; gap: 1.2rem;
+  opacity: 0; transform: translateX(-20px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.arch-node.shown { opacity: 1; transform: none; }
+.arch-node-num {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  background: var(--black); color: var(--white);
+  width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.arch-node-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+.arch-node-desc { font-size: 0.83rem; color: var(--gray-700); line-height: 1.55; }
+.arch-arrow {
+  text-align: center; font-family: var(--font-mono); font-size: 0.8rem;
+  color: var(--gray-400); padding: 0.3rem 0;
+}
+
+/* ─── COMPARISON TABLE ────────────────────────────────── */
+.cmp-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
+.cmp-table th { padding: 0.7rem 1rem; border-bottom: 2px solid var(--black); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.cmp-table th:first-child { text-align: left; }
+.cmp-table th:not(:first-child) { text-align: center; }
+.cmp-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--gray-200); }
+.cmp-table td:first-child { font-size: 0.85rem; }
+.cmp-table td:not(:first-child) { text-align: center; font-size: 1rem; }
+.cmp-table td.check { opacity: 0; transition: opacity .3s ease; }
+.cmp-table td.check.shown { opacity: 1; }
+.cmp-table tr:last-child td { border-bottom: none; }
+.cmp-table .col-novect { background: var(--gray-50); font-weight: 600; }
+
+/* ─── CODE ────────────────────────────────────────────── */
+pre {
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  padding: 1.2rem 1.5rem; overflow-x: auto; font-family: var(--font-mono);
+  font-size: 0.8rem; line-height: 1.75; margin: 1rem 0; border-radius: 2px;
+}
+
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--gray-100); padding: 0.1em 0.35em; }
+
+/* ─── FOOTER ──────────────────────────────────────────── */
+footer {
+  background: var(--gray-50); border-top: 1px solid var(--gray-200);
+  padding: 3rem 0;
+}
+.footer-inner { display: flex; flex-direction: column; gap: 2rem; }
+.footer-title { font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 1rem; }
+details summary {
+  cursor: pointer; font-size: 0.88rem; font-weight: 500; list-style: none;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+details summary::before { content: '+'; font-family: var(--font-mono); font-size: 1rem; }
+details[open] summary::before { content: '−'; }
+.ref-list { margin-top: 1rem; list-style: none; }
+.ref-list li { font-size: 0.82rem; color: var(--gray-700); padding: 0.3rem 0; border-bottom: 1px solid var(--gray-200); line-height: 1.5; }
+.ref-list li span { font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-500); margin-right: 0.5rem; }
+
+.footer-sig { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-500); }
+
+/* ─── 3D VIZ ──────────────────────────────────────────── */
+.viz-tabs { display:flex; gap:0; margin:1.5rem 0 0; border-bottom: 2px solid var(--black); }
+.viz-tab {
+  background: none; border: 1px solid var(--gray-200); border-bottom: none;
+  padding: 0.5rem 1.4rem; font-family: var(--font-mono); font-size: 0.8rem;
+  cursor: pointer; letter-spacing: 0.04em; margin-right: 4px;
+  transition: background .2s, color .2s;
+}
+.viz-tab.active { background: var(--black); color: var(--white); border-color: var(--black); }
+.viz-tab:hover:not(.active) { background: var(--gray-100); }
+.viz-desc { margin: 1rem 0 0; }
+#canvas-container { margin-top: 1rem; }
+#canvas-3d { touch-action: none; }
+
+/* ══════════════════════════════════════════════════════
+   PAPER EXPLORER  —  full-window scroll-driven
+   ══════════════════════════════════════════════════════ */
+#pe-scroll-outer{position:relative}
+#pe-sticky-frame{position:sticky;top:52px;height:calc(100vh - 52px);display:flex;flex-direction:column;background:#fff;border-top:1px solid var(--gray-200);overflow:hidden;z-index:10}
+#pe-toc{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--gray-200);flex-shrink:0;height:46px;background:var(--gray-50)}
+#pe-toc::-webkit-scrollbar{display:none}
+.pe-toc-item{display:flex;align-items:center;gap:.4rem;padding:0 1.1rem;height:100%;white-space:nowrap;cursor:pointer;border-right:1px solid var(--gray-200);font-size:.78rem;font-family:var(--font-sans);color:var(--gray-700);transition:background .15s,color .15s;flex-shrink:0}
+.pe-toc-item:hover{background:var(--gray-100);color:var(--black)}
+.pe-toc-item.active{background:var(--black);color:#fff}
+.pe-toc-num{font-family:var(--font-mono);font-size:.65rem;opacity:.7}
+#pe-split{flex:1;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;min-height:0}
+@media(max-width:768px){ #pe-split{ grid-template-columns:1fr } #pe-right{ display:none } }
+#pe-left{border-right:1px solid var(--gray-200);background:#f2f2f2;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;min-height:0}
+#pe-canvas-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:1.5rem}
+#pe-canvas{display:block;max-width:100%;max-height:100%;box-shadow:0 4px 32px rgba(0,0,0,.18);background:#fff}
+#pe-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f2f2f2;z-index:5;transition:opacity .3s}
+#pe-loading.hidden{opacity:0;pointer-events:none}
+.pe-spinner{width:28px;height:28px;border:2px solid var(--gray-300);border-top-color:var(--black);border-radius:50%;animation:pe-spin .8s linear infinite}
+@keyframes pe-spin{to{transform:rotate(360deg)}}
+#pe-right{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+#pe-anim-label{padding:.7rem 1.5rem;border-bottom:1px solid var(--gray-200);background:var(--gray-50);display:flex;align-items:center;gap:.5rem;font-size:.88rem;flex-shrink:0;min-height:44px}
+.pe-anim{flex:1;display:none;align-items:center;justify-content:center;overflow-y:auto;padding:2rem;min-height:0}
+.pe-anim.active{display:flex}
+.pe-anim-inner{width:100%;max-width:460px;display:flex;flex-direction:column;align-items:center;gap:1.2rem}
+#pe-nav{height:46px;border-top:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem;flex-shrink:0;background:#fff;gap:1rem}
+.pe-btn{background:none;border:1px solid var(--gray-300);font-family:var(--font-mono);font-size:.74rem;padding:.25rem .8rem;cursor:pointer;border-radius:3px;transition:background .15s;white-space:nowrap}
+.pe-btn:hover{background:var(--gray-50)}
+.pe-btn:disabled{opacity:.3;cursor:default}
+.pe-scroll-hint{font-family:var(--font-mono);font-size:.68rem;color:var(--gray-500);letter-spacing:.03em;animation:pe-pulse 2s ease-in-out infinite}
+@keyframes pe-pulse{0%,100%{opacity:.4}50%{opacity:1}}
+/* shared anim */
+@keyframes pe-word-in{to{opacity:1;transform:translateY(0)}}
+@keyframes pe-tl-in{to{opacity:1;transform:translateX(0)}}
+.pe-tagline-anim{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center}
+.pe-word{font-family:var(--font-serif);font-size:1.5rem;opacity:0;transform:translateY(10px);animation:pe-word-in .45s ease forwards;animation-delay:var(--d,0s)}
+.pe-word.accent{font-style:italic}
+.pe-pillars{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap}
+.pe-pillar{text-align:center;opacity:0;transform:translateY(14px);animation:pe-word-in .45s ease forwards;animation-delay:var(--dd,1s)}
+.pe-pillar-icon{font-family:var(--font-serif);font-size:2.2rem;line-height:1;margin-bottom:.35rem}
+.pe-pillar-lbl{font-size:.7rem;color:var(--gray-700);line-height:1.4}
+.pe-badge{font-family:var(--font-mono);font-size:.7rem;color:var(--gray-500);opacity:0;animation:pe-word-in .4s ease forwards}
+.pe-timeline{display:flex;flex-direction:column;width:100%;max-width:360px}
+.pe-tl-item{display:flex;align-items:flex-start;gap:.9rem;padding:.65rem 0;border-left:2px solid var(--gray-200);padding-left:1rem;opacity:0;transform:translateX(-10px);animation:pe-tl-in .4s ease forwards;animation-delay:var(--d,0s)}
+.pe-tl-item.highlight{border-left-color:var(--black)}
+.pe-tl-dot{width:8px;height:8px;border-radius:50%;background:var(--gray-300);margin-top:5px;flex-shrink:0}
+.pe-tl-item.highlight .pe-tl-dot{background:var(--black)}
+.pe-tl-text{font-size:.86rem}
+.pe-problem-grid{display:flex;flex-direction:column;gap:.75rem;width:100%;max-width:360px}
+.pe-prob-card{border:1px solid var(--gray-200);border-radius:4px;padding:.85rem 1rem;opacity:0;transform:translateY(12px);animation:pe-word-in .4s ease forwards;animation-delay:var(--d,0s)}
+.pe-prob-icon{font-size:1.3rem;margin-bottom:.25rem}
+.pe-prob-title{font-weight:600;font-size:.86rem;margin-bottom:.2rem}
+.pe-prob-body{font-size:.78rem;color:var(--gray-700)}
+.pe-arrow-label{text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--gray-500);opacity:0;animation:pe-word-in .4s ease forwards}
+.pe-ko-build{width:100%;max-width:380px}
+.pe-ko-eq{display:flex;align-items:baseline;gap:.3rem;flex-wrap:wrap;font-family:var(--font-serif);font-size:1.5rem;margin-bottom:1.1rem;justify-content:center}
+.pe-ko-part,.pe-ko-op{opacity:0;transform:translateY(7px);animation:pe-word-in .3s ease forwards;animation-delay:var(--d,0s)}
+.pe-ko-fields{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1rem}
+.pe-ko-field{display:flex;align-items:center;gap:.7rem;opacity:0;animation:pe-tl-in .3s ease forwards;animation-delay:var(--d,0s)}
+.pe-ko-sym{font-family:var(--font-serif);font-size:1.1rem;width:18px;flex-shrink:0}
+.pe-ko-def{font-size:.8rem;color:var(--gray-700)}
+.pe-ko-graph{display:flex;align-items:center;justify-content:center;opacity:0;animation:pe-word-in .4s ease forwards}
+.pe-ko-node{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:.85rem;line-height:1.2;text-align:center;background:#fff}
+.pe-ko-edge{height:1.5px;width:28px;background:var(--gray-300)}
+.pe-dist-anim{width:100%;max-width:380px}
+.pe-dist-formula{font-family:var(--font-serif);font-size:1rem;text-align:center;margin-bottom:1.3rem;padding:.8rem 1rem;border:1px solid var(--gray-200);border-radius:4px;opacity:0;animation:pe-word-in .4s ease forwards;animation-delay:var(--d,0s)}
+.pe-dist-bars{display:flex;flex-direction:column;gap:.65rem;margin-bottom:.8rem}
+.pe-dist-bar-row{display:flex;align-items:center;gap:.8rem;opacity:0;animation:pe-tl-in .4s ease forwards;animation-delay:var(--d,0s)}
+.pe-dist-bar-lbl{font-size:.76rem;width:120px;flex-shrink:0}
+.pe-dist-bar-track{flex:1;height:7px;background:var(--gray-100);border-radius:4px;overflow:hidden}
+.pe-dist-bar-fill{height:100%;background:var(--black);border-radius:4px;width:0;transition:width 1s ease}
+.pe-dist-bar-row.in .pe-dist-bar-fill{width:var(--w,50%)}
+.pe-dist-note{font-family:var(--font-mono);font-size:.7rem;color:var(--gray-500);text-align:center;opacity:0;animation:pe-word-in .4s ease forwards}
+.pe-hbar{opacity:0;animation:pe-word-in .5s ease forwards;animation-delay:var(--hd,0s)}
+.pe-hom-legend{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;font-size:.76rem;color:var(--gray-700)}
+.pe-sh-node,.pe-sh-stalk,.pe-sh-edge,.pe-sh-arrow,.pe-sh-label{opacity:0;animation:pe-word-in .4s ease forwards;animation-delay:var(--sd,0s)}
+.pe-algo-steps{display:flex;flex-direction:column;align-items:center;width:100%;max-width:360px}
+.pe-step{display:flex;gap:.8rem;width:100%;border:1px solid var(--gray-200);border-radius:4px;padding:.65rem .9rem;opacity:0;animation:pe-tl-in .35s ease forwards;animation-delay:var(--d,0s)}
+.pe-step.highlight{border-color:var(--black)}
+.pe-step-num{font-family:var(--font-mono);font-size:.7rem;color:var(--gray-500);padding-top:2px;flex-shrink:0}
+.pe-step-title{font-weight:600;font-size:.83rem}
+.pe-step-desc{font-size:.76rem;color:var(--gray-700);margin-top:.1rem}
+.pe-step-arrow{color:var(--gray-300);font-size:.9rem;line-height:1;align-self:center;opacity:0;animation:pe-word-in .2s ease forwards;animation-delay:var(--d,0s)}
+.pe-results-anim{width:100%;max-width:380px}
+.pe-res-title{font-family:var(--font-mono);font-size:.72rem;color:var(--gray-500);margin-bottom:.9rem;text-align:center;letter-spacing:.05em;opacity:0;animation:pe-word-in .4s ease forwards;animation-delay:var(--d,0s)}
+.pe-res-bar-group{display:flex;flex-direction:column;gap:.55rem}
+.pe-res-row{display:flex;align-items:center;gap:.6rem;opacity:0;animation:pe-tl-in .4s ease forwards;animation-delay:var(--d,0s)}
+.pe-res-lbl{font-size:.74rem;width:120px;flex-shrink:0}
+.pe-res-track{flex:1;height:20px;background:var(--gray-100);border-radius:3px;position:relative;overflow:hidden}
+.pe-res-fill{position:absolute;inset:0;height:100%;background:var(--gray-300);border-radius:3px;width:0;transition:width 1s ease}
+.pe-res-row.cookix .pe-res-fill{background:var(--black)}
+.pe-res-row.in .pe-res-fill{width:var(--tw,50%)}
+.pe-res-val{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:.7rem;color:var(--gray-700)}
+.pe-res-row.cookix .pe-res-val{color:#fff}
+.pe-res-note{text-align:center;font-size:.76rem;color:var(--gray-700);margin-top:.9rem;font-style:italic;opacity:0;animation:pe-word-in .4s ease forwards}
+.pe-arch-anim{display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px}
+.pe-arch-row{display:flex;gap:.5rem;justify-content:center;width:100%;opacity:0;animation:pe-tl-in .35s ease forwards;animation-delay:var(--d,0s)}
+.pe-arch-box{border:1px solid var(--gray-300);border-radius:4px;padding:.45rem .7rem;font-size:.75rem;text-align:center;background:#fff;flex:1}
+.pe-arch-box.input{background:var(--gray-50)}
+.pe-arch-box.output{background:var(--black);color:#fff;border-color:var(--black)}
+.pe-arch-conn{color:var(--gray-400);font-size:1rem;line-height:1;margin:.25rem 0;opacity:0;animation:pe-word-in .2s ease forwards;animation-delay:var(--d,0s)}
+.pe-conclusion-anim{width:100%;max-width:380px;display:flex;flex-direction:column;gap:.9rem}
+.pe-concl-claim{display:flex;gap:.8rem;align-items:flex-start;font-size:.86rem;opacity:0;animation:pe-tl-in .4s ease forwards;animation-delay:var(--d,0s)}
+.pe-concl-icon{font-size:1rem;flex-shrink:0;margin-top:2px}
+.pe-concl-quote{font-family:var(--font-serif);font-style:italic;font-size:.92rem;line-height:1.6;color:var(--gray-700);border-left:2px solid var(--black);padding-left:1rem;opacity:0;animation:pe-tl-in .4s ease forwards;animation-delay:var(--d,0s)}
+
+/* ─── BASE OVERFLOW FIX
+html, body { overflow-x: hidden; max-width: 100%; }
+svg { max-width: 100%; height: auto; }
+.svg-stage { overflow: hidden; width: 100%; }
+pre { overflow-x: auto; max-width: 100%; }
+table { display: block; overflow-x: auto; max-width: 100%; }
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 700px) {
+  .ko-grid { grid-template-columns: 1fr; }
+  .sheaf-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .nav-drawer { display: flex; }
+  .bar-label { width: 80px; font-size: 0.74rem; }
+  .results-table { font-size: 0.78rem; }
+  .results-table th, .results-table td { padding: 0.5rem 0.5rem; }
+  .cmp-table th, .cmp-table td { padding: 0.4rem 0.4rem; font-size: 0.74rem; }
+  h1.hero-title { font-size: 2.4rem; }
+  .algo-box { font-size: 0.72rem; padding: 1rem; }
+  .container { padding: 0 1.2rem; }
+  .hero-tagline { font-size: 1.1rem; }
+  .math-block { padding: 1.2rem 1rem; }
+  .sheaf-grid { display: block; }
+  .slider-row label { font-size: 0.75rem; }
+  #canvas-3d { height: 320px !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-logo">NoVectDB</span>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#ko">Knowledge Objects</a></li>
+    <li><a href="#distance">Distance</a></li>
+    <li><a href="#topology">Topology</a></li>
+    <li><a href="#sheaves">Sheaves</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#paper-explorer" style="font-weight:500;">Paper ↗</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<ul class="nav-drawer" id="nav-drawer">
+  <li><a href="#problem"    onclick="closeMenu()">§1 &nbsp;Problem</a></li>
+  <li><a href="#ko"         onclick="closeMenu()">§3 &nbsp;Knowledge Objects</a></li>
+  <li><a href="#distance"   onclick="closeMenu()">§4 &nbsp;Distance</a></li>
+  <li><a href="#topology"   onclick="closeMenu()">§5 &nbsp;Topology</a></li>
+  <li><a href="#sheaves"    onclick="closeMenu()">§6 &nbsp;Sheaves</a></li>
+  <li><a href="#viz3d"      onclick="closeMenu()">§3D &nbsp;3D Visualization</a></li>
+  <li><a href="#results"    onclick="closeMenu()">§8 &nbsp;Results</a></li>
+  <li><a href="#architecture" onclick="closeMenu()">§9 &nbsp;Architecture</a></li>
+  <li><a href="#paper-explorer" onclick="closeMenu()">§ Paper Explorer</a></li>
+  <li><a href="#conclusion" onclick="closeMenu()">§11 Conclusion</a></li>
+</ul>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Research Paper · February 2026</div>
+    <h1 class="hero-title">NoVect<span>DB</span></h1>
+    <p class="hero-subtitle">A Topological–Relational Paradigm for Post-Vector Data Management &mdash; CookiX Reference Implementation on Dynamic Graph Manifolds with Sheaf-Theoretic Composition</p>
+
+    <div class="hero-tagline">
+      <span id="typewriter"></span>
+    </div>
+
+    <div class="hero-meta">
+      <strong>Ahmed Hafdi</strong> &nbsp;·&nbsp; Independent Research, CookiX Project &nbsp;·&nbsp; February 2026
+    </div>
+
+    <div class="abstract-box reveal">
+      <div class="label">Abstract</div>
+      <p>Vector databases suffer from three fundamental limitations rooted in the geometry of flat Euclidean space: <strong>semantic gap</strong> (distance ≠ meaning), <strong>precision collapse</strong> (concentration of measure in high dimensions), and <strong>opacity</strong> (no interpretable retrieval path).</p>
+      <p style="margin-bottom:0">We introduce <strong>NoVectDB</strong> (<em>Not Only Vector Database</em>), a formal paradigm that augments &mdash; and, where appropriate, replaces &mdash; vector similarity with typed relational edges, persistent homology signatures, and sheaf-theoretic composition rules. The reference engine <strong>CookiX</strong> demonstrates a <strong>2.4× precision improvement</strong> on relational retrieval tasks over leading vector databases while maintaining sub-linear query scaling.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §1 PROBLEM -->
+<section id="problem">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 1</div>
+      <h2 class="section-title">Why Vector Databases<br/>Are Not Enough</h2>
+      <p>The dominant pattern for grounding large language models in external knowledge is Retrieval-Augmented Generation (RAG), which relies almost exclusively on vector databases: systems that embed text into \(\mathbb{R}^n\) and retrieve neighbours by Euclidean or cosine distance. Despite widespread adoption, this approach has three well-documented failure modes.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card reveal reveal-delay-1">
+        <div class="card-title">1. Concentration of Measure</div>
+        <div class="card-body">
+          <p>As the embedding dimension \(n \to \infty\), all pairwise distances converge to \(\sqrt{2}\) in probability:</p>
+          \[\Pr\!\left[\left|\|X_i - X_j\| - \sqrt{2}\right| > \varepsilon\right] \leq 2\exp\!\left(-\frac{cn\varepsilon^2}{4}\right)\]
+          <p style="margin-bottom:0">The ratio \(d_{\max}/d_{\min} \to 1\). Every document is equally distant from every other — <em>precision collapses</em>.</p>
+        </div>
+        <!-- Concentration animation -->
+        <div class="svg-stage" style="height:140px; margin-top:1rem;">
+          <svg id="concentration-svg" width="340" height="120" viewBox="0 0 340 120">
+            <text x="85" y="12" font-family="JetBrains Mono,monospace" font-size="9" fill="#888" text-anchor="middle">low-dim: spread out</text>
+            <text x="255" y="12" font-family="JetBrains Mono,monospace" font-size="9" fill="#888" text-anchor="middle">high-dim: collapsed</text>
+            <!-- Low-dim dots -->
+            <circle id="ld1" cx="50" cy="65" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <circle id="ld2" cx="100" cy="40" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <circle id="ld3" cx="85" cy="90" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <circle id="ld4" cx="125" cy="65" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <circle id="ld5" cx="60" cy="95" r="5" fill="none" stroke="#000" stroke-width="1.5"/>
+            <!-- distance lines low-dim -->
+            <line x1="50" y1="65" x2="100" y2="40" stroke="#ccc" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="85" y1="90" x2="125" y2="65" stroke="#ccc" stroke-width="1" stroke-dasharray="3,3"/>
+            <line id="divider" x1="170" y1="20" x2="170" y2="110" stroke="#e0e0e0" stroke-width="1"/>
+            <!-- High-dim: all clustered -->
+            <circle id="hd1" cx="230" cy="62" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <circle id="hd2" cx="250" cy="58" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <circle id="hd3" cx="240" cy="72" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <circle id="hd4" cx="255" cy="68" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <circle id="hd5" cx="235" cy="78" r="5" fill="none" stroke="#888" stroke-width="1.5"/>
+            <!-- equal-distance arcs hint -->
+            <circle cx="242" cy="68" r="22" fill="none" stroke="#ccc" stroke-width="1" stroke-dasharray="4,4"/>
+            <text x="242" y="108" font-family="JetBrains Mono,monospace" font-size="8" fill="#888" text-anchor="middle">all distances ≈ √2</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card reveal reveal-delay-2">
+        <div class="card-title">2. Semantic Gap</div>
+        <div class="card-body">
+          <p>For any non-symmetric, non-transitive relation \(\rho\), a semantic gap exists: no single metric can faithfully represent it. A metric space is always symmetric (\(d(a,b)=d(b,a)\)) and obeys the triangle inequality — but knowledge relations are not.</p>
+          <p>The verb <em>"prevents"</em> is directed and cannot be encoded by any inner product or \(\ell_p\) norm.</p>
+        </div>
+        <div class="svg-stage" style="height:110px; margin-top:1rem;">
+          <svg width="340" height="95" viewBox="0 0 340 95">
+            <!-- Vector space side -->
+            <text x="75" y="12" font-family="JetBrains Mono,monospace" font-size="9" fill="#888" text-anchor="middle">vector space</text>
+            <circle cx="40" cy="55" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+            <text x="40" y="75" font-family="Inter,sans-serif" font-size="9" fill="#555" text-anchor="middle">umbrella</text>
+            <circle cx="120" cy="55" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+            <text x="120" y="75" font-family="Inter,sans-serif" font-size="9" fill="#555" text-anchor="middle">coat</text>
+            <line x1="46" y1="55" x2="114" y2="55" stroke="#ccc" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="80" y="47" font-family="JetBrains Mono,monospace" font-size="8" fill="#888" text-anchor="middle">0.84 ≈ 0.81</text>
+            <text x="75" y="88" font-family="JetBrains Mono,monospace" font-size="8" fill="#aaa" text-anchor="middle">distance ≠ relation</text>
+            <line x1="170" y1="10" x2="170" y2="90" stroke="#e0e0e0" stroke-width="1"/>
+            <!-- Graph side -->
+            <text x="260" y="12" font-family="JetBrains Mono,monospace" font-size="9" fill="#888" text-anchor="middle">knowledge graph</text>
+            <circle cx="205" cy="55" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+            <text x="205" y="75" font-family="Inter,sans-serif" font-size="9" fill="#000" text-anchor="middle">umbrella</text>
+            <circle cx="315" cy="55" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+            <text x="315" y="75" font-family="Inter,sans-serif" font-size="9" fill="#000" text-anchor="middle">rain</text>
+            <defs><marker id="arr1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#000"/></marker></defs>
+            <line x1="211" y1="55" x2="307" y2="55" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+            <text x="260" y="47" font-family="JetBrains Mono,monospace" font-size="8" fill="#000" text-anchor="middle">prevents →</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card reveal reveal-delay-3">
+        <div class="card-title">3. Retrieval Opacity</div>
+        <div class="card-body">
+          <p>Vector retrieval returns a scalar distance. There is no path, no justification, no typed connection. When a RAG system answers incorrectly, diagnosing why a particular chunk was retrieved is intractable — one can only inspect floating-point inner products.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);margin-bottom:0.4rem;">VECTOR RESPONSE</div>
+            <pre style="font-size:0.75rem;margin:0;padding:0.8rem">score: 0.872
+chunk_id: 4f2a…
+<span style="color:#aaa">// why? unknown</span></pre>
+          </div>
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);margin-bottom:0.4rem;">NOVECTDB RESPONSE</div>
+            <pre style="font-size:0.75rem;margin:0;padding:0.8rem">umbrella
+  →[prevents] rain
+  →[wets] coat
+path_score: 0.97</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §2 UMBRELLA PROBLEM -->
+<section id="umbrella">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 2</div>
+      <h2 class="section-title">The Umbrella Problem</h2>
+      <p>Five concepts: <em>raincoat, rain, water, umbrella, storm</em>. A sentence-transformer maps them to nearby points in \(\mathbb{R}^n\) — all with similar cosine distance to the query <em>"What prevents the coat from getting wet?"</em></p>
+      <p>The correct answer — <strong>umbrella</strong> — requires understanding a directed causal chain. No inner product can encode the verb <em>prevents</em>.</p>
+    </div>
+
+    <div class="svg-stage reveal" style="height:280px;" id="umbrella-stage">
+      <svg id="umbrella-svg" width="100%" height="260" viewBox="0 0 740 260" preserveAspectRatio="xMidYMid meet" style="max-width:740px;">
+        <defs>
+          <marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L7,3.5 z" fill="#000"/>
+          </marker>
+          <marker id="arr-gray" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L7,3.5 z" fill="#bbb"/>
+          </marker>
+          <marker id="arr-red" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L0,7 L7,3.5 z" fill="#000"/>
+          </marker>
+        </defs>
+
+        <!-- Nodes -->
+        <g id="node-umbrella" opacity="0">
+          <circle cx="370" cy="80" r="28" fill="#000" stroke="#000" stroke-width="1.5"/>
+          <text x="370" y="84" font-size="12" fill="#fff" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">umbrella</text>
+        </g>
+        <g id="node-rain" opacity="0">
+          <circle cx="560" cy="80" r="22" fill="none" stroke="#000" stroke-width="1.5"/>
+          <text x="560" y="84" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif">rain</text>
+        </g>
+        <g id="node-coat" opacity="0">
+          <circle cx="560" cy="190" r="22" fill="none" stroke="#000" stroke-width="1.5"/>
+          <text x="560" y="194" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif">raincoat</text>
+        </g>
+        <g id="node-water" opacity="0">
+          <circle cx="200" cy="80" r="22" fill="none" stroke="#000" stroke-width="1.5"/>
+          <text x="200" y="84" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif">water</text>
+        </g>
+        <g id="node-storm" opacity="0">
+          <circle cx="200" cy="190" r="22" fill="none" stroke="#000" stroke-width="1.5"/>
+          <text x="200" y="194" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif">storm</text>
+        </g>
+
+        <!-- Edges - drawn animated -->
+        <!-- umbrella → rain: prevents -->
+        <line id="e-prevents" x1="398" y1="80" x2="536" y2="80" stroke="#000" stroke-width="1.5" marker-end="url(#arr)" class="draw-path"/>
+        <text id="el-prevents" x="467" y="70" font-size="9" fill="#000" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">prevents</text>
+
+        <!-- rain → coat: leads_to -->
+        <line id="e-wets" x1="560" y1="103" x2="560" y2="166" stroke="#000" stroke-width="1.5" marker-end="url(#arr)" class="draw-path"/>
+        <text id="el-wets" x="578" y="140" font-size="9" fill="#000" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">wets</text>
+
+        <!-- water → rain -->
+        <line id="e-causes1" x1="222" y1="80" x2="346" y2="80" stroke="#bbb" stroke-width="1.5" marker-end="url(#arr-gray)" class="draw-path"/>
+        <text id="el-causes1" x="284" y="70" font-size="9" fill="#bbb" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">is_a</text>
+
+        <!-- storm → rain -->
+        <line id="e-causes2" x1="215" y1="175" x2="350" y2="96" stroke="#bbb" stroke-width="1.5" marker-end="url(#arr-gray)" class="draw-path"/>
+        <text id="el-causes2" x="277" y="148" font-size="9" fill="#bbb" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">causes</text>
+
+        <!-- Query path highlight -->
+        <text id="query-label" x="370" y="240" font-size="11" fill="#000" text-anchor="middle" font-family="Inter,sans-serif" opacity="0" font-style="italic">Query: "What prevents the coat from getting wet?"</text>
+        <text id="answer-label" x="370" y="256" font-size="10" fill="#000" text-anchor="middle" font-family="JetBrains Mono,monospace" opacity="0">→ answer: umbrella (via typed edge traversal)</text>
+      </svg>
+    </div>
+    <p class="reveal" style="font-size:0.88rem;color:var(--gray-700);margin-top:0.5rem;">
+      The black node (umbrella) is identified by deterministic typed-edge traversal — not proximity. Vector retrieval cannot distinguish this causal chain from irrelevant neighbours with similar embeddings.
+    </p>
+  </div>
+</section>
+
+<!-- §3 KNOWLEDGE OBJECTS -->
+<section id="ko">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 3</div>
+      <h2 class="section-title">The Knowledge Object</h2>
+      <p>The atomic unit of NoVectDB storage is the <strong>Knowledge Object</strong> — a quadruple that captures every dimension of meaning:</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 3.1</div>
+      \[\mathcal{K} = (V,\, E,\, T,\, S)\]
+    </div>
+
+    <div class="ko-grid" id="ko-grid">
+      <div class="ko-card">
+        <div class="ko-symbol">V</div>
+        <div class="ko-label">Embedding Vector</div>
+        <div class="ko-desc">An optional vector \(V \in \mathbb{R}^n\) — a legacy embedding or content signature. The vector component is <em>optional</em>, making NoVectDB strictly more general than vector databases. Pure topological–relational storage is a valid configuration.</div>
+      </div>
+      <div class="ko-card">
+        <div class="ko-symbol">E</div>
+        <div class="ko-label">Relational Edges</div>
+        <div class="ko-desc">A set \(E = \{(r_i, \mathcal{K}_i, w_i)\}\) of typed, directed, weighted edges. Relation types \(r_i \in \mathcal{R}\) come from a controlled vocabulary: <code>causes</code>, <code>is_a</code>, <code>part_of</code>, <code>prevents</code>, <code>contradicts</code>, <code>example_of</code>…</div>
+      </div>
+      <div class="ko-card">
+        <div class="ko-symbol">T</div>
+        <div class="ko-label">Topological Signature</div>
+        <div class="ko-desc">A vector \(T \in \mathbb{R}^m\) derived from persistent homology of the local neighbourhood. It captures the <em>shape</em> of how this concept relates to its context — stable under small graph perturbations.</div>
+      </div>
+      <div class="ko-card">
+        <div class="ko-symbol">S</div>
+        <div class="ko-label">Sheaf Section</div>
+        <div class="ko-desc">A functor \(S: \mathrm{Star}(\mathcal{K}) \to \mathbf{Vect}\) assigning a linear transformation to each edge — defining how this object's <em>meaning transforms</em> in the context of adjacent objects. Enables compositional, global-consistent retrieval.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §4 DISTANCE METRIC -->
+<section id="distance">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 4</div>
+      <h2 class="section-title">The NoVectDB<br/>Composite Distance</h2>
+      <p>For two Knowledge Objects \(\mathcal{K}_a, \mathcal{K}_b\) in the Dynamic Graph Manifold \(\mathcal{M}\), the composite distance blends three orthogonal signals:</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 3.4 — NoVectDB Composite Distance</div>
+      \[d_{\text{NoVectDB}}(\mathcal{K}_a, \mathcal{K}_b) = \alpha \cdot d_{\text{geo}}(a,b) + \beta \cdot \bigl(1 - \mathrm{TVS}(T_a, T_b)\bigr) + \gamma \cdot \|S_a \circ_\pi S_b\|\]
+    </div>
+
+    <div class="reveal">
+      <h3 class="subsec">The three components</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">\(\alpha \cdot d_{\text{geo}}(a,b)\) — Graph Geodesic</div>
+          <div class="card-body">Minimum-weight path in the typed relation graph \(G\). Captures structural proximity in the knowledge network.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">\(\beta \cdot (1 - \mathrm{TVS})\) — Topological Similarity</div>
+          <div class="card-body">\(\mathrm{TVS}(T_a,T_b) = \exp(-\lambda \cdot W_2(\mathrm{Dgm}_a, \mathrm{Dgm}_b))\) — the 2-Wasserstein distance between persistence diagrams. Captures <em>shape similarity</em> of local neighbourhoods.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">\(\gamma \cdot \|S_a \circ_\pi S_b\|\) — Sheaf Residual</div>
+          <div class="card-body">Measures how consistently the objects' contexts compose along path \(\pi\). Low residual = highly compatible semantics.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Adjust the mixing coefficients</h3>
+      <p style="font-size:0.88rem;color:var(--gray-700)">The coefficients must satisfy \(\alpha + \beta + \gamma = 1\). Drag any slider — the others auto-adjust.</p>
+      <div class="slider-group" id="slider-group">
+        <div class="slider-row">
+          <label>\(\alpha\)</label>
+          <input type="range" id="sl-alpha" min="0" max="100" value="40" oninput="adjustSliders('alpha')"/>
+          <span class="val" id="val-alpha">0.40</span>
+          <span style="font-size:0.78rem;color:var(--gray-500);margin-left:0.5rem">geo</span>
+        </div>
+        <div class="slider-row">
+          <label>\(\beta\)</label>
+          <input type="range" id="sl-beta" min="0" max="100" value="35" oninput="adjustSliders('beta')"/>
+          <span class="val" id="val-beta">0.35</span>
+          <span style="font-size:0.78rem;color:var(--gray-500);margin-left:0.5rem">topo</span>
+        </div>
+        <div class="slider-row">
+          <label>\(\gamma\)</label>
+          <input type="range" id="sl-gamma" min="0" max="100" value="25" oninput="adjustSliders('gamma')"/>
+          <span class="val" id="val-gamma">0.25</span>
+          <span style="font-size:0.78rem;color:var(--gray-500);margin-left:0.5rem">sheaf</span>
+        </div>
+        <div class="slider-sum" id="slider-sum">α + β + γ = 1.00 ✓</div>
+      </div>
+    </div>
+
+    <div class="reveal math-block" style="margin-top:1.5rem;">
+      <div class="math-label">Theorem 3.5 — Quasi-metric</div>
+      <p style="font-size:0.88rem;text-align:left;">(\(\mathcal{K},\, d_{\text{NoVectDB}}\)) is a quasi-metric space: \(d(K_a,K_a)=0\), \(d(K_a,K_b)\geq 0\), and the triangle inequality holds up to a bounded sheaf consistency error \(\varepsilon\). When the sheaf is globally consistent, \(\varepsilon = 0\) and the space is a true metric space.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §5 PERSISTENT HOMOLOGY -->
+<section id="topology">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 5</div>
+      <h2 class="section-title">Persistent Homology<br/>Signatures</h2>
+      <p>Persistent homology studies the <em>shape</em> of data across multiple scales. Given a filtration of simplicial complexes built from the local neighbourhood graph, it tracks which topological features (connected components, loops, voids) are born and die as the scale parameter \(\varepsilon\) grows.</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 4.1 — Topological Signature</div>
+      \[T(\mathcal{K}) = \mathrm{Vectorise}\!\bigl(\mathrm{Barcode}(\mathrm{VR}(N_r(\mathcal{K})))\bigr) \in \mathbb{R}^m\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">where \(\mathrm{VR}\) is the Vietoris–Rips complex on the \(r\)-hop neighbourhood, and \(\mathrm{Vectorise}\) maps persistence barcodes to stable vectors via persistence landscapes.</p>
+    </div>
+
+    <h3 class="subsec reveal">Filtration Animation</h3>
+    <p class="reveal" style="font-size:0.88rem;color:var(--gray-700)">As \(\varepsilon\) grows, edges form between nearby nodes. Loops (1-cycles) appear and disappear — their <em>persistence</em> \(= (\text{birth}, \text{death})\) encodes topological structure.</p>
+
+    <div class="svg-stage reveal" style="height:200px;" id="homology-stage">
+      <svg id="homology-svg" width="400" height="180" viewBox="0 0 400 180">
+        <!-- dots -->
+        <circle id="h1" cx="80" cy="70" r="5" fill="#000"/>
+        <circle id="h2" cx="150" cy="50" r="5" fill="#000"/>
+        <circle id="h3" cx="200" cy="100" r="5" fill="#000"/>
+        <circle id="h4" cx="130" cy="130" r="5" fill="#000"/>
+        <circle id="h5" cx="70" cy="130" r="5" fill="#000"/>
+        <circle id="h6" cx="250" cy="60" r="5" fill="#000"/>
+        <circle id="h7" cx="310" cy="90" r="5" fill="#000"/>
+        <circle id="h8" cx="280" cy="140" r="5" fill="#000"/>
+        <!-- edges appear at different ε -->
+        <line id="he1" x1="80" y1="70" x2="150" y2="50" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he2" x1="150" y1="50" x2="200" y2="100" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he3" x1="200" y1="100" x2="130" y2="130" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he4" x1="130" y1="130" x2="70" y2="130" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he5" x1="70" y1="130" x2="80" y2="70" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he6" x1="250" y1="60" x2="310" y2="90" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he7" x1="310" y1="90" x2="280" y2="140" stroke="#000" stroke-width="1" opacity="0"/>
+        <line id="he8" x1="280" y1="140" x2="250" y2="60" stroke="#000" stroke-width="1" opacity="0"/>
+        <!-- triangles -->
+        <polygon id="ht1" points="250,60 310,90 280,140" fill="#000" fill-opacity="0" stroke="none"/>
+        <!-- epsilon label -->
+        <text id="eps-label" x="200" y="170" font-family="JetBrains Mono,monospace" font-size="10" fill="#888" text-anchor="middle">ε = 0.0</text>
+      </svg>
+    </div>
+
+    <div class="barcode-container reveal" id="barcode-container">
+      <h3 class="subsec">Persistence Barcode</h3>
+      <p style="font-size:0.85rem;color:var(--gray-700);margin-bottom:1rem;">Each bar represents a topological feature: its left endpoint is when it <em>appears</em>, its right endpoint when it <em>disappears</em>. Long bars = significant topology.</p>
+      <div class="barcode-row">
+        <span class="barcode-dim">H₀</span>
+        <div class="barcode-track"><div class="barcode-bar" id="bar-h0-1" style="left:0%;background:#000"></div></div>
+        <span style="font-size:0.75rem;font-family:var(--font-mono);color:var(--gray-500)">connected components</span>
+      </div>
+      <div class="barcode-row">
+        <span class="barcode-dim">H₀</span>
+        <div class="barcode-track"><div class="barcode-bar" id="bar-h0-2" style="left:0%;background:#555"></div></div>
+      </div>
+      <div class="barcode-row">
+        <span class="barcode-dim">H₁</span>
+        <div class="barcode-track"><div class="barcode-bar" id="bar-h1-1" style="left:25%;background:#000"></div></div>
+        <span style="font-size:0.75rem;font-family:var(--font-mono);color:var(--gray-500)">1-cycles (loops)</span>
+      </div>
+      <div class="barcode-row">
+        <span class="barcode-dim">H₁</span>
+        <div class="barcode-track"><div class="barcode-bar" id="bar-h1-2" style="left:40%;background:#555"></div></div>
+      </div>
+    </div>
+
+    <div class="math-block reveal" style="margin-top:1.5rem;">
+      <div class="math-label">Proposition 4.2 — Stability</div>
+      \[\|T(\mathcal{K};\, G) - T(\mathcal{K};\, G')\|_\infty \leq C \cdot w_{\max}\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">Adding a single edge of weight \(w_{\max}\) changes the signature by at most \(C \cdot w_{\max}\). The topological signature is provably stable under small graph perturbations.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §6 SHEAF THEORY -->
+<section id="sheaves">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 6</div>
+      <h2 class="section-title">Sheaf-Theoretic<br/>Composition</h2>
+      <p>A <strong>cellular sheaf</strong> on the knowledge graph assigns a vector space (a <em>stalk</em>) to each Knowledge Object and a linear map to each relation edge. These maps encode how meaning transforms as you traverse a relation.</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 5.1 — Cellular Sheaf</div>
+      \[\mathcal{F}(v) \cong \mathbb{R}^{d_v}\quad\text{(stalk at vertex } v\text{)}\]
+      \[\mathcal{F}_{e \trianglerighteq v}: \mathcal{F}(v) \to \mathcal{F}(e)\quad\text{(restriction map on edge } e\text{)}\]
+    </div>
+
+    <div class="reveal" id="sheaf-anim-container">
+      <h3 class="subsec">Local-to-Global Consistency</h3>
+      <p style="font-size:0.88rem;color:var(--gray-700);margin-bottom:1.2rem;">The sheaf Laplacian \(\mathcal{L}_\mathcal{F} = B_\mathcal{F}^\top B_\mathcal{F}\) captures whether local sections agree globally. Its kernel encodes <em>globally consistent interpretations</em>.</p>
+      <div style="display:flex;flex-direction:column;gap:0.3rem;margin:1.5rem 0;" id="sheaf-nodes">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+          <div class="stalk-node" id="sn-1"><div style="font-size:0.65rem;color:#888;margin-bottom:2px">stalk F(umbrella)</div><div>u ∈ ℝ³</div></div>
+          <div class="stalk-node" id="sn-2"><div style="font-size:0.65rem;color:#888;margin-bottom:2px">stalk F(rain)</div><div>r ∈ ℝ³</div></div>
+          <div class="stalk-node" id="sn-3"><div style="font-size:0.65rem;color:#888;margin-bottom:2px">stalk F(coat)</div><div>c ∈ ℝ³</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:0 3rem;">
+          <div class="stalk-connector" id="sc-1">↓ F_{prevents}<br/><span style="font-size:0.7rem">restriction map</span></div>
+          <div class="stalk-connector" id="sc-2">↓ F_{wets}<br/><span style="font-size:0.7rem">restriction map</span></div>
+        </div>
+        <div style="text-align:center;">
+          <div class="stalk-node" id="sn-global" style="display:inline-block;min-width:240px;"><div style="font-size:0.65rem;color:#888;margin-bottom:2px">global section x ∈ ⊕F(v)</div><div>𝓛_F · x = 0 ⟺ globally consistent</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Theorem 5.3 — Global Consistency</div>
+      \[\mathcal{L}_\mathcal{F} \cdot x = 0 \iff \text{local sections agree on all overlapping edges}\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">\(\dim \ker(\mathcal{L}_\mathcal{F})\) equals the number of independent globally consistent interpretations. This gives NoVectDB a principled answer to the question: "Do these facts agree?"</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Compositional Retrieval — Equation 2</div>
+      \[S_\pi = \mathcal{F}_{e_k} \circ \cdots \circ \mathcal{F}_{e_1}\]
+      \[\|S_a \circ_\pi S_b\| = \|S_\pi(x_a) - x_b\|_2\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">The <em>composition residual</em> measures how well \(\mathcal{K}_a\)'s semantics arrive at \(\mathcal{K}_b\) via path \(\pi\). Small residual = high semantic compatibility along the relational chain.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §3D VISUALIZATION -->
+<section id="viz3d">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 3D</div>
+      <h2 class="section-title">Interactive 3D<br/>Visualization</h2>
+      <p>Explore the two core mathematical structures of NoVectDB in three dimensions. Drag to orbit, scroll to zoom.</p>
+    </div>
+
+    <div class="viz-tabs reveal">
+      <button class="viz-tab active" id="tab-sheaf" onclick="switchTab('sheaf')">Sheaf Structure</button>
+      <button class="viz-tab" id="tab-filtration" onclick="switchTab('filtration')">Vietoris–Rips Filtration</button>
+    </div>
+
+    <div id="viz-sheaf-desc" class="viz-desc reveal">
+      <p style="font-size:0.88rem;color:var(--gray-700);">A <strong>cellular sheaf</strong> assigns a vector space (stalk) to each Knowledge Object and a linear map (restriction) to each edge. The wireframe cube at each node represents its local semantic frame \(\mathcal{F}(v) \cong \mathbb{R}^3\). Hover a node to highlight its stalk and outgoing restriction maps.</p>
+    </div>
+    <div id="viz-filtration-desc" class="viz-desc reveal" style="display:none;">
+      <p style="font-size:0.88rem;color:var(--gray-700);">The <strong>Vietoris–Rips filtration</strong> builds a simplicial complex from a point cloud by connecting points within radius \(\varepsilon\). As \(\varepsilon\) grows, edges, triangles (2-simplices), and tetrahedra (3-simplices) appear. The persistent features that survive long encode the topological signature \(T(\mathcal{K})\).</p>
+    </div>
+
+    <div id="canvas-container" class="reveal" style="position:relative;">
+      <canvas id="canvas-3d" style="width:100%;height:500px;display:block;cursor:grab;background:#fff;border:1px solid var(--gray-200);"></canvas>
+      <!-- Filtration controls -->
+      <div id="filt-controls" style="display:none;position:absolute;bottom:16px;left:16px;right:16px;">
+        <div style="display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,0.95);padding:0.7rem 1rem;border:1px solid var(--gray-200);">
+          <label style="font-family:var(--font-mono);font-size:0.78rem;white-space:nowrap;">\(\varepsilon\)</label>
+          <input type="range" id="eps-slider" min="0" max="100" value="0" style="flex:1;accent-color:#000;"/>
+          <span id="eps-val" style="font-family:var(--font-mono);font-size:0.78rem;width:3.5rem;">0.00</span>
+          <button id="filt-play" style="background:#000;color:#fff;border:none;padding:0.3rem 0.8rem;font-family:var(--font-mono);font-size:0.75rem;cursor:pointer;white-space:nowrap;">▶ Play</button>
+        </div>
+        <div id="betti-nums" style="margin-top:0.5rem;font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-700);background:rgba(255,255,255,0.95);padding:0.5rem 1rem;border:1px solid var(--gray-200);">
+          β₀ (components): — &nbsp;|&nbsp; β₁ (loops): — &nbsp;|&nbsp; β₂ (voids): —
+        </div>
+      </div>
+      <!-- Sheaf label overlay -->
+      <div id="sheaf-label" style="display:none;position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.95);border:1px solid var(--gray-200);padding:0.6rem 0.9rem;font-family:var(--font-mono);font-size:0.78rem;max-width:220px;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- §7 QUERY PIPELINE -->
+<section id="pipeline">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 7</div>
+      <h2 class="section-title">Query Pipeline</h2>
+      <p>NoVectDB retrieval is a deterministic multi-stage process. Click <strong>Next Step</strong> to walk through Algorithm 1.</p>
+    </div>
+
+    <div class="algo-box reveal" id="algo-box">
+      <div style="font-size:0.75rem;color:#888;margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.08em;">Algorithm 1 — NoVectDB Query Pipeline</div>
+      <div class="algo-line" data-step="0"><span style="color:#888">Require:</span> Query q, graph G, sheaf F, parameters k, α, β, γ</div>
+      <div class="algo-line" data-step="1">1: I ← IntentParse(q) <span class="comment">▷ LLM slot extraction</span></div>
+      <div class="algo-line" data-step="2">2: S₀ ← DeterministicLookup(G, I) <span class="comment">▷ exact edge match</span></div>
+      <div class="algo-line" data-step="3">3: <span style="color:#888">if</span> |S₀| ≥ k <span style="color:#888">then</span></div>
+      <div class="algo-line" data-step="4">4: &nbsp;&nbsp;&nbsp;&nbsp;return RankBySheaf(S₀, F, q)</div>
+      <div class="algo-line" data-step="5">5: <span style="color:#888">end if</span></div>
+      <div class="algo-line" data-step="6">6: S₁ ← GeodesicBFS(G, I.anchor, h_max) <span class="comment">▷ type-filtered BFS</span></div>
+      <div class="algo-line" data-step="7">7: S₂ ← TopoExpand(S₁, T, β) <span class="comment">▷ topological neighbourhood</span></div>
+      <div class="algo-line" data-step="8">8: S₃ ← SheafCompose(S₂, F, γ) <span class="comment">▷ composition residual</span></div>
+      <div class="algo-line" data-step="9">9: return Rank(S₃, d_NoVectDB)[:k]</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;" class="reveal">
+      <button class="algo-step-btn" id="algo-next">Next Step →</button>
+      <button class="algo-step-btn" id="algo-reset" style="background:var(--gray-200);color:var(--black);">Reset</button>
+      <span id="algo-desc" style="font-size:0.85rem;color:var(--gray-700);font-style:italic;"></span>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Query Complexity</h3>
+      <div class="math-block">
+        \[O\!\left(|V_{\text{local}}| + |E_{\text{local}}|\log|E_{\text{local}}| + l^3\right)\]
+        <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">where \(|V_{\text{local}}|, |E_{\text{local}}|\) are the sizes of the explored subgraph and \(l\) is the landmark count for PH computation (typically \(l=50\), costing only \(\sim 1.25 \times 10^5\) operations).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §8 RESULTS -->
+<section id="results">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 8</div>
+      <h2 class="section-title">Preliminary Results</h2>
+      <p>Evaluated on 500 relational queries across three task classes over a technical document corpus (industrial pipe specifications, medical ontologies, legal case chains).</p>
+    </div>
+
+    <h3 class="subsec reveal">Precision@5 by System</h3>
+    <div class="bar-chart reveal" id="bar-chart">
+      <div class="bar-row cookix">
+        <span class="bar-label">CookiX (α=0.4)</span>
+        <div class="bar-track"><div class="bar-fill" data-width="83"><span>0.830</span></div></div>
+      </div>
+      <div class="bar-row other">
+        <span class="bar-label">GraphRAG</span>
+        <div class="bar-track"><div class="bar-fill" data-width="58.3"><span>0.583</span></div></div>
+      </div>
+      <div class="bar-row other">
+        <span class="bar-label">Pinecone</span>
+        <div class="bar-track"><div class="bar-fill" data-width="45.7"><span>0.457</span></div></div>
+      </div>
+      <div class="bar-row other">
+        <span class="bar-label">Chroma</span>
+        <div class="bar-track"><div class="bar-fill" data-width="43.7"><span>0.437</span></div></div>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Precision@5 by Task</h3>
+      <table class="results-table">
+        <thead>
+          <tr><th>System</th><th>Task A<br/><span style="font-weight:400;font-size:0.75rem">Single-hop</span></th><th>Task B<br/><span style="font-weight:400;font-size:0.75rem">Multi-hop</span></th><th>Task C<br/><span style="font-weight:400;font-size:0.75rem">Contradiction</span></th><th>Avg</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Chroma</td><td>0.72</td><td>0.31</td><td>0.28</td><td>0.437</td></tr>
+          <tr><td>Pinecone</td><td>0.74</td><td>0.33</td><td>0.30</td><td>0.457</td></tr>
+          <tr><td>GraphRAG</td><td>0.78</td><td>0.52</td><td>0.45</td><td>0.583</td></tr>
+          <tr class="highlight"><td>CookiX</td><td>0.91</td><td>0.82</td><td>0.76</td><td>0.830</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.83rem;color:var(--gray-500);font-family:var(--font-mono);">CookiX: <strong>2.4× improvement on Task B</strong> · <strong>2.6× on Task C</strong> vs vector-only baselines</p>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Query Latency (100K objects)</h3>
+      <table class="results-table">
+        <thead><tr><th>System</th><th>p₅₀ (ms)</th><th>p₉₉ (ms)</th></tr></thead>
+        <tbody>
+          <tr><td>Chroma</td><td>12</td><td>45</td></tr>
+          <tr><td>Pinecone</td><td>8</td><td>32</td></tr>
+          <tr class="highlight"><td>CookiX</td><td>18</td><td>67</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.85rem;color:var(--gray-700);">CookiX trades modest latency overhead (PH computation) for substantially higher precision. Graph traversal itself adds negligible cost.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §9 ARCHITECTURE -->
+<section id="architecture">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 9</div>
+      <h2 class="section-title">CookiX Architecture</h2>
+      <p>CookiX is the reference implementation of NoVectDB — a document-oriented topological database analogous to how MongoDB realised the NoSQL paradigm. Five core subsystems:</p>
+    </div>
+
+    <div class="arch-pipeline reveal" id="arch-pipeline">
+      <div class="arch-node" data-delay="0">
+        <div class="arch-node-num">1</div>
+        <div><div class="arch-node-title">Ingestor</div><div class="arch-node-desc">Accepts raw text, pre-computed embeddings, or structured documents. Uses a small LLM (3B-parameter instruction model) for relation extraction — identifying typed edges. Simultaneously computes persistent homology via Landmark Vietoris–Rips complex in \(O(l^3)\) time.</div></div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node" data-delay="150">
+        <div class="arch-node-num">2</div>
+        <div><div class="arch-node-title">Manifold Store</div><div class="arch-node-desc">Persistent storage for the graph \(G\), sheaf sections \(\mathcal{F}\), and metadata. Memory-mapped adjacency list (inspired by sled/redb in Rust) with type-indexed edge lookups in \(O(1)\) amortised time.</div></div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node" data-delay="300">
+        <div class="arch-node-num">3</div>
+        <div><div class="arch-node-title">TopoIndex</div><div class="arch-node-desc">Approximate nearest-neighbour index over topological signatures \(T\). Adapts the HNSW algorithm to operate on persistence diagram distances (Wasserstein) rather than Euclidean distances.</div></div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node" data-delay="450">
+        <div class="arch-node-num">4</div>
+        <div><div class="arch-node-title">Query Engine</div><div class="arch-node-desc">Implements Algorithm 1: IntentParse → DeterministicLookup → GeodesicBFS → TopoExpand → SheafCompose → Rank. Deterministic typed-edge traversal at its core.</div></div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node" data-delay="600">
+        <div class="arch-node-num">5</div>
+        <div>
+          <div class="arch-node-title">API / SDK (Python + Rust)</div>
+          <div class="arch-node-desc">MongoDB-like document interface:</div>
+          <pre style="margin-top:0.5rem;font-size:0.78rem;">db = cookix.connect("mydb")
+db.insert({"text": "...", "edges": [...]})
+results = db.query(
+    "Is A compatible with B?",
+    k=5, mode="reasoning"
+)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §10 PARADIGM COMPARISON -->
+<section id="comparison">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 10</div>
+      <h2 class="section-title">Paradigm Comparison</h2>
+      <p>How NoVectDB positions against the landscape of existing retrieval paradigms:</p>
+    </div>
+
+    <div class="reveal" style="overflow-x:auto;">
+      <table class="cmp-table" id="cmp-table">
+        <thead>
+          <tr>
+            <th style="text-align:left;">Property</th>
+            <th>VectorDB</th>
+            <th>GraphDB</th>
+            <th>GraphRAG</th>
+            <th class="col-novect">NoVectDB</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Typed relations</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check" data-val="~">partial</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Topological signature</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Sheaf composition</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Interpretable path</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check" data-val="~">partial</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Precision collapse</td>
+            <td class="check" data-val="!">yes</td>
+            <td class="check" data-val="-">N/A</td>
+            <td class="check" data-val="!">yes</td>
+            <td class="check col-novect" data-val="✓">immune</td>
+          </tr>
+          <tr>
+            <td>Multi-hop reasoning</td>
+            <td class="check" data-val="~">weak</td>
+            <td class="check" data-val="✓">strong</td>
+            <td class="check" data-val="~">medium</td>
+            <td class="check col-novect" data-val="✓">strong</td>
+          </tr>
+          <tr>
+            <td>Sub-linear ANN</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+          <tr>
+            <td>Document-oriented</td>
+            <td class="check" data-val="✓">✓</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check" data-val="×">×</td>
+            <td class="check col-novect" data-val="✓">✓</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="reveal" style="margin-top:2rem;padding:1.2rem 1.5rem;border-left:3px solid var(--black);background:var(--gray-50);">
+      <strong>Key distinction from GraphRAG:</strong> Microsoft's GraphRAG builds a graph from LLM-extracted entities but still uses <em>vector similarity</em> to traverse it. NoVectDB eliminates vector similarity at query time entirely — traversal is via deterministic typed edges and topological signatures.
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PAPER EXPLORER  —  full-window, scroll-driven
+     ══════════════════════════════════════════════════════════ -->
+<div id="pe-scroll-outer">
+  <div id="pe-sticky-frame">
+    <div id="paper-explorer">
+
+      <!-- TOC strip -->
+      <div id="pe-toc">
+        <div class="pe-toc-item active" data-section="0" onclick="peGoSection(0)"><span class="pe-toc-num">§0</span>Abstract</div>
+        <div class="pe-toc-item" data-section="1" onclick="peGoSection(1)"><span class="pe-toc-num">§1</span>Introduction</div>
+        <div class="pe-toc-item" data-section="2" onclick="peGoSection(2)"><span class="pe-toc-num">§2</span>Problem</div>
+        <div class="pe-toc-item" data-section="3" onclick="peGoSection(3)"><span class="pe-toc-num">§3</span>Knowledge Objects</div>
+        <div class="pe-toc-item" data-section="4" onclick="peGoSection(4)"><span class="pe-toc-num">§4</span>Distance</div>
+        <div class="pe-toc-item" data-section="5" onclick="peGoSection(5)"><span class="pe-toc-num">§5</span>Homology</div>
+        <div class="pe-toc-item" data-section="6" onclick="peGoSection(6)"><span class="pe-toc-num">§6</span>Sheaves</div>
+        <div class="pe-toc-item" data-section="7" onclick="peGoSection(7)"><span class="pe-toc-num">§7</span>Algorithm</div>
+        <div class="pe-toc-item" data-section="8" onclick="peGoSection(8)"><span class="pe-toc-num">§8</span>Results</div>
+        <div class="pe-toc-item" data-section="9" onclick="peGoSection(9)"><span class="pe-toc-num">§9</span>Architecture</div>
+        <div class="pe-toc-item" data-section="10" onclick="peGoSection(10)"><span class="pe-toc-num">§10</span>Conclusion</div>
+      </div>
+
+      <!-- Split: PDF | Animation -->
+      <div id="pe-split">
+
+        <!-- LEFT: PDF -->
+        <div id="pe-left">
+          <div id="pe-canvas-wrap">
+            <canvas id="pe-canvas"></canvas>
+            <div id="pe-loading">
+              <div class="pe-spinner"></div>
+              <div style="margin-top:.8rem;font-family:var(--font-mono);font-size:.75rem;color:#888">Loading PDF…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Animations -->
+        <div id="pe-right">
+          <div id="pe-anim-label">
+            <span id="pe-anim-num" style="font-family:var(--font-mono);font-size:.72rem;color:var(--gray-500)">§ 0</span>
+            <span id="pe-anim-title" style="font-weight:600">Abstract</span>
+          </div>
+
+          <!-- 0 Abstract -->
+          <div class="pe-anim active" id="pe-anim-0">
+            <div class="pe-anim-inner">
+              <div class="pe-tagline-anim">
+                <div class="pe-word" style="--d:0s">Stop</div>
+                <div class="pe-word" style="--d:.15s">measuring</div>
+                <div class="pe-word" style="--d:.3s">distances.</div>
+                <div class="pe-word accent" style="--d:.6s">Start</div>
+                <div class="pe-word accent" style="--d:.75s">understanding</div>
+                <div class="pe-word accent" style="--d:.9s">adjacency.</div>
+              </div>
+              <div class="pe-pillars">
+                <div class="pe-pillar" style="--dd:1.2s"><div class="pe-pillar-icon">𝕂</div><div class="pe-pillar-lbl">Typed<br/>Relations</div></div>
+                <div class="pe-pillar" style="--dd:1.5s"><div class="pe-pillar-icon">β</div><div class="pe-pillar-lbl">Persistent<br/>Homology</div></div>
+                <div class="pe-pillar" style="--dd:1.8s"><div class="pe-pillar-icon">ℱ</div><div class="pe-pillar-lbl">Sheaf<br/>Composition</div></div>
+              </div>
+              <div class="pe-badge" style="animation-delay:2.2s">NoVectDB · February 2026</div>
+            </div>
+          </div>
+
+          <!-- 1 Introduction -->
+          <div class="pe-anim" id="pe-anim-1">
+            <div class="pe-anim-inner">
+              <div class="pe-timeline">
+                <div class="pe-tl-item" style="--d:0s"><div class="pe-tl-dot"></div><div class="pe-tl-text"><strong>TF-IDF</strong> — Bag of words</div></div>
+                <div class="pe-tl-item" style="--d:.4s"><div class="pe-tl-dot"></div><div class="pe-tl-text"><strong>Word2Vec</strong> — Dense embeddings</div></div>
+                <div class="pe-tl-item" style="--d:.8s"><div class="pe-tl-dot"></div><div class="pe-tl-text"><strong>BERT / GPT</strong> — Contextual vectors</div></div>
+                <div class="pe-tl-item" style="--d:1.2s"><div class="pe-tl-dot"></div><div class="pe-tl-text"><strong>RAG + VectorDB</strong> — Semantic search</div></div>
+                <div class="pe-tl-item highlight" style="--d:1.8s"><div class="pe-tl-dot"></div><div class="pe-tl-text"><strong>NoVectDB</strong> — Topological relations ✦</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2 Problem -->
+          <div class="pe-anim" id="pe-anim-2">
+            <div class="pe-anim-inner">
+              <div class="pe-problem-grid">
+                <div class="pe-prob-card" style="--d:0s"><div class="pe-prob-icon">📐</div><div class="pe-prob-title">Semantic Gap</div><div class="pe-prob-body">cos(king−man+woman)≈queen — but meaning lives in <em>relations</em>, not coordinates</div></div>
+                <div class="pe-prob-card" style="--d:.35s"><div class="pe-prob-icon">🌌</div><div class="pe-prob-title">Curse of Dimensionality</div><div class="pe-prob-body">In ℝⁿ, all distances converge as n→∞ — <em>retrieval collapses</em></div></div>
+                <div class="pe-prob-card" style="--d:.7s"><div class="pe-prob-icon">🔒</div><div class="pe-prob-title">Opacity</div><div class="pe-prob-body">No interpretable path — just a ranked list of floats</div></div>
+              </div>
+              <div class="pe-arrow-label" style="animation-delay:1.2s">NoVectDB resolves all three ↓</div>
+            </div>
+          </div>
+
+          <!-- 3 Knowledge Objects -->
+          <div class="pe-anim" id="pe-anim-3">
+            <div class="pe-anim-inner">
+              <div class="pe-ko-build">
+                <div class="pe-ko-eq"><span class="pe-ko-part" style="--d:0s">𝕂</span><span class="pe-ko-op" style="--d:.3s">=</span><span class="pe-ko-part" style="--d:.5s">(A,</span><span class="pe-ko-part" style="--d:.8s">τ,</span><span class="pe-ko-part" style="--d:1.1s">κ,</span><span class="pe-ko-part" style="--d:1.4s">Σ)</span></div>
+                <div class="pe-ko-fields">
+                  <div class="pe-ko-field" style="--d:.6s"><span class="pe-ko-sym">A</span><span class="pe-ko-def">Attributes (typed key-value)</span></div>
+                  <div class="pe-ko-field" style="--d:.9s"><span class="pe-ko-sym">τ</span><span class="pe-ko-def">Type ∈ {Entity, Concept, Relation, Rule}</span></div>
+                  <div class="pe-ko-field" style="--d:1.2s"><span class="pe-ko-sym">κ</span><span class="pe-ko-def">Homology signature β=(β₀,β₁,β₂)</span></div>
+                  <div class="pe-ko-field" style="--d:1.5s"><span class="pe-ko-sym">Σ</span><span class="pe-ko-def">Sheaf stalk over open set U</span></div>
+                </div>
+                <div class="pe-ko-graph" style="animation-delay:2s">
+                  <div class="pe-ko-node">𝕂₁<br/><small>Entity</small></div>
+                  <div class="pe-ko-edge"></div>
+                  <div class="pe-ko-node">𝕂₂<br/><small>Concept</small></div>
+                  <div class="pe-ko-edge"></div>
+                  <div class="pe-ko-node">𝕂₃<br/><small>Rule</small></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Distance -->
+          <div class="pe-anim" id="pe-anim-4">
+            <div class="pe-anim-inner">
+              <div class="pe-dist-anim">
+                <div class="pe-dist-formula" style="--d:0s">d<sub>T</sub>(𝕂ᵢ,𝕂ⱼ) = α·d<sub>R</sub> + β·d<sub>H</sub> + γ·d<sub>S</sub></div>
+                <div class="pe-dist-bars">
+                  <div class="pe-dist-bar-row" style="--d:.5s;--w:70%"><span class="pe-dist-bar-lbl">d<sub>R</sub> Relational</span><div class="pe-dist-bar-track"><div class="pe-dist-bar-fill"></div></div></div>
+                  <div class="pe-dist-bar-row" style="--d:.9s;--w:45%"><span class="pe-dist-bar-lbl">d<sub>H</sub> Homological</span><div class="pe-dist-bar-track"><div class="pe-dist-bar-fill"></div></div></div>
+                  <div class="pe-dist-bar-row" style="--d:1.3s;--w:55%"><span class="pe-dist-bar-lbl">d<sub>S</sub> Sheaf</span><div class="pe-dist-bar-track"><div class="pe-dist-bar-fill"></div></div></div>
+                </div>
+                <div class="pe-dist-note" style="animation-delay:1.8s">α + β + γ = 1 &nbsp;|&nbsp; Adaptive weights per query</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 Homology -->
+          <div class="pe-anim" id="pe-anim-5">
+            <div class="pe-anim-inner">
+              <svg viewBox="0 0 400 200" width="100%" style="max-width:400px;display:block;margin:0 auto 1.2rem">
+                <line x1="30" y1="170" x2="380" y2="170" stroke="#000" stroke-width="1"/>
+                <text x="200" y="192" text-anchor="middle" font-size="11" fill="#888">filtration ε →</text>
+                <g class="pe-hbar" style="--hd:.3s"><rect x="40" y="80" width="240" height="10" fill="#000" rx="2"/><text x="34" y="89" text-anchor="end" font-size="10" fill="#444">β₀</text></g>
+                <g class="pe-hbar" style="--hd:.6s"><rect x="40" y="95" width="140" height="10" fill="#000" rx="2" opacity=".7"/></g>
+                <g class="pe-hbar" style="--hd:.9s"><rect x="40" y="110" width="80" height="10" fill="#000" rx="2" opacity=".5"/></g>
+                <g class="pe-hbar" style="--hd:1.3s"><rect x="100" y="130" width="120" height="10" fill="#555" rx="2"/><text x="94" y="139" text-anchor="end" font-size="10" fill="#444">β₁</text></g>
+                <g class="pe-hbar" style="--hd:1.6s"><rect x="160" y="145" width="60" height="10" fill="#555" rx="2" opacity=".7"/></g>
+                <g class="pe-hbar" style="--hd:1.9s"><rect x="240" y="160" width="40" height="8" fill="#999" rx="2"/><text x="234" y="167" text-anchor="end" font-size="10" fill="#444">β₂</text></g>
+              </svg>
+              <div class="pe-hom-legend"><span><b>β₀</b> Components</span><span><b>β₁</b> Loops</span><span><b>β₂</b> Voids</span></div>
+            </div>
+          </div>
+
+          <!-- 6 Sheaves -->
+          <div class="pe-anim" id="pe-anim-6">
+            <div class="pe-anim-inner">
+              <svg viewBox="0 0 400 220" width="100%" style="max-width:400px;display:block;margin:0 auto">
+                <defs><marker id="arB" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#000"/></marker></defs>
+                <g class="pe-sh-node" style="--sd:0s"><circle cx="80" cy="175" r="16" fill="none" stroke="#000" stroke-width="1.5"/><text x="80" y="180" text-anchor="middle" font-size="11">U₁</text></g>
+                <g class="pe-sh-node" style="--sd:.3s"><circle cx="200" cy="175" r="16" fill="none" stroke="#000" stroke-width="1.5"/><text x="200" y="180" text-anchor="middle" font-size="9">U₁∩U₂</text></g>
+                <g class="pe-sh-node" style="--sd:.6s"><circle cx="320" cy="175" r="16" fill="none" stroke="#000" stroke-width="1.5"/><text x="320" y="180" text-anchor="middle" font-size="11">U₂</text></g>
+                <line class="pe-sh-edge" style="--sd:.8s" x1="96" y1="175" x2="184" y2="175" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+                <line class="pe-sh-edge" style="--sd:.9s" x1="216" y1="175" x2="304" y2="175" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+                <g class="pe-sh-stalk" style="--sd:1s"><rect x="58" y="80" width="44" height="65" fill="none" stroke="#000" stroke-width="1.5" rx="3"/><text x="80" y="98" text-anchor="middle" font-size="8" fill="#555">ℱ(U₁)</text><text x="80" y="114" text-anchor="middle" font-size="11">𝕂ᵢ</text><text x="80" y="130" text-anchor="middle" font-size="11">𝕂ⱼ</text></g>
+                <g class="pe-sh-stalk" style="--sd:1.3s"><rect x="178" y="80" width="44" height="65" fill="none" stroke="#000" stroke-width="1.5" rx="3"/><text x="200" y="98" text-anchor="middle" font-size="8" fill="#555">ρ(𝕂)</text><text x="200" y="116" text-anchor="middle" font-size="9">restriction</text><text x="200" y="132" text-anchor="middle" font-size="9">maps</text></g>
+                <g class="pe-sh-stalk" style="--sd:1.6s"><rect x="298" y="80" width="44" height="65" fill="none" stroke="#000" stroke-width="1.5" rx="3"/><text x="320" y="98" text-anchor="middle" font-size="8" fill="#555">ℱ(U₂)</text><text x="320" y="114" text-anchor="middle" font-size="11">𝕂ₖ</text><text x="320" y="130" text-anchor="middle" font-size="11">𝕂ₗ</text></g>
+                <line class="pe-sh-arrow" style="--sd:1.1s" x1="80" y1="145" x2="80" y2="159" stroke="#000" stroke-width="1.5" marker-end="url(#arB)"/>
+                <line class="pe-sh-arrow" style="--sd:1.4s" x1="200" y1="145" x2="200" y2="159" stroke="#000" stroke-width="1.5" marker-end="url(#arB)"/>
+                <line class="pe-sh-arrow" style="--sd:1.7s" x1="320" y1="145" x2="320" y2="159" stroke="#000" stroke-width="1.5" marker-end="url(#arB)"/>
+                <text class="pe-sh-label" style="--sd:2s" x="200" y="38" text-anchor="middle" font-size="10">ℱ(U₁∪U₂) ≅ ℱ(U₁) ×_{ℱ(U₁∩U₂)} ℱ(U₂)</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- 7 Algorithm -->
+          <div class="pe-anim" id="pe-anim-7">
+            <div class="pe-anim-inner">
+              <div class="pe-algo-steps">
+                <div class="pe-step" style="--d:0s"><div class="pe-step-num">01</div><div class="pe-step-body"><div class="pe-step-title">Ingest</div><div class="pe-step-desc">Parse entity → build 𝕂 = (A,τ,κ,Σ)</div></div></div>
+                <div class="pe-step-arrow" style="--d:.3s">↓</div>
+                <div class="pe-step" style="--d:.4s"><div class="pe-step-num">02</div><div class="pe-step-body"><div class="pe-step-title">Homology</div><div class="pe-step-desc">Vietoris–Rips filtration → β=(β₀,β₁,β₂)</div></div></div>
+                <div class="pe-step-arrow" style="--d:.7s">↓</div>
+                <div class="pe-step" style="--d:.8s"><div class="pe-step-num">03</div><div class="pe-step-body"><div class="pe-step-title">Sheaf</div><div class="pe-step-desc">Assign stalks ℱ(U) and restriction maps ρ</div></div></div>
+                <div class="pe-step-arrow" style="--d:1.1s">↓</div>
+                <div class="pe-step" style="--d:1.2s"><div class="pe-step-num">04</div><div class="pe-step-body"><div class="pe-step-title">Query</div><div class="pe-step-desc">d<sub>T</sub>=α·d<sub>R</sub>+β·d<sub>H</sub>+γ·d<sub>S</sub> → ranked path</div></div></div>
+                <div class="pe-step-arrow" style="--d:1.5s">↓</div>
+                <div class="pe-step highlight" style="--d:1.6s"><div class="pe-step-num">05</div><div class="pe-step-body"><div class="pe-step-title">Return</div><div class="pe-step-desc">Interpretable relational path with full provenance</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8 Results -->
+          <div class="pe-anim" id="pe-anim-8">
+            <div class="pe-anim-inner">
+              <div class="pe-results-anim">
+                <div class="pe-res-title" style="--d:0s">Retrieval Quality (MAP@10)</div>
+                <div class="pe-res-bar-group">
+                  <div class="pe-res-row cookix" style="--d:.3s;--tw:94%"><span class="pe-res-lbl">CookiX / NoVectDB</span><div class="pe-res-track"><div class="pe-res-fill"></div><span class="pe-res-val">0.94</span></div></div>
+                  <div class="pe-res-row" style="--d:.7s;--tw:79%"><span class="pe-res-lbl">HNSW (Faiss)</span><div class="pe-res-track"><div class="pe-res-fill"></div><span class="pe-res-val">0.79</span></div></div>
+                  <div class="pe-res-row" style="--d:1s;--tw:71%"><span class="pe-res-lbl">GraphRAG</span><div class="pe-res-track"><div class="pe-res-fill"></div><span class="pe-res-val">0.71</span></div></div>
+                  <div class="pe-res-row" style="--d:1.3s;--tw:63%"><span class="pe-res-lbl">BM25</span><div class="pe-res-track"><div class="pe-res-fill"></div><span class="pe-res-val">0.63</span></div></div>
+                </div>
+                <div class="pe-res-note" style="animation-delay:1.8s">+19% MAP@10 over nearest vector baseline</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9 Architecture -->
+          <div class="pe-anim" id="pe-anim-9">
+            <div class="pe-anim-inner">
+              <div class="pe-arch-anim">
+                <div class="pe-arch-row" style="--d:0s"><div class="pe-arch-box input">Raw Text / Docs</div></div>
+                <div class="pe-arch-conn" style="--d:.3s">↓</div>
+                <div class="pe-arch-row" style="--d:.4s"><div class="pe-arch-box">KO Builder</div><div class="pe-arch-box">Homology Engine</div></div>
+                <div class="pe-arch-conn" style="--d:.8s">↓</div>
+                <div class="pe-arch-row" style="--d:.9s"><div class="pe-arch-box">Sheaf Graph Store</div></div>
+                <div class="pe-arch-conn" style="--d:1.2s">↓</div>
+                <div class="pe-arch-row" style="--d:1.3s"><div class="pe-arch-box">d<sub>T</sub> Query Engine</div><div class="pe-arch-box">Path Explainer</div></div>
+                <div class="pe-arch-conn" style="--d:1.7s">↓</div>
+                <div class="pe-arch-row" style="--d:1.8s"><div class="pe-arch-box output">Ranked Results + Provenance</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 10 Conclusion -->
+          <div class="pe-anim" id="pe-anim-10">
+            <div class="pe-anim-inner">
+              <div class="pe-conclusion-anim">
+                <div class="pe-concl-claim" style="--d:0s"><span class="pe-concl-icon">✓</span><span>Semantic gap → resolved by typed directed relations</span></div>
+                <div class="pe-concl-claim" style="--d:.4s"><span class="pe-concl-icon">✓</span><span>Precision collapse → immune; distance on discrete manifold</span></div>
+                <div class="pe-concl-claim" style="--d:.8s"><span class="pe-concl-icon">✓</span><span>Opacity → full interpretable path at every query</span></div>
+                <div class="pe-concl-quote" style="--d:1.4s">"Just as NoSQL spawned MongoDB and Cassandra — NoVectDB could inspire the next generation of knowledge engines."</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /pe-right -->
+      </div><!-- /pe-split -->
+
+      <!-- Bottom nav -->
+      <div id="pe-nav">
+        <button class="pe-btn" onclick="pePrevPage()">← Prev</button>
+        <span id="pe-page-info" style="font-family:var(--font-mono);font-size:.8rem;color:var(--gray-700)">— / —</span>
+        <button class="pe-btn" onclick="peNextPage()">Next →</button>
+        <span class="pe-scroll-hint">↓ scroll to explore</span>
+      </div>
+
+    </div><!-- /paper-explorer -->
+  </div><!-- /pe-sticky-frame -->
+</div><!-- /pe-scroll-outer -->
+
+
+<section id="conclusion">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-num">§ 11</div>
+      <h2 class="section-title">Conclusion</h2>
+    </div>
+    <div class="reveal">
+      <p>NoVectDB presents a mathematically grounded paradigm for post-vector data management. By combining <strong>typed relational edges</strong>, <strong>persistent homology signatures</strong>, and <strong>sheaf-theoretic composition</strong>, it overcomes the fundamental limitations of flat metric spaces:</p>
+      <ul style="margin:1rem 0 1rem 1.5rem;line-height:2;font-size:0.95rem;">
+        <li>Semantic gap — resolved by typed directed relations</li>
+        <li>Precision collapse — immune; distance defined on discrete manifold</li>
+        <li>Retrieval opacity — full interpretable path at every query</li>
+      </ul>
+      <p>Just as NoSQL spawned MongoDB, Cassandra, and Neo4j, NoVectDB could inspire specialised engines for legal reasoning, medical ontologies, and engineering knowledge bases. CookiX is the first, not the last.</p>
+    </div>
+
+    <div style="margin-top:3rem;padding:2.5rem;border:1px solid var(--black);text-align:center;" class="reveal">
+      <p style="font-family:var(--font-serif);font-style:italic;font-size:1.6rem;letter-spacing:-0.01em;margin:0;">
+        "Stop measuring distances.<br/>Start understanding adjacency."
+      </p>
+      <p style="margin-top:1rem;font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-500);">Ahmed Hafdi · NoVectDB / CookiX · February 2026</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">References</div>
+        <details>
+          <summary>Show 14 references</summary>
+          <ol class="ref-list">
+            <li><span>[1]</span>P. Lewis et al. Retrieval-augmented generation for knowledge-intensive NLP tasks. <em>NeurIPS</em>, 2020.</li>
+            <li><span>[2]</span>R. Vershynin. <em>High-Dimensional Probability</em>. Cambridge University Press, 2018.</li>
+            <li><span>[3]</span>H. Edelsbrunner and J. L. Harer. <em>Computational Topology: An Introduction</em>. AMS, 2010.</li>
+            <li><span>[4]</span>P. Bubenik. Statistical topological data analysis using persistence landscapes. <em>JMLR</em>, 16:77–102, 2015.</li>
+            <li><span>[5]</span>H. Adams et al. Persistence images: A stable vector representation of persistent homology. <em>JMLR</em>, 18(8):1–35, 2017.</li>
+            <li><span>[6]</span>J. Curry. Sheaves, cosheaves and applications. <em>arXiv:1303.3255v2</em>, 2014.</li>
+            <li><span>[7]</span>J. Hansen and R. Ghrist. Toward a spectral theory of cellular sheaves. <em>JACT</em>, 3(4):315–358, 2019.</li>
+            <li><span>[8]</span>Y. A. Malkov and D. A. Yashunin. Efficient and robust ANN search using HNSW. <em>IEEE TPAMI</em>, 42(4):824–836, 2018.</li>
+            <li><span>[9]</span>D. Edge et al. From local to global: A graph RAG approach to query-focused summarization. <em>arXiv:2404.16130</em>, 2024.</li>
+            <li><span>[10]</span>V. de Silva and G. Carlsson. Topological estimation using witness complexes. <em>SPBG</em>, 2004.</li>
+            <li><span>[11]</span>C. Bodnar et al. Neural sheaf diffusion. <em>NeurIPS</em>, 2022.</li>
+            <li><span>[12]</span>F. Chazal et al. <em>The Structure and Stability of Persistence Modules</em>. Springer, 2016.</li>
+            <li><span>[13]</span>R. Ghrist. Barcodes: The persistent topology of data. <em>Bull. AMS</em>, 45(1):61–75, 2008.</li>
+            <li><span>[14]</span>G. Carlsson. Topology and data. <em>Bull. AMS</em>, 46(2):255–308, 2009.</li>
+          </ol>
+        </details>
+      </div>
+      <div class="footer-sig">
+        Interactive explanation of: <em>NoVectDB: A Topological–Relational Paradigm for Post-Vector Data Management</em><br/>
+        Ahmed Hafdi · Independent Research / CookiX Project · February 2026
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── MOBILE MENU ───────────────────────────────────────────────────────────
+function toggleMenu() {
+  const burger = document.getElementById('nav-burger');
+  const drawer = document.getElementById('nav-drawer');
+  burger.classList.toggle('open');
+  drawer.classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-burger').classList.remove('open');
+  document.getElementById('nav-drawer').classList.remove('open');
+}
+// Close drawer on outside tap
+document.addEventListener('click', e => {
+  const burger = document.getElementById('nav-burger');
+  const drawer = document.getElementById('nav-drawer');
+  if (!burger.contains(e.target) && !drawer.contains(e.target)) {
+    burger.classList.remove('open');
+    drawer.classList.remove('open');
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// PAPER EXPLORER — full-window scroll-driven
+// ══════════════════════════════════════════════════════════════
+const PE_SECTIONS = [
+  { id:0,  title:'Abstract',           pages:[1,1]   },
+  { id:1,  title:'Introduction',       pages:[2,2]   },
+  { id:2,  title:'Problem Statement',  pages:[3,3]   },
+  { id:3,  title:'Knowledge Objects',  pages:[4,4]   },
+  { id:4,  title:'Topological Distance',pages:[5,5]  },
+  { id:5,  title:'Persistent Homology',pages:[6,6]  },
+  { id:6,  title:'Sheaf Composition',  pages:[7,7]   },
+  { id:7,  title:'Algorithm',          pages:[8,8]   },
+  { id:8,  title:'Results',            pages:[9,10]  },
+  { id:9,  title:'Architecture',       pages:[11,11] },
+  { id:10, title:'Conclusion',         pages:[12,99] },
+];
+
+let pePDF=null, peCurrentPage=1, peTotalPages=0, peCurrentSection=0, peRendering=false;
+
+function peSectionForPage(p){
+  for(let i=PE_SECTIONS.length-1;i>=0;i--){
+    if(p>=PE_SECTIONS[i].pages[0]) return i;
+  }
+  return 0;
+}
+
+function peShowSection(idx){
+  idx=Math.max(0,Math.min(idx,PE_SECTIONS.length-1));
+  if(idx===peCurrentSection && document.querySelector('.pe-anim.active')) return;
+  peCurrentSection=idx;
+  const sec=PE_SECTIONS[idx];
+  document.getElementById('pe-anim-num').textContent='§ '+idx;
+  document.getElementById('pe-anim-title').textContent=sec.title;
+  // swap panel with clone to re-trigger animations
+  document.querySelectorAll('.pe-anim').forEach(el=>el.classList.remove('active'));
+  const panel=document.getElementById('pe-anim-'+idx);
+  if(panel){
+    const clone=panel.cloneNode(true);
+    panel.parentNode.replaceChild(clone,panel);
+    clone.classList.add('active');
+    requestAnimationFrame(()=>{
+      clone.querySelectorAll('.pe-dist-bar-row,.pe-res-row').forEach(r=>r.classList.add('in'));
+    });
+  }
+  // TOC highlight + scroll active into view
+  document.querySelectorAll('.pe-toc-item').forEach(el=>{
+    const on=parseInt(el.dataset.section)===idx;
+    el.classList.toggle('active',on);
+    if(on) el.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  });
+}
+
+function peRenderPage(num){
+  if(!pePDF||peRendering) return;
+  peRendering=true;
+  pePDF.getPage(num).then(page=>{
+    const canvas=document.getElementById('pe-canvas');
+    const ctx=canvas.getContext('2d');
+    const wrap=document.getElementById('pe-canvas-wrap');
+    const vp1=page.getViewport({scale:1});
+    const maxW=(wrap.clientWidth||500)-40;
+    const maxH=(wrap.clientHeight||600)-40;
+    const scale=Math.min(maxW/vp1.width, maxH/vp1.height);
+    const vp=page.getViewport({scale});
+    canvas.width=vp.width;
+    canvas.height=vp.height;
+    page.render({canvasContext:ctx,viewport:vp}).promise.then(()=>{
+      peRendering=false;
+      document.getElementById('pe-loading').classList.add('hidden');
+      document.getElementById('pe-page-info').textContent=num+' / '+peTotalPages;
+      const sec=peSectionForPage(num);
+      peShowSection(sec);
+    });
+  });
+}
+
+function peNextPage(){ if(peCurrentPage<peTotalPages){peCurrentPage++;peRenderPage(peCurrentPage);} }
+function pePrevPage(){ if(peCurrentPage>1){peCurrentPage--;peRenderPage(peCurrentPage);} }
+
+function peGoSection(idx){
+  peShowSection(idx);
+  peCurrentPage=PE_SECTIONS[idx].pages[0];
+  if(pePDF) peRenderPage(peCurrentPage);
+}
+
+// Scroll-driven page navigation
+function peHandleScroll(){
+  const outer=document.getElementById('pe-scroll-outer');
+  if(!outer||!pePDF) return;
+  const rect=outer.getBoundingClientRect();
+  const scrollableH=outer.offsetHeight-window.innerHeight;
+  if(scrollableH<=0) return;
+  const scrolled=Math.max(0,-rect.top);
+  const progress=scrolled/scrollableH;
+  const targetPage=Math.min(peTotalPages,Math.max(1,Math.round(progress*(peTotalPages-1))+1));
+  if(targetPage!==peCurrentPage&&!peRendering){
+    peCurrentPage=targetPage;
+    peRenderPage(peCurrentPage);
+  }
+}
+window.addEventListener('scroll',peHandleScroll,{passive:true});
+
+// Keyboard navigation when explorer is in view
+document.addEventListener('keydown',e=>{
+  const frame=document.getElementById('pe-sticky-frame');
+  if(!frame) return;
+  const r=frame.getBoundingClientRect();
+  if(r.top<window.innerHeight&&r.bottom>0){
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();peNextPage();}
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();pePrevPage();}
+  }
+});
+
+function peInit(){
+  if(!document.getElementById('pe-canvas')) return;
+  // Set scroll wrapper height: each page gets 80vh of scroll
+  const outer=document.getElementById('pe-scroll-outer');
+  outer.style.minHeight=(window.innerHeight*0.6)+'px'; // initial placeholder
+  const script=document.createElement('script');
+  script.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  script.onload=()=>{
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.getDocument('/static/paper.pdf').promise.then(pdf=>{
+      pePDF=pdf;
+      peTotalPages=pdf.numPages;
+      // Set scroll wrapper height based on page count
+      outer.style.minHeight=(peTotalPages*window.innerHeight*0.65+window.innerHeight)+'px';
+      peRenderPage(1);
+    }).catch(err=>{
+      document.getElementById('pe-loading').innerHTML=
+        '<div style="font-family:var(--font-mono);font-size:.78rem;color:#888;padding:1.5rem;text-align:center">PDF unavailable in preview.<br/>Loads correctly from Flask server.</div>';
+    });
+  };
+  document.head.appendChild(script);
+}
+
+// Lazy-init on intersection
+const peObs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting){peInit();peObs.disconnect();}
+},{threshold:0.05});
+const peSec=document.getElementById('paper-explorer');
+if(peSec) peObs.observe(peSec);
+
+// ─── TYPEWRITER ────────────────────────────────────────────────────────────
+const phrase = "Stop measuring distances. Start understanding adjacency.";
+const tw = document.getElementById('typewriter');
+let ti = 0;
+function typeNext() {
+  if (ti <= phrase.length) { tw.textContent = phrase.slice(0, ti++); setTimeout(typeNext, 38); }
+}
+setTimeout(typeNext, 600);
+
+// ─── SCROLL REVEAL ─────────────────────────────────────────────────────────
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+// ─── UMBRELLA GRAPH ────────────────────────────────────────────────────────
+const umbrellaObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  umbrellaObs.disconnect();
+  const seq = [
+    ['node-umbrella', 0], ['node-rain', 200], ['node-coat', 400],
+    ['node-water', 600], ['node-storm', 800],
+    ['e-prevents', 1000], ['el-prevents', 1500],
+    ['e-wets', 1200], ['el-wets', 1700],
+    ['e-causes1', 1400], ['el-causes1', 1900],
+    ['e-causes2', 1600], ['el-causes2', 2100],
+    ['query-label', 2400], ['answer-label', 2900]
+  ];
+  seq.forEach(([id, delay]) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.transition = 'opacity 0.5s ease';
+      el.setAttribute('opacity', '1');
+      if (el.tagName === 'line') {
+        el.style.strokeDasharray = '500';
+        el.style.strokeDashoffset = '500';
+        el.style.transition = 'stroke-dashoffset 0.8s ease';
+        el.style.strokeDashoffset = '0';
+      }
+    }, delay);
+  });
+}, { threshold: 0.3 });
+const us = document.getElementById('umbrella-stage');
+if (us) umbrellaObs.observe(us);
+
+// ─── KNOWLEDGE OBJECT CARDS ────────────────────────────────────────────────
+const koObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  koObs.disconnect();
+  document.querySelectorAll('.ko-card').forEach((c, i) => {
+    setTimeout(() => c.classList.add('shown'), i * 150);
+  });
+}, { threshold: 0.2 });
+const koGrid = document.getElementById('ko-grid');
+if (koGrid) koObs.observe(koGrid);
+
+// ─── SLIDERS ───────────────────────────────────────────────────────────────
+function adjustSliders(changed) {
+  const a = parseInt(document.getElementById('sl-alpha').value);
+  const b = parseInt(document.getElementById('sl-beta').value);
+  const g = parseInt(document.getElementById('sl-gamma').value);
+  const total = a + b + g;
+  const av = (a/total).toFixed(2), bv = (b/total).toFixed(2), gv = (1 - a/total - b/total).toFixed(2);
+  document.getElementById('val-alpha').textContent = av;
+  document.getElementById('val-beta').textContent = bv;
+  document.getElementById('val-gamma').textContent = (parseFloat(av)+parseFloat(bv)+parseFloat(gv) <= 1.001) ? gv : (1-parseFloat(av)-parseFloat(bv)).toFixed(2);
+  const sum = (parseFloat(av)+parseFloat(bv)+parseFloat(document.getElementById('val-gamma').textContent)).toFixed(2);
+  const sc = document.getElementById('slider-sum');
+  sc.textContent = `α + β + γ = ${sum} ${sum==='1.00'?'✓':'⚠'}`;
+}
+
+// ─── PERSISTENT HOMOLOGY ANIMATION ────────────────────────────────────────
+const homoObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  homoObs.disconnect();
+  let eps = 0;
+  const steps = [
+    { eps: 0.2, edges: ['he1','he2'], label: 'ε = 0.2' },
+    { eps: 0.4, edges: ['he3','he4','he5'], label: 'ε = 0.4 → 1-cycle born' },
+    { eps: 0.6, edges: ['he6','he7','he8'], label: 'ε = 0.6 → new component' },
+    { eps: 0.8, fill: 'ht1', label: 'ε = 0.8 → triangle filled' },
+  ];
+  let si = 0;
+  function nextStep() {
+    if (si >= steps.length) {
+      // animate barcodes
+      animateBarcodes();
+      return;
+    }
+    const s = steps[si++];
+    document.getElementById('eps-label').textContent = s.label;
+    if (s.edges) s.edges.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('opacity', '1');
+    });
+    if (s.fill) {
+      const el = document.getElementById(s.fill);
+      if (el) el.setAttribute('fill-opacity', '0.08');
+    }
+    setTimeout(nextStep, 700);
+  }
+  setTimeout(nextStep, 400);
+}, { threshold: 0.3 });
+const hs = document.getElementById('homology-stage');
+if (hs) homoObs.observe(hs);
+
+function animateBarcodes() {
+  const bars = [
+    { id: 'bar-h0-1', width: '100%' },
+    { id: 'bar-h0-2', width: '60%' },
+    { id: 'bar-h1-1', width: '45%' },
+    { id: 'bar-h1-2', width: '25%' },
+  ];
+  bars.forEach((b, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(b.id);
+      if (el) el.style.width = b.width;
+    }, i * 200);
+  });
+}
+
+// ─── SHEAF NODES ───────────────────────────────────────────────────────────
+const sheafObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  sheafObs.disconnect();
+  ['sn-1','sn-2','sn-3','sn-global'].forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('shown');
+    }, i * 250);
+  });
+}, { threshold: 0.3 });
+const sc = document.getElementById('sheaf-anim-container');
+if (sc) sheafObs.observe(sc);
+
+// ─── ALGORITHM STEPPER ────────────────────────────────────────────────────
+const algoDescs = {
+  0: '', 1: 'Parse query intent: extract entity anchors and relation types.',
+  2: 'Try exact typed-edge lookup first — O(1) average case.',
+  3: 'If we have enough exact matches, skip probabilistic search.',
+  4: 'Return exact matches ranked by sheaf composition score.',
+  5: '',
+  6: 'Type-filtered breadth-first search from anchor node.',
+  7: 'Expand candidates using topological signature similarity.',
+  8: 'Score by sheaf composition residual along relation paths.',
+  9: 'Return top-k results by composite NoVectDB distance.'
+};
+let currentAlgoStep = -1;
+const algoLines = document.querySelectorAll('.algo-line');
+document.getElementById('algo-next').addEventListener('click', () => {
+  currentAlgoStep++;
+  if (currentAlgoStep > 9) currentAlgoStep = 9;
+  algoLines.forEach(l => l.classList.remove('active'));
+  const target = document.querySelector(`.algo-line[data-step="${currentAlgoStep}"]`);
+  if (target) target.classList.add('active');
+  document.getElementById('algo-desc').textContent = algoDescs[currentAlgoStep] || '';
+});
+document.getElementById('algo-reset').addEventListener('click', () => {
+  currentAlgoStep = -1;
+  algoLines.forEach(l => l.classList.remove('active'));
+  document.getElementById('algo-desc').textContent = '';
+});
+
+// ─── BAR CHART ─────────────────────────────────────────────────────────────
+const barObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  barObs.disconnect();
+  document.querySelectorAll('.bar-fill').forEach((b, i) => {
+    setTimeout(() => {
+      b.style.width = b.dataset.width + '%';
+    }, i * 150);
+  });
+}, { threshold: 0.3 });
+const bc = document.getElementById('bar-chart');
+if (bc) barObs.observe(bc);
+
+// ─── ARCH PIPELINE ─────────────────────────────────────────────────────────
+const archObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  archObs.disconnect();
+  document.querySelectorAll('.arch-node').forEach((n, i) => {
+    const delay = parseInt(n.dataset.delay || 0);
+    setTimeout(() => n.classList.add('shown'), delay);
+  });
+}, { threshold: 0.2 });
+const ap = document.getElementById('arch-pipeline');
+if (ap) archObs.observe(ap);
+
+// ─── COMPARISON TABLE ──────────────────────────────────────────────────────
+const cmpObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  cmpObs.disconnect();
+  const cells = document.querySelectorAll('.cmp-table td.check');
+  cells.forEach((c, i) => {
+    setTimeout(() => c.classList.add('shown'), i * 60);
+  });
+}, { threshold: 0.2 });
+const ct = document.getElementById('cmp-table');
+if (ct) cmpObs.observe(ct);
+</script>
+
+<!-- THREE.JS 3D VISUALIZATION -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas = document.getElementById('canvas-3d');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0xffffff, 1);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+
+const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / 500, 0.1, 100);
+camera.position.set(0, 1.5, 6);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 2;
+controls.maxDistance = 14;
+
+// ── RESIZE ──
+function resize() {
+  const w = canvas.clientWidth, h = 500;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ══════════════════════════════════════════════════
+// SCENE A: SHEAF STRUCTURE
+// ══════════════════════════════════════════════════
+const sheafGroup = new THREE.Group();
+
+const nodeData = [
+  { name: 'umbrella', pos: [0, 0, 0],    stalk: 'F(v₀) ≅ ℝ³\n→ prevents, shields' },
+  { name: 'rain',     pos: [2.2, 0.4, -0.5], stalk: 'F(v₁) ≅ ℝ³\n→ wets, causes' },
+  { name: 'raincoat', pos: [2.2,-1.2, 0.6],  stalk: 'F(v₂) ≅ ℝ³\n→ protects' },
+  { name: 'water',    pos: [-2, 0.8, 0.5],   stalk: 'F(v₃) ≅ ℝ³\n→ is_a, flows' },
+  { name: 'storm',    pos: [-1.8,-1, -0.8],  stalk: 'F(v₄) ≅ ℝ³\n→ causes, produces' },
+];
+
+const edgeData = [
+  { from: 0, to: 1, type: 'prevents' },
+  { from: 1, to: 2, type: 'wets' },
+  { from: 3, to: 1, type: 'is_a' },
+  { from: 4, to: 1, type: 'causes' },
+  { from: 4, to: 3, type: 'produces' },
+];
+
+const matSphere  = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.4, metalness: 0.1 });
+const matSphereH = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.3, metalness: 0.2 });
+const matWire    = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+const matEdge    = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1.5 });
+const matEdgeH   = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 3 });
+const matGray    = new THREE.LineBasicMaterial({ color: 0xaaaaaa, linewidth: 1 });
+
+// Ambient + directional light
+const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+dirLight.position.set(5, 8, 5);
+scene.add(ambLight, dirLight);
+
+// Build nodes
+const nodeMeshes = [];
+const stalkGroups = [];
+nodeData.forEach((nd, i) => {
+  const geo = new THREE.SphereGeometry(0.18, 24, 24);
+  const mesh = new THREE.Mesh(geo, matSphere.clone());
+  mesh.position.set(...nd.pos);
+  mesh.userData = { index: i, name: nd.name, stalk: nd.stalk };
+  sheafGroup.add(mesh);
+  nodeMeshes.push(mesh);
+
+  // Stalk = wireframe cube
+  const cGeo = new THREE.BoxGeometry(0.55, 0.55, 0.55);
+  const cWire = new THREE.Mesh(cGeo, matWire.clone());
+  cWire.position.set(...nd.pos);
+  cWire.userData.baseOpacity = 0.25;
+  cWire.material.opacity = 0.25;
+  cWire.material.transparent = true;
+  sheafGroup.add(cWire);
+  stalkGroups.push(cWire);
+
+  // Axis arrows (stalk ℝ³ frame) – thin lines
+  const axes = [
+    { dir: [0.35, 0, 0] },
+    { dir: [0, 0.35, 0] },
+    { dir: [0, 0, 0.35] },
+  ];
+  axes.forEach(ax => {
+    const pts = [
+      new THREE.Vector3(...nd.pos),
+      new THREE.Vector3(nd.pos[0]+ax.dir[0], nd.pos[1]+ax.dir[1], nd.pos[2]+ax.dir[2])
+    ];
+    const lg = new THREE.BufferGeometry().setFromPoints(pts);
+    const lm = new THREE.LineBasicMaterial({ color: 0xbbbbbb });
+    const line = new THREE.Line(lg, lm);
+    line.userData.isAxis = true;
+    sheafGroup.add(line);
+  });
+});
+
+// Build edges (directed with arrowhead)
+const edgeMeshes = [];
+edgeData.forEach(ed => {
+  const a = new THREE.Vector3(...nodeData[ed.from].pos);
+  const b = new THREE.Vector3(...nodeData[ed.to].pos);
+  const dir = b.clone().sub(a).normalize();
+  const start = a.clone().add(dir.clone().multiplyScalar(0.2));
+  const end   = b.clone().sub(dir.clone().multiplyScalar(0.2));
+  const pts = [start, end];
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const line = new THREE.Line(geo, matEdge.clone());
+  line.userData = { from: ed.from, to: ed.to, type: ed.type };
+  sheafGroup.add(line);
+  edgeMeshes.push(line);
+
+  // Arrow cone
+  const coneGeo = new THREE.ConeGeometry(0.06, 0.18, 8);
+  const coneMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const cone = new THREE.Mesh(coneGeo, coneMat);
+  cone.position.copy(end);
+  const up = new THREE.Vector3(0, 1, 0);
+  const q = new THREE.Quaternion().setFromUnitVectors(up, dir);
+  cone.setRotationFromQuaternion(q);
+  sheafGroup.add(cone);
+
+  // Restriction map — small plane halfway, tilted
+  const mid = start.clone().lerp(end, 0.5);
+  const planeGeo = new THREE.PlaneGeometry(0.18, 0.18);
+  const planeMat = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true, transparent: true, opacity: 0.5 });
+  const plane = new THREE.Mesh(planeGeo, planeMat);
+  plane.position.copy(mid);
+  plane.lookAt(b);
+  plane.rotateX(Math.PI / 2);
+  sheafGroup.add(plane);
+});
+
+sheafGroup.position.y = -0.2;
+scene.add(sheafGroup);
+
+// ── Raycaster for hover ──
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let hoveredNode = -1;
+const labelEl = document.getElementById('sheaf-label');
+
+canvas.addEventListener('pointermove', e => {
+  if (currentTab !== 'sheaf') return;
+  const rect = canvas.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  pointer.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(nodeMeshes);
+  if (hits.length > 0) {
+    const idx = hits[0].object.userData.index;
+    if (idx !== hoveredNode) {
+      // Reset previous
+      if (hoveredNode >= 0) {
+        nodeMeshes[hoveredNode].material.color.set(0x000000);
+        stalkGroups[hoveredNode].material.opacity = 0.25;
+      }
+      hoveredNode = idx;
+      nodeMeshes[idx].material.color.set(0x333333);
+      stalkGroups[idx].material.opacity = 1.0;
+      // Show label
+      const nd = nodeData[idx];
+      labelEl.innerHTML = `<strong>${nd.name}</strong><br/>${nd.stalk.replace('\n','<br/>')}`;
+      labelEl.style.display = 'block';
+    }
+    canvas.style.cursor = 'pointer';
+  } else {
+    if (hoveredNode >= 0) {
+      nodeMeshes[hoveredNode].material.color.set(0x000000);
+      stalkGroups[hoveredNode].material.opacity = 0.25;
+      hoveredNode = -1;
+    }
+    labelEl.style.display = 'none';
+    canvas.style.cursor = 'grab';
+  }
+});
+
+// ══════════════════════════════════════════════════
+// SCENE B: VIETORIS–RIPS FILTRATION
+// ══════════════════════════════════════════════════
+const filtGroup = new THREE.Group();
+
+// Fixed seed point cloud (deterministic) in unit sphere
+const rawPts = [
+  [ 0.8,  0.2, -0.3], [-0.7,  0.5,  0.2], [ 0.1, -0.8,  0.4],
+  [ 0.5,  0.7,  0.5], [-0.3, -0.4, -0.7], [ 0.6, -0.3,  0.6],
+  [-0.5,  0.1, -0.5], [ 0.2,  0.6, -0.6], [-0.1, -0.6,  0.1],
+  [ 0.3,  0.0,  0.8], [-0.8, -0.2,  0.3]
+];
+const fPts = rawPts.map(p => new THREE.Vector3(...p).multiplyScalar(2.2));
+
+// Precompute all pairwise distances
+const nP = fPts.length;
+const dists = Array.from({length: nP}, () => new Array(nP).fill(0));
+for (let i = 0; i < nP; i++)
+  for (let j = i+1; j < nP; j++)
+    dists[i][j] = dists[j][i] = fPts[i].distanceTo(fPts[j]);
+
+// Max distance
+let maxDist = 0;
+for (let i = 0; i < nP; i++) for (let j = i+1; j < nP; j++) maxDist = Math.max(maxDist, dists[i][j]);
+
+// Node spheres
+const fNodeMeshes = [];
+const fNodeMat = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.5 });
+fPts.forEach(p => {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 16), fNodeMat);
+  m.position.copy(p);
+  filtGroup.add(m);
+  fNodeMeshes.push(m);
+});
+
+// Edge pool (all pairs)
+const edgePool = [];
+for (let i = 0; i < nP; i++) {
+  for (let j = i+1; j < nP; j++) {
+    const geo = new THREE.BufferGeometry().setFromPoints([fPts[i], fPts[j]]);
+    const mat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0 });
+    const line = new THREE.Line(geo, mat);
+    line.userData = { i, j, dist: dists[i][j] };
+    filtGroup.add(line);
+    edgePool.push(line);
+  }
+}
+
+// Triangle pool (all triples)
+const triPool = [];
+for (let i = 0; i < nP; i++) {
+  for (let j = i+1; j < nP; j++) {
+    for (let k = j+1; k < nP; k++) {
+      const maxSide = Math.max(dists[i][j], dists[j][k], dists[i][k]);
+      const verts = new Float32Array([
+        ...fPts[i].toArray(), ...fPts[j].toArray(), ...fPts[k].toArray(),
+        ...fPts[i].toArray(), ...fPts[k].toArray(), ...fPts[j].toArray(),
+      ]);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+      geo.computeVertexNormals();
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0x000000, transparent: true, opacity: 0,
+        side: THREE.DoubleSide, depthWrite: false
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.userData = { i, j, k, maxSide };
+      filtGroup.add(mesh);
+      triPool.push(mesh);
+    }
+  }
+}
+
+// Tetra pool (all quadruples) – just wireframe outline
+const tetraPool = [];
+for (let i = 0; i < nP; i++) {
+  for (let j = i+1; j < nP; j++) {
+    for (let k = j+1; k < nP; k++) {
+      for (let l = k+1; l < nP; l++) {
+        const maxSide = Math.max(dists[i][j],dists[i][k],dists[i][l],dists[j][k],dists[j][l],dists[k][l]);
+        if (maxSide > maxDist * 0.55) continue; // skip sparse tetras
+        const pairs = [[i,j],[i,k],[i,l],[j,k],[j,l],[k,l]];
+        const group = new THREE.Group();
+        group.userData = { maxSide };
+        pairs.forEach(([a,b]) => {
+          const geo = new THREE.BufferGeometry().setFromPoints([fPts[a], fPts[b]]);
+          const mat = new THREE.LineBasicMaterial({ color: 0x555555, transparent: true, opacity: 0 });
+          const ln = new THREE.Line(geo, mat);
+          group.add(ln);
+        });
+        filtGroup.add(group);
+        tetraPool.push(group);
+      }
+    }
+  }
+}
+
+filtGroup.visible = false;
+scene.add(filtGroup);
+
+// ── Filtration controls ──
+const slider = document.getElementById('eps-slider');
+const epsVal = document.getElementById('eps-val');
+const bettiEl = document.getElementById('betti-nums');
+const playBtn = document.getElementById('filt-play');
+
+let playInterval = null;
+let playing = false;
+
+function setEps(val) {
+  const t = val / 100;
+  const eps = t * maxDist;
+  epsVal.textContent = eps.toFixed(2);
+  slider.value = val;
+
+  edgePool.forEach(l => {
+    const show = l.userData.dist <= eps;
+    l.material.opacity = show ? 0.9 : 0;
+  });
+  triPool.forEach(m => {
+    const show = m.userData.maxSide <= eps;
+    m.material.opacity = show ? 0.07 : 0;
+  });
+  tetraPool.forEach(g => {
+    const show = g.userData.maxSide <= eps;
+    g.children.forEach(c => { c.material.opacity = show ? 0.4 : 0; });
+  });
+
+  // Crude Betti approximation via Union-Find
+  const parent = Array.from({length:nP},(_,i)=>i);
+  function find(x){ return parent[x]===x?x:parent[x]=find(parent[x]); }
+  let loops = 0, edges = 0;
+  edgePool.forEach(l => {
+    if (l.userData.dist <= eps) {
+      const {i,j} = l.userData;
+      const pi = find(i), pj = find(j);
+      if (pi !== pj) { parent[pi] = pj; }
+      else { loops++; }
+      edges++;
+    }
+  });
+  const components = new Set(Array.from({length:nP},(_,i)=>find(i))).size;
+  const voids = tetraPool.filter(g => g.userData.maxSide <= eps).length;
+  bettiEl.textContent = `β₀ (components): ${components}  |  β₁ (loops): ${loops}  |  β₂ (voids): ${voids}`;
+}
+
+slider.addEventListener('input', () => setEps(parseInt(slider.value)));
+
+playBtn.addEventListener('click', () => {
+  playing = !playing;
+  playBtn.textContent = playing ? '⏸ Pause' : '▶ Play';
+  if (playing) {
+    if (parseInt(slider.value) >= 100) slider.value = 0;
+    playInterval = setInterval(() => {
+      let v = parseInt(slider.value) + 1;
+      if (v > 100) { v = 100; playing = false; playBtn.textContent = '▶ Play'; clearInterval(playInterval); }
+      setEps(v);
+    }, 60);
+  } else {
+    clearInterval(playInterval);
+  }
+});
+
+// ══════════════════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════════════════
+let currentTab = 'sheaf';
+window.switchTab = function(tab) {
+  currentTab = tab;
+  document.getElementById('tab-sheaf').classList.toggle('active', tab==='sheaf');
+  document.getElementById('tab-filtration').classList.toggle('active', tab==='filtration');
+  document.getElementById('viz-sheaf-desc').style.display = tab==='sheaf' ? '' : 'none';
+  document.getElementById('viz-filtration-desc').style.display = tab==='filtration' ? '' : 'none';
+  document.getElementById('filt-controls').style.display = tab==='filtration' ? '' : 'none';
+  document.getElementById('sheaf-label').style.display = 'none';
+
+  sheafGroup.visible = (tab === 'sheaf');
+  filtGroup.visible  = (tab === 'filtration');
+
+  if (tab === 'sheaf') {
+    camera.position.set(0, 1.5, 6);
+    controls.target.set(0, 0, 0);
+  } else {
+    camera.position.set(0, 2, 7);
+    controls.target.set(0, 0, 0);
+    setEps(parseInt(slider.value));
+  }
+  controls.update();
+};
+
+// ── Animate ──
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  t += 0.005;
+  controls.update();
+
+  if (currentTab === 'sheaf') {
+    // Gently rotate stalk cubes
+    stalkGroups.forEach((c, i) => {
+      c.rotation.x = t * 0.4 + i * 0.5;
+      c.rotation.y = t * 0.3 + i * 0.7;
+    });
+    // Pulse node scale slightly
+    nodeMeshes.forEach((m, i) => {
+      const s = 1 + 0.06 * Math.sin(t * 1.5 + i);
+      m.scale.setScalar(s);
+    });
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>

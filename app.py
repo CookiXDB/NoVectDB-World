@@ -4,8 +4,16 @@ import os
 app = Flask(__name__)
 
 @app.route("/")
-def index():
-    return render_template("index.html")
+def home():
+    return render_template("home.html")
+
+@app.route("/polyfdor")
+def polyfdor():
+    return render_template("polyfdor.html")
+
+@app.route("/papers/novectDB")
+def novectdb():
+    return render_template("novectdb.html")
 
 @app.route("/static/<path:filename>")
 def static_files(filename):

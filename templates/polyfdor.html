@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PolyfdoR — The creator behind PolyfdoS.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-400: #999;
+  --gray-600: #555;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--white);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── NAV ─────────────────────────────────────────── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gray-200);
+  height: 52px;
+  display: flex; align-items: center;
+  padding: 0 2.5rem;
+  justify-content: space-between;
+}
+.nav-back {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; color: var(--gray-600);
+  text-decoration: none; transition: color .2s;
+  letter-spacing: 0.02em;
+}
+.nav-back:hover { color: var(--black); }
+.nav-name {
+  font-family: var(--font-mono);
+  font-size: 0.85rem; font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* ── HERO ────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-top: 52px;
+}
+.hero-left {
+  padding: 5rem 3rem 5rem 2.5rem;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid var(--gray-200);
+}
+.hero-right {
+  padding: 5rem 2.5rem 5rem 3rem;
+  display: flex; flex-direction: column;
+  justify-content: center;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--gray-400);
+  margin-bottom: 2rem;
+}
+.hero-name {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 400; line-height: 1.0;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.5rem;
+}
+.hero-alias {
+  font-family: var(--font-mono);
+  font-size: 1rem; color: var(--gray-400);
+  margin-bottom: 2.5rem;
+}
+.hero-bio {
+  font-size: 1.05rem; line-height: 1.75;
+  color: var(--gray-600); max-width: 420px;
+}
+.hero-bio strong { color: var(--black); font-weight: 500; }
+
+/* equation card */
+.equation-card {
+  border: 1px solid var(--gray-200);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+}
+.eq-line {
+  font-family: var(--font-serif);
+  font-size: 1.8rem; letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+}
+.eq-line em { font-style: italic; }
+.eq-breakdown {
+  margin-top: 1.5rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.eq-row {
+  font-family: var(--font-mono);
+  font-size: 0.8rem; color: var(--gray-600);
+  display: flex; gap: 0.8rem;
+}
+.eq-key { color: var(--black); font-weight: 500; min-width: 50px; }
+
+.tagline {
+  font-family: var(--font-serif);
+  font-size: 1.1rem; font-style: italic;
+  color: var(--gray-400);
+  border-left: 2px solid var(--gray-200);
+  padding-left: 1rem;
+}
+
+/* ── FIELDS ──────────────────────────────────────── */
+.fields-section {
+  padding: 6rem 2.5rem;
+  max-width: 1100px; margin: 0 auto;
+  border-top: 1px solid var(--gray-200);
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--gray-400);
+  margin-bottom: 3rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--gray-200);
+}
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+.field-item {
+  padding: 2rem;
+  border: 1px solid var(--gray-200);
+}
+.field-num {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; color: var(--gray-400);
+  letter-spacing: 0.08em; margin-bottom: 1rem;
+}
+.field-name {
+  font-family: var(--font-serif);
+  font-size: 1.3rem; margin-bottom: 0.8rem;
+}
+.field-desc {
+  font-size: 0.83rem; color: var(--gray-600);
+  line-height: 1.6;
+}
+
+/* ── WORK ────────────────────────────────────────── */
+.work-section {
+  padding: 6rem 2.5rem;
+  max-width: 1100px; margin: 0 auto;
+  border-top: 1px solid var(--gray-200);
+}
+.work-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 2rem; align-items: center;
+  padding: 1.8rem 0;
+  border-bottom: 1px solid var(--gray-200);
+  text-decoration: none; color: inherit;
+}
+.work-row:hover .wr-title { text-decoration: underline; text-decoration-thickness: 1px; }
+.wr-type {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; color: var(--gray-400);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  line-height: 1.4;
+}
+.wr-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem; font-weight: 400;
+}
+.wr-title em { font-style: italic; }
+.wr-arrow { font-size: 1rem; color: var(--gray-400); }
+
+/* ── FOOTER ──────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--gray-200);
+  padding: 2rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1100px; margin: 0 auto;
+}
+.footer-text { font-size: 0.72rem; color: var(--gray-400); }
+.footer-text a { color: inherit; }
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 700px) {
+  nav { padding: 0 1.2rem; }
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-left { border-right: none; border-bottom: 1px solid var(--gray-200); padding: 3rem 1.2rem; }
+  .hero-right { padding: 3rem 1.2rem; }
+  .hero-name { font-size: 3rem; }
+  .fields-section, .work-section { padding: 4rem 1.2rem; }
+  .fields-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .work-row { grid-template-columns: 80px 1fr; }
+  .wr-arrow { display: none; }
+  footer { padding: 1.5rem 1.2rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-name">PolyfdoR</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">The creator behind PolyfdoS</div>
+    <h1 class="hero-name">Ahmed<br>Hafdi</h1>
+    <div class="hero-alias">@polyfdor</div>
+    <p class="hero-bio">
+      <strong>Polymath.</strong> Builder of systems, researcher of structures,
+      thinker across disciplines. I build worlds where mathematics,
+      operating systems, and knowledge intersect.<br><br>
+      Founder of <strong>PolyfdoS</strong> — a universe of ideas
+      bigger than the universe itself.
+    </p>
+  </div>
+
+  <div class="hero-right">
+    <div class="equation-card">
+      <div class="eq-line">Polyfd<em>o</em>R</div>
+      <div class="eq-breakdown">
+        <div class="eq-row"><span class="eq-key">PolyfdoS</span>+ R</div>
+        <div class="eq-row"><span class="eq-key">R</span>= Owner</div>
+      </div>
+    </div>
+    <p class="tagline">"The creator behind PolyfdoS."</p>
+  </div>
+</div>
+
+<hr style="border:none;border-top:1px solid var(--gray-200);">
+
+<!-- FIELDS -->
+<section class="fields-section">
+  <div class="section-label">Fields of study</div>
+  <div class="fields-grid">
+    <div class="field-item">
+      <div class="field-num">POLY</div>
+      <div class="field-name">Polymath</div>
+      <p class="field-desc">Learning across many fields — mathematics, CS, philosophy, physics. No single domain contains the truth.</p>
+    </div>
+    <div class="field-item">
+      <div class="field-num">FD</div>
+      <div class="field-name">Systems &amp; Architecture</div>
+      <p class="field-desc">Operating systems, low-level design, and the structures that make computation possible at every scale.</p>
+    </div>
+    <div class="field-item">
+      <div class="field-num">OS</div>
+      <div class="field-name">Topology &amp; Data</div>
+      <p class="field-desc">The shape of information. Sheaf theory, persistent homology, and knowledge graphs beyond the vector paradigm.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section class="work-section">
+  <div class="section-label">Work</div>
+
+  <a class="work-row" href="/papers/novectDB">
+    <div class="wr-type">Research<br>Paper · 2026</div>
+    <div class="wr-title">NoVect<em>DB</em> — A Topological–Relational Paradigm</div>
+    <div class="wr-arrow">→</div>
+  </a>
+
+  <div class="work-row" style="opacity:.4;pointer-events:none;">
+    <div class="wr-type">In research<br>2026</div>
+    <div class="wr-title" style="color:var(--gray-400);">Next paper — TBD</div>
+  </div>
+
+  <div class="work-row" style="opacity:.4;pointer-events:none;">
+    <div class="wr-type">World<br>PolyfdoS</div>
+    <div class="wr-title" style="color:var(--gray-400);">Systems &amp; OS — Coming soon</div>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-text">Ahmed Hafdi · <a href="/">PolyfdoS</a> · 2026</span>
+  <span class="footer-text">@polyfdor</span>
+</footer>
+
+</body>
+</html>

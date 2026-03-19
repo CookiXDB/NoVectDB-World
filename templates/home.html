@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PolyfdoS — Think Bigger Than the Universe.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-400: #999;
+  --gray-600: #555;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--white);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── NAV ─────────────────────────────────────────── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gray-200);
+  height: 52px;
+  display: flex; align-items: center;
+  padding: 0 2.5rem;
+  justify-content: space-between;
+}
+.nav-brand {
+  font-family: var(--font-mono);
+  font-size: 0.9rem; font-weight: 500;
+  letter-spacing: -0.03em;
+  text-decoration: none; color: var(--black);
+}
+.nav-brand span { opacity: 0.35; }
+.nav-links-right { display: flex; gap: 2rem; align-items: center; }
+.nav-links-right a {
+  font-size: 0.8rem; color: var(--gray-600);
+  text-decoration: none; transition: color .2s;
+  letter-spacing: 0.01em;
+}
+.nav-links-right a:hover { color: var(--black); }
+.nav-links-right a.active { color: var(--black); font-weight: 500; }
+
+/* ── HERO ────────────────────────────────────────── */
+.hero {
+  height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: flex-start;
+  padding: 0 2.5rem;
+  max-width: 900px; margin: 0 auto;
+  width: 100%;
+  position: relative;
+}
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--gray-400);
+  margin-bottom: 2.5rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.hero-label::after {
+  content: ''; display: block;
+  width: 40px; height: 1px; background: var(--gray-400);
+}
+.hero-headline {
+  font-family: var(--font-serif);
+  font-size: clamp(3.2rem, 8vw, 6.5rem);
+  font-weight: 400; line-height: 1.0;
+  letter-spacing: -0.025em;
+  margin-bottom: 1.5rem;
+}
+.hero-headline em { font-style: italic; }
+.hero-tagline {
+  font-family: var(--font-serif);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: var(--gray-600); font-style: italic;
+  margin-bottom: 4rem;
+}
+.hero-acronym {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  margin-bottom: 4rem;
+  border-left: 2px solid var(--black);
+  padding-left: 1.2rem;
+}
+.acronym-row {
+  font-family: var(--font-mono);
+  font-size: 0.8rem; color: var(--gray-600);
+  display: flex; gap: 0.8rem;
+}
+.acronym-key { color: var(--black); font-weight: 500; min-width: 40px; }
+.hero-scroll {
+  position: absolute; bottom: 2.5rem; left: 2.5rem;
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--gray-400); letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 0.6rem;
+  text-transform: uppercase;
+}
+.hero-scroll::before {
+  content: '';
+  display: block; width: 1px; height: 40px;
+  background: var(--gray-400);
+}
+
+/* ── DIVIDER ─────────────────────────────────────── */
+.rule { border: none; border-top: 1px solid var(--gray-200); }
+
+/* ── WORLDS SECTION ──────────────────────────────── */
+.worlds {
+  padding: 8rem 2.5rem;
+  max-width: 1100px; margin: 0 auto;
+}
+.section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--gray-400);
+  margin-bottom: 3rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-eyebrow::after {
+  content: ''; flex: 1; height: 1px; background: var(--gray-200);
+}
+.worlds-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--gray-200);
+}
+.world-card {
+  padding: 2.5rem;
+  border-right: 1px solid var(--gray-200);
+  text-decoration: none; color: inherit;
+  display: flex; flex-direction: column;
+  transition: background .15s;
+  position: relative;
+}
+.world-card:last-child { border-right: none; }
+.world-card:hover { background: var(--gray-100); }
+.world-card.disabled { opacity: 0.4; pointer-events: none; cursor: default; }
+.world-num {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; color: var(--gray-400);
+  letter-spacing: 0.1em; margin-bottom: 2rem;
+}
+.world-name {
+  font-family: var(--font-serif);
+  font-size: 2rem; font-weight: 400;
+  line-height: 1.1; letter-spacing: -0.01em;
+  margin-bottom: 1rem;
+}
+.world-name em { font-style: italic; }
+.world-desc {
+  font-size: 0.85rem; color: var(--gray-600);
+  line-height: 1.65; flex: 1;
+  margin-bottom: 2rem;
+}
+.world-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+.world-tag.live::before {
+  content: ''; display: block;
+  width: 5px; height: 5px;
+  background: var(--black);
+  border-radius: 50%;
+}
+.world-tag.soon { color: var(--gray-400); }
+.world-arrow {
+  position: absolute; top: 2.5rem; right: 2.5rem;
+  font-size: 1.1rem; opacity: 0;
+  transition: opacity .2s, transform .2s;
+}
+.world-card:hover .world-arrow { opacity: 1; transform: translateX(3px); }
+
+/* ── PAPERS SECTION ──────────────────────────────── */
+.papers {
+  padding: 8rem 2.5rem;
+  max-width: 1100px; margin: 0 auto;
+  border-top: 1px solid var(--gray-200);
+}
+.paper-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 2rem; align-items: start;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--gray-200);
+  text-decoration: none; color: inherit;
+  transition: background .15s;
+  cursor: pointer;
+}
+.paper-row:hover .pr-title { text-decoration: underline; text-decoration-thickness: 1px; }
+.paper-row:hover .pr-arrow { transform: translateX(5px); }
+.pr-index {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; color: var(--gray-400);
+  padding-top: 0.25rem;
+  letter-spacing: 0.06em;
+}
+.pr-title {
+  font-family: var(--font-serif);
+  font-size: 1.7rem; font-weight: 400;
+  letter-spacing: -0.01em; line-height: 1.15;
+  margin-bottom: 0.6rem;
+}
+.pr-title em { font-style: italic; }
+.pr-meta {
+  font-size: 0.78rem; color: var(--gray-600);
+  margin-bottom: 0.5rem;
+}
+.pr-abstract {
+  font-size: 0.85rem; color: var(--gray-600);
+  line-height: 1.65; max-width: 580px;
+}
+.pr-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+.pr-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; color: var(--gray-400);
+  letter-spacing: 0.04em;
+}
+.pr-tag::before { content: '#'; }
+.pr-arrow {
+  font-size: 1.2rem;
+  padding-top: 0.25rem;
+  transition: transform .2s;
+}
+.pr-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--black);
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* ── FOOTER ──────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--gray-200);
+  padding: 2rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1100px; margin: 0 auto;
+}
+.footer-brand {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+.footer-brand span { opacity: 0.4; }
+.footer-note { font-size: 0.72rem; color: var(--gray-400); }
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 700px) {
+  nav { padding: 0 1.2rem; }
+  .hero { padding: 0 1.2rem; }
+  .hero-headline { font-size: 3rem; }
+  .worlds { padding: 4rem 1.2rem; }
+  .worlds-grid { grid-template-columns: 1fr; }
+  .world-card { border-right: none; border-bottom: 1px solid var(--gray-200); }
+  .world-card:last-child { border-bottom: none; }
+  .papers { padding: 4rem 1.2rem; }
+  .paper-row { grid-template-columns: 50px 1fr; }
+  .pr-arrow { display: none; }
+  footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem 1.2rem; }
+  .nav-links-right a:not(:last-child) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="/">Polyfd<span>o</span>S</a>
+  <div class="nav-links-right">
+    <a href="#worlds">Worlds</a>
+    <a href="#papers">Research</a>
+    <a href="/polyfdor">PolyfdoR</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">PolyfdoS World</div>
+  <h1 class="hero-headline">
+    Think Bigger<br>
+    Than the<br>
+    <em>Universe.</em>
+  </h1>
+  <p class="hero-tagline">Welcome to PolyfdoS World.</p>
+  <div class="hero-acronym">
+    <div class="acronym-row"><span class="acronym-key">POLY</span>→ Polymath — learning across many fields</div>
+    <div class="acronym-row"><span class="acronym-key">FD</span>→ Hafdi — the name behind the world</div>
+    <div class="acronym-row"><span class="acronym-key">OS</span>→ Operating Systems &amp; Systems thinking</div>
+  </div>
+  <div class="hero-scroll">Scroll to explore</div>
+</section>
+
+<hr class="rule">
+
+<!-- WORLDS -->
+<section class="worlds" id="worlds">
+  <div class="section-eyebrow">Worlds inside PolyfdoS</div>
+  <div class="worlds-grid">
+
+    <a class="world-card" href="#papers">
+      <div class="world-num">01</div>
+      <div class="world-name">Research<br><em>&amp; Papers</em></div>
+      <p class="world-desc">
+        Open-access research on topology, knowledge representation,
+        and post-vector data systems. Every paper ships with an
+        interactive animated explainer.
+      </p>
+      <span class="world-tag live">Live</span>
+      <span class="world-arrow">→</span>
+    </a>
+
+    <div class="world-card disabled">
+      <div class="world-num">02</div>
+      <div class="world-name">Systems<br><em>&amp; OS</em></div>
+      <p class="world-desc">
+        Deep explorations in operating systems, low-level architecture,
+        and systems design. Coming soon.
+      </p>
+      <span class="world-tag soon">Coming soon</span>
+    </div>
+
+    <div class="world-card disabled">
+      <div class="world-num">03</div>
+      <div class="world-name">The<br><em>Polymath</em></div>
+      <p class="world-desc">
+        Cross-disciplinary thinking across mathematics, physics,
+        philosophy, and computation. Coming soon.
+      </p>
+      <span class="world-tag soon">Coming soon</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- PAPERS -->
+<section class="papers" id="papers">
+  <div class="section-eyebrow">Published Research</div>
+
+  <a class="paper-row" href="/papers/novectDB">
+    <div class="pr-index">CKX<br>001</div>
+    <div class="pr-body">
+      <div class="pr-title">
+        <span class="pr-badge">New</span>
+        NoVect<em>DB</em>
+      </div>
+      <div class="pr-meta">Ahmed Hafdi · CookiX Project · February 2026</div>
+      <p class="pr-abstract">
+        A topological–relational paradigm for post-vector data management.
+        Replaces embedding similarity with sheaf-theoretic composition on
+        dynamic graph manifolds — exact retrieval, no approximation.
+      </p>
+      <div class="pr-tags">
+        <span class="pr-tag">topology</span>
+        <span class="pr-tag">sheaf-theory</span>
+        <span class="pr-tag">knowledge-graphs</span>
+        <span class="pr-tag">persistent-homology</span>
+      </div>
+    </div>
+    <div class="pr-arrow">→</div>
+  </a>
+
+  <div class="paper-row" style="opacity:.4;pointer-events:none;">
+    <div class="pr-index">CKX<br>002</div>
+    <div class="pr-body">
+      <div class="pr-title" style="font-size:1.3rem;color:#999;">Next paper — in research</div>
+      <div class="pr-meta">2026 · TBD</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-brand">Polyfd<span>o</span>S</span>
+  <span class="footer-note">A world built by <a href="/polyfdor" style="color:inherit;">PolyfdoR</a> · 2026</span>
+</footer>
+
+</body>
+</html>
