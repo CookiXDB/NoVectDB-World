@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ContextOS — A Hierarchical Architecture for Managing Context in LLMs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --black: #000;
+  --white: #fff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-500: #888;
+  --gray-700: #444;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --max-w: 860px;
+  --section-gap: 100px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 17px; }
+body { font-family: var(--font-sans); background: var(--white); color: var(--black); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* ─── NAV ─────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px;
+}
+.nav-back { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; }
+.nav-back:hover { color: var(--black); }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); letter-spacing: 0.01em; transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+
+.nav-burger {
+  display: none; flex-direction: column; justify-content: center; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px;
+}
+.nav-burger span { display: block; height: 2px; background: var(--black); transition: transform .3s ease, opacity .3s ease; }
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.nav-drawer {
+  display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99;
+  background: rgba(255,255,255,0.98); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  flex-direction: column; padding: 0;
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease;
+}
+.nav-drawer.open { max-height: 400px; }
+.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
+.nav-drawer a { display: block; padding: 0.9rem 2rem; font-size: 0.9rem; text-decoration: none; color: var(--black); font-family: var(--font-sans); letter-spacing: 0.01em; transition: background .15s; }
+.nav-drawer a:hover { background: var(--gray-50); }
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
+section:last-of-type { border-bottom: none; }
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero { padding-top: 130px; padding-bottom: 80px; border-bottom: 1px solid var(--black); }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem; }
+h1.hero-title { font-family: var(--font-serif); font-size: clamp(2.8rem, 6vw, 4.4rem); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+h1.hero-title span { font-style: italic; }
+.hero-subtitle { font-size: 1.05rem; color: var(--gray-700); max-width: 620px; margin-bottom: 2rem; line-height: 1.6; }
+.hero-tagline { font-family: var(--font-serif); font-style: italic; font-size: 1.3rem; letter-spacing: -0.01em; border-left: 3px solid var(--black); padding-left: 1rem; margin: 2rem 0; }
+#typewriter::after { content: '|'; animation: blink .7s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-meta { font-size: 0.82rem; color: var(--gray-500); font-family: var(--font-mono); margin-top: 2.5rem; }
+.hero-meta strong { color: var(--black); }
+.abstract-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.8rem 2rem; margin-top: 3rem; border-radius: 2px; }
+.abstract-box .label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; }
+.abstract-box p { font-size: 0.93rem; color: var(--gray-700); line-height: 1.75; }
+
+/* ─── HEADINGS ────────────────────────────────────────── */
+h2.section-num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.2; }
+h3.subsec { font-size: 1rem; font-weight: 600; letter-spacing: 0.01em; margin: 2.5rem 0 0.8rem; }
+p { margin-bottom: 1rem; }
+
+/* ─── SCROLL REVEAL ───────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+.reveal-delay-5 { transition-delay: .5s; }
+
+/* ─── CARDS ───────────────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+.card { border: 1px solid var(--gray-200); padding: 1.8rem; background: var(--white); position: relative; overflow: hidden; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--black); }
+.card-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.6rem; }
+.card-body { font-size: 0.9rem; color: var(--gray-700); line-height: 1.65; }
+.card-mono { font-family: var(--font-mono); font-size: 0.78rem; }
+
+/* ─── SVG STAGE ───────────────────────────────────────── */
+.svg-stage { background: var(--gray-50); border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; margin: 1.5rem 0; overflow: hidden; border-radius: 2px; }
+
+/* ─── RESULTS TABLE ───────────────────────────────────── */
+.results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+.results-table th { text-align: left; padding: 0.6rem 1rem; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.results-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--gray-200); }
+.results-table tr.highlight td { font-weight: 600; background: var(--gray-50); }
+.results-table tr:hover td { background: var(--gray-100); }
+
+/* ─── CODE BLOCK ──────────────────────────────────────── */
+.code-block { background: var(--gray-50); border: 1px solid var(--gray-200); border-left: 3px solid var(--black); padding: 1.4rem 1.6rem; margin: 1.5rem 0; font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.7; color: var(--gray-700); overflow-x: auto; white-space: pre; }
+
+/* ─── LATENCY BAR ─────────────────────────────────────── */
+.lat-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.lat-lbl { font-family: var(--font-mono); font-size: 0.78rem; width: 180px; flex-shrink: 0; }
+.lat-track { flex: 1; height: 22px; background: var(--gray-100); border: 1px solid var(--gray-200); overflow: hidden; }
+.lat-fill { height: 100%; background: var(--black); width: 0; transition: width 1.2s cubic-bezier(.22,.61,.36,1); }
+.lat-fill.rag { background: var(--gray-300); }
+.lat-val { font-family: var(--font-mono); font-size: 0.76rem; color: var(--gray-500); width: 60px; text-align: right; }
+
+/* ─── ARCH NODES ──────────────────────────────────────── */
+.arch-node { border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem; display: flex; align-items: flex-start; gap: 1.2rem; opacity: 0; transform: translateX(-20px); transition: opacity .5s ease, transform .5s ease; }
+.arch-node.shown { opacity: 1; transform: none; }
+.arch-node-num { font-family: var(--font-mono); font-size: 0.72rem; background: var(--black); color: var(--white); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.arch-node-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+.arch-node-desc { font-size: 0.88rem; color: var(--gray-700); line-height: 1.55; }
+.arch-arrow { text-align: left; padding: 0.3rem 0 0.3rem 1.5rem; color: var(--gray-500); font-size: 0.8rem; }
+
+/* ─── Q-CARDS ─────────────────────────────────────────── */
+.q-card { border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem; margin-bottom: 0.8rem; display: flex; gap: 1.2rem; align-items: flex-start; }
+.q-num { font-family: var(--font-mono); font-size: 0.72rem; background: var(--black); color: var(--white); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.q-text { font-size: 0.92rem; color: var(--gray-700); line-height: 1.6; }
+
+/* ─── 3D CACHE VISUALIZATION ──────────────────────────── */
+#cache-3d-wrap {
+  width: 100%;
+  height: 420px;
+  perspective: 900px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  margin: 2rem 0;
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+}
+#cache-3d-wrap:active { cursor: grabbing; }
+
+#cache-scene {
+  width: 500px;
+  height: 300px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(28deg) rotateY(-20deg);
+  transition: transform 0.05s linear;
+}
+
+.cache-tier {
+  position: absolute;
+  width: 440px;
+  height: 90px;
+  left: 30px;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+}
+
+/* tier positions stacked in 3D */
+.cache-tier.t-l1 { transform: translateZ(90px); }
+.cache-tier.t-l2 { transform: translateZ(0px); }
+.cache-tier.t-l3 { transform: translateZ(-90px); }
+
+/* tier face (top face) */
+.tier-face {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+  gap: 1.5rem;
+}
+.t-l1 .tier-face { background: rgba(0,0,0,0.92); color: #fff; }
+.t-l2 .tier-face { background: rgba(30,30,30,0.72); color: #fff; }
+.t-l3 .tier-face { background: rgba(60,60,60,0.5); color: #ddd; }
+
+/* side face of each tier (left side) */
+.tier-side {
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  width: 100%;
+  height: 18px;
+  transform-origin: top;
+  transform: rotateX(-90deg);
+}
+.t-l1 .tier-side { background: rgba(0,0,0,0.7); }
+.t-l2 .tier-side { background: rgba(30,30,30,0.5); }
+.t-l3 .tier-side { background: rgba(60,60,60,0.3); }
+
+.tier-tag {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+.tier-info { flex: 1; }
+.tier-name { font-family: var(--font-sans); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.9; }
+.tier-desc { font-family: var(--font-mono); font-size: 0.65rem; opacity: 0.65; margin-top: 2px; }
+.tier-latency {
+  font-family: var(--font-mono); font-size: 0.68rem; text-align: right; opacity: 0.8;
+}
+.tier-latency .lat-num { font-size: 1.1rem; font-weight: 700; display: block; opacity: 1; }
+
+/* capsule particles */
+.capsule-particle {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+  pointer-events: none;
+}
+
+/* 3D grid lines on floor */
+.tier-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 40px 22px;
+}
+
+/* label above the viz */
+#cache-3d-label {
+  position: absolute;
+  top: 14px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--gray-500);
+}
+#cache-3d-hint {
+  position: absolute;
+  bottom: 12px; right: 16px;
+  font-family: var(--font-mono); font-size: 0.62rem; color: var(--gray-300);
+}
+
+/* animated capsule flow lines */
+.flow-path {
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.5), transparent);
+  animation: flow-pulse 2s ease-in-out infinite;
+  opacity: 0.5;
+}
+@keyframes flow-pulse { 0%,100%{opacity:0.2} 50%{opacity:0.7} }
+
+/* ─── TIER SPECS TABLE ─────────────────────────────────── */
+.tier-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.85rem; }
+.tier-table th { padding: 0.55rem 0.9rem; border-bottom: 2px solid var(--black); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; text-align: left; }
+.tier-table td { padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--gray-200); font-family: var(--font-mono); font-size: 0.78rem; }
+.tier-table .tier-chip { display: inline-block; padding: 0.1rem 0.5rem; font-weight: 700; }
+.chip-l1 { background: var(--black); color: var(--white); }
+.chip-l2 { background: var(--gray-700); color: var(--white); }
+.chip-l3 { background: var(--gray-200); color: var(--black); }
+
+/* ─── CAPSULE DIAGRAM ──────────────────────────────────── */
+.capsule-diagram {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin: 1.5rem 0;
+}
+.cap-format {
+  border: 1px solid var(--gray-200);
+  padding: 1rem 1.2rem;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity .4s ease, transform .4s ease;
+}
+.cap-format.shown { opacity: 1; transform: scale(1); }
+.cap-fmt-name { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 0.3rem; }
+.cap-fmt-desc { font-size: 0.82rem; color: var(--gray-700); line-height: 1.5; }
+.cap-fmt-size { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); margin-top: 0.4rem; }
+
+/* ─── BACKEND CARDS ────────────────────────────────────── */
+.backend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+.backend-card { border: 1px solid var(--gray-200); padding: 1.4rem 1.2rem; text-align: center; position: relative; overflow: hidden; }
+.backend-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--black); }
+.backend-icon { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 0.8rem; }
+.backend-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; }
+.backend-tech { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); margin-bottom: 0.6rem; }
+.backend-best { font-size: 0.8rem; color: var(--gray-700); line-height: 1.45; }
+
+/* ─── PAPER EXPLORER ──────────────────────────────────── */
+#pe-scroll-outer { position: relative; }
+#pe-sticky-frame {
+  position: sticky; top: 52px;
+  height: calc(100vh - 52px);
+  display: flex; flex-direction: column;
+  background: #fff;
+  border-top: 1px solid var(--gray-200);
+  overflow: hidden; z-index: 10;
+}
+#paper-explorer { display: flex; flex-direction: column; height: 100%; }
+#pe-toc {
+  display: flex; overflow-x: auto; scrollbar-width: none;
+  border-bottom: 1px solid var(--gray-200); flex-shrink: 0;
+  height: 46px; background: var(--gray-50);
+}
+#pe-toc::-webkit-scrollbar { display: none; }
+.pe-toc-item {
+  flex-shrink: 0; padding: 0 1.2rem;
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.8rem; cursor: pointer;
+  border-right: 1px solid var(--gray-200);
+  color: var(--gray-700); transition: background .15s;
+  white-space: nowrap;
+}
+.pe-toc-item:hover { background: var(--gray-100); }
+.pe-toc-item.active { background: var(--white); font-weight: 600; color: var(--black); border-bottom: 2px solid var(--black); }
+.pe-toc-num { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); }
+.pe-toc-item.active .pe-toc-num { color: var(--black); }
+
+#pe-split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; min-height: 0; }
+#pe-left { border-right: 1px solid var(--gray-200); background: #f2f2f2; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+#pe-canvas-wrap { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; }
+#pe-canvas { display: block; max-width: 100%; max-height: 100%; box-shadow: 0 4px 32px rgba(0,0,0,.18); background: #fff; }
+#pe-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f2f2f2; }
+#pe-loading.hidden { display: none; }
+.pe-spinner { width: 28px; height: 28px; border: 2px solid var(--gray-300); border-top-color: var(--black); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#pe-right { display: flex; flex-direction: column; overflow: hidden; }
+#pe-anim-label { padding: 0.8rem 1.5rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; background: var(--white); }
+.pe-anim { flex: 1; display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem; min-height: 0; }
+.pe-anim.active { display: flex; }
+.pe-anim-inner { width: 100%; max-width: 420px; }
+
+#pe-nav { padding: 0.6rem 1.5rem; border-top: 1px solid var(--gray-200); display: flex; align-items: center; gap: 1rem; flex-shrink: 0; background: var(--gray-50); }
+.pe-btn { font-family: var(--font-mono); font-size: 0.78rem; background: none; border: 1px solid var(--gray-200); padding: 0.3rem 0.9rem; cursor: pointer; transition: background .15s; }
+.pe-btn:hover { background: var(--gray-100); }
+#pe-page-info { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-500); flex: 1; text-align: center; }
+.pe-scroll-hint { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); margin-left: auto; }
+
+/* PE animations */
+@keyframes pe-in { to { opacity:1; transform:translateY(0) } }
+.pe-word { font-family: var(--font-serif); font-size: 1.5rem; opacity: 0; transform: translateY(10px); animation: pe-in .45s ease forwards; animation-delay: var(--d,0s); line-height: 1.15; }
+.pe-word em { font-style: italic; }
+
+.pe-pillars { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+.pe-pillar { flex: 1; min-width: 80px; border: 1px solid var(--gray-200); padding: 1rem; text-align: center; opacity: 0; transform: translateY(12px); animation: pe-in .4s ease forwards; animation-delay: var(--dd,0s); }
+.pe-pillar-icon { font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.4rem; }
+.pe-pillar-lbl { font-size: 0.72rem; color: var(--gray-700); line-height: 1.3; }
+
+.pe-tier-stack { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; }
+.pe-tier-row { display: flex; align-items: center; gap: 1rem; opacity: 0; animation: pe-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-tier-chip { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.6rem; flex-shrink: 0; width: 36px; text-align: center; }
+.pe-tier-bar { flex: 1; height: 28px; background: var(--gray-100); position: relative; overflow: hidden; }
+.pe-tier-bar-fill { height: 100%; position: absolute; left: 0; top: 0; display: flex; align-items: center; padding-left: 0.6rem; font-family: var(--font-mono); font-size: 0.68rem; }
+.l1-fill { background: var(--black); color: #fff; width: 0; transition: width 1.2s ease; }
+.l2-fill { background: var(--gray-700); color: #fff; width: 0; transition: width 1.2s .2s ease; }
+.l3-fill { background: var(--gray-300); color: var(--black); width: 0; transition: width 1.2s .4s ease; }
+.pe-tier-ms { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray-500); flex-shrink: 0; width: 50px; text-align: right; }
+
+.pe-capsule-viz { width: 100%; }
+.pe-cap-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; opacity: 0; animation: pe-in .35s ease forwards; animation-delay: var(--d,0s); }
+.pe-cap-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--black); flex-shrink: 0; }
+.pe-cap-label { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; width: 70px; }
+.pe-cap-bar { flex: 1; height: 14px; background: var(--gray-100); }
+.pe-cap-fill { height: 100%; background: var(--black); width: 0; transition: width 1s ease; }
+.pe-cap-pct { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); width: 36px; text-align: right; }
+
+.pe-query-trace { font-family: var(--font-mono); font-size: 0.72rem; }
+.pe-trace-step { display: flex; gap: 0.8rem; margin-bottom: 0.6rem; opacity: 0; animation: pe-in .35s ease forwards; animation-delay: var(--d,0s); }
+.pe-trace-badge { background: var(--black); color: #fff; padding: 0.1rem 0.4rem; flex-shrink: 0; font-size: 0.65rem; }
+.pe-trace-text { color: var(--gray-700); line-height: 1.5; }
+.pe-trace-text strong { color: var(--black); }
+
+.pe-latency-compare { display: flex; gap: 1.5rem; }
+.pe-lat-col { flex: 1; }
+.pe-lat-col-lbl { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-500); margin-bottom: 0.8rem; }
+.pe-lat-val { font-family: var(--font-serif); font-size: 2.5rem; font-weight: 500; }
+.pe-lat-sub { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); }
+
+.pe-bar-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.7rem; opacity:0; animation: pe-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-bar-lbl { font-family: var(--font-mono); font-size: 0.72rem; width: 100px; text-align: right; color: var(--gray-700); flex-shrink: 0; }
+.pe-bar-track { flex: 1; height: 18px; background: var(--gray-100); overflow: hidden; }
+.pe-bar-fill { height: 100%; background: var(--black); width: 0; transition: width 1s cubic-bezier(.22,.61,.36,1); }
+.pe-bar-fill.dim { background: var(--gray-300); }
+.pe-bar-val { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray-500); width: 3rem; }
+
+.pe-phase-list { }
+.pe-phase { display: flex; gap: 1rem; margin-bottom: 0.9rem; opacity: 0; animation: pe-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-phase-dot { width: 22px; height: 22px; background: var(--black); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 0.68rem; color: #fff; flex-shrink: 0; margin-top: 2px; }
+.pe-phase-body { }
+.pe-phase-name { font-weight: 600; font-size: 0.85rem; }
+.pe-phase-desc { font-size: 0.8rem; color: var(--gray-700); line-height: 1.5; }
+
+.pe-hit-rates { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.8rem; }
+.pe-hit-box { text-align: center; padding: 1rem; border: 1px solid var(--gray-200); opacity: 0; animation: pe-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-hit-num { font-family: var(--font-serif); font-size: 2rem; font-weight: 500; }
+.pe-hit-lbl { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ─── FOOTER ──────────────────────────────────────────── */
+footer { background: var(--gray-50); border-top: 1px solid var(--gray-200); padding: 3rem 0; }
+.footer-inner { display: flex; gap: 4rem; align-items: flex-start; flex-wrap: wrap; }
+.footer-title { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 1rem; }
+.footer-sig { font-size: 0.85rem; color: var(--gray-700); line-height: 1.6; }
+.footer-sig em { font-family: var(--font-serif); font-style: italic; }
+details summary { cursor: pointer; font-size: 0.88rem; font-weight: 500; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '+'; font-family: var(--font-mono); }
+details[open] summary::before { content: '−'; }
+.ref-list { margin-top: 1rem; padding-left: 0; list-style: none; }
+.ref-list li { display: flex; gap: 1rem; font-size: 0.83rem; color: var(--gray-700); margin-bottom: 0.6rem; line-height: 1.5; }
+.ref-list li span { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); flex-shrink: 0; }
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 700px) {
+  nav { padding: 0 1.2rem; }
+  .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .nav-drawer { display: flex; }
+  .container { padding: 0 1.2rem; }
+  #pe-split { grid-template-columns: 1fr; }
+  #pe-right { display: none; }
+  .card-grid { grid-template-columns: 1fr; }
+  .backend-grid { grid-template-columns: 1fr; }
+  .capsule-diagram { grid-template-columns: 1fr; }
+  #cache-3d-wrap { height: 280px; }
+  #cache-scene { transform: scale(0.6) rotateX(28deg) rotateY(-20deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-logo">ContextOS</span>
+  <ul class="nav-links">
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#capsules">Capsules</a></li>
+    <li><a href="#backends">Backends</a></li>
+    <li><a href="#learning">Learning</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#open">Open Questions</a></li>
+    <li><a href="#paper-explorer" style="font-weight:500;">Paper ↗</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<ul class="nav-drawer" id="nav-drawer">
+  <li><a href="#intro" onclick="closeMenu()">Introduction</a></li>
+  <li><a href="#architecture" onclick="closeMenu()">Architecture</a></li>
+  <li><a href="#capsules" onclick="closeMenu()">Capsules</a></li>
+  <li><a href="#backends" onclick="closeMenu()">Backends</a></li>
+  <li><a href="#learning" onclick="closeMenu()">Learning</a></li>
+  <li><a href="#performance" onclick="closeMenu()">Performance</a></li>
+  <li><a href="#open" onclick="closeMenu()">Open Questions</a></li>
+  <li><a href="#paper-explorer" onclick="closeMenu()">Paper ↗</a></li>
+</ul>
+
+<!-- §0 HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Research Paper · September 2025 · CKX 004</div>
+    <h1 class="hero-title">Context<span>OS</span></h1>
+    <p class="hero-subtitle">A Hierarchical Architecture for Managing Context in Large Language Models</p>
+    <div class="hero-tagline">
+      <span id="typewriter"></span>
+    </div>
+    <div class="hero-meta">
+      <strong>Ahmed Hafdi</strong> &nbsp;·&nbsp; System Design Proposal &nbsp;·&nbsp; September 2025
+    </div>
+    <div class="abstract-box reveal">
+      <div class="label">Abstract</div>
+      <p>This paper proposes ContextOS, a practical system architecture for managing context in LLM applications. Current approaches treat context retrieval as a one-size-fits-all operation, resulting in consistent 100–200ms latency regardless of query recency. I propose a three-tier caching system inspired by how computer processors manage memory — keep recent stuff fast (L1), compress frequently-used stuff (L2), and store everything else efficiently (L3). The architecture introduces <em>context capsules</em>: smart containers that store information in multiple formats and automatically choose the right format based on recency and importance. Expected reduction: average retrieval latency from 150ms to 20–40ms.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §1 INTRODUCTION -->
+<section id="intro">
+  <div class="container">
+    <h2 class="section-num reveal">§ 1</h2>
+    <h2 class="section-title reveal">The Context Problem</h2>
+
+    <p class="reveal">Large Language Models are incredibly powerful, but they have a fundamental limitation: they can only pay attention to what you put in their context window. Current systems handle this poorly — every retrieval takes about 150ms regardless of whether you're asking a follow-up question from 30 seconds ago or searching millions of documents for the first time.</p>
+
+    <p class="reveal">The core insight is that context access follows the same patterns as CPU memory access:</p>
+
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title">Temporal Locality</div>
+        <div class="card-body">If you accessed something recently, you'll likely access it again soon. A follow-up question about transformers should find transformer context in microseconds, not 150ms.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Spatial Locality</div>
+        <div class="card-body">If you accessed something, you'll likely access related things. Accessing attention mechanisms implies likely interest in positional encodings and multi-head attention.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Frequency Patterns</div>
+        <div class="card-body">Some information gets accessed repeatedly across sessions. Frequently accessed topics should live permanently in faster tiers, self-organizing based on usage.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cache Hierarchies</div>
+        <div class="card-body">Computer architects solved this decades ago. L1 cache: &lt;1ms. L2 cache: &lt;10ms. L3 storage: &lt;100ms. ContextOS applies identical principles to LLM context.</div>
+      </div>
+    </div>
+
+    <h3 class="subsec reveal">The Concrete Scenario</h3>
+    <div class="code-block reveal">User: "How do transformers handle long-range dependencies?"
+System: Searches entire corpus → 150ms → answer.
+
+User: "What about computational complexity?" (30 seconds later)
+Current:  Search entire corpus again → 150ms (wasteful)
+ContextOS: L1 cache hit → &lt;1ms → answer</div>
+  </div>
+</section>
+
+<!-- §2 ARCHITECTURE + 3D VIZ -->
+<section id="architecture">
+  <div class="container">
+    <h2 class="section-num reveal">§ 2</h2>
+    <h2 class="section-title reveal">Three-Tier Cache Architecture</h2>
+
+    <p class="reveal">ContextOS is an operating system for context. Just like an OS manages how programs access memory and storage, ContextOS manages how LLMs access context across three tiers with dramatically different speed–capacity trade-offs.</p>
+
+    <div id="cache-3d-wrap" class="reveal">
+      <div id="cache-3d-label">Interactive 3D Cache Hierarchy — Drag to Rotate</div>
+      <div id="cache-scene">
+
+        <!-- L1 Tier -->
+        <div class="cache-tier t-l1">
+          <div class="tier-face">
+            <div class="tier-grid"></div>
+            <div class="tier-tag">L1</div>
+            <div class="tier-info">
+              <div class="tier-name">Hot Context</div>
+              <div class="tier-desc">In-Memory · RAM · 2,000–8,000 tokens</div>
+            </div>
+            <div class="tier-latency">
+              <span class="lat-num">&lt;1ms</span>
+              Current session
+            </div>
+          </div>
+          <div class="tier-side"></div>
+        </div>
+
+        <!-- L2 Tier -->
+        <div class="cache-tier t-l2">
+          <div class="tier-face">
+            <div class="tier-grid"></div>
+            <div class="tier-tag">L2</div>
+            <div class="tier-info">
+              <div class="tier-name">Warm Context</div>
+              <div class="tier-desc">Redis Cluster · 32,000–64,000 tokens</div>
+            </div>
+            <div class="tier-latency">
+              <span class="lat-num">&lt;10ms</span>
+              Compressed summaries
+            </div>
+          </div>
+          <div class="tier-side"></div>
+        </div>
+
+        <!-- L3 Tier -->
+        <div class="cache-tier t-l3">
+          <div class="tier-face">
+            <div class="tier-grid"></div>
+            <div class="tier-tag">L3</div>
+            <div class="tier-info">
+              <div class="tier-name">Cold Storage</div>
+              <div class="tier-desc">VectorDB + GraphDB + ObjectStore · Unlimited</div>
+            </div>
+            <div class="tier-latency">
+              <span class="lat-num">&lt;100ms</span>
+              Full corpus search
+            </div>
+          </div>
+          <div class="tier-side"></div>
+        </div>
+
+        <!-- Capsule particles (JS-animated) -->
+        <div id="particle-container"></div>
+      </div>
+      <div id="cache-3d-hint">drag to rotate</div>
+    </div>
+
+    <table class="tier-table reveal">
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>Storage</th>
+          <th>Latency</th>
+          <th>Capacity</th>
+          <th>Format</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tier-chip chip-l1">L1</span></td>
+          <td>Server RAM</td>
+          <td>&lt;1ms</td>
+          <td>2,000–8,000 tokens</td>
+          <td>Full raw text</td>
+        </tr>
+        <tr>
+          <td><span class="tier-chip chip-l2">L2</span></td>
+          <td>Redis cluster</td>
+          <td>&lt;10ms</td>
+          <td>32,000–64,000 tokens</td>
+          <td>Compressed summaries</td>
+        </tr>
+        <tr>
+          <td><span class="tier-chip chip-l3">L3</span></td>
+          <td>VectorDB + Graph + Object</td>
+          <td>&lt;100ms</td>
+          <td>Unlimited</td>
+          <td>All formats</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsec reveal">Six Components</h3>
+    <div id="arch-nodes">
+      <div class="arch-node">
+        <div class="arch-node-num">1</div>
+        <div>
+          <div class="arch-node-title">User Interface Layer</div>
+          <div class="arch-node-desc">Captures query text, timestamp, session ID, conversation history. The timestamp and session ID determine whether this is a follow-up or a fresh topic.</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node">
+        <div class="arch-node-num">2</div>
+        <div>
+          <div class="arch-node-title">Context Scheduler</div>
+          <div class="arch-node-desc">The traffic controller. Parses entities, topics, intent, and complexity. Searches tiers in order (L1 → L2 → L3). Ranks results using semantic similarity (40%), recency (20%), frequency (20%), trust (10%), entity overlap (10%).</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node">
+        <div class="arch-node-num">3</div>
+        <div>
+          <div class="arch-node-title">Three-Tier Cache</div>
+          <div class="arch-node-desc">L1 (hot, RAM), L2 (warm, Redis), L3 (cold, multi-backend). Each tier searched in order; misses fall through to the next tier.</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node">
+        <div class="arch-node-num">4</div>
+        <div>
+          <div class="arch-node-title">Context Capsule Engine</div>
+          <div class="arch-node-desc">Assembles ranked capsules into a structured prompt. Dynamically selects format (raw/summary/facts) based on token budget and priority. Allocates 30% to L1, 40% to L3, 20% to L2, 10% to facts.</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node">
+        <div class="arch-node-num">5</div>
+        <div>
+          <div class="arch-node-title">LLM Inference Engine</div>
+          <div class="arch-node-desc">Receives the structured context prompt and generates the response. The richer, more relevant context produces higher-quality answers.</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-node">
+        <div class="arch-node-num">6</div>
+        <div>
+          <div class="arch-node-title">Feedback Loop</div>
+          <div class="arch-node-desc">After each response: updates capsule access counts, records co-access patterns, promotes frequently-used capsules to faster tiers, and creates new capsules from Q&amp;A pairs.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §3 CONTEXT CAPSULES -->
+<section id="capsules">
+  <div class="container">
+    <h2 class="section-num reveal">§ 3</h2>
+    <h2 class="section-title reveal"><em>Context Capsules</em></h2>
+
+    <p class="reveal">A capsule is a self-contained information container that stores the same content in multiple formats simultaneously — the fundamental unit of information in ContextOS. The system automatically selects the right format based on priority, token budget, and query type.</p>
+
+    <div class="capsule-diagram" id="capsule-formats">
+      <div class="cap-format">
+        <div class="cap-fmt-name">Raw Text</div>
+        <div class="cap-fmt-desc">Full fidelity, zero information loss. Used for high-priority L1 context where detail matters.</div>
+        <div class="cap-fmt-size">~2,000 tokens · 100% fidelity</div>
+        <div style="margin-top:0.6rem; background:var(--black); height:3px; width:100%;"></div>
+      </div>
+      <div class="cap-format">
+        <div class="cap-fmt-name">Summary</div>
+        <div class="cap-fmt-desc">10–30% of original size. Used for background context in L2 where token efficiency matters.</div>
+        <div class="cap-fmt-size">~200 tokens · 90% token saving</div>
+        <div style="margin-top:0.6rem; background:var(--gray-700); height:3px; width:30%;"></div>
+      </div>
+      <div class="cap-format">
+        <div class="cap-fmt-name">Facts</div>
+        <div class="cap-fmt-desc">Ultra-compressed atomic claims. Used for fact-checking queries and filling remaining token budget.</div>
+        <div class="cap-fmt-size">~30 tokens · atomic</div>
+        <div style="margin-top:0.6rem; background:var(--gray-300); height:3px; width:8%;"></div>
+      </div>
+      <div class="cap-format">
+        <div class="cap-fmt-name">Embedding</div>
+        <div class="cap-fmt-desc">768-dimensional vector for semantic similarity search. Enables fast retrieval across millions of capsules.</div>
+        <div class="cap-fmt-size">768 floats · no tokens</div>
+        <div style="margin-top:0.6rem; background:var(--gray-200); height:3px; width:100%;"></div>
+      </div>
+      <div class="cap-format">
+        <div class="cap-fmt-name">Structured</div>
+        <div class="cap-fmt-desc">Tables, code, citations in parseable format. Used when the query involves comparisons or references.</div>
+        <div class="cap-fmt-size">Variable · machine-readable</div>
+        <div style="margin-top:0.6rem; background:var(--gray-200); height:3px; width:60%;"></div>
+      </div>
+    </div>
+
+    <h3 class="subsec reveal">Capsule Lifecycle</h3>
+    <p class="reveal">Capsules evolve through three phases, automatically migrating between tiers based on usage patterns:</p>
+
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title">① Creation</div>
+        <div class="card-body">New content arrives → all formats generated simultaneously → capsule starts in L3 cold storage. Q&amp;A pairs generate new capsules that start in L1 (hot).</div>
+      </div>
+      <div class="card">
+        <div class="card-title">② Growth</div>
+        <div class="card-body">Gets accessed → builds usage statistics → promoted to faster tiers. At 10 accesses/hour → L2. At 50 accesses/10min → L1. Co-access patterns recorded.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">③ Decay</div>
+        <div class="card-body">No recent access → relevance score drops → demoted to slower tiers. TTL policies trigger invalidation when source documents update.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §4 L3 BACKENDS -->
+<section id="backends">
+  <div class="container">
+    <h2 class="section-num reveal">§ 4</h2>
+    <h2 class="section-title reveal">L3 Storage Backends</h2>
+
+    <p class="reveal">L3 isn't a single database — it's three specialized storage systems working in concert. Each backend excels at a different class of retrieval query.</p>
+
+    <div class="backend-grid reveal">
+      <div class="backend-card">
+        <div class="backend-icon">∿</div>
+        <div class="backend-name">VectorDB</div>
+        <div class="backend-tech">Pinecone · Weaviate · Milvus</div>
+        <div class="backend-best">Converts query to 768-dim embedding, returns top-k semantically similar capsules. Best for <em>"find me information about X"</em> queries.</div>
+      </div>
+      <div class="backend-card">
+        <div class="backend-icon">◇</div>
+        <div class="backend-name">GraphDB</div>
+        <div class="backend-tech">Neo4j · Amazon Neptune</div>
+        <div class="backend-best">Traverses knowledge graph along edges like <em>compares-to</em>, <em>part-of</em>, <em>developed-by</em>. Best for <em>"how does X relate to Y?"</em> queries.</div>
+      </div>
+      <div class="backend-card">
+        <div class="backend-icon">□</div>
+        <div class="backend-name">ObjectStore</div>
+        <div class="backend-tech">S3-compatible storage</div>
+        <div class="backend-best">Stores and retrieves full documents — PDFs, text, code. Provides the source of truth when raw original content is needed.</div>
+      </div>
+    </div>
+
+    <p class="reveal" style="font-size:0.9rem; color:var(--gray-700);">The three backends are complementary: vector search finds similar content, graph traversal reveals non-obvious connections, and object storage provides full-fidelity retrieval. Combining all three produces the most comprehensive results possible.</p>
+  </div>
+</section>
+
+<!-- §5 LEARNING LOOP -->
+<section id="learning">
+  <div class="container">
+    <h2 class="section-num reveal">§ 5</h2>
+    <h2 class="section-title reveal">The Learning Loop</h2>
+
+    <p class="reveal">After every response, ContextOS updates its understanding of access patterns. The system gets smarter over time — the 10th query in a domain is dramatically faster than the 1st.</p>
+
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title">Capsule Statistics</div>
+        <div class="card-body card-mono">access_count += 1<br>last_accessed = now()<br>utility_score = f(feedback)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Co-Access Patterns</div>
+        <div class="card-body">Capsules used together get linked. Next time capsule A is accessed, capsule B is pre-fetched automatically.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cache Promotion</div>
+        <div class="card-body card-mono">&gt;10 accesses/hour → L2<br>&gt;50 accesses/10min → L1</div>
+      </div>
+      <div class="card">
+        <div class="card-title">New Capsule Creation</div>
+        <div class="card-body">Every Q&amp;A pair becomes a new capsule starting in L1 — immediately hot. The conversation itself becomes context for future questions.</div>
+      </div>
+    </div>
+
+    <h3 class="subsec reveal">What the System Learns</h3>
+    <div class="q-card reveal reveal-delay-1">
+      <div class="q-num">1</div>
+      <div class="q-text"><strong>Your Interests</strong> — If you frequently ask about machine learning, ML capsules stay permanently in L1 without manual configuration.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-2">
+      <div class="q-num">2</div>
+      <div class="q-text"><strong>Topic Clusters</strong> — Which topics are related and queried together. Transformers → attention mechanisms → positional encoding becomes a cached cluster.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-3">
+      <div class="q-num">3</div>
+      <div class="q-text"><strong>Query Patterns</strong> — Common follow-up questions get pre-fetched into L1 before you even ask them.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-4">
+      <div class="q-num">4</div>
+      <div class="q-text"><strong>Optimal Formats</strong> — Which capsule format (raw/summary/facts) works best for each query type, learned from response quality feedback.</div>
+    </div>
+  </div>
+</section>
+
+<!-- §6 PERFORMANCE -->
+<section id="performance">
+  <div class="container">
+    <h2 class="section-num reveal">§ 6</h2>
+    <h2 class="section-title reveal">Expected Performance</h2>
+
+    <p class="reveal">Based on the architecture design, latency improvements increase dramatically as the system learns access patterns over 50–100 queries:</p>
+
+    <div class="reveal" id="latency-bars" style="margin: 2rem 0;">
+      <div style="display:flex; gap:1rem; margin-bottom:0.5rem; font-family:var(--font-mono); font-size:0.68rem; color:var(--gray-500); padding-left:200px;">
+        <span style="width:12px;height:12px;background:var(--gray-300);display:inline-block;margin-right:4px;"></span>Traditional RAG
+        &nbsp;&nbsp;
+        <span style="width:12px;height:12px;background:var(--black);display:inline-block;margin-right:4px;"></span>ContextOS
+      </div>
+      <div class="lat-row">
+        <div class="lat-lbl">First-time (cold)</div>
+        <div class="lat-track"><div class="lat-fill rag" data-w="100" style="width:0%">150ms</div></div>
+        <div class="lat-val"></div>
+      </div>
+      <div class="lat-row">
+        <div class="lat-lbl">Follow-up (warm)</div>
+        <div class="lat-track"><div class="lat-fill rag" data-w="50" style="width:0%">80ms</div></div>
+        <div class="lat-track" style="flex:0.5;"><div class="lat-fill" data-w="100" style="width:0%">50ms</div></div>
+      </div>
+      <div class="lat-row">
+        <div class="lat-lbl">Frequent (hot)</div>
+        <div class="lat-track"><div class="lat-fill rag" data-w="100" style="width:0%">150ms</div></div>
+        <div class="lat-track" style="flex:0.1;"><div class="lat-fill" data-w="100" style="width:0%">15ms</div></div>
+      </div>
+      <div class="lat-row">
+        <div class="lat-lbl">Average (after learning)</div>
+        <div class="lat-track"><div class="lat-fill rag" data-w="100" style="width:0%">150ms</div></div>
+        <div class="lat-track" style="flex:0.27;"><div class="lat-fill" data-w="100" style="width:0%">40ms</div></div>
+      </div>
+    </div>
+
+    <table class="results-table reveal">
+      <thead>
+        <tr>
+          <th>Query Type</th>
+          <th>Traditional RAG</th>
+          <th>ContextOS</th>
+          <th>Improvement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>First-time (cold)</td>
+          <td>150ms</td>
+          <td>150ms</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Follow-up (warm)</td>
+          <td>150ms</td>
+          <td>50–80ms</td>
+          <td>~50%</td>
+        </tr>
+        <tr class="highlight">
+          <td>Frequent (hot)</td>
+          <td>150ms</td>
+          <td>10–20ms</td>
+          <td>~87%</td>
+        </tr>
+        <tr class="highlight">
+          <td>Average (after learning)</td>
+          <td>150ms</td>
+          <td>30–50ms</td>
+          <td>67–80%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsec reveal">Expected Cache Hit Rates</h3>
+    <p class="reveal" style="font-size:0.9rem;color:var(--gray-700);">After 50–100 queries in a domain, the system self-organizes to keep most context in fast tiers:</p>
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title" style="font-family:var(--font-mono);font-size:1.6rem;font-weight:400;">40–60%</div>
+        <div class="card-body">L1 cache hit rate — served in under 1ms from RAM</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-family:var(--font-mono);font-size:1.6rem;font-weight:400;">20–30%</div>
+        <div class="card-body">L2 cache hit rate — served in under 10ms from Redis</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-family:var(--font-mono);font-size:1.6rem;font-weight:400;">70–90%</div>
+        <div class="card-body">Combined L1+L2 hit rate — only 10–30% of queries reach L3</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §7 OPEN QUESTIONS -->
+<section id="open">
+  <div class="container">
+    <h2 class="section-num reveal">§ 7</h2>
+    <h2 class="section-title reveal">Limitations &amp; Open Questions</h2>
+
+    <div class="q-card reveal reveal-delay-1">
+      <div class="q-num">1</div>
+      <div class="q-text"><strong>Cold Start Problem</strong> — First-time users see no benefit until the system learns their patterns. Mitigation: pre-populate caches from similar users or domain defaults.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-2">
+      <div class="q-num">2</div>
+      <div class="q-text"><strong>Optimal Cache Sizes</strong> — What is the sweet spot for L1/L2 capacity? This likely varies by application domain and user behavior patterns.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-3">
+      <div class="q-num">3</div>
+      <div class="q-text"><strong>Cache Consistency</strong> — If source documents update, cached summaries become stale. TTL policies and dependency tracking are required for cache invalidation.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-4">
+      <div class="q-num">4</div>
+      <div class="q-text"><strong>Compression Strategies</strong> — Should L2 use extractive summarization, abstractive summarization, or learned query-aware compression? Each has different trade-offs.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-5">
+      <div class="q-num">5</div>
+      <div class="q-text"><strong>Multi-User Caching</strong> — How to share L2/L3 across users while preserving L1 privacy? Federated ContextOS across organizations is a long-term research direction.</div>
+    </div>
+  </div>
+</section>
+
+<!-- §8 PAPER EXPLORER -->
+<section id="paper-explorer" style="padding:0;border:none;">
+  <div id="pe-scroll-outer">
+    <div id="pe-sticky-frame">
+      <div id="paper-explorer">
+
+        <div id="pe-toc">
+          <div class="pe-toc-item active" data-idx="0" onclick="peGoto(0)"><span class="pe-toc-num">§0</span>Overview</div>
+          <div class="pe-toc-item" data-idx="1" onclick="peGoto(1)"><span class="pe-toc-num">§1</span>Problem</div>
+          <div class="pe-toc-item" data-idx="2" onclick="peGoto(2)"><span class="pe-toc-num">§2</span>Architecture</div>
+          <div class="pe-toc-item" data-idx="3" onclick="peGoto(3)"><span class="pe-toc-num">§3</span>Capsules</div>
+          <div class="pe-toc-item" data-idx="4" onclick="peGoto(4)"><span class="pe-toc-num">§4</span>Cache Tiers</div>
+          <div class="pe-toc-item" data-idx="5" onclick="peGoto(5)"><span class="pe-toc-num">§5</span>Backends</div>
+          <div class="pe-toc-item" data-idx="6" onclick="peGoto(6)"><span class="pe-toc-num">§6</span>Learning</div>
+          <div class="pe-toc-item" data-idx="7" onclick="peGoto(7)"><span class="pe-toc-num">§7</span>Performance</div>
+          <div class="pe-toc-item" data-idx="8" onclick="peGoto(8)"><span class="pe-toc-num">§8</span>Open Questions</div>
+        </div>
+
+        <div id="pe-split">
+          <!-- PDF SIDE -->
+          <div id="pe-left">
+            <div id="pe-canvas-wrap">
+              <div id="pe-loading">
+                <div class="pe-spinner"></div>
+                <p style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);margin-top:1rem;">Loading PDF…</p>
+              </div>
+              <canvas id="pe-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- ANIMATION SIDE -->
+          <div id="pe-right">
+            <div id="pe-anim-label">
+              <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.08em;" id="pe-anim-title">Overview</span>
+            </div>
+
+            <!-- Anim 0: Overview -->
+            <div class="pe-anim active" id="pe-a0">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s">Context<em>OS</em></div>
+                <div class="pe-word" style="--d:.15s;font-size:1rem;color:var(--gray-500);margin-top:.5rem;">An OS for LLM Context Management</div>
+                <div class="pe-pillars">
+                  <div class="pe-pillar" style="--dd:.3s"><div class="pe-pillar-icon">L1</div><div class="pe-pillar-lbl">Hot Context<br>&lt;1ms</div></div>
+                  <div class="pe-pillar" style="--dd:.45s"><div class="pe-pillar-icon">L2</div><div class="pe-pillar-lbl">Warm Context<br>&lt;10ms</div></div>
+                  <div class="pe-pillar" style="--dd:.6s"><div class="pe-pillar-icon">L3</div><div class="pe-pillar-lbl">Cold Storage<br>&lt;100ms</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Anim 1: Problem -->
+            <div class="pe-anim" id="pe-a1">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">The 150ms Problem</div>
+                <div style="margin-top:1.5rem;" class="pe-query-trace">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge">Q1</div><div class="pe-trace-text"><strong>Cold query</strong> → L3 search → 150ms</div></div>
+                  <div class="pe-trace-step" style="--d:.5s"><div class="pe-trace-badge">Q2</div><div class="pe-trace-text">Follow-up <strong>(30s later)</strong> → still 150ms</div></div>
+                  <div class="pe-trace-step" style="--d:.8s"><div class="pe-trace-badge">❌</div><div class="pe-trace-text">No temporal awareness. Every query treated identically.</div></div>
+                  <div class="pe-trace-step" style="--d:1.1s"><div class="pe-trace-badge">✓</div><div class="pe-trace-text">ContextOS Q2 → <strong>L1 hit → &lt;1ms</strong></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Anim 2: Architecture -->
+            <div class="pe-anim" id="pe-a2">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">6-Component System</div>
+                <div style="margin-top:1.2rem;" class="pe-phase-list">
+                  <div class="pe-phase" style="--d:.15s"><div class="pe-phase-dot">1</div><div class="pe-phase-body"><div class="pe-phase-name">User Interface</div><div class="pe-phase-desc">Captures query + timestamp + session</div></div></div>
+                  <div class="pe-phase" style="--d:.3s"><div class="pe-phase-dot">2</div><div class="pe-phase-body"><div class="pe-phase-name">Context Scheduler</div><div class="pe-phase-desc">Parses intent, searches tiers, ranks results</div></div></div>
+                  <div class="pe-phase" style="--d:.45s"><div class="pe-phase-dot">3</div><div class="pe-phase-body"><div class="pe-phase-name">Three-Tier Cache</div><div class="pe-phase-desc">L1 → L2 → L3 with cascade fallback</div></div></div>
+                  <div class="pe-phase" style="--d:.6s"><div class="pe-phase-dot">4</div><div class="pe-phase-body"><div class="pe-phase-name">Capsule Engine</div><div class="pe-phase-desc">Assembles optimal context prompt</div></div></div>
+                  <div class="pe-phase" style="--d:.75s"><div class="pe-phase-dot">5</div><div class="pe-phase-body"><div class="pe-phase-name">LLM Inference</div><div class="pe-phase-desc">Generates answer from rich context</div></div></div>
+                  <div class="pe-phase" style="--d:.9s"><div class="pe-phase-dot">6</div><div class="pe-phase-body"><div class="pe-phase-name">Feedback Loop</div><div class="pe-phase-desc">Updates stats, promotes capsules</div></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Anim 3: Capsules -->
+            <div class="pe-anim" id="pe-a3">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Capsule Formats</div>
+                <div style="margin-top:1.5rem;" class="pe-capsule-viz">
+                  <div class="pe-cap-row" style="--d:.2s"><div class="pe-cap-dot"></div><div class="pe-cap-label">Raw Text</div><div class="pe-cap-bar"><div class="pe-cap-fill" data-w="100"></div></div><div class="pe-cap-pct">100%</div></div>
+                  <div class="pe-cap-row" style="--d:.4s"><div class="pe-cap-dot" style="background:var(--gray-500)"></div><div class="pe-cap-label">Summary</div><div class="pe-cap-bar"><div class="pe-cap-fill" data-w="15" style="background:var(--gray-500)"></div></div><div class="pe-cap-pct">~15%</div></div>
+                  <div class="pe-cap-row" style="--d:.6s"><div class="pe-cap-dot" style="background:var(--gray-300)"></div><div class="pe-cap-label">Facts</div><div class="pe-cap-bar"><div class="pe-cap-fill" data-w="3" style="background:var(--gray-300)"></div></div><div class="pe-cap-pct">~3%</div></div>
+                  <div class="pe-cap-row" style="--d:.8s"><div class="pe-cap-dot" style="background:var(--gray-200)"></div><div class="pe-cap-label">Embedding</div><div class="pe-cap-bar"><div class="pe-cap-fill" data-w="100" style="background:var(--gray-200)"></div></div><div class="pe-cap-pct">768d</div></div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--gray-500);margin-top:1rem;font-family:var(--font-mono);">System auto-selects format based on priority and token budget.</p>
+              </div>
+            </div>
+
+            <!-- Anim 4: Cache Tiers -->
+            <div class="pe-anim" id="pe-a4">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Cache Tier Latencies</div>
+                <div style="margin-top:1.5rem;" class="pe-tier-stack">
+                  <div class="pe-tier-row" style="--d:.2s">
+                    <div class="pe-tier-chip chip-l1">L1</div>
+                    <div class="pe-tier-bar"><div class="pe-tier-bar-fill l1-fill" data-w="5">&lt;1ms</div></div>
+                    <div class="pe-tier-ms">RAM</div>
+                  </div>
+                  <div class="pe-tier-row" style="--d:.4s">
+                    <div class="pe-tier-chip chip-l2">L2</div>
+                    <div class="pe-tier-bar"><div class="pe-tier-bar-fill l2-fill" data-w="20">&lt;10ms</div></div>
+                    <div class="pe-tier-ms">Redis</div>
+                  </div>
+                  <div class="pe-tier-row" style="--d:.6s">
+                    <div class="pe-tier-chip chip-l3">L3</div>
+                    <div class="pe-tier-bar"><div class="pe-tier-bar-fill l3-fill" data-w="100">&lt;100ms</div></div>
+                    <div class="pe-tier-ms">Storage</div>
+                  </div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--gray-500);margin-top:1.5rem;font-family:var(--font-mono);">L1 is 100× faster than L3. Keeping hot context in L1 transforms average latency.</p>
+              </div>
+            </div>
+
+            <!-- Anim 5: Backends -->
+            <div class="pe-anim" id="pe-a5">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Three L3 Backends</div>
+                <div style="margin-top:1.2rem;" class="pe-query-trace">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge">∿</div><div class="pe-trace-text"><strong>VectorDB</strong> — semantic similarity, embedding search</div></div>
+                  <div class="pe-trace-step" style="--d:.5s"><div class="pe-trace-badge">◇</div><div class="pe-trace-text"><strong>GraphDB</strong> — relationship traversal, concept linking</div></div>
+                  <div class="pe-trace-step" style="--d:.8s"><div class="pe-trace-badge">□</div><div class="pe-trace-text"><strong>ObjectStore</strong> — full document retrieval, source of truth</div></div>
+                  <div class="pe-trace-step" style="--d:1.1s"><div class="pe-trace-badge">→</div><div class="pe-trace-text">All three combined = most comprehensive results</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Anim 6: Learning -->
+            <div class="pe-anim" id="pe-a6">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">The System Gets Smarter</div>
+                <div style="margin-top:1.2rem;" class="pe-phase-list">
+                  <div class="pe-phase" style="--d:.2s"><div class="pe-phase-dot">↑</div><div class="pe-phase-body"><div class="pe-phase-name">Promotion</div><div class="pe-phase-desc">Frequent capsules move to faster tiers automatically</div></div></div>
+                  <div class="pe-phase" style="--d:.4s"><div class="pe-phase-dot">↓</div><div class="pe-phase-body"><div class="pe-phase-name">Demotion</div><div class="pe-phase-desc">Unused capsules decay to slower tiers over time</div></div></div>
+                  <div class="pe-phase" style="--d:.6s"><div class="pe-phase-dot">+</div><div class="pe-phase-body"><div class="pe-phase-name">New Capsules</div><div class="pe-phase-desc">Every Q&amp;A pair becomes a hot L1 capsule immediately</div></div></div>
+                  <div class="pe-phase" style="--d:.8s"><div class="pe-phase-dot">~</div><div class="pe-phase-body"><div class="pe-phase-name">Co-Access</div><div class="pe-phase-desc">Related capsules get pre-fetched together</div></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Anim 7: Performance -->
+            <div class="pe-anim" id="pe-a7">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">67–80% Latency Reduction</div>
+                <div style="margin-top:1.5rem;">
+                  <div class="pe-bar-row" style="--d:.2s"><div class="pe-bar-lbl">Traditional RAG</div><div class="pe-bar-track"><div class="pe-bar-fill dim" data-w="100"></div></div><div class="pe-bar-val">150ms</div></div>
+                  <div class="pe-bar-row" style="--d:.4s"><div class="pe-bar-lbl">Cold query</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="100"></div></div><div class="pe-bar-val">150ms</div></div>
+                  <div class="pe-bar-row" style="--d:.6s"><div class="pe-bar-lbl">Warm follow-up</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="40"></div></div><div class="pe-bar-val">60ms</div></div>
+                  <div class="pe-bar-row" style="--d:.8s"><div class="pe-bar-lbl">Hot (frequent)</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="10"></div></div><div class="pe-bar-val">15ms</div></div>
+                  <div class="pe-bar-row" style="--d:1.0s"><div class="pe-bar-lbl">Average (learned)</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="27"></div></div><div class="pe-bar-val">40ms</div></div>
+                </div>
+                <div class="pe-hit-rates" style="margin-top:1.5rem;">
+                  <div class="pe-hit-box" style="--d:1.2s"><div class="pe-hit-num">50%</div><div class="pe-hit-lbl">L1 hit rate</div></div>
+                  <div class="pe-hit-box" style="--d:1.4s"><div class="pe-hit-num">25%</div><div class="pe-hit-lbl">L2 hit rate</div></div>
+                  <div class="pe-hit-box" style="--d:1.6s"><div class="pe-hit-num">80%</div><div class="pe-hit-lbl">L1+L2 combined</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Anim 8: Open Questions -->
+            <div class="pe-anim" id="pe-a8">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Open Research Questions</div>
+                <div style="margin-top:1.2rem;" class="pe-query-trace">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge">?</div><div class="pe-trace-text"><strong>Cold start</strong> — bootstrap for new users without history</div></div>
+                  <div class="pe-trace-step" style="--d:.45s"><div class="pe-trace-badge">?</div><div class="pe-trace-text"><strong>Optimal sizes</strong> — ideal L1/L2 capacity per domain</div></div>
+                  <div class="pe-trace-step" style="--d:.7s"><div class="pe-trace-badge">?</div><div class="pe-trace-text"><strong>Consistency</strong> — cache invalidation when source updates</div></div>
+                  <div class="pe-trace-step" style="--d:.95s"><div class="pe-trace-badge">?</div><div class="pe-trace-text"><strong>Compression</strong> — extractive vs. abstractive vs. learned</div></div>
+                  <div class="pe-trace-step" style="--d:1.2s"><div class="pe-trace-badge">?</div><div class="pe-trace-text"><strong>Multi-user</strong> — shared L2/L3 with L1 privacy boundaries</div></div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- pe-right -->
+
+          <div id="pe-nav">
+            <button class="pe-btn" onclick="peNav(-1)">← Prev</button>
+            <span id="pe-page-info">Page 1 / 18</span>
+            <button class="pe-btn" onclick="peNav(1)">Next →</button>
+            <span class="pe-scroll-hint">scroll to explore ↓</span>
+          </div>
+
+        </div><!-- pe-split -->
+      </div><!-- paper-explorer -->
+    </div><!-- pe-sticky-frame -->
+
+    <!-- scroll spacer -->
+    <div style="height:600vh;"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">ContextOS</div>
+        <div class="footer-sig">
+          Ahmed Hafdi<br>
+          <em>System Design Proposal</em><br>
+          September 2025
+        </div>
+      </div>
+      <div style="flex:1;">
+        <div class="footer-title">References</div>
+        <details>
+          <summary>View References</summary>
+          <ul class="ref-list">
+            <li><span>[1]</span>Lewis et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." NeurIPS.</li>
+            <li><span>[2]</span>Anthropic (2023). "Claude 2.1: 200K Context Window."</li>
+            <li><span>[3]</span>OpenAI (2023). "GPT-4 Technical Report."</li>
+            <li><span>[4]</span>Effelsberg &amp; Haerder (1984). "Principles of Database Buffer Management." ACM TODS.</li>
+            <li><span>[5]</span>Malkov &amp; Yashunin (2018). "Efficient and Robust Approximate Nearest Neighbor Search Using HNSW."</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ─── NAV ──────────────────────────────────────────── */
+function toggleMenu() {
+  document.getElementById('nav-burger').classList.toggle('open');
+  document.getElementById('nav-drawer').classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-burger').classList.remove('open');
+  document.getElementById('nav-drawer').classList.remove('open');
+}
+
+/* ─── TYPEWRITER ───────────────────────────────────── */
+(function(){
+  const phrase = "What if LLMs remembered like CPUs cache?";
+  let i = 0;
+  const el = document.getElementById('typewriter');
+  function tick() {
+    if (i < phrase.length) { el.textContent += phrase[i++]; setTimeout(tick, 38); }
+  }
+  setTimeout(tick, 500);
+})();
+
+/* ─── SCROLL REVEAL ────────────────────────────────── */
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* ─── ARCH NODES ───────────────────────────────────── */
+const nodeObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('shown'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.arch-node').forEach((n, i) => {
+  n.style.transitionDelay = (i * 0.12) + 's';
+  nodeObs.observe(n);
+});
+
+/* ─── CAPSULE FORMATS ──────────────────────────────── */
+const capObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const items = e.target.querySelectorAll('.cap-format');
+      items.forEach((c, i) => { setTimeout(() => c.classList.add('shown'), i * 100); });
+      capObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+const capDiagram = document.getElementById('capsule-formats');
+if (capDiagram) capObs.observe(capDiagram);
+
+/* ─── LATENCY BARS ─────────────────────────────────── */
+const latObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.lat-fill').forEach(b => {
+        const w = b.dataset.w || '100';
+        setTimeout(() => { b.style.width = w + '%'; }, 200);
+      });
+      latObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.2 });
+const latSec = document.getElementById('latency-bars');
+if (latSec) latObs.observe(latSec);
+
+/* ─── 3D CACHE VISUALIZATION ───────────────────────── */
+(function() {
+  const scene = document.getElementById('cache-scene');
+  const wrap = document.getElementById('cache-3d-wrap');
+  if (!scene || !wrap) return;
+
+  let rotX = 28, rotY = -20;
+  let dragging = false, lastX, lastY;
+
+  function applyRotation() {
+    scene.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  }
+
+  wrap.addEventListener('mousedown', e => {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    wrap.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    rotY += dx * 0.4;
+    rotX -= dy * 0.4;
+    rotX = Math.max(-60, Math.min(80, rotX));
+    applyRotation();
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  document.addEventListener('mouseup', () => {
+    dragging = false; wrap.style.cursor = 'grab';
+  });
+
+  // Touch support
+  wrap.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    dragging = true; lastX = t.clientX; lastY = t.clientY;
+  }, {passive: true});
+  document.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const t = e.touches[0];
+    const dx = t.clientX - lastX, dy = t.clientY - lastY;
+    rotY += dx * 0.4;
+    rotX -= dy * 0.4;
+    rotX = Math.max(-60, Math.min(80, rotX));
+    applyRotation();
+    lastX = t.clientX; lastY = t.clientY;
+  }, {passive: true});
+  document.addEventListener('touchend', () => { dragging = false; });
+
+  // Animate capsule particles flowing between tiers
+  const container = document.getElementById('particle-container');
+  if (!container) return;
+
+  // Tier center positions (approx in 3D scene coords)
+  const tierPositions = [
+    { left: 220, top: 45, z: 90 },  // L1
+    { left: 220, top: 45, z: 0 },   // L2
+    { left: 220, top: 45, z: -90 }, // L3
+  ];
+
+  function spawnParticle() {
+    const p = document.createElement('div');
+    p.className = 'capsule-particle';
+
+    // Random start tier and end tier
+    const fromTier = Math.floor(Math.random() * 3);
+    const toTier = fromTier === 2 ? Math.floor(Math.random() * 2) : fromTier + 1;
+
+    const startLeft = 60 + Math.random() * 320;
+    const direction = fromTier < toTier ? 1 : -1; // moving down (to L3) or up (promotion)
+
+    p.style.cssText = `
+      left: ${startLeft}px;
+      top: ${tierPositions[fromTier].top - 10}px;
+      opacity: 0;
+      background: ${fromTier === 0 ? '#fff' : fromTier === 1 ? '#ccc' : '#888'};
+      box-shadow: 0 0 6px ${fromTier === 0 ? 'rgba(255,255,255,0.9)' : 'rgba(200,200,200,0.5)'};
+    `;
+
+    container.appendChild(p);
+
+    // Animate: fade in, move between tiers, fade out
+    const duration = 1200 + Math.random() * 800;
+    p.animate([
+      { opacity: 0, transform: `translateZ(${tierPositions[fromTier].z}px) translateY(0px)` },
+      { opacity: 0.9, transform: `translateZ(${tierPositions[fromTier].z + (toTier - fromTier) * -45}px) translateY(${(toTier - fromTier) * 30}px)` },
+      { opacity: 0, transform: `translateZ(${tierPositions[toTier].z}px) translateY(${(toTier - fromTier) * 90}px)` }
+    ], { duration, easing: 'ease-in-out', fill: 'forwards' }).onfinish = () => p.remove();
+  }
+
+  // Spawn particles periodically
+  setInterval(spawnParticle, 400);
+  // Initial burst
+  for (let i = 0; i < 3; i++) setTimeout(spawnParticle, i * 200);
+
+  // Gentle auto-rotation when not dragging
+  let autoRot = 0;
+  function autoRotate() {
+    if (!dragging) {
+      autoRot += 0.08;
+      rotY = -20 + Math.sin(autoRot * 0.015) * 15;
+      applyRotation();
+    }
+    requestAnimationFrame(autoRotate);
+  }
+  autoRotate();
+})();
+
+/* ─── PAPER EXPLORER ───────────────────────────────── */
+(function(){
+  const PDF_URL = '/static/contextOS.pdf';
+  let pdfDoc = null, currentPage = 1, totalPages = 0, currentAnim = 0;
+  const TOTAL_ANIMS = 9;
+
+  // Page mapping: anim index → PDF page
+  const animToPage = [1, 1, 2, 6, 3, 5, 9, 12, 16];
+
+  const canvas = document.getElementById('pe-canvas');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+  const loading = document.getElementById('pe-loading');
+  const pageInfo = document.getElementById('pe-page-info');
+
+  function updatePageInfo() {
+    if (pageInfo) pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
+  }
+
+  function renderPage(num) {
+    if (!pdfDoc) return;
+    pdfDoc.getPage(num).then(page => {
+      const wrap = document.getElementById('pe-canvas-wrap');
+      const maxW = wrap ? wrap.clientWidth - 40 : 400;
+      const maxH = wrap ? wrap.clientHeight - 40 : 500;
+      const vp0 = page.getViewport({ scale: 1 });
+      const scale = Math.min(maxW / vp0.width, maxH / vp0.height, 2);
+      const vp = page.getViewport({ scale });
+      canvas.width = vp.width; canvas.height = vp.height;
+      page.render({ canvasContext: ctx, viewport: vp }).promise.then(() => {
+        if (loading) loading.classList.add('hidden');
+      });
+      currentPage = num;
+      updatePageInfo();
+    });
+  }
+
+  window.peNav = function(dir) {
+    if (!pdfDoc) return;
+    const next = Math.max(1, Math.min(totalPages, currentPage + dir));
+    renderPage(next);
+  };
+
+  window.peGoto = function(idx) {
+    currentAnim = Math.max(0, Math.min(TOTAL_ANIMS - 1, idx));
+    // Switch anim panel
+    document.querySelectorAll('.pe-anim').forEach((a, i) => a.classList.toggle('active', i === currentAnim));
+    document.querySelectorAll('.pe-toc-item').forEach((t, i) => t.classList.toggle('active', i === currentAnim));
+    // Update label
+    const titles = ['Overview','The Problem','Architecture','Capsules','Cache Tiers','Backends','Learning Loop','Performance','Open Questions'];
+    const lbl = document.getElementById('pe-anim-title');
+    if (lbl) lbl.textContent = titles[currentAnim] || '';
+    // Jump to corresponding PDF page
+    const pg = animToPage[currentAnim] || 1;
+    if (pdfDoc) renderPage(pg);
+    // Trigger bar animations in active panel
+    triggerPanelAnimations(currentAnim);
+  };
+
+  function triggerPanelAnimations(idx) {
+    const panel = document.getElementById('pe-a' + idx);
+    if (!panel) return;
+    // Bar fills
+    panel.querySelectorAll('.pe-bar-fill[data-w]').forEach(b => {
+      b.style.width = '0';
+      setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 300);
+    });
+    panel.querySelectorAll('.pe-cap-fill[data-w]').forEach(b => {
+      b.style.width = '0';
+      setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 300);
+    });
+    panel.querySelectorAll('.pe-tier-bar-fill[data-w]').forEach(b => {
+      b.style.width = '0';
+      setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 400);
+    });
+  }
+
+  // Load PDF
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    pdfjsLib.getDocument(PDF_URL).promise.then(doc => {
+      pdfDoc = doc; totalPages = doc.numPages;
+      renderPage(1);
+      updatePageInfo();
+    }).catch(() => { if (loading) loading.innerHTML = '<p style="font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-500);">PDF unavailable</p>'; });
+  } else {
+    if (loading) loading.innerHTML = '<p style="font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-500);">PDF viewer loading…</p>';
+  }
+
+  // Scroll-driven TOC
+  const outer = document.getElementById('pe-scroll-outer');
+  if (outer) {
+    window.addEventListener('scroll', () => {
+      const rect = outer.getBoundingClientRect();
+      if (rect.top > 0 || rect.bottom < 0) return;
+      const progress = Math.max(0, Math.min(1, (-rect.top) / (outer.clientHeight - window.innerHeight)));
+      const idx = Math.min(TOTAL_ANIMS - 1, Math.floor(progress * TOTAL_ANIMS));
+      if (idx !== currentAnim) peGoto(idx);
+    });
+  }
+
+  // Initial bar animations
+  setTimeout(() => triggerPanelAnimations(0), 800);
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+
+</body>
+</html>

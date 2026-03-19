@@ -23,6 +23,10 @@ def hafdi_conjecture():
 def realistic():
     return render_template("realistic.html")
 
+@app.route("/papers/contextOS")
+def context_os():
+    return render_template("contextOS.html")
+
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)
