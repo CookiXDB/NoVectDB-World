@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hafdi Conjecture — Asymptotic Bounds of Half-Prime Gaps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script>
+MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root {
+  --black: #000;
+  --white: #fff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-500: #888;
+  --gray-700: #444;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --max-w: 860px;
+  --section-gap: 100px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 17px; }
+body { font-family: var(--font-sans); background: var(--white); color: var(--black); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* ─── NAV ─────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px;
+}
+.nav-back { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; }
+.nav-back:hover { color: var(--black); }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); letter-spacing: 0.01em; transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+
+.nav-burger {
+  display: none; flex-direction: column; justify-content: center; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px;
+}
+.nav-burger span { display: block; height: 2px; background: var(--black); transition: transform .3s ease, opacity .3s ease; }
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.nav-drawer {
+  display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99;
+  background: rgba(255,255,255,0.98); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  flex-direction: column; padding: 0;
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s ease;
+}
+.nav-drawer.open { max-height: 400px; }
+.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
+.nav-drawer a { display: block; padding: 0.9rem 2rem; font-size: 0.9rem; text-decoration: none; color: var(--black); font-family: var(--font-sans); letter-spacing: 0.01em; transition: background .15s; }
+.nav-drawer a:hover { background: var(--gray-50); }
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
+section:last-of-type { border-bottom: none; }
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero { padding-top: 130px; padding-bottom: 80px; border-bottom: 1px solid var(--black); }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem; }
+h1.hero-title { font-family: var(--font-serif); font-size: clamp(2.8rem, 6vw, 4.4rem); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+h1.hero-title span { font-style: italic; }
+.hero-subtitle { font-size: 1.05rem; color: var(--gray-700); max-width: 620px; margin-bottom: 2rem; line-height: 1.6; }
+.hero-tagline { font-family: var(--font-serif); font-style: italic; font-size: 1.3rem; letter-spacing: -0.01em; border-left: 3px solid var(--black); padding-left: 1rem; margin: 2rem 0; }
+#typewriter::after { content: '|'; animation: blink .7s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-meta { font-size: 0.82rem; color: var(--gray-500); font-family: var(--font-mono); margin-top: 2.5rem; }
+.hero-meta strong { color: var(--black); }
+.abstract-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.8rem 2rem; margin-top: 3rem; border-radius: 2px; }
+.abstract-box .label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; }
+.abstract-box p { font-size: 0.93rem; color: var(--gray-700); line-height: 1.75; }
+
+/* ─── HEADINGS ────────────────────────────────────────── */
+h2.section-num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.2; }
+h3.subsec { font-size: 1rem; font-weight: 600; letter-spacing: 0.01em; margin: 2.5rem 0 0.8rem; }
+p { margin-bottom: 1rem; }
+
+/* ─── SCROLL REVEAL ───────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+.reveal-delay-5 { transition-delay: .5s; }
+
+/* ─── CARDS ───────────────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+.card { border: 1px solid var(--gray-200); padding: 1.8rem; background: var(--white); position: relative; overflow: hidden; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--black); }
+.card-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.6rem; }
+.card-body { font-size: 0.9rem; color: var(--gray-700); line-height: 1.65; }
+
+/* ─── SVG STAGE ───────────────────────────────────────── */
+.svg-stage { background: var(--gray-50); border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; margin: 1.5rem 0; overflow: hidden; border-radius: 2px; }
+
+/* ─── MATH BLOCK ──────────────────────────────────────── */
+.math-block { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.8rem 2rem; margin: 1.5rem 0; overflow-x: auto; text-align: center; }
+.math-label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; text-align: left; }
+
+/* ─── PRIME NUMBER LINE ───────────────────────────────── */
+.prime-line-svg text { font-family: var(--font-mono); }
+.prime-dot { transition: all 0.6s ease; }
+.gap-brace { opacity: 0; transition: opacity 0.5s ease; }
+.gap-brace.shown { opacity: 1; }
+
+/* ─── BOUND CHART ─────────────────────────────────────── */
+.bound-chart { position: relative; height: 200px; margin: 1.5rem 0; background: var(--gray-50); border: 1px solid var(--gray-200); overflow: hidden; }
+#bound-canvas { display: block; }
+
+/* ─── RESULTS TABLE ───────────────────────────────────── */
+.results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+.results-table th { text-align: left; padding: 0.6rem 1rem; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.results-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--gray-200); }
+.results-table tr.highlight td { font-weight: 600; background: var(--gray-50); }
+.results-table tr:hover td { background: var(--gray-100); }
+
+/* ─── VERIFICATION TABLE ──────────────────────────────── */
+.verify-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.82rem; font-family: var(--font-mono); }
+.verify-table th { padding: 0.5rem 0.8rem; border-bottom: 2px solid var(--black); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
+.verify-table td { padding: 0.45rem 0.8rem; border-bottom: 1px solid var(--gray-200); text-align: center; }
+.verify-table .check-col { color: #000; font-weight: 700; }
+.verify-row { opacity: 0; transform: translateX(-8px); transition: opacity .4s ease, transform .4s ease; }
+.verify-row.shown { opacity: 1; transform: none; }
+
+/* ─── QUESTION CARDS ──────────────────────────────────── */
+.q-card { border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem; margin-bottom: 0.8rem; display: flex; gap: 1.2rem; align-items: flex-start; }
+.q-num { font-family: var(--font-mono); font-size: 0.72rem; background: var(--black); color: var(--white); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.q-text { font-size: 0.92rem; color: var(--gray-700); line-height: 1.6; }
+
+/* ─── ARCH NODES ──────────────────────────────────────── */
+.arch-node { border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem; display: flex; align-items: flex-start; gap: 1.2rem; opacity: 0; transform: translateX(-20px); transition: opacity .5s ease, transform .5s ease; }
+.arch-node.shown { opacity: 1; transform: none; }
+.arch-node-num { font-family: var(--font-mono); font-size: 0.72rem; background: var(--black); color: var(--white); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.arch-node-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+.arch-node-desc { font-size: 0.88rem; color: var(--gray-700); line-height: 1.55; }
+.arch-arrow { text-align: left; padding: 0.4rem 0 0.4rem 1.5rem; color: var(--gray-500); font-size: 0.9rem; }
+
+/* ─── PAPER EXPLORER ──────────────────────────────────── */
+#pe-scroll-outer { position: relative; }
+#pe-sticky-frame {
+  position: sticky; top: 52px;
+  height: calc(100vh - 52px);
+  display: flex; flex-direction: column;
+  background: #fff;
+  border-top: 1px solid var(--gray-200);
+  overflow: hidden; z-index: 10;
+}
+#paper-explorer { display: flex; flex-direction: column; height: 100%; }
+#pe-toc {
+  display: flex; overflow-x: auto; scrollbar-width: none;
+  border-bottom: 1px solid var(--gray-200); flex-shrink: 0;
+  height: 46px; background: var(--gray-50);
+}
+#pe-toc::-webkit-scrollbar { display: none; }
+.pe-toc-item {
+  flex-shrink: 0; padding: 0 1.2rem;
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.8rem; cursor: pointer;
+  border-right: 1px solid var(--gray-200);
+  color: var(--gray-700); transition: background .15s;
+  white-space: nowrap;
+}
+.pe-toc-item:hover { background: var(--gray-100); }
+.pe-toc-item.active { background: var(--white); font-weight: 600; color: var(--black); border-bottom: 2px solid var(--black); }
+.pe-toc-num { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); }
+.pe-toc-item.active .pe-toc-num { color: var(--black); }
+
+#pe-split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; min-height: 0; }
+#pe-left { border-right: 1px solid var(--gray-200); background: #f2f2f2; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+#pe-canvas-wrap { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; }
+#pe-canvas { display: block; max-width: 100%; max-height: 100%; box-shadow: 0 4px 32px rgba(0,0,0,.18); background: #fff; }
+#pe-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f2f2f2; }
+#pe-loading.hidden { display: none; }
+.pe-spinner { width: 28px; height: 28px; border: 2px solid var(--gray-300); border-top-color: var(--black); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#pe-right { display: flex; flex-direction: column; overflow: hidden; }
+#pe-anim-label { padding: 0.8rem 1.5rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; background: var(--white); }
+.pe-anim { flex: 1; display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem; min-height: 0; }
+.pe-anim.active { display: flex; }
+.pe-anim-inner { width: 100%; max-width: 400px; }
+
+#pe-nav { padding: 0.6rem 1.5rem; border-top: 1px solid var(--gray-200); display: flex; align-items: center; gap: 1rem; flex-shrink: 0; background: var(--gray-50); }
+.pe-btn { font-family: var(--font-mono); font-size: 0.78rem; background: none; border: 1px solid var(--gray-200); padding: 0.3rem 0.9rem; cursor: pointer; transition: background .15s; }
+.pe-btn:hover { background: var(--gray-100); }
+#pe-page-info { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-500); flex: 1; text-align: center; }
+.pe-scroll-hint { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); margin-left: auto; }
+
+/* PE animations */
+@keyframes pe-word-in { to { opacity:1; transform:translateY(0) } }
+.pe-word { font-family: var(--font-serif); font-size: 1.6rem; opacity: 0; transform: translateY(10px); animation: pe-word-in .45s ease forwards; animation-delay: var(--d,0s); line-height: 1.1; }
+.pe-word-italic { font-style: italic; }
+
+.pe-pillars { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+.pe-pillar { flex: 1; min-width: 80px; border: 1px solid var(--gray-200); padding: 1rem; text-align: center; opacity: 0; transform: translateY(12px); animation: pe-word-in .4s ease forwards; animation-delay: var(--dd,0s); }
+.pe-pillar-icon { font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.4rem; }
+.pe-pillar-lbl { font-size: 0.72rem; color: var(--gray-700); line-height: 1.3; }
+
+.pe-prime-seq { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; align-items: baseline; }
+.pe-prime-chip { font-family: var(--font-mono); font-size: 0.9rem; background: var(--black); color: var(--white); padding: 0.2rem 0.5rem; opacity: 0; animation: pe-word-in .3s ease forwards; animation-delay: var(--d,0s); }
+.pe-gap-chip { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray-500); opacity: 0; animation: pe-word-in .3s ease forwards; animation-delay: var(--d,0s); }
+
+.pe-timeline { position: relative; padding-left: 1.5rem; }
+.pe-timeline::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--gray-200); }
+.pe-tl-item { position:relative; margin-bottom:1.2rem; opacity:0; animation: pe-word-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-tl-item::before { content:''; position:absolute; left:-1.5rem; top:0.4rem; width:8px; height:8px; background:var(--black); border-radius:50%; transform:translateX(-3px); }
+.pe-tl-year { font-family: var(--font-mono); font-size:0.7rem; color:var(--gray-500); }
+.pe-tl-text { font-size:0.85rem; line-height:1.5; }
+.pe-tl-text strong { color:var(--black); }
+
+.pe-formula-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem; margin: 0.8rem 0; text-align: center; opacity:0; animation: pe-word-in .5s ease forwards; animation-delay: var(--d,0s); }
+.pe-formula-label { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; text-align: left; }
+
+.pe-bar-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.7rem; opacity:0; animation: pe-word-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-bar-lbl { font-family: var(--font-mono); font-size: 0.72rem; width: 60px; text-align: right; color: var(--gray-700); }
+.pe-bar-track { flex: 1; height: 18px; background: var(--gray-100); overflow: hidden; }
+.pe-bar-fill { height: 100%; background: var(--black); width: 0; transition: width 1s cubic-bezier(.22,.61,.36,1); }
+.pe-bar-val { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray-500); width: 2rem; }
+
+.pe-q-list { list-style: none; }
+.pe-q-list li { display: flex; gap: 0.8rem; margin-bottom: 0.8rem; font-size: 0.85rem; line-height: 1.55; opacity:0; animation: pe-word-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-q-n { font-family: var(--font-mono); font-size: 0.72rem; background: var(--black); color: var(--white); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+
+/* ─── FOOTER ──────────────────────────────────────────── */
+footer { background: var(--gray-50); border-top: 1px solid var(--gray-200); padding: 3rem 0; }
+.footer-inner { display: flex; gap: 4rem; align-items: flex-start; flex-wrap: wrap; }
+.footer-title { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 1rem; }
+.footer-sig { font-size: 0.85rem; color: var(--gray-700); line-height: 1.6; }
+.footer-sig em { font-family: var(--font-serif); font-style: italic; }
+details summary { cursor: pointer; font-size: 0.88rem; font-weight: 500; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '+'; font-family: var(--font-mono); }
+details[open] summary::before { content: '−'; }
+.ref-list { margin-top: 1rem; padding-left: 0; list-style: none; }
+.ref-list li { display: flex; gap: 1rem; font-size: 0.83rem; color: var(--gray-700); margin-bottom: 0.6rem; line-height: 1.5; }
+.ref-list li span { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); flex-shrink: 0; }
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 700px) {
+  nav { padding: 0 1.2rem; }
+  .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .nav-drawer { display: flex; }
+  .container { padding: 0 1.2rem; }
+  #pe-split { grid-template-columns: 1fr; }
+  #pe-right { display: none; }
+  .card-grid { grid-template-columns: 1fr; }
+  .pe-pillars { gap: 0.6rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-logo">Hafdi Conjecture</span>
+  <ul class="nav-links">
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#definitions">Definitions</a></li>
+    <li><a href="#conjecture">Conjecture</a></li>
+    <li><a href="#motivation">Motivation</a></li>
+    <li><a href="#observations">Observations</a></li>
+    <li><a href="#verification">Verification</a></li>
+    <li><a href="#open">Open Questions</a></li>
+    <li><a href="#paper-explorer" style="font-weight:500;">Paper ↗</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<ul class="nav-drawer" id="nav-drawer">
+  <li><a href="#intro" onclick="closeMenu()">Introduction</a></li>
+  <li><a href="#definitions" onclick="closeMenu()">Definitions</a></li>
+  <li><a href="#conjecture" onclick="closeMenu()">Conjecture</a></li>
+  <li><a href="#motivation" onclick="closeMenu()">Motivation</a></li>
+  <li><a href="#observations" onclick="closeMenu()">Observations</a></li>
+  <li><a href="#verification" onclick="closeMenu()">Verification</a></li>
+  <li><a href="#open" onclick="closeMenu()">Open Questions</a></li>
+  <li><a href="#paper-explorer" onclick="closeMenu()">Paper ↗</a></li>
+</ul>
+
+<!-- §0 HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Research Paper · October 2025</div>
+    <h1 class="hero-title">Hafdi<span> Conjecture</span></h1>
+    <p class="hero-subtitle">A Conjecture on the Asymptotic Bounds of Half-Prime Gaps</p>
+    <div class="hero-tagline">
+      <span id="typewriter"></span>
+    </div>
+    <div class="hero-meta">
+      <strong>Ahmed Hafdi</strong> · Independent Research · October 28, 2025
+    </div>
+    <div class="abstract-box reveal">
+      <div class="label">Abstract</div>
+      <p>We present a new conjecture concerning the asymptotic behavior of prime gaps, specifically focusing on half-gap ratios. By introducing the normalized half-gap sequence \(\{r_n\}\), we propose an upper bound that connects the growth rate of these gaps to an exponential function of the prime index. This conjecture, if proven, would provide insight into the distribution of primes and refine existing bounds on prime gaps.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §1 INTRODUCTION -->
+<section id="intro">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-num">§ 1</h2>
+      <h2 class="section-title">Introduction</h2>
+      <p>Let \(P_n\) denote the \(n\)-th prime number, with \(P_0 = 2\), \(P_1 = 3\), \(P_2 = 5\), and so forth. The study of prime gaps, defined as \(g_n = P_{n+1} - P_n\), has been a central topic in analytic number theory for centuries.</p>
+      <p>Classical results such as Bertrand's postulate and more recent work by Zhang, Maynard, and the Polymath project have provided various bounds on prime gaps. In this paper, we introduce a normalized perspective by considering <em>half-gaps</em> \(r_n\), and propose a conjecture relating these quantities to an exponential bound in terms of the prime index.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card reveal reveal-delay-1">
+        <div class="card-title">Bertrand's Postulate (1845)</div>
+        <div class="card-body">For every integer \(n \geq 1\), there exists at least one prime \(p\) with \(n < p \leq 2n\). This guarantees gaps can never be too large relative to the prime itself.</div>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <div class="card-title">Zhang–Maynard (2013–2015)</div>
+        <div class="card-body">Proved that \(\liminf_{n\to\infty} g_n\) is bounded — infinitely many prime gaps remain below a fixed constant. The Hafdi Conjecture addresses the complementary question: how <em>small</em> can normalized gaps be, relative to index?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §2 DEFINITIONS -->
+<section id="definitions">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-num">§ 2</h2>
+      <h2 class="section-title">Definitions<br/>and Notation</h2>
+      <p>We introduce two central objects: the half-gap sequence and its cumulative representation.</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 1 — Half-Gap Sequence</div>
+      \[r_n = \frac{P_{n+1} - P_n}{2} = \frac{g_n}{2}\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;">Since all primes greater than 2 are odd, \(g_n\) is always even for \(n \geq 1\), making \(r_n\) a positive integer for all \(n \geq 1\).</p>
+    </div>
+
+    <!-- Animated prime number line -->
+    <div class="reveal" style="margin: 1.5rem 0;">
+      <h3 class="subsec">Prime Number Line</h3>
+      <p style="font-size:0.85rem;color:var(--gray-700);margin-bottom:1rem;">The primes \(P_1\) through \(P_6\), their gaps \(g_n\), and corresponding half-gaps \(r_n\):</p>
+      <div class="svg-stage" style="height:160px; padding: 1rem;">
+        <svg id="prime-line-svg" width="100%" height="130" viewBox="0 0 700 130" preserveAspectRatio="xMidYMid meet">
+          <!-- axis -->
+          <line x1="30" y1="65" x2="670" y2="65" stroke="#e8e8e8" stroke-width="2"/>
+          <!-- prime dots (placed proportionally: 3,5,7,11,13,17 → normalize to [30,670]) -->
+          <!-- scale: 3→30, 17→670 so range=14, scale=640/14≈45.7 -->
+          <!-- P1=3: 30, P2=5: 30+2*45.7=121.4, P3=7: 30+4*45.7=212.8, P4=11: 30+8*45.7=395.6, P5=13: 30+10*45.7=487, P6=17: 30+14*45.7=669.8 -->
+          <circle id="pd-1" cx="30"  cy="65" r="8" fill="#000" opacity="0" class="prime-dot"/>
+          <circle id="pd-2" cx="121" cy="65" r="8" fill="#000" opacity="0" class="prime-dot"/>
+          <circle id="pd-3" cx="213" cy="65" r="8" fill="#000" opacity="0" class="prime-dot"/>
+          <circle id="pd-4" cx="396" cy="65" r="8" fill="#000" opacity="0" class="prime-dot"/>
+          <circle id="pd-5" cx="487" cy="65" r="8" fill="#000" opacity="0" class="prime-dot"/>
+          <circle id="pd-6" cx="670" cy="65" r="8" fill="#000" opacity="0" class="prime-dot"/>
+          <!-- labels -->
+          <text id="pl-1" x="30"  y="95" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">P₁=3</text>
+          <text id="pl-2" x="121" y="95" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">P₂=5</text>
+          <text id="pl-3" x="213" y="95" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">P₃=7</text>
+          <text id="pl-4" x="396" y="95" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">P₄=11</text>
+          <text id="pl-5" x="487" y="95" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">P₅=13</text>
+          <text id="pl-6" x="670" y="95" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">P₆=17</text>
+          <!-- gap braces g1 (3→5) -->
+          <g id="gap-g1" class="gap-brace">
+            <line x1="30" y1="40" x2="121" y2="40" stroke="#888" stroke-width="1.5"/>
+            <line x1="30" y1="37" x2="30" y2="43" stroke="#888" stroke-width="1.5"/>
+            <line x1="121" y1="37" x2="121" y2="43" stroke="#888" stroke-width="1.5"/>
+            <text x="75"  y="32" text-anchor="middle" font-family="monospace" font-size="10" fill="#888">g₁=2, r₁=1</text>
+          </g>
+          <!-- gap brace g3 (7→11) -->
+          <g id="gap-g3" class="gap-brace">
+            <line x1="213" y1="40" x2="396" y2="40" stroke="#555" stroke-width="1.5"/>
+            <line x1="213" y1="37" x2="213" y2="43" stroke="#555" stroke-width="1.5"/>
+            <line x1="396" y1="37" x2="396" y2="43" stroke="#555" stroke-width="1.5"/>
+            <text x="304" y="32" text-anchor="middle" font-family="monospace" font-size="10" fill="#555">g₃=4, r₃=2</text>
+          </g>
+          <!-- gap brace g5 (13→17) -->
+          <g id="gap-g5" class="gap-brace">
+            <line x1="487" y1="40" x2="670" y2="40" stroke="#555" stroke-width="1.5"/>
+            <line x1="487" y1="37" x2="487" y2="43" stroke="#555" stroke-width="1.5"/>
+            <line x1="670" y1="37" x2="670" y2="43" stroke="#555" stroke-width="1.5"/>
+            <text x="578" y="32" text-anchor="middle" font-family="monospace" font-size="10" fill="#555">g₅=4, r₅=2</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 3 — Cumulative Representation</div>
+      \[P_m = P_1 + P_0 \cdot \sum_{i=1}^{m-1} r_i = 3 + 2\sum_{i=1}^{m-1} r_i\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;"><em>Proof by telescoping:</em> \(P_m = P_1 + \sum_{i=1}^{m-1}(P_{i+1}-P_i) = 3 + \sum_{i=1}^{m-1} 2r_i\).</p>
+    </div>
+  </div>
+</section>
+
+<!-- §3 MAIN CONJECTURE -->
+<section id="conjecture">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-num">§ 3</h2>
+      <h2 class="section-title">Main Conjecture</h2>
+      <p>The central claim of this paper — connecting the size of half-prime gaps to an exponential bound in the prime index.</p>
+    </div>
+
+    <div class="math-block reveal" style="border-left: 3px solid var(--black);">
+      <div class="math-label">Conjecture 4 — Exponential Half-Gap Bound</div>
+      <p style="font-size:0.9rem;color:var(--gray-700);margin-bottom:1rem;text-align:left;font-style:italic;">For any positive integer \(m\) such that \(P_m\) is prime, there exists an integer \(k \geq 1\) and an index \(n \leq m-1\) such that:</p>
+      \[r_n < \left\lfloor \frac{m}{2^k} \right\rfloor - 1\]
+    </div>
+
+    <div class="reveal reveal-delay-1">
+      <p style="font-size:0.9rem;color:var(--gray-700);">This conjecture suggests that among the first \(m-1\) half-gaps, at least one is bounded by an <strong>exponentially decreasing function of \(m\)</strong>. In other words, the sequence of half-gaps cannot all be too large relative to their index.</p>
+    </div>
+
+    <!-- Exponential bound visualization -->
+    <div class="reveal" style="margin-top:2rem;">
+      <h3 class="subsec">Bound Decay Visualization</h3>
+      <p style="font-size:0.85rem;color:var(--gray-700);margin-bottom:1rem;">The bound \(\lfloor m/2^k \rfloor - 1\) for fixed \(m=20\) as \(k\) increases — showing how stringent the bound becomes:</p>
+      <div class="svg-stage" style="height:180px;">
+        <svg id="bound-svg" width="100%" height="160" viewBox="0 0 600 160" preserveAspectRatio="xMidYMid meet">
+          <!-- grid lines -->
+          <line x1="60" y1="20" x2="60" y2="130" stroke="#e8e8e8" stroke-width="1"/>
+          <line x1="60" y1="130" x2="560" y2="130" stroke="#e8e8e8" stroke-width="1"/>
+          <!-- k=1: floor(20/2)-1=9, k=2: floor(20/4)-1=4, k=3: floor(20/8)-1=1, k=4: floor(20/16)-1=0 -->
+          <!-- bars at k=1,2,3,4: heights 9,4,1,0 normalize to max=9 → 110px height each bar width=80px gap=20px -->
+          <!-- x positions: 80,200,320,440 -->
+          <!-- bar heights: 9→110, 4→49, 1→12, 0→0 (proportional, max_h=110) -->
+          <rect id="bnd-1" x="80"  y="130" width="80" height="0" fill="#000"/>
+          <rect id="bnd-2" x="210" y="130" width="80" height="0" fill="#333"/>
+          <rect id="bnd-3" x="340" y="130" width="80" height="0" fill="#666"/>
+          <rect id="bnd-4" x="470" y="130" width="80" height="0" fill="#aaa"/>
+          <!-- k labels -->
+          <text x="120" y="148" text-anchor="middle" font-family="monospace" font-size="11" fill="#888">k=1</text>
+          <text x="250" y="148" text-anchor="middle" font-family="monospace" font-size="11" fill="#888">k=2</text>
+          <text x="380" y="148" text-anchor="middle" font-family="monospace" font-size="11" fill="#888">k=3</text>
+          <text x="510" y="148" text-anchor="middle" font-family="monospace" font-size="11" fill="#888">k=4</text>
+          <!-- value labels (will be set by JS) -->
+          <text id="bv-1" x="120" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">9</text>
+          <text id="bv-2" x="250" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">4</text>
+          <text id="bv-3" x="380" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">1</text>
+          <text id="bv-4" x="510" y="20" text-anchor="middle" font-family="monospace" font-size="11" fill="#000" opacity="0">0</text>
+          <!-- y-axis label -->
+          <text x="20" y="75" text-anchor="middle" font-family="monospace" font-size="10" fill="#888" transform="rotate(-90,20,75)">bound value</text>
+          <text x="310" y="165" text-anchor="middle" font-family="monospace" font-size="10" fill="#888">⌊m/2ᵏ⌋ − 1  (m = 20)</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §4 MOTIVATION -->
+<section id="motivation">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-num">§ 4</h2>
+      <h2 class="section-title">Motivation<br/>and Context</h2>
+      <p>The Hafdi Conjecture connects to three landmark results in prime number theory, each addressing a different facet of gap distribution.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card reveal reveal-delay-1">
+        <div class="card-title">Prime Number Theorem</div>
+        <div class="card-body">
+          The average gap between consecutive primes near \(n\) is approximately \(\ln(P_n)\). The Hafdi Conjecture provides a <em>different perspective</em>: rather than averages, it focuses on the <strong>minimum behavior</strong> of normalized gaps relative to index position.
+        </div>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <div class="card-title">Cramér's Conjecture</div>
+        <div class="card-body">
+          Cramér conjectured \(g_n = O((\ln P_n)^2)\). If the Hafdi Conjecture holds, it provides <strong>complementary information</strong> about the distribution of gap sizes — not the maximum but the index-relative minimum behavior.
+        </div>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <div class="card-title">Zhang–Maynard–Tao</div>
+        <div class="card-body">
+          Recent breakthroughs showed \(\liminf_{n\to\infty} g_n\) is bounded — infinitely many primes are within a fixed distance of each other. The Hafdi Conjecture addresses a <strong>different aspect</strong>: the relationship between prime <em>index</em> and gap magnitude.
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-4" style="margin-top:2rem;">
+      <h3 class="subsec">Heuristic Argument</h3>
+      <p style="font-size:0.9rem;color:var(--gray-700);">Under the assumption that primes behave pseudo-randomly with local density \(1/\ln(n)\) near \(n\), we expect gaps of size \(O(\ln P_m)\). For large \(m\), the condition \(r_n < \lfloor m/2^k\rfloor - 1\) becomes increasingly stringent as \(k\) grows, but there are \(m-1\) opportunities for at least one half-gap to satisfy this bound.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §5 PRELIMINARY OBSERVATIONS -->
+<section id="observations">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-num">§ 5</h2>
+      <h2 class="section-title">Preliminary<br/>Observations</h2>
+      <p>Two immediate consequences of Conjecture 4, assuming it holds.</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Proposition 6 — Asymptotic Corollary</div>
+      <p style="font-size:0.88rem;color:var(--gray-700);margin-bottom:1rem;text-align:left;font-style:italic;">If Conjecture 4 holds, then for sufficiently large \(m\), there exists \(n \leq m-1\) such that:</p>
+      \[r_n = O\!\left(\frac{m}{2^k}\right)\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;color:var(--gray-700);">for some \(k\) depending on \(m\). This makes the growth rate of the minimum half-gap sub-linear in \(m\).</p>
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">Proposition 7 — Density of Small Half-Gaps</div>
+      <p style="font-size:0.88rem;color:var(--gray-700);margin-bottom:1rem;text-align:left;font-style:italic;">The conjecture implies that the sequence \(\{r_n\}\) contains <strong>infinitely many terms</strong> that are relatively small compared to their index position.</p>
+      \[\exists\, \text{infinitely many } n : r_n \ll n\]
+      <p style="font-size:0.85rem;margin-top:0.8rem;text-align:left;color:var(--gray-700);">This is a weaker statement than twin prime density, but stronger than what follows from the PNT alone. The sequence of half-gaps cannot grow monotonically with index.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §6 COMPUTATIONAL VERIFICATION -->
+<section id="verification">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-num">§ 6</h2>
+      <h2 class="section-title">Computational<br/>Verification</h2>
+      <p>Initial verification for small primes demonstrates consistency with the conjecture. For each \(m\), we find the optimal \(k\) and exhibit an \(n \leq m-1\) satisfying the bound.</p>
+    </div>
+
+    <div class="reveal">
+      <h3 class="subsec">Verification Table</h3>
+      <p style="font-size:0.85rem;color:var(--gray-700);margin-bottom:1rem;">For each \(m\), we show the smallest \(r_n\) found among \(n \leq m-1\), and the first \(k\) for which the conjecture is satisfied.</p>
+      <div style="overflow-x:auto;">
+        <table class="verify-table" id="verify-table">
+          <thead>
+            <tr>
+              <th>m</th>
+              <th>Pₘ</th>
+              <th>min rₙ (n≤m−1)</th>
+              <th>k</th>
+              <th>⌊m/2ᵏ⌋ − 1</th>
+              <th>Satisfied?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="verify-row"><td>6</td><td>13</td><td>1</td><td>1</td><td>2</td><td class="check-col">✓</td></tr>
+            <tr class="verify-row"><td>8</td><td>19</td><td>1</td><td>1</td><td>3</td><td class="check-col">✓</td></tr>
+            <tr class="verify-row"><td>10</td><td>29</td><td>1</td><td>1</td><td>4</td><td class="check-col">✓</td></tr>
+            <tr class="verify-row"><td>12</td><td>37</td><td>1</td><td>1</td><td>5</td><td class="check-col">✓</td></tr>
+            <tr class="verify-row"><td>15</td><td>47</td><td>1</td><td>1</td><td>6</td><td class="check-col">✓</td></tr>
+            <tr class="verify-row"><td>20</td><td>71</td><td>1</td><td>1</td><td>9</td><td class="check-col">✓</td></tr>
+            <tr class="verify-row"><td>25</td><td>97</td><td>1</td><td>1</td><td>11</td><td class="check-col">✓</td></tr>
+            <tr class="verify-row"><td>30</td><td>113</td><td>1</td><td>1</td><td>14</td><td class="check-col">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.82rem;color:var(--gray-500);font-family:var(--font-mono);margin-top:0.5rem;">k=1 suffices for all verified cases — the bound ⌊m/2⌋−1 is easily satisfied when r₁=1 (P₁=3, P₂=5).</p>
+    </div>
+
+    <div class="reveal reveal-delay-2" style="margin-top:2rem;">
+      <h3 class="subsec">Systematic Study Approach</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title">Step 1</div>
+          <div class="card-body">Compute \(r_n\) for \(1 \leq n \leq N\) for large \(N\) using a prime sieve.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Step 2</div>
+          <div class="card-body">For each \(m\), determine the optimal \(k\) and verify \(\exists n : r_n < \lfloor m/2^k\rfloor - 1\).</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Step 3</div>
+          <div class="card-body">Analyze the distribution of \((m, k)\) pairs that satisfy the conjecture and characterize extremal cases.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §7 OPEN QUESTIONS -->
+<section id="open">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-num">§ 7</h2>
+      <h2 class="section-title">Open Questions<br/>and Future Work</h2>
+      <p>Five natural directions for further investigation:</p>
+    </div>
+
+    <div style="margin-top:1.5rem;">
+      <div class="q-card reveal reveal-delay-1">
+        <div class="q-num">1</div>
+        <div class="q-text">What is the <strong>optimal relationship</strong> between \(m\) and \(k\) in Conjecture 4? Can we sharpen the bound to a specific \(k = k(m)\)?</div>
+      </div>
+      <div class="q-card reveal reveal-delay-2">
+        <div class="q-num">2</div>
+        <div class="q-text">Can we provide a <strong>probabilistic argument</strong> using the Cramér random model to establish the conjecture with probability 1 under standard heuristics?</div>
+      </div>
+      <div class="q-card reveal reveal-delay-3">
+        <div class="q-num">3</div>
+        <div class="q-text">Does the conjecture hold <strong>with probability 1</strong> under standard heuristics for prime distributions?</div>
+      </div>
+      <div class="q-card reveal reveal-delay-4">
+        <div class="q-num">4</div>
+        <div class="q-text">What are the <strong>implications for primality testing</strong> or cryptographic applications, where gap structure has practical consequences?</div>
+      </div>
+      <div class="q-card reveal reveal-delay-5">
+        <div class="q-num">5</div>
+        <div class="q-text">Can this conjecture be <strong>weakened or strengthened</strong> while remaining tractable — for instance, by replacing \(2^k\) with a slower or faster exponential base?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §8 CONCLUSION -->
+<section id="conclusion">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-num">§ 8</h2>
+      <h2 class="section-title">Conclusion</h2>
+      <p>We have presented a novel conjecture relating the size of half-prime gaps to an exponential bound in terms of the prime index. While the conjecture requires rigorous proof, it offers a fresh perspective on the classical problem of bounding prime gaps and may lead to new insights in analytic number theory.</p>
+    </div>
+    <div class="reveal reveal-delay-1" style="margin-top:2rem;padding:1.5rem 2rem;border-left:3px solid var(--black);background:var(--gray-50);">
+      <p style="font-family:var(--font-serif);font-style:italic;font-size:1.1rem;margin:0;">"The half-gap sequence \(\{r_n\}\) encodes the fine structure of prime distribution in a normalized, integer-valued form — making it a natural lens for studying asymptotic gap behavior."</p>
+      <p style="margin-top:0.8rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--gray-500);">— Ahmed Hafdi, October 2025</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PAPER EXPLORER — full-window, scroll-driven
+     ══════════════════════════════════════════════════════════ -->
+<div id="pe-scroll-outer">
+  <div id="pe-sticky-frame">
+    <div id="paper-explorer">
+
+      <!-- TOC strip -->
+      <div id="pe-toc">
+        <div class="pe-toc-item active" data-section="0" onclick="peGoSection(0)"><span class="pe-toc-num">§0</span>Abstract</div>
+        <div class="pe-toc-item" data-section="1" onclick="peGoSection(1)"><span class="pe-toc-num">§1</span>Introduction</div>
+        <div class="pe-toc-item" data-section="2" onclick="peGoSection(2)"><span class="pe-toc-num">§2</span>Definitions</div>
+        <div class="pe-toc-item" data-section="3" onclick="peGoSection(3)"><span class="pe-toc-num">§3</span>Conjecture</div>
+        <div class="pe-toc-item" data-section="4" onclick="peGoSection(4)"><span class="pe-toc-num">§4</span>Motivation</div>
+        <div class="pe-toc-item" data-section="5" onclick="peGoSection(5)"><span class="pe-toc-num">§5</span>Observations</div>
+        <div class="pe-toc-item" data-section="6" onclick="peGoSection(6)"><span class="pe-toc-num">§6</span>Verification</div>
+        <div class="pe-toc-item" data-section="7" onclick="peGoSection(7)"><span class="pe-toc-num">§7</span>Open Questions</div>
+        <div class="pe-toc-item" data-section="8" onclick="peGoSection(8)"><span class="pe-toc-num">§8</span>Conclusion</div>
+      </div>
+
+      <!-- Split: PDF | Animation -->
+      <div id="pe-split">
+        <!-- LEFT: PDF -->
+        <div id="pe-left">
+          <div id="pe-canvas-wrap">
+            <canvas id="pe-canvas"></canvas>
+            <div id="pe-loading">
+              <div class="pe-spinner"></div>
+              <div style="margin-top:.8rem;font-family:var(--font-mono);font-size:.75rem;color:#888">Loading PDF…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Animations -->
+        <div id="pe-right">
+          <div id="pe-anim-label">
+            <span id="pe-anim-num" style="font-family:var(--font-mono);font-size:.72rem;color:var(--gray-500)">§ 0</span>
+            <span id="pe-anim-title" style="font-weight:600">Abstract</span>
+          </div>
+
+          <!-- §0 Abstract -->
+          <div class="pe-anim active" id="pe-anim-0">
+            <div class="pe-anim-inner">
+              <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.5rem;">
+                <span class="pe-word" style="--d:0s">How</span>
+                <span class="pe-word" style="--d:.12s">small</span>
+                <span class="pe-word" style="--d:.24s">can</span>
+                <span class="pe-word pe-word-italic" style="--d:.36s">half-prime</span>
+                <span class="pe-word" style="--d:.48s">gaps</span>
+                <span class="pe-word" style="--d:.6s">be?</span>
+              </div>
+              <div class="pe-pillars">
+                <div class="pe-pillar" style="--dd:0.9s">
+                  <div class="pe-pillar-icon">rₙ</div>
+                  <div class="pe-pillar-lbl">Half-Gap<br/>Sequence</div>
+                </div>
+                <div class="pe-pillar" style="--dd:1.1s">
+                  <div class="pe-pillar-icon">⌊⌋</div>
+                  <div class="pe-pillar-lbl">Exponential<br/>Bound</div>
+                </div>
+                <div class="pe-pillar" style="--dd:1.3s">
+                  <div class="pe-pillar-icon">ℕ</div>
+                  <div class="pe-pillar-lbl">Number<br/>Theory</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- §1 Introduction -->
+          <div class="pe-anim" id="pe-anim-1">
+            <div class="pe-anim-inner">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">Historical context</div>
+              <div class="pe-timeline">
+                <div class="pe-tl-item" style="--d:0.1s">
+                  <div class="pe-tl-year">1845</div>
+                  <div class="pe-tl-text"><strong>Bertrand's Postulate</strong> — always a prime between n and 2n</div>
+                </div>
+                <div class="pe-tl-item" style="--d:0.4s">
+                  <div class="pe-tl-year">1936</div>
+                  <div class="pe-tl-text"><strong>Cramér's Conjecture</strong> — gₙ = O((ln Pₙ)²)</div>
+                </div>
+                <div class="pe-tl-item" style="--d:0.7s">
+                  <div class="pe-tl-year">2013</div>
+                  <div class="pe-tl-text"><strong>Zhang's Theorem</strong> — bounded gaps, lim inf gₙ &lt; 70,000,000</div>
+                </div>
+                <div class="pe-tl-item" style="--d:1.0s">
+                  <div class="pe-tl-year">2015</div>
+                  <div class="pe-tl-text"><strong>Maynard–Tao</strong> — lim inf gₙ ≤ 246</div>
+                </div>
+                <div class="pe-tl-item" style="--d:1.3s">
+                  <div class="pe-tl-year">2025</div>
+                  <div class="pe-tl-text"><strong>Hafdi Conjecture</strong> — exponential bound on min rₙ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- §2 Definitions -->
+          <div class="pe-anim" id="pe-anim-2">
+            <div class="pe-anim-inner">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">First primes and half-gaps</div>
+              <div class="pe-prime-seq">
+                <span class="pe-prime-chip" style="--d:0.0s">2</span>
+                <span class="pe-gap-chip"   style="--d:0.2s">r₀=½</span>
+                <span class="pe-prime-chip" style="--d:0.4s">3</span>
+                <span class="pe-gap-chip"   style="--d:0.6s">r₁=1</span>
+                <span class="pe-prime-chip" style="--d:0.8s">5</span>
+                <span class="pe-gap-chip"   style="--d:1.0s">r₂=1</span>
+                <span class="pe-prime-chip" style="--d:1.2s">7</span>
+                <span class="pe-gap-chip"   style="--d:1.4s">r₃=2</span>
+                <span class="pe-prime-chip" style="--d:1.6s">11</span>
+                <span class="pe-gap-chip"   style="--d:1.8s">r₄=1</span>
+                <span class="pe-prime-chip" style="--d:2.0s">13</span>
+              </div>
+              <div class="pe-formula-box" style="--d:2.4s;margin-top:1.2rem;">
+                <div class="pe-formula-label">Definition</div>
+                rₙ = gₙ / 2 = (Pₙ₊₁ − Pₙ) / 2
+              </div>
+            </div>
+          </div>
+
+          <!-- §3 Main Conjecture -->
+          <div class="pe-anim" id="pe-anim-3">
+            <div class="pe-anim-inner">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">Conjecture 4 — Exponential Bound</div>
+              <div class="pe-formula-box" style="--d:0.1s;border-left:3px solid #000;">
+                <div class="pe-formula-label">Main statement</div>
+                ∃ k ≥ 1, n ≤ m−1 : rₙ &lt; ⌊m/2ᵏ⌋ − 1
+              </div>
+              <div style="margin-top:1.2rem;">
+                <div class="pe-bar-row" style="--d:0.6s">
+                  <div class="pe-bar-lbl">k=1</div>
+                  <div class="pe-bar-track"><div class="pe-bar-fill" id="bnd-bar-1" data-w="90"></div></div>
+                  <div class="pe-bar-val">⌊m/2⌋</div>
+                </div>
+                <div class="pe-bar-row" style="--d:0.8s">
+                  <div class="pe-bar-lbl">k=2</div>
+                  <div class="pe-bar-track"><div class="pe-bar-fill" id="bnd-bar-2" data-w="45"></div></div>
+                  <div class="pe-bar-val">⌊m/4⌋</div>
+                </div>
+                <div class="pe-bar-row" style="--d:1.0s">
+                  <div class="pe-bar-lbl">k=3</div>
+                  <div class="pe-bar-track"><div class="pe-bar-fill" id="bnd-bar-3" data-w="22"></div></div>
+                  <div class="pe-bar-val">⌊m/8⌋</div>
+                </div>
+                <div class="pe-bar-row" style="--d:1.2s">
+                  <div class="pe-bar-lbl">k=4</div>
+                  <div class="pe-bar-track"><div class="pe-bar-fill" id="bnd-bar-4" data-w="11"></div></div>
+                  <div class="pe-bar-val">⌊m/16⌋</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- §4 Motivation -->
+          <div class="pe-anim" id="pe-anim-4">
+            <div class="pe-anim-inner">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">Classical connections</div>
+              <div class="pe-pillars" style="flex-direction:column;gap:0.6rem;">
+                <div class="pe-pillar" style="--dd:0.1s;text-align:left;display:flex;gap:1rem;align-items:flex-start;">
+                  <div class="pe-pillar-icon" style="flex-shrink:0;">PNT</div>
+                  <div class="pe-pillar-lbl" style="font-size:0.82rem;">Avg gap ≈ ln Pₙ — Hafdi focuses on the <em>minimum</em></div>
+                </div>
+                <div class="pe-pillar" style="--dd:0.4s;text-align:left;display:flex;gap:1rem;align-items:flex-start;">
+                  <div class="pe-pillar-icon" style="flex-shrink:0;">Cr</div>
+                  <div class="pe-pillar-lbl" style="font-size:0.82rem;">gₙ = O((ln Pₙ)²) — complementary to Hafdi's index bound</div>
+                </div>
+                <div class="pe-pillar" style="--dd:0.7s;text-align:left;display:flex;gap:1rem;align-items:flex-start;">
+                  <div class="pe-pillar-icon" style="flex-shrink:0;">ZMT</div>
+                  <div class="pe-pillar-lbl" style="font-size:0.82rem;">lim inf gₙ bounded — different: index vs magnitude</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- §5 Observations -->
+          <div class="pe-anim" id="pe-anim-5">
+            <div class="pe-anim-inner">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">Consequences of Conjecture 4</div>
+              <div class="pe-formula-box" style="--d:0.1s;">
+                <div class="pe-formula-label">Proposition 6</div>
+                rₙ = O(m / 2ᵏ)  for large m
+              </div>
+              <div class="pe-formula-box" style="--d:0.6s;">
+                <div class="pe-formula-label">Proposition 7</div>
+                ∃ infinitely many n : rₙ ≪ n
+              </div>
+              <div style="font-size:0.82rem;color:var(--gray-700);margin-top:1rem;opacity:0;animation:pe-word-in .5s ease forwards;animation-delay:1.1s;">
+                The half-gap sequence cannot grow monotonically — it must return to small values infinitely often, relative to index.
+              </div>
+            </div>
+          </div>
+
+          <!-- §6 Verification -->
+          <div class="pe-anim" id="pe-anim-6">
+            <div class="pe-anim-inner">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">Verified cases (k=1 suffices)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                <div class="pe-formula-box" style="--d:0.1s;padding:0.8rem;">
+                  <div class="pe-formula-label">m=10</div>
+                  ⌊10/2⌋−1 = 4<br/>r₁=1 &lt; 4 ✓
+                </div>
+                <div class="pe-formula-box" style="--d:0.3s;padding:0.8rem;">
+                  <div class="pe-formula-label">m=20</div>
+                  ⌊20/2⌋−1 = 9<br/>r₁=1 &lt; 9 ✓
+                </div>
+                <div class="pe-formula-box" style="--d:0.5s;padding:0.8rem;">
+                  <div class="pe-formula-label">m=50</div>
+                  ⌊50/2⌋−1 = 24<br/>r₁=1 &lt; 24 ✓
+                </div>
+                <div class="pe-formula-box" style="--d:0.7s;padding:0.8rem;">
+                  <div class="pe-formula-label">m=100</div>
+                  ⌊100/2⌋−1 = 49<br/>r₁=1 &lt; 49 ✓
+                </div>
+              </div>
+              <div style="font-size:0.78rem;color:var(--gray-500);margin-top:0.8rem;font-family:var(--font-mono);opacity:0;animation:pe-word-in .5s ease forwards;animation-delay:1.1s;">
+                The twin-prime gap (r=1) satisfies the conjecture whenever m ≥ 6.
+              </div>
+            </div>
+          </div>
+
+          <!-- §7 Open Questions -->
+          <div class="pe-anim" id="pe-anim-7">
+            <div class="pe-anim-inner">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">Five open directions</div>
+              <ul class="pe-q-list">
+                <li style="--d:0.1s"><div class="pe-q-n">1</div>Optimal k(m) relationship?</li>
+                <li style="--d:0.35s"><div class="pe-q-n">2</div>Cramér model probabilistic argument?</li>
+                <li style="--d:0.6s"><div class="pe-q-n">3</div>Holds with probability 1 under heuristics?</li>
+                <li style="--d:0.85s"><div class="pe-q-n">4</div>Cryptographic / primality applications?</li>
+                <li style="--d:1.1s"><div class="pe-q-n">5</div>Weaken or strengthen while tractable?</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- §8 Conclusion -->
+          <div class="pe-anim" id="pe-anim-8">
+            <div class="pe-anim-inner">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);margin-bottom:1.2rem;text-transform:uppercase;letter-spacing:0.08em;">Conclusion</div>
+              <div class="pe-formula-box" style="--d:0.1s;border-left:3px solid #000;text-align:left;font-style:italic;font-family:var(--font-serif);font-size:1rem;">
+                "A fresh perspective on bounding prime gaps — through normalization and index-relative exponential bounds."
+              </div>
+              <div class="pe-pillars" style="margin-top:1.5rem;">
+                <div class="pe-pillar" style="--dd:0.8s;">
+                  <div class="pe-pillar-icon">✦</div>
+                  <div class="pe-pillar-lbl">New<br/>conjecture</div>
+                </div>
+                <div class="pe-pillar" style="--dd:1.0s;">
+                  <div class="pe-pillar-icon">∞</div>
+                  <div class="pe-pillar-lbl">Open<br/>problems</div>
+                </div>
+                <div class="pe-pillar" style="--dd:1.2s;">
+                  <div class="pe-pillar-icon">ℙ</div>
+                  <div class="pe-pillar-lbl">Prime<br/>theory</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /#pe-right -->
+      </div><!-- /#pe-split -->
+
+      <!-- Bottom nav -->
+      <div id="pe-nav">
+        <button class="pe-btn" onclick="pePrevPage()">← Prev</button>
+        <span id="pe-page-info">— / —</span>
+        <button class="pe-btn" onclick="peNextPage()">Next →</button>
+        <span class="pe-scroll-hint">↓ scroll to explore</span>
+      </div>
+
+    </div><!-- /#paper-explorer -->
+  </div><!-- /#pe-sticky-frame -->
+</div><!-- /#pe-scroll-outer -->
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">References</div>
+        <details>
+          <summary>Show 5 references</summary>
+          <ol class="ref-list">
+            <li><span>[1]</span>J. Bertrand, <em>Mémoire sur le nombre de valeurs que peut prendre une fonction quand on y permute les lettres qu'elle renferme</em>, Journal de l'École Royale Polytechnique, 1845.</li>
+            <li><span>[2]</span>H. Cramér, <em>On the order of magnitude of the difference between consecutive prime numbers</em>, Acta Arithmetica, 1936.</li>
+            <li><span>[3]</span>Y. Zhang, <em>Bounded gaps between primes</em>, Annals of Mathematics, 2014.</li>
+            <li><span>[4]</span>J. Maynard, <em>Small gaps between primes</em>, Annals of Mathematics, 2015.</li>
+            <li><span>[5]</span>D.H.J. Polymath, <em>Variants of the Selberg sieve, and bounded intervals containing many primes</em>, Research in the Mathematical Sciences, 2014.</li>
+          </ol>
+        </details>
+      </div>
+      <div class="footer-sig">
+        Interactive explanation of: <em>A Conjecture on the Asymptotic Bounds of Half-Prime Gaps</em><br/>
+        Ahmed Hafdi · Independent Research · October 2025
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── MOBILE MENU ───────────────────────────────────────────────────────────
+function toggleMenu() {
+  const burger = document.getElementById('nav-burger');
+  const drawer = document.getElementById('nav-drawer');
+  burger.classList.toggle('open');
+  drawer.classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-burger').classList.remove('open');
+  document.getElementById('nav-drawer').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  const burger = document.getElementById('nav-burger');
+  const drawer = document.getElementById('nav-drawer');
+  if (!burger.contains(e.target) && !drawer.contains(e.target)) {
+    burger.classList.remove('open');
+    drawer.classList.remove('open');
+  }
+});
+
+// ─── TYPEWRITER ─────────────────────────────────────────────────────────────
+const phrase = "How small can half-prime gaps be, relative to their index?";
+const tw = document.getElementById('typewriter');
+let ti = 0;
+function typeNext() {
+  if (ti <= phrase.length) { tw.textContent = phrase.slice(0, ti++); setTimeout(typeNext, 36); }
+}
+setTimeout(typeNext, 600);
+
+// ─── SCROLL REVEAL ──────────────────────────────────────────────────────────
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+// ─── PRIME LINE ANIMATION ───────────────────────────────────────────────────
+const primeLineObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  primeLineObs.disconnect();
+  const dots = ['pd-1','pd-2','pd-3','pd-4','pd-5','pd-6'];
+  const labels = ['pl-1','pl-2','pl-3','pl-4','pl-5','pl-6'];
+  dots.forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('opacity','1');
+      const lbl = document.getElementById(labels[i]);
+      if (lbl) lbl.setAttribute('opacity','1');
+    }, i * 250);
+  });
+  setTimeout(() => {
+    ['gap-g1','gap-g3','gap-g5'].forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('shown');
+      }, i * 300);
+    });
+  }, dots.length * 250 + 200);
+}, { threshold: 0.3 });
+const plSvg = document.getElementById('prime-line-svg');
+if (plSvg) primeLineObs.observe(plSvg);
+
+// ─── BOUND SVG ANIMATION ────────────────────────────────────────────────────
+const boundObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  boundObs.disconnect();
+  // bar heights proportional: 9→110, 4→49, 1→12, 0→0
+  const bars = [
+    { id: 'bnd-1', h: 110, vy: 20 },
+    { id: 'bnd-2', h: 49,  vy: 81 },
+    { id: 'bnd-3', h: 12,  vy: 118 },
+    { id: 'bnd-4', h: 0,   vy: 130 },
+  ];
+  const vals = ['bv-1','bv-2','bv-3','bv-4'];
+  bars.forEach((b, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(b.id);
+      if (el) {
+        el.setAttribute('y', 130 - b.h);
+        el.setAttribute('height', b.h);
+      }
+      const vl = document.getElementById(vals[i]);
+      if (vl) {
+        vl.setAttribute('y', Math.max(15, 130 - b.h - 5));
+        vl.setAttribute('opacity','1');
+      }
+    }, i * 300);
+  });
+}, { threshold: 0.3 });
+const bSvg = document.getElementById('bound-svg');
+if (bSvg) boundObs.observe(bSvg);
+
+// ─── VERIFY TABLE ANIMATION ─────────────────────────────────────────────────
+const verifyObs = new IntersectionObserver((entries) => {
+  if (!entries[0].isIntersecting) return;
+  verifyObs.disconnect();
+  document.querySelectorAll('.verify-row').forEach((row, i) => {
+    setTimeout(() => row.classList.add('shown'), i * 120);
+  });
+}, { threshold: 0.2 });
+const vt = document.getElementById('verify-table');
+if (vt) verifyObs.observe(vt);
+
+// ══════════════════════════════════════════════════════════════
+// PAPER EXPLORER — full-window scroll-driven
+// ══════════════════════════════════════════════════════════════
+const PE_SECTIONS = [
+  { id:0, title:'Abstract',            pages:[1,1] },
+  { id:1, title:'Introduction',        pages:[1,1] },
+  { id:2, title:'Definitions',         pages:[1,2] },
+  { id:3, title:'Main Conjecture',     pages:[2,2] },
+  { id:4, title:'Motivation',          pages:[2,2] },
+  { id:5, title:'Observations',        pages:[3,3] },
+  { id:6, title:'Verification',        pages:[3,3] },
+  { id:7, title:'Open Questions',      pages:[3,3] },
+  { id:8, title:'Conclusion',          pages:[3,4] },
+];
+
+let pePDF=null, peCurrentPage=1, peTotalPages=0, peCurrentSection=0, peRendering=false;
+
+function peSectionForPage(p) {
+  for (let i = PE_SECTIONS.length-1; i >= 0; i--) {
+    if (p >= PE_SECTIONS[i].pages[0]) return i;
+  }
+  return 0;
+}
+
+function peShowSection(idx) {
+  idx = Math.max(0, Math.min(idx, PE_SECTIONS.length-1));
+  if (idx === peCurrentSection && document.querySelector('.pe-anim.active')) return;
+  peCurrentSection = idx;
+  const sec = PE_SECTIONS[idx];
+  document.getElementById('pe-anim-num').textContent = '§ ' + idx;
+  document.getElementById('pe-anim-title').textContent = sec.title;
+  document.querySelectorAll('.pe-anim').forEach(el => el.classList.remove('active'));
+  const panel = document.getElementById('pe-anim-' + idx);
+  if (panel) {
+    const clone = panel.cloneNode(true);
+    panel.parentNode.replaceChild(clone, panel);
+    clone.classList.add('active');
+    // trigger pe-bar-fill animations
+    requestAnimationFrame(() => {
+      clone.querySelectorAll('.pe-bar-fill[data-w]').forEach(b => {
+        setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 200);
+      });
+    });
+  }
+  document.querySelectorAll('.pe-toc-item').forEach(el => {
+    const on = parseInt(el.dataset.section) === idx;
+    el.classList.toggle('active', on);
+    if (on) el.scrollIntoView({ inline:'center', block:'nearest', behavior:'smooth' });
+  });
+}
+
+function peRenderPage(num) {
+  if (!pePDF || peRendering) return;
+  peRendering = true;
+  pePDF.getPage(num).then(page => {
+    const canvas = document.getElementById('pe-canvas');
+    const ctx = canvas.getContext('2d');
+    const wrap = document.getElementById('pe-canvas-wrap');
+    const vp1 = page.getViewport({ scale: 1 });
+    const maxW = (wrap.clientWidth || 500) - 40;
+    const maxH = (wrap.clientHeight || 600) - 40;
+    const scale = Math.min(maxW / vp1.width, maxH / vp1.height);
+    const vp = page.getViewport({ scale });
+    canvas.width = vp.width;
+    canvas.height = vp.height;
+    page.render({ canvasContext: ctx, viewport: vp }).promise.then(() => {
+      peRendering = false;
+      document.getElementById('pe-loading').classList.add('hidden');
+      document.getElementById('pe-page-info').textContent = num + ' / ' + peTotalPages;
+      peShowSection(peSectionForPage(num));
+    });
+  });
+}
+
+function peNextPage() { if (peCurrentPage < peTotalPages) { peCurrentPage++; peRenderPage(peCurrentPage); } }
+function pePrevPage() { if (peCurrentPage > 1) { peCurrentPage--; peRenderPage(peCurrentPage); } }
+
+function peGoSection(idx) {
+  peShowSection(idx);
+  peCurrentPage = PE_SECTIONS[idx].pages[0];
+  if (pePDF) peRenderPage(peCurrentPage);
+}
+
+function peHandleScroll() {
+  const outer = document.getElementById('pe-scroll-outer');
+  if (!outer || !pePDF) return;
+  const rect = outer.getBoundingClientRect();
+  const scrollableH = outer.offsetHeight - window.innerHeight;
+  if (scrollableH <= 0) return;
+  const scrolled = Math.max(0, -rect.top);
+  const progress = scrolled / scrollableH;
+  const targetPage = Math.min(peTotalPages, Math.max(1, Math.round(progress * (peTotalPages - 1)) + 1));
+  if (targetPage !== peCurrentPage && !peRendering) {
+    peCurrentPage = targetPage;
+    peRenderPage(peCurrentPage);
+  }
+}
+window.addEventListener('scroll', peHandleScroll, { passive: true });
+
+document.addEventListener('keydown', e => {
+  const frame = document.getElementById('pe-sticky-frame');
+  if (!frame) return;
+  const r = frame.getBoundingClientRect();
+  if (r.top < window.innerHeight && r.bottom > 0) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); peNextPage(); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); pePrevPage(); }
+  }
+});
+
+function peInit() {
+  if (!document.getElementById('pe-canvas')) return;
+  const outer = document.getElementById('pe-scroll-outer');
+  outer.style.minHeight = (window.innerHeight * 0.6) + 'px';
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  script.onload = () => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.getDocument('/static/hafdi_conjecture.pdf').promise.then(pdf => {
+      pePDF = pdf;
+      peTotalPages = pdf.numPages;
+      outer.style.minHeight = (peTotalPages * window.innerHeight * 0.65 + window.innerHeight) + 'px';
+      peRenderPage(1);
+    }).catch(() => {
+      document.getElementById('pe-loading').innerHTML =
+        '<div style="font-family:var(--font-mono);font-size:.78rem;color:#888;padding:1.5rem;text-align:center">PDF unavailable in preview.<br/>Loads correctly from Flask server.</div>';
+    });
+  };
+  document.head.appendChild(script);
+}
+
+const peObs = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) { peInit(); peObs.disconnect(); }
+}, { threshold: 0.05 });
+const peSec = document.getElementById('paper-explorer');
+if (peSec) peObs.observe(peSec);
+</script>
+</body>
+</html>

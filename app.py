@@ -15,6 +15,10 @@ def polyfdor():
 def novectdb():
     return render_template("novectdb.html")
 
+@app.route("/papers/hafdiConjecture")
+def hafdi_conjecture():
+    return render_template("hafdiConjecture.html")
+
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)

@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "novectdb",
-      "runtimeExecutable": "/bin/zsh",
-      "runtimeArgs": ["/tmp/run_novectdb.sh"],
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["/Users/vpro/Desktop/novectdb_site/app.py"],
       "port": 5050
     }
   ]
