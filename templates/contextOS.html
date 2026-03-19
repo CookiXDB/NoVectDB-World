@@ -1427,17 +1427,19 @@ if (latSec) latObs.observe(latSec);
     });
   }
 
-  // Load PDF
-  if (typeof pdfjsLib !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  // Load pdfjs dynamically then load PDF
+  function initPDF() {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     pdfjsLib.getDocument(PDF_URL).promise.then(doc => {
       pdfDoc = doc; totalPages = doc.numPages;
       renderPage(1);
       updatePageInfo();
     }).catch(() => { if (loading) loading.innerHTML = '<p style="font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-500);">PDF unavailable</p>'; });
-  } else {
-    if (loading) loading.innerHTML = '<p style="font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-500);">PDF viewer loading…</p>';
   }
+  const pdfScript = document.createElement('script');
+  pdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  pdfScript.onload = initPDF;
+  document.head.appendChild(pdfScript);
 
   // Scroll-driven TOC
   const outer = document.getElementById('pe-scroll-outer');
@@ -1456,7 +1458,6 @@ if (latSec) latObs.observe(latSec);
 })();
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
 </body>
 </html>
