@@ -27,6 +27,10 @@ def realistic():
 def context_os():
     return render_template("contextOS.html")
 
+@app.route("/papers/pizzaSugar")
+def pizza_sugar():
+    return render_template("pizzaSugar.html")
+
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)

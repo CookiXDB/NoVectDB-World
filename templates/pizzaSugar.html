@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Monohedral Disc Tiling for Optimal Sugar Loaf Processing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script>
+MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root {
+  --black: #000;
+  --white: #fff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-500: #888;
+  --gray-700: #444;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --max-w: 860px;
+  --section-gap: 100px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 17px; }
+body { font-family: var(--font-sans); background: var(--white); color: var(--black); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* ─── NAV ─────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
+  height: 52px;
+}
+.nav-back { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; }
+.nav-back:hover { color: var(--black); }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+.nav-burger { display: none; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px; }
+.nav-burger span { display: block; height: 2px; background: var(--black); transition: transform .3s, opacity .3s; }
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-drawer { display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99; background: rgba(255,255,255,0.98); backdrop-filter: blur(8px); border-bottom: 1px solid var(--gray-200); flex-direction: column; max-height: 0; overflow: hidden; transition: max-height .35s; }
+.nav-drawer.open { max-height: 400px; }
+.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
+.nav-drawer a { display: block; padding: 0.9rem 2rem; font-size: 0.9rem; text-decoration: none; color: var(--black); }
+.nav-drawer a:hover { background: var(--gray-50); }
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
+section:last-of-type { border-bottom: none; }
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero { padding-top: 130px; padding-bottom: 80px; border-bottom: 1px solid var(--black); }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem; }
+h1.hero-title { font-family: var(--font-serif); font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+h1.hero-title span { font-style: italic; }
+.hero-subtitle { font-size: 1.05rem; color: var(--gray-700); max-width: 620px; margin-bottom: 2rem; line-height: 1.6; }
+.hero-tagline { font-family: var(--font-serif); font-style: italic; font-size: 1.3rem; letter-spacing: -0.01em; border-left: 3px solid var(--black); padding-left: 1rem; margin: 2rem 0; }
+#typewriter::after { content: '|'; animation: blink .7s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-meta { font-size: 0.82rem; color: var(--gray-500); font-family: var(--font-mono); margin-top: 2.5rem; }
+.hero-meta strong { color: var(--black); }
+.abstract-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.8rem 2rem; margin-top: 3rem; border-radius: 2px; }
+.abstract-box .label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; }
+.abstract-box p { font-size: 0.93rem; color: var(--gray-700); line-height: 1.75; }
+
+/* ─── HEADINGS ────────────────────────────────────────── */
+h2.section-num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.2; }
+h3.subsec { font-size: 1rem; font-weight: 600; letter-spacing: 0.01em; margin: 2.5rem 0 0.8rem; }
+p { margin-bottom: 1rem; }
+
+/* ─── SCROLL REVEAL ───────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+
+/* ─── CARDS ───────────────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+.card { border: 1px solid var(--gray-200); padding: 1.8rem; background: var(--white); position: relative; overflow: hidden; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--black); }
+.card-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.6rem; }
+.card-body { font-size: 0.9rem; color: var(--gray-700); line-height: 1.65; }
+
+/* ─── MATH BLOCK ──────────────────────────────────────── */
+.math-block { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.6rem 2rem; margin: 1.5rem 0; overflow-x: auto; text-align: center; }
+.math-label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; text-align: left; }
+
+/* ─── RESULTS TABLE ───────────────────────────────────── */
+.results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+.results-table th { text-align: left; padding: 0.6rem 1rem; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.results-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--gray-200); }
+.results-table tr.highlight td { font-weight: 600; background: var(--gray-50); }
+.results-table tr:hover td { background: var(--gray-100); }
+
+/* ─── Q-CARDS ─────────────────────────────────────────── */
+.q-card { border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem; margin-bottom: 0.8rem; display: flex; gap: 1.2rem; align-items: flex-start; }
+.q-num { font-family: var(--font-mono); font-size: 0.72rem; background: var(--black); color: var(--white); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.q-text { font-size: 0.92rem; color: var(--gray-700); line-height: 1.6; }
+
+/* ═══════════════════════════════════════════════════════
+   3D ANIMATION SECTION
+═══════════════════════════════════════════════════════ */
+#viz-section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); background: var(--gray-50); }
+
+.viz-layout {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.viz-panel {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+.viz-panel-header {
+  padding: 0.7rem 1.2rem;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gray-50);
+}
+.viz-panel-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+}
+
+canvas { display: block; }
+
+/* Controls */
+.viz-controls {
+  padding: 0.8rem 1.2rem;
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--gray-50);
+}
+.ctrl-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+  padding: 0.3rem 0.9rem;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  letter-spacing: 0.02em;
+}
+.ctrl-btn:hover { background: var(--gray-100); }
+.ctrl-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+.ctrl-sep { width: 1px; height: 18px; background: var(--gray-200); flex-shrink: 0; }
+.ctrl-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Full-width viz for the intro */
+.viz-full {
+  max-width: var(--max-w);
+  margin: 2rem auto 0;
+  padding: 0 2rem;
+}
+.viz-full .viz-panel { width: 100%; }
+
+/* Stats bar below viz */
+.viz-stats {
+  max-width: var(--max-w);
+  margin: 1.5rem auto 0;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 1rem;
+}
+.viz-stat {
+  border: 1px solid var(--gray-200);
+  padding: 1rem 1.2rem;
+  background: var(--white);
+  text-align: center;
+  transition: background .2s;
+}
+.viz-stat.active-stat { background: var(--black); color: var(--white); }
+.viz-stat-num { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 500; display: block; }
+.viz-stat-lbl { font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; margin-top: 2px; }
+
+/* Section heading inside viz-section */
+.viz-section-heading {
+  max-width: var(--max-w);
+  margin: 0 auto 2rem;
+  padding: 0 2rem;
+}
+
+/* ─── EFFICIENCY BARS ──────────────────────────────────── */
+.eff-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.eff-lbl { font-family: var(--font-mono); font-size: 0.78rem; width: 200px; flex-shrink: 0; }
+.eff-track { flex: 1; height: 22px; background: var(--gray-100); border: 1px solid var(--gray-200); overflow: hidden; }
+.eff-fill { height: 100%; background: var(--black); width: 0; transition: width 1.2s cubic-bezier(.22,.61,.36,1); display: flex; align-items: center; padding-left: 6px; font-family: var(--font-mono); font-size: 0.68rem; color: white; }
+.eff-fill.dim { background: var(--gray-300); color: var(--black); }
+
+/* ─── PAPER EXPLORER ──────────────────────────────────── */
+#pe-scroll-outer { position: relative; }
+#pe-sticky-frame { position: sticky; top: 52px; height: calc(100vh - 52px); display: flex; flex-direction: column; background: #fff; border-top: 1px solid var(--gray-200); overflow: hidden; z-index: 10; }
+#paper-explorer { display: flex; flex-direction: column; height: 100%; }
+#pe-toc { display: flex; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--gray-200); flex-shrink: 0; height: 46px; background: var(--gray-50); }
+#pe-toc::-webkit-scrollbar { display: none; }
+.pe-toc-item { flex-shrink: 0; padding: 0 1.2rem; display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; cursor: pointer; border-right: 1px solid var(--gray-200); color: var(--gray-700); transition: background .15s; white-space: nowrap; }
+.pe-toc-item:hover { background: var(--gray-100); }
+.pe-toc-item.active { background: var(--white); font-weight: 600; color: var(--black); border-bottom: 2px solid var(--black); }
+.pe-toc-num { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); }
+.pe-toc-item.active .pe-toc-num { color: var(--black); }
+#pe-split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; min-height: 0; }
+#pe-left { border-right: 1px solid var(--gray-200); background: #f2f2f2; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+#pe-canvas-wrap { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; }
+#pe-canvas { display: block; max-width: 100%; max-height: 100%; box-shadow: 0 4px 32px rgba(0,0,0,.18); background: #fff; }
+#pe-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f2f2f2; }
+#pe-loading.hidden { display: none; }
+.pe-spinner { width: 28px; height: 28px; border: 2px solid var(--gray-300); border-top-color: var(--black); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#pe-right { display: flex; flex-direction: column; overflow: hidden; }
+#pe-anim-label { padding: 0.8rem 1.5rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; background: var(--white); }
+.pe-anim { flex: 1; display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem; min-height: 0; }
+.pe-anim.active { display: flex; }
+.pe-anim-inner { width: 100%; max-width: 420px; }
+#pe-nav { padding: 0.6rem 1.5rem; border-top: 1px solid var(--gray-200); display: flex; align-items: center; gap: 1rem; flex-shrink: 0; background: var(--gray-50); }
+.pe-btn { font-family: var(--font-mono); font-size: 0.78rem; background: none; border: 1px solid var(--gray-200); padding: 0.3rem 0.9rem; cursor: pointer; transition: background .15s; }
+.pe-btn:hover { background: var(--gray-100); }
+#pe-page-info { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-500); flex: 1; text-align: center; }
+.pe-scroll-hint { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); margin-left: auto; }
+
+@keyframes pe-in { to { opacity:1; transform:translateY(0) } }
+.pe-word { font-family: var(--font-serif); font-size: 1.5rem; opacity: 0; transform: translateY(10px); animation: pe-in .45s ease forwards; animation-delay: var(--d,0s); line-height: 1.15; }
+.pe-word em { font-style: italic; }
+.pe-pillars { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+.pe-pillar { flex: 1; min-width: 80px; border: 1px solid var(--gray-200); padding: 1rem; text-align: center; opacity: 0; animation: pe-in .4s ease forwards; animation-delay: var(--dd,0s); }
+.pe-pillar-icon { font-family: var(--font-mono); font-size: 1.4rem; margin-bottom: 0.4rem; font-weight: 700; }
+.pe-pillar-lbl { font-size: 0.72rem; color: var(--gray-700); line-height: 1.3; }
+.pe-bar-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.7rem; opacity:0; animation: pe-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-bar-lbl { font-family: var(--font-mono); font-size: 0.72rem; width: 130px; text-align: right; color: var(--gray-700); flex-shrink: 0; }
+.pe-bar-track { flex: 1; height: 18px; background: var(--gray-100); overflow: hidden; }
+.pe-bar-fill { height: 100%; background: var(--black); width: 0; transition: width 1s cubic-bezier(.22,.61,.36,1); }
+.pe-bar-fill.dim { background: var(--gray-300); }
+.pe-bar-val { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray-500); width: 3rem; }
+.pe-trace-step { display: flex; gap: 0.8rem; margin-bottom: 0.6rem; opacity: 0; animation: pe-in .35s ease forwards; animation-delay: var(--d,0s); font-family: var(--font-mono); font-size: 0.72rem; }
+.pe-trace-badge { background: var(--black); color: #fff; padding: 0.1rem 0.4rem; flex-shrink: 0; font-size: 0.65rem; }
+.pe-trace-text { color: var(--gray-700); line-height: 1.5; }
+.pe-trace-text strong { color: var(--black); }
+.pe-formula-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1rem 1.2rem; margin: 0.8rem 0; text-align: center; opacity:0; animation: pe-in .5s ease forwards; animation-delay: var(--d,0s); font-size: 0.9rem; }
+.pe-formula-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; text-align: left; }
+
+/* ─── FOOTER ──────────────────────────────────────────── */
+footer { background: var(--gray-50); border-top: 1px solid var(--gray-200); padding: 3rem 0; }
+.footer-inner { display: flex; gap: 4rem; align-items: flex-start; flex-wrap: wrap; }
+.footer-title { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 1rem; }
+.footer-sig { font-size: 0.85rem; color: var(--gray-700); line-height: 1.6; }
+.footer-sig em { font-family: var(--font-serif); font-style: italic; }
+details summary { cursor: pointer; font-size: 0.88rem; font-weight: 500; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '+'; font-family: var(--font-mono); }
+details[open] summary::before { content: '−'; }
+.ref-list { margin-top: 1rem; padding-left: 0; list-style: none; }
+.ref-list li { display: flex; gap: 1rem; font-size: 0.83rem; color: var(--gray-700); margin-bottom: 0.6rem; line-height: 1.5; }
+.ref-list li span { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); flex-shrink: 0; }
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 700px) {
+  nav { padding: 0 1.2rem; }
+  .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .nav-drawer { display: flex; }
+  .container { padding: 0 1.2rem; }
+  .card-grid { grid-template-columns: 1fr; }
+  .viz-layout { grid-template-columns: 1fr; }
+  .viz-stats { grid-template-columns: 1fr; }
+  #pe-split { grid-template-columns: 1fr; }
+  #pe-right { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-logo">Sugar Loaf Tiling</span>
+  <ul class="nav-links">
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#math">Framework</a></li>
+    <li><a href="#viz-section">3D Model</a></li>
+    <li><a href="#configurations">Tilings</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#paper-explorer" style="font-weight:500;">Paper ↗</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<ul class="nav-drawer" id="nav-drawer">
+  <li><a href="#intro" onclick="closeMenu()">Introduction</a></li>
+  <li><a href="#math" onclick="closeMenu()">Framework</a></li>
+  <li><a href="#viz-section" onclick="closeMenu()">3D Model</a></li>
+  <li><a href="#configurations" onclick="closeMenu()">Tilings</a></li>
+  <li><a href="#results" onclick="closeMenu()">Results</a></li>
+  <li><a href="#paper-explorer" onclick="closeMenu()">Paper ↗</a></li>
+</ul>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Research Paper · September 2025 · CKX 005</div>
+    <h1 class="hero-title">Monohedral<span> Disc Tiling</span></h1>
+    <p class="hero-subtitle">For Optimal Sugar Loaf Processing: A Novel Approach to Frustum-Shaped Solid Decomposition</p>
+    <div class="hero-tagline">
+      <span id="typewriter"></span>
+    </div>
+    <div class="hero-meta">
+      <strong>Mathematical Processing Research Group</strong> &nbsp;·&nbsp; September 2025
+    </div>
+    <div class="abstract-box reveal">
+      <div class="label">Abstract</div>
+      <p>This paper introduces a revolutionary approach to sugar loaf processing by adapting monohedral disc tiling techniques from circular pizza cutting to frustum-shaped sugar loaves. Curved polygonal tiling patterns are applied to each horizontal layer of a truncated cone, achieving 92–98% cutting efficiency compared to 72–85% with traditional methods. Three polygon configurations (5-gons, 7-gons, 9-gons) generate identical curved pieces within each layer while maintaining optimal material utilization across varying radii.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §1 INTRODUCTION -->
+<section id="intro">
+  <div class="container">
+    <h2 class="section-num reveal">§ 1</h2>
+    <h2 class="section-title reveal">The Pizza Problem Meets the Sugar Loaf</h2>
+
+    <p class="reveal">In 2016, Haddley and Worsley demonstrated that a circular disc can be divided into any number of identical curved pieces using monohedral polygon tiling — the same mathematical structure used to tile flat planes, now applied to circles. This paper extends that breakthrough to three-dimensional frustum-shaped objects.</p>
+
+    <p class="reveal">A sugar loaf (pain de sucre) is a frustum: a truncated cone with height H = 12 cm, bottom radius R = 6 cm, and top radius r = 3 cm. Traditional cutting methods produce between 12.9% and 27.1% waste. Monohedral tiling, scaled layer by layer, reduces this to under 8%.</p>
+
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title">Traditional Sectorial</div>
+        <div class="card-body">Straight radial cuts from center create angular wedges. Fast to implement but produces 14.7% waste (116.4 cm³ per loaf). Efficiency: 85.3%.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cubic Decomposition</div>
+        <div class="card-body">Grid-based rectangular cuts ignoring circular geometry. Variable piece count, 27.1% waste (214.2 cm³), lowest efficiency: 72.9%.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Monohedral Pentagon (5-gon)</div>
+        <div class="card-body">10 identical curved pieces per layer, scaling with radius. 5.2% waste (41.2 cm³). Efficiency: 94.8%. All pieces geometrically identical.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Monohedral Nonagon (9-gon)</div>
+        <div class="card-body">18 identical curved pieces per layer. Near-perfect 1.9% waste (15.0 cm³). Efficiency: 98.1% — the highest achieved in this study.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §2 MATHEMATICAL FRAMEWORK -->
+<section id="math">
+  <div class="container">
+    <h2 class="section-num reveal">§ 2</h2>
+    <h2 class="section-title reveal">Mathematical Framework</h2>
+
+    <p class="reveal">The frustum F has height H, bottom radius R, and top radius r. The radius at height z varies linearly:</p>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition — Frustum Radius Profile</div>
+      \[\rho(z) = R - \frac{(R - r)\,z}{H}, \qquad 0 \le z \le H \tag{1}\]
+    </div>
+
+    <p class="reveal">We divide the frustum into L horizontal layers of thickness h = H/L. For layer k (0-indexed from bottom), the representative radius uses the layer midpoint:</p>
+
+    <div class="math-block reveal">
+      <div class="math-label">Layer k Representative Radius</div>
+      \[\rho_k = R - \frac{(R-r)(k + 0.5)\,h}{H}, \qquad k = 0, 1, \ldots, L-1 \tag{3}\]
+    </div>
+
+    <h3 class="subsec reveal">Scaling Law</h3>
+    <p class="reveal">A key insight: since each layer is a circle, the full monohedral tiling from the base layer simply scales proportionally. All tiling dimensions scale with the ratio of radii:</p>
+
+    <div class="math-block reveal">
+      <div class="math-label">Tiling Scaling Law</div>
+      \[\text{Tiling}_k = \text{Tiling}_{\text{base}} \times \frac{\rho_k}{\rho_0} \tag{4}\]
+    </div>
+
+    <p class="reveal">This guarantees geometric similarity across all layers — pieces at the top are exact scaled copies of pieces at the bottom, maintaining the monohedral property throughout the 3D frustum.</p>
+
+    <div class="math-block reveal">
+      <div class="math-label">Pentagon Piece Volume (per layer k)</div>
+      \[V_{\text{pentagon},k} = \frac{\pi \rho_k^2 h}{10} \tag{5}\]
+    </div>
+
+    <div class="math-block reveal">
+      <div class="math-label">General n-gon: Pieces per Layer</div>
+      \[N_{\text{pieces}} = 2n \tag{6}\]
+    </div>
+  </div>
+</section>
+
+<!-- §3 THE 3D ANIMATION -->
+<section id="viz-section">
+  <div class="viz-section-heading reveal">
+    <h2 class="section-num">§ 3</h2>
+    <h2 class="section-title">Interactive Sugar Loaf Model</h2>
+    <p style="font-size:0.9rem;color:var(--gray-700);max-width:600px;">Left: the 3D frustum decomposed into 12 horizontal layers. Right: top-view of the curved monohedral tiling for any single layer. Use the controls to explode the layers and switch polygon configurations.</p>
+  </div>
+
+  <div class="viz-layout reveal">
+
+    <!-- LEFT: 3D FRUSTUM CANVAS -->
+    <div class="viz-panel">
+      <div class="viz-panel-header">
+        <span class="viz-panel-title">Sugar Loaf — 3D Layer Decomposition</span>
+      </div>
+      <canvas id="frustum-canvas" width="400" height="420"></canvas>
+      <div class="viz-controls">
+        <span class="ctrl-label">View:</span>
+        <button class="ctrl-btn active" id="btn-solid" onclick="setSolid()">Solid</button>
+        <button class="ctrl-btn" id="btn-explode" onclick="setExplode()">Explode Layers</button>
+        <div class="ctrl-sep"></div>
+        <span class="ctrl-label">n-gon:</span>
+        <button class="ctrl-btn" id="btn-5" onclick="setNgon(5)">5</button>
+        <button class="ctrl-btn active" id="btn-7" onclick="setNgon(7)">7</button>
+        <button class="ctrl-btn" id="btn-9" onclick="setNgon(9)">9</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: TOP-VIEW TILING CANVAS -->
+    <div class="viz-panel">
+      <div class="viz-panel-header">
+        <span class="viz-panel-title" id="tiling-panel-title">Layer Cross-Section — Heptagon (7-gon) Tiling</span>
+      </div>
+      <canvas id="tiling-canvas" width="400" height="420"></canvas>
+      <div class="viz-controls">
+        <span class="ctrl-label">Layer:</span>
+        <input type="range" id="layer-slider" min="0" max="11" value="6" style="flex:1;accent-color:#000;" oninput="setLayer(this.value)">
+        <span id="layer-label" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);width:80px;text-align:right;">k=6, ρ=4.5cm</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Stats under viz -->
+  <div class="viz-stats reveal" style="margin-top:1.5rem;">
+    <div class="viz-stat" id="stat-pieces">
+      <span class="viz-stat-num" id="stat-num">14</span>
+      <span class="viz-stat-lbl">Pieces / Layer</span>
+    </div>
+    <div class="viz-stat active-stat" id="stat-eff">
+      <span class="viz-stat-num" id="stat-eff-num">97.3%</span>
+      <span class="viz-stat-lbl">Efficiency</span>
+    </div>
+    <div class="viz-stat" id="stat-waste">
+      <span class="viz-stat-num" id="stat-waste-num">21.4 cm³</span>
+      <span class="viz-stat-lbl">Waste</span>
+    </div>
+  </div>
+
+</section>
+
+<!-- §4 TILING CONFIGURATIONS -->
+<section id="configurations">
+  <div class="container">
+    <h2 class="section-num reveal">§ 4</h2>
+    <h2 class="section-title reveal">Tiling Configurations</h2>
+
+    <p class="reveal">For any odd n ≥ 5, monohedral n-gon tiling produces 2n identical curved pieces per layer. Each piece has an outer arc edge, two S-curved side edges, and a vertex at the center. The S-curve offset makes adjacent pieces interlock — a key property for physical cutting stability.</p>
+
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title">Pentagon (5-gon)</div>
+        <div class="card-body">10 pieces per layer (5 inner + 5 outer groups). Simplest practical configuration. Curved blades follow a gentle S with low mechanical complexity. Efficiency: 94.8%.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Heptagon (7-gon)</div>
+        <div class="card-body">14 pieces per layer. Optimal balance between cutting complexity and efficiency. Recommended for standard industrial implementation. Efficiency: 97.3%.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Nonagon (9-gon)</div>
+        <div class="card-body">18 pieces per layer. Highest efficiency (98.1%). Requires more precise blade positioning. Best for high-value processing where waste cost justifies equipment investment.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">General n-gon Rule</div>
+        <div class="card-body">For any odd n ≥ 5: pieces per layer = 2n, angular efficiency = 100%, volume per piece = πρ²h / 2n. Higher n → more pieces → higher efficiency.</div>
+      </div>
+    </div>
+
+    <h3 class="subsec reveal">Efficiency Comparison</h3>
+    <div id="eff-bars" class="reveal" style="margin:1.5rem 0;">
+      <div class="eff-row">
+        <div class="eff-lbl">Cubic Decomp.</div>
+        <div class="eff-track"><div class="eff-fill dim" data-w="72.9">72.9%</div></div>
+      </div>
+      <div class="eff-row">
+        <div class="eff-lbl">Traditional Sectorial</div>
+        <div class="eff-track"><div class="eff-fill dim" data-w="85.3">85.3%</div></div>
+      </div>
+      <div class="eff-row">
+        <div class="eff-lbl">Pentagon (5-gon)</div>
+        <div class="eff-track"><div class="eff-fill" data-w="94.8">94.8%</div></div>
+      </div>
+      <div class="eff-row">
+        <div class="eff-lbl">Heptagon (7-gon)</div>
+        <div class="eff-track"><div class="eff-fill" data-w="97.3">97.3%</div></div>
+      </div>
+      <div class="eff-row">
+        <div class="eff-lbl">Nonagon (9-gon)</div>
+        <div class="eff-track"><div class="eff-fill" data-w="98.1">98.1%</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §5 RESULTS -->
+<section id="results">
+  <div class="container">
+    <h2 class="section-num reveal">§ 5</h2>
+    <h2 class="section-title reveal">Experimental Results</h2>
+
+    <p class="reveal">Tests performed on standard Cosumar sugar loaves (H = 12 cm, R = 6 cm, r = 3 cm, h = 1.0 cm layer thickness). Heptagon-based tiling was the primary test configuration.</p>
+
+    <table class="results-table reveal">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Pieces / Layer</th>
+          <th>Efficiency (%)</th>
+          <th>Waste (cm³)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Traditional Sectorial</td>
+          <td>12</td>
+          <td>85.3</td>
+          <td>116.4</td>
+        </tr>
+        <tr>
+          <td>Cubic Decomposition</td>
+          <td>Variable</td>
+          <td>72.9</td>
+          <td>214.2</td>
+        </tr>
+        <tr class="highlight">
+          <td>Pentagon Tiling (5-gon)</td>
+          <td>10</td>
+          <td>94.8</td>
+          <td>41.2</td>
+        </tr>
+        <tr class="highlight">
+          <td>Heptagon Tiling (7-gon)</td>
+          <td>14</td>
+          <td>97.3</td>
+          <td>21.4</td>
+        </tr>
+        <tr class="highlight">
+          <td>Nonagon Tiling (9-gon)</td>
+          <td>18</td>
+          <td>98.1</td>
+          <td>15.0</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsec reveal">Key Performance Metrics (Heptagon)</h3>
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title" style="font-family:var(--font-mono);font-size:1.4rem;font-weight:400;">97.3%</div>
+        <div class="card-body">Volume utilization efficiency per loaf</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-family:var(--font-mono);font-size:1.4rem;font-weight:400;">0.94</div>
+        <div class="card-body">Piece uniformity score (σ/μ deviation)</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-family:var(--font-mono);font-size:1.4rem;font-weight:400;">45s</div>
+        <div class="card-body">Processing time per loaf (full 12 layers)</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-family:var(--font-mono);font-size:1.4rem;font-weight:400;">98.7%</div>
+        <div class="card-body">Edge quality (clean cuts / total cuts)</div>
+      </div>
+    </div>
+
+    <h3 class="subsec reveal">Future Directions</h3>
+    <div class="q-card reveal reveal-delay-1">
+      <div class="q-num">1</div>
+      <div class="q-text">Application to other frustum-shaped food products — ice cream cones, Christmas cakes, volcanic chocolate desserts.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-2">
+      <div class="q-num">2</div>
+      <div class="q-text">Integration with automated packaging — curved pieces could be designed to tessellate into rectangular packaging without wasted air space.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-3">
+      <div class="q-num">3</div>
+      <div class="q-text">Hybrid tiling patterns for irregular or damaged sugar loaves — adaptive tiling that compensates for geometry deviations.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-4">
+      <div class="q-num">4</div>
+      <div class="q-text">Extension to even-n polygons using modified Haddley-Worsley construction — potentially enabling 2n+2 or 4n piece configurations.</div>
+    </div>
+  </div>
+</section>
+
+<!-- §6 PAPER EXPLORER -->
+<section id="paper-explorer" style="padding:0;border:none;">
+  <div id="pe-scroll-outer">
+    <div id="pe-sticky-frame">
+      <div id="paper-explorer">
+        <div id="pe-toc">
+          <div class="pe-toc-item active" data-idx="0" onclick="peGoto(0)"><span class="pe-toc-num">§0</span>Overview</div>
+          <div class="pe-toc-item" data-idx="1" onclick="peGoto(1)"><span class="pe-toc-num">§1</span>Problem</div>
+          <div class="pe-toc-item" data-idx="2" onclick="peGoto(2)"><span class="pe-toc-num">§2</span>Frustum</div>
+          <div class="pe-toc-item" data-idx="3" onclick="peGoto(3)"><span class="pe-toc-num">§3</span>Layers</div>
+          <div class="pe-toc-item" data-idx="4" onclick="peGoto(4)"><span class="pe-toc-num">§4</span>Tiling</div>
+          <div class="pe-toc-item" data-idx="5" onclick="peGoto(5)"><span class="pe-toc-num">§5</span>5-gon</div>
+          <div class="pe-toc-item" data-idx="6" onclick="peGoto(6)"><span class="pe-toc-num">§6</span>7-gon</div>
+          <div class="pe-toc-item" data-idx="7" onclick="peGoto(7)"><span class="pe-toc-num">§7</span>Efficiency</div>
+          <div class="pe-toc-item" data-idx="8" onclick="peGoto(8)"><span class="pe-toc-num">§8</span>Results</div>
+        </div>
+        <div id="pe-split">
+          <div id="pe-left">
+            <div id="pe-canvas-wrap">
+              <div id="pe-loading">
+                <div class="pe-spinner"></div>
+                <p style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);margin-top:1rem;">Loading PDF…</p>
+              </div>
+              <canvas id="pe-canvas"></canvas>
+            </div>
+          </div>
+          <div id="pe-right">
+            <div id="pe-anim-label">
+              <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.08em;" id="pe-anim-title">Overview</span>
+            </div>
+
+            <!-- A0: Overview -->
+            <div class="pe-anim active" id="pe-a0">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s">Monohedral<em> Tiling</em></div>
+                <div class="pe-word" style="--d:.15s;font-size:1rem;color:var(--gray-500);margin-top:.5rem;">Pizza math → Sugar loaf</div>
+                <div class="pe-pillars">
+                  <div class="pe-pillar" style="--dd:.3s"><div class="pe-pillar-icon">10</div><div class="pe-pillar-lbl">Pieces<br>5-gon</div></div>
+                  <div class="pe-pillar" style="--dd:.45s"><div class="pe-pillar-icon">14</div><div class="pe-pillar-lbl">Pieces<br>7-gon</div></div>
+                  <div class="pe-pillar" style="--dd:.6s"><div class="pe-pillar-icon">18</div><div class="pe-pillar-lbl">Pieces<br>9-gon</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A1: Problem -->
+            <div class="pe-anim" id="pe-a1">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">The Waste Problem</div>
+                <div style="margin-top:1.5rem;">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge">27%</div><div class="pe-trace-text"><strong>Cubic decomposition</strong> — worst efficiency, ignores circular geometry</div></div>
+                  <div class="pe-trace-step" style="--d:.5s"><div class="pe-trace-badge">15%</div><div class="pe-trace-text"><strong>Sectorial cuts</strong> — angular waste at slice edges</div></div>
+                  <div class="pe-trace-step" style="--d:.8s"><div class="pe-trace-badge">5%</div><div class="pe-trace-text"><strong>Monohedral 7-gon</strong> — curved pieces tile perfectly</div></div>
+                  <div class="pe-trace-step" style="--d:1.1s"><div class="pe-trace-badge">2%</div><div class="pe-trace-text"><strong>Monohedral 9-gon</strong> — near-perfect utilization</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A2: Frustum -->
+            <div class="pe-anim" id="pe-a2">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Frustum Geometry</div>
+                <div class="pe-formula-box" style="--d:.25s">
+                  <div class="pe-formula-label">Radius at height z</div>
+                  ρ(z) = R − (R−r)z/H
+                </div>
+                <div class="pe-formula-box" style="--d:.5s">
+                  <div class="pe-formula-label">Standard sugar loaf</div>
+                  H = 12cm, R = 6cm, r = 3cm
+                </div>
+                <div class="pe-formula-box" style="--d:.75s">
+                  <div class="pe-formula-label">Volume</div>
+                  V = πH(R² + Rr + r²)/3 = 791.7 cm³
+                </div>
+              </div>
+            </div>
+
+            <!-- A3: Layers -->
+            <div class="pe-anim" id="pe-a3">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Layer Decomposition</div>
+                <div style="margin-top:1.5rem;">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge">L</div><div class="pe-trace-text"><strong>12 layers</strong>, h = 1.0 cm each</div></div>
+                  <div class="pe-trace-step" style="--d:.4s"><div class="pe-trace-badge">ρ</div><div class="pe-trace-text">Radius at layer k: ρ_k = R − (R−r)(k+0.5)h/H</div></div>
+                  <div class="pe-trace-step" style="--d:.6s"><div class="pe-trace-badge">k=0</div><div class="pe-trace-text">Bottom layer: ρ₀ ≈ 5.875 cm (near R=6)</div></div>
+                  <div class="pe-trace-step" style="--d:.8s"><div class="pe-trace-badge">k=11</div><div class="pe-trace-text">Top layer: ρ₁₁ ≈ 3.125 cm (near r=3)</div></div>
+                  <div class="pe-trace-step" style="--d:1.0s"><div class="pe-trace-badge">scale</div><div class="pe-trace-text">Each tiling scales by ρ_k/ρ₀ — geometric similarity preserved</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A4: Tiling Theory -->
+            <div class="pe-anim" id="pe-a4">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Monohedral Tiling</div>
+                <div style="margin-top:1.2rem;">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge">∿</div><div class="pe-trace-text"><strong>S-curved cuts</strong> from center to circumference — not straight radial lines</div></div>
+                  <div class="pe-trace-step" style="--d:.45s"><div class="pe-trace-badge">=</div><div class="pe-trace-text">All 2n pieces are <strong>geometrically identical</strong> (monohedral)</div></div>
+                  <div class="pe-trace-step" style="--d:.7s"><div class="pe-trace-badge">🔒</div><div class="pe-trace-text">Adjacent pieces <strong>interlock</strong> along S-curved edges — stable cuts</div></div>
+                  <div class="pe-trace-step" style="--d:.95s"><div class="pe-trace-badge">∞</div><div class="pe-trace-text">Works for any odd n ≥ 5, producing N = 2n pieces</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A5: 5-gon -->
+            <div class="pe-anim" id="pe-a5">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Pentagon (5-gon)</div>
+                <div class="pe-formula-box" style="--d:.25s">
+                  <div class="pe-formula-label">Pieces per layer</div>
+                  N = 2 × 5 = <strong>10 pieces</strong>
+                </div>
+                <div style="margin-top:1rem;">
+                  <div class="pe-bar-row" style="--d:.4s"><div class="pe-bar-lbl">Efficiency</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="94.8"></div></div><div class="pe-bar-val">94.8%</div></div>
+                  <div class="pe-bar-row" style="--d:.6s"><div class="pe-bar-lbl">vs Traditional</div><div class="pe-bar-track"><div class="pe-bar-fill dim" data-w="85.3"></div></div><div class="pe-bar-val">85.3%</div></div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--gray-500);margin-top:1rem;font-family:var(--font-mono);">Simplest blade geometry. Best for first-generation implementation.</p>
+              </div>
+            </div>
+
+            <!-- A6: 7-gon -->
+            <div class="pe-anim" id="pe-a6">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Heptagon (7-gon)</div>
+                <div class="pe-formula-box" style="--d:.25s">
+                  <div class="pe-formula-label">Pieces per layer</div>
+                  N = 2 × 7 = <strong>14 pieces</strong>
+                </div>
+                <div style="margin-top:1rem;">
+                  <div class="pe-bar-row" style="--d:.4s"><div class="pe-bar-lbl">Efficiency</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="97.3"></div></div><div class="pe-bar-val">97.3%</div></div>
+                  <div class="pe-bar-row" style="--d:.6s"><div class="pe-bar-lbl">Piece uniformity</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="94"></div></div><div class="pe-bar-val">0.94</div></div>
+                  <div class="pe-bar-row" style="--d:.8s"><div class="pe-bar-lbl">Edge quality</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="98.7"></div></div><div class="pe-bar-val">98.7%</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A7: Efficiency -->
+            <div class="pe-anim" id="pe-a7">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Efficiency Comparison</div>
+                <div style="margin-top:1.5rem;">
+                  <div class="pe-bar-row" style="--d:.15s"><div class="pe-bar-lbl">Cubic (72.9%)</div><div class="pe-bar-track"><div class="pe-bar-fill dim" data-w="72.9"></div></div><div class="pe-bar-val">−</div></div>
+                  <div class="pe-bar-row" style="--d:.3s"><div class="pe-bar-lbl">Sectorial (85.3%)</div><div class="pe-bar-track"><div class="pe-bar-fill dim" data-w="85.3"></div></div><div class="pe-bar-val">−</div></div>
+                  <div class="pe-bar-row" style="--d:.45s"><div class="pe-bar-lbl">5-gon (94.8%)</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="94.8"></div></div><div class="pe-bar-val">+</div></div>
+                  <div class="pe-bar-row" style="--d:.6s"><div class="pe-bar-lbl">7-gon (97.3%)</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="97.3"></div></div><div class="pe-bar-val">++</div></div>
+                  <div class="pe-bar-row" style="--d:.75s"><div class="pe-bar-lbl">9-gon (98.1%)</div><div class="pe-bar-track"><div class="pe-bar-fill" data-w="98.1"></div></div><div class="pe-bar-val">+++</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A8: Results -->
+            <div class="pe-anim" id="pe-a8">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Experimental Validation</div>
+                <div style="margin-top:1.2rem;">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge">✓</div><div class="pe-trace-text"><strong>97.3%</strong> volume efficiency on real Cosumar loaves</div></div>
+                  <div class="pe-trace-step" style="--d:.4s"><div class="pe-trace-badge">✓</div><div class="pe-trace-text"><strong>45s</strong> processing time per loaf (12 layers)</div></div>
+                  <div class="pe-trace-step" style="--d:.6s"><div class="pe-trace-badge">✓</div><div class="pe-trace-text"><strong>98.7%</strong> edge quality on curved blade cuts</div></div>
+                  <div class="pe-trace-step" style="--d:.8s"><div class="pe-trace-badge">$</div><div class="pe-trace-text"><strong>8–12 month</strong> payback period for implementation cost</div></div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- pe-right -->
+
+          <div id="pe-nav">
+            <button class="pe-btn" onclick="peNav(-1)">← Prev</button>
+            <span id="pe-page-info">Page 1 / 5</span>
+            <button class="pe-btn" onclick="peNav(1)">Next →</button>
+            <span class="pe-scroll-hint">scroll to explore ↓</span>
+          </div>
+
+        </div><!-- pe-split -->
+      </div><!-- paper-explorer -->
+    </div><!-- pe-sticky-frame -->
+    <div style="height:600vh;"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">Monohedral Disc Tiling</div>
+        <div class="footer-sig">Mathematical Processing Research Group<br><em>Sugar Loaf Processing Study</em><br>September 2025</div>
+      </div>
+      <div style="flex:1;">
+        <div class="footer-title">References</div>
+        <details>
+          <summary>View References</summary>
+          <ul class="ref-list">
+            <li><span>[1]</span>Haddley, J., &amp; Worsley, S. (2016). Monohedral disc tiling. University of Liverpool Mathematical Sciences.</li>
+            <li><span>[2]</span>Preparata, F. P., &amp; Shamos, M. I. (1985). Computational Geometry: An Introduction. Springer-Verlag.</li>
+            <li><span>[3]</span>Brass, P., Moser, W., &amp; Pach, J. (2005). Research Problems in Discrete Geometry. Springer.</li>
+            <li><span>[4]</span>Fejes Tóth, L. (1964). Regular Figures. Pergamon Press.</li>
+            <li><span>[5]</span>Conway, J. H., &amp; Sloane, N. J. A. (1999). Sphere Packings, Lattices and Groups. Springer-Verlag.</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ─── NAV ──────────────────────────────────────────── */
+function toggleMenu() {
+  document.getElementById('nav-burger').classList.toggle('open');
+  document.getElementById('nav-drawer').classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-burger').classList.remove('open');
+  document.getElementById('nav-drawer').classList.remove('open');
+}
+
+/* ─── TYPEWRITER ───────────────────────────────────── */
+(function(){
+  const phrase = "What if pizza math could perfect the sugar loaf?";
+  let i = 0;
+  const el = document.getElementById('typewriter');
+  function tick() {
+    if (i < phrase.length) { el.textContent += phrase[i++]; setTimeout(tick, 40); }
+  }
+  setTimeout(tick, 500);
+})();
+
+/* ─── SCROLL REVEAL ────────────────────────────────── */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* ─── EFFICIENCY BARS ──────────────────────────────── */
+const effObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.eff-fill[data-w]').forEach(b => {
+        setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 200);
+      });
+      effObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.2 });
+const effBars = document.getElementById('eff-bars');
+if (effBars) effObs.observe(effBars);
+
+/* ════════════════════════════════════════════════════
+   3D FRUSTUM + TILING CANVASES
+════════════════════════════════════════════════════ */
+(function(){
+
+const FC = document.getElementById('frustum-canvas');
+const TC = document.getElementById('tiling-canvas');
+if (!FC || !TC) return;
+
+const fx = FC.getContext('2d');
+const tx = TC.getContext('2d');
+const FW = FC.width, FH = FC.height;
+const TW = TC.width, TH = TC.height;
+
+// Config
+const LAYERS = 12;
+const SCALE = 32;       // px per cm
+const EA = 0.30;        // ellipse y-compression (3D view angle)
+const LAYER_PX = 18;    // px per layer (stacked view)
+const DISC_THICK = 5;   // disc thickness px (exploded view)
+const SPREAD_MAX = 22;  // max extra px between layers when exploded
+
+// State
+let fExplode = 0;   // 0=solid, 1=exploded
+let fNgon = 7;
+let fLayer = 6;     // selected layer for top-view
+let fAnim = null;
+
+// Frustum params
+function layerR(k) {
+  // pixel radius of layer k (k=0 bottom, k=11 top)
+  return (6 - (6 - 3) * k / (LAYERS - 1)) * SCALE;
+}
+
+// ── TILING DRAWING ─────────────────────────────────
+// Draw 2n curved-piece monohedral tiling
+// ctx: canvas context, already centered & scaled
+function drawTilingRaw(ctx, R, n) {
+  const N = 2 * n;
+  for (let i = 0; i < N; i++) {
+    const a1 = (Math.PI * 2 * i) / N;
+    const a2 = (Math.PI * 2 * (i + 1)) / N;
+    // S-curve amplitude & direction
+    const dir = (i % 2 === 0) ? 1 : -1;
+    const amp = R * 0.22;
+    // Control points for curved edges (quadratic bezier from center)
+    const lcp = {
+      x: R * 0.52 * Math.cos(a1) + amp * dir * Math.cos(a1 + Math.PI / 2),
+      y: R * 0.52 * Math.sin(a1) + amp * dir * Math.sin(a1 + Math.PI / 2)
+    };
+    const rcp = {
+      x: R * 0.52 * Math.cos(a2) - amp * dir * Math.cos(a2 + Math.PI / 2),
+      y: R * 0.52 * Math.sin(a2) - amp * dir * Math.sin(a2 + Math.PI / 2)
+    };
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(lcp.x, lcp.y, R * Math.cos(a1), R * Math.sin(a1));
+    ctx.arc(0, 0, R, a1, a2, false);
+    ctx.quadraticCurveTo(rcp.x, rcp.y, 0, 0);
+    ctx.closePath();
+    const v = (i % 2 === 0) ? 18 : 155;
+    ctx.fillStyle = `rgb(${v},${v},${v})`;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+    ctx.lineWidth = 0.9;
+    ctx.stroke();
+  }
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(0, 0, Math.max(2, R * 0.045), 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+}
+
+// Draw disc (ellipse + tiling) at a given canvas position
+function drawDisc(ctx, cx, cy, R, drawTiling) {
+  // Bottom face shadow
+  ctx.save();
+  ctx.translate(cx, cy + DISC_THICK);
+  ctx.scale(1, EA);
+  ctx.beginPath();
+  ctx.arc(0, 0, R, 0, Math.PI * 2);
+  ctx.fillStyle = '#aaa';
+  ctx.fill();
+  ctx.restore();
+
+  // Side (front half trapezoid)
+  ctx.beginPath();
+  ctx.moveTo(cx - R, cy);
+  ctx.lineTo(cx - R, cy + DISC_THICK);
+  ctx.ellipse(cx, cy + DISC_THICK, R, R * EA, 0, Math.PI, 0, true);
+  ctx.lineTo(cx + R, cy);
+  ctx.ellipse(cx, cy, R, R * EA, 0, 0, Math.PI, true);
+  ctx.fillStyle = '#c8c8c8';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(120,120,120,0.5)';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+
+  if (drawTiling) {
+    // Top face: scale to ellipse then draw tiling
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, EA);
+    // Clip to circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, R, 0, Math.PI * 2);
+    ctx.clip();
+    drawTilingRaw(ctx, R, fNgon);
+    ctx.restore();
+    ctx.restore();
+  } else {
+    // Plain filled ellipse
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, EA);
+    ctx.beginPath();
+    ctx.arc(0, 0, R, 0, Math.PI * 2);
+    ctx.fillStyle = '#ddd';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Ellipse outline
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(1, EA);
+  ctx.beginPath();
+  ctx.arc(0, 0, R, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(80,80,80,0.5)';
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ── FRUSTUM CANVAS: SOLID VIEW ──────────────────────
+function renderSolid() {
+  fx.clearRect(0, 0, FW, FH);
+  fx.fillStyle = '#f8f8f8';
+  fx.fillRect(0, 0, FW, FH);
+
+  const CX = FW / 2;
+  const CY = FH * 0.80;
+  const BR = layerR(0);
+  const TR = layerR(LAYERS - 1);
+  const totalH = (LAYERS - 1) * LAYER_PX;
+  const TY = CY - totalH;
+
+  // Drop shadow
+  fx.save();
+  fx.globalAlpha = 0.12;
+  fx.translate(CX, CY + 18);
+  fx.scale(1, 0.22);
+  fx.beginPath();
+  fx.arc(0, 0, BR * 0.9, 0, Math.PI * 2);
+  fx.fillStyle = '#000';
+  fx.fill();
+  fx.restore();
+
+  // Back half of bottom
+  fx.save();
+  fx.translate(CX, CY);
+  fx.scale(1, EA);
+  fx.beginPath();
+  fx.arc(0, 0, BR, Math.PI, 2 * Math.PI, false);
+  fx.fillStyle = '#b0b0b0';
+  fx.fill();
+  fx.restore();
+
+  // Back side surface
+  fx.beginPath();
+  fx.moveTo(CX - BR, CY);
+  fx.lineTo(CX - TR, TY);
+  fx.save();
+  fx.translate(CX, TY);
+  fx.scale(1, EA);
+  fx.arc(0, 0, TR, Math.PI, 2 * Math.PI, false);
+  fx.restore();
+  fx.lineTo(CX + BR, CY);
+  fx.fillStyle = '#c8c8c8';
+  fx.fill();
+
+  // Layer lines (back half)
+  for (let k = 1; k < LAYERS; k++) {
+    const r = layerR(k);
+    const y = CY - k * LAYER_PX;
+    fx.save();
+    fx.translate(CX, y);
+    fx.scale(1, EA);
+    fx.beginPath();
+    fx.arc(0, 0, r, Math.PI, 2 * Math.PI, false);
+    fx.strokeStyle = 'rgba(100,100,100,0.35)';
+    fx.lineWidth = 0.7;
+    fx.stroke();
+    fx.restore();
+  }
+
+  // Front side surface
+  fx.beginPath();
+  fx.moveTo(CX - BR, CY);
+  fx.lineTo(CX - TR, TY);
+  fx.save();
+  fx.translate(CX, TY);
+  fx.scale(1, EA);
+  fx.arc(0, 0, TR, Math.PI, 0, true);
+  fx.restore();
+  fx.lineTo(CX + BR, CY);
+  fx.fillStyle = '#dedede';
+  fx.fill();
+  fx.strokeStyle = '#aaa';
+  fx.lineWidth = 0.8;
+  fx.stroke();
+
+  // Layer lines (front half)
+  for (let k = 1; k < LAYERS; k++) {
+    const r = layerR(k);
+    const y = CY - k * LAYER_PX;
+    fx.save();
+    fx.translate(CX, y);
+    fx.scale(1, EA);
+    fx.beginPath();
+    fx.arc(0, 0, r, 0, Math.PI, false);
+    fx.strokeStyle = 'rgba(80,80,80,0.45)';
+    fx.lineWidth = 0.7;
+    fx.stroke();
+    fx.restore();
+  }
+
+  // Top face with tiling
+  fx.save();
+  fx.translate(CX, TY);
+  fx.scale(1, EA);
+  fx.save();
+  fx.beginPath();
+  fx.arc(0, 0, TR, 0, Math.PI * 2);
+  fx.clip();
+  drawTilingRaw(fx, TR, fNgon);
+  fx.restore();
+  fx.beginPath();
+  fx.arc(0, 0, TR, 0, Math.PI * 2);
+  fx.strokeStyle = '#888';
+  fx.lineWidth = 1;
+  fx.stroke();
+  fx.restore();
+
+  // Bottom ellipse (front)
+  fx.save();
+  fx.translate(CX, CY);
+  fx.scale(1, EA);
+  fx.beginPath();
+  fx.arc(0, 0, BR, 0, Math.PI, false);
+  fx.fillStyle = '#b8b8b8';
+  fx.fill();
+  fx.restore();
+
+  // Dimension labels
+  fx.fillStyle = '#777';
+  fx.font = '10px JetBrains Mono, monospace';
+  fx.textAlign = 'right';
+  fx.fillText('R = 6cm', CX - BR - 4, CY + 3);
+  fx.fillText('r = 3cm', CX - TR - 4, TY + 3);
+  fx.textAlign = 'left';
+  fx.fillText('H = 12cm', CX + BR + 6, (CY + TY) / 2 + 4);
+  // H line
+  fx.strokeStyle = '#ccc';
+  fx.lineWidth = 0.6;
+  fx.beginPath();
+  fx.moveTo(CX + BR + 4, CY);
+  fx.lineTo(CX + BR + 4, TY);
+  fx.stroke();
+
+  // Info
+  fx.fillStyle = '#999';
+  fx.font = '10px JetBrains Mono, monospace';
+  fx.textAlign = 'center';
+  const nlbl = {5:'5-gon · 10 pieces/layer', 7:'7-gon · 14 pieces/layer', 9:'9-gon · 18 pieces/layer'};
+  fx.fillText(nlbl[fNgon], FW / 2, FH - 10);
+}
+
+// ── FRUSTUM CANVAS: EXPLODED VIEW ───────────────────
+function renderExploded(t) {
+  fx.clearRect(0, 0, FW, FH);
+  fx.fillStyle = '#f8f8f8';
+  fx.fillRect(0, 0, FW, FH);
+
+  const CX = FW / 2;
+  const spread = t * SPREAD_MAX;
+  const baseStep = LAYER_PX + spread;
+  const totalH = (LAYERS - 1) * baseStep + DISC_THICK;
+  const baseY = FH * 0.88 - (totalH > FH * 0.8 ? totalH - FH * 0.8 : 0);
+
+  // Draw bottom → top (painter's: far layers first = top layers)
+  for (let k = LAYERS - 1; k >= 0; k--) {
+    const R = layerR(k);
+    const y = baseY - k * baseStep;
+    const showTile = t > 0.15;
+    drawDisc(fx, CX, y, R, showTile);
+
+    // Label when fully exploded
+    if (t > 0.8 && R > 24) {
+      const rk = (6 - (6 - 3) * k / (LAYERS - 1)).toFixed(1);
+      fx.fillStyle = 'rgba(120,120,120,0.9)';
+      fx.font = '8.5px JetBrains Mono, monospace';
+      fx.textAlign = 'left';
+      fx.fillText(`k=${k}  ρ=${rk}`, CX + R + 3, y + 3);
+    }
+  }
+
+  fx.textAlign = 'center';
+  fx.fillStyle = '#999';
+  fx.font = '10px JetBrains Mono, monospace';
+  const nlbl = {5:'5-gon · 10 pieces/layer', 7:'7-gon · 14 pieces/layer', 9:'9-gon · 18 pieces/layer'};
+  fx.fillText(nlbl[fNgon], FW / 2, 18);
+}
+
+// ── MAIN FRUSTUM RENDER ─────────────────────────────
+function renderFrustum() {
+  if (fExplode < 0.02) {
+    renderSolid();
+  } else {
+    renderExploded(fExplode);
+  }
+}
+
+// ── ANIMATE EXPLODE ─────────────────────────────────
+function animateTo(target) {
+  if (fAnim) cancelAnimationFrame(fAnim);
+  const start = fExplode;
+  const t0 = performance.now();
+  const dur = 900;
+  function step(t) {
+    let p = Math.min(1, (t - t0) / dur);
+    p = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+    fExplode = start + (target - start) * p;
+    renderFrustum();
+    if (fExplode !== target) fAnim = requestAnimationFrame(step);
+  }
+  fAnim = requestAnimationFrame(step);
+}
+
+// ── TOP-VIEW TILING CANVAS ──────────────────────────
+function renderTiling() {
+  tx.clearRect(0, 0, TW, TH);
+  tx.fillStyle = '#f8f8f8';
+  tx.fillRect(0, 0, TW, TH);
+
+  const CX = TW / 2, CY = TH / 2 - 20;
+  const R = layerR(fLayer) * 1.3; // scale up for visibility
+
+  // Background circle
+  tx.save();
+  tx.translate(CX, CY);
+  tx.beginPath();
+  tx.arc(0, 0, R, 0, Math.PI * 2);
+  tx.fillStyle = '#e8e8e8';
+  tx.fill();
+  tx.restore();
+
+  // Tiling
+  tx.save();
+  tx.translate(CX, CY);
+  tx.save();
+  tx.beginPath();
+  tx.arc(0, 0, R, 0, Math.PI * 2);
+  tx.clip();
+  drawTilingRaw(tx, R, fNgon);
+  tx.restore();
+
+  // Circle outline
+  tx.beginPath();
+  tx.arc(0, 0, R, 0, Math.PI * 2);
+  tx.strokeStyle = '#888';
+  tx.lineWidth = 1.5;
+  tx.stroke();
+  tx.restore();
+
+  // Radius label
+  const rk = (6 - (6 - 3) * fLayer / (LAYERS - 1)).toFixed(2);
+  tx.fillStyle = '#888';
+  tx.font = '10px JetBrains Mono, monospace';
+  tx.textAlign = 'center';
+  tx.fillText(`Layer k=${fLayer}  ρ=${rk}cm  →  ${2 * fNgon} pieces`, TW / 2, CY + R + 22);
+
+  // N pieces count in center
+  tx.fillStyle = 'rgba(255,255,255,0.0)';
+  // Cut count overlay
+  tx.fillStyle = '#666';
+  tx.font = '9px JetBrains Mono, monospace';
+  tx.textAlign = 'center';
+
+  const nlabels = {5:'Pentagon: 10 curved pieces', 7:'Heptagon: 14 curved pieces', 9:'Nonagon: 18 curved pieces'};
+  tx.fillText(nlabels[fNgon], TW / 2, TH - 10);
+}
+
+// ── CONTROLS ────────────────────────────────────────
+const statData = {
+  5: {pieces:10, eff:'94.8%', waste:'41.2 cm³'},
+  7: {pieces:14, eff:'97.3%', waste:'21.4 cm³'},
+  9: {pieces:18, eff:'98.1%', waste:'15.0 cm³'}
+};
+
+function updateStats() {
+  const d = statData[fNgon];
+  document.getElementById('stat-num').textContent = d.pieces;
+  document.getElementById('stat-eff-num').textContent = d.eff;
+  document.getElementById('stat-waste-num').textContent = d.waste;
+}
+
+window.setSolid = function() {
+  document.getElementById('btn-solid').classList.add('active');
+  document.getElementById('btn-explode').classList.remove('active');
+  animateTo(0);
+};
+window.setExplode = function() {
+  document.getElementById('btn-explode').classList.add('active');
+  document.getElementById('btn-solid').classList.remove('active');
+  animateTo(1);
+};
+window.setNgon = function(n) {
+  fNgon = n;
+  [5,7,9].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===n));
+  const titles = {5:'Layer Cross-Section — Pentagon (5-gon) Tiling', 7:'Layer Cross-Section — Heptagon (7-gon) Tiling', 9:'Layer Cross-Section — Nonagon (9-gon) Tiling'};
+  document.getElementById('tiling-panel-title').textContent = titles[n];
+  updateStats();
+  renderFrustum();
+  renderTiling();
+};
+window.setLayer = function(k) {
+  fLayer = parseInt(k);
+  const rk = (6 - (6-3)*fLayer/(LAYERS-1)).toFixed(1);
+  document.getElementById('layer-label').textContent = `k=${fLayer}, ρ=${rk}cm`;
+  renderTiling();
+};
+
+// Initial render
+renderFrustum();
+renderTiling();
+updateStats();
+
+})(); // end 3D viz IIFE
+
+/* ─── PAPER EXPLORER ───────────────────────────────── */
+(function(){
+  const PDF_URL = '/static/pizzaSugar.pdf';
+  const animToPage = [1, 1, 2, 2, 2, 3, 3, 4, 5];
+  const TOTAL_ANIMS = 9;
+  let pdfDoc = null, currentPage = 1, totalPages = 0, currentAnim = 0;
+
+  const canvas = document.getElementById('pe-canvas');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+  const loading = document.getElementById('pe-loading');
+
+  function updatePageInfo() {
+    const el = document.getElementById('pe-page-info');
+    if (el) el.textContent = `Page ${currentPage} / ${totalPages}`;
+  }
+
+  function renderPage(num) {
+    if (!pdfDoc) return;
+    pdfDoc.getPage(num).then(page => {
+      const wrap = document.getElementById('pe-canvas-wrap');
+      const maxW = wrap ? wrap.clientWidth - 40 : 380;
+      const maxH = wrap ? wrap.clientHeight - 40 : 480;
+      const vp0 = page.getViewport({scale:1});
+      const scale = Math.min(maxW/vp0.width, maxH/vp0.height, 2);
+      const vp = page.getViewport({scale});
+      canvas.width = vp.width; canvas.height = vp.height;
+      page.render({canvasContext:ctx, viewport:vp}).promise.then(() => {
+        if (loading) loading.classList.add('hidden');
+      });
+      currentPage = num;
+      updatePageInfo();
+    });
+  }
+
+  window.peNav = function(dir) {
+    if (!pdfDoc) return;
+    renderPage(Math.max(1, Math.min(totalPages, currentPage + dir)));
+  };
+
+  const titles = ['Overview','The Problem','Frustum Geometry','Layer Decomp.','Tiling Theory','5-gon','7-gon','Efficiency','Results'];
+  window.peGoto = function(idx) {
+    currentAnim = Math.max(0, Math.min(TOTAL_ANIMS-1, idx));
+    document.querySelectorAll('.pe-anim').forEach((a,i) => a.classList.toggle('active', i===currentAnim));
+    document.querySelectorAll('.pe-toc-item').forEach((t,i) => t.classList.toggle('active', i===currentAnim));
+    const lbl = document.getElementById('pe-anim-title');
+    if (lbl) lbl.textContent = titles[currentAnim] || '';
+    if (pdfDoc) renderPage(animToPage[currentAnim] || 1);
+    triggerBars(currentAnim);
+  };
+
+  function triggerBars(idx) {
+    const panel = document.getElementById('pe-a' + idx);
+    if (!panel) return;
+    panel.querySelectorAll('.pe-bar-fill[data-w]').forEach(b => {
+      b.style.width = '0';
+      setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 300);
+    });
+  }
+
+  // Load PDF dynamically
+  const pdfScript = document.createElement('script');
+  pdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  pdfScript.onload = () => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.getDocument(PDF_URL).promise.then(doc => {
+      pdfDoc = doc; totalPages = doc.numPages;
+      renderPage(1); updatePageInfo();
+    }).catch(() => {
+      if (loading) loading.innerHTML = '<p style="font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-500);">PDF unavailable</p>';
+    });
+  };
+  document.head.appendChild(pdfScript);
+
+  // Scroll-driven TOC
+  const outer = document.getElementById('pe-scroll-outer');
+  if (outer) {
+    window.addEventListener('scroll', () => {
+      const rect = outer.getBoundingClientRect();
+      if (rect.top > 0 || rect.bottom < 0) return;
+      const p = Math.max(0, Math.min(1, (-rect.top) / (outer.clientHeight - window.innerHeight)));
+      const idx = Math.min(TOTAL_ANIMS-1, Math.floor(p * TOTAL_ANIMS));
+      if (idx !== currentAnim) peGoto(idx);
+    });
+  }
+
+  setTimeout(() => triggerBars(0), 600);
+})();
+</script>
+</body>
+</html>
