@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PolyfdoR — The creator behind PolyfdoS.</title>
+<title>PolyfdoR — Ahmed Hafdi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -28,7 +28,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ── NAV ─────────────────────────────────────────── */
+/* ── NAV ──────────────────────────────────────────────────── */
 nav {
   position: fixed; top:0; left:0; right:0; z-index:100;
   background: rgba(255,255,255,0.96);
@@ -46,13 +46,17 @@ nav {
   letter-spacing: 0.02em;
 }
 .nav-back:hover { color: var(--black); }
+.nav-brand {
+  display: flex; align-items: center; gap: 0.55rem;
+}
+.nav-raven { width: 26px; height: 26px; }
 .nav-name {
   font-family: var(--font-mono);
   font-size: 0.85rem; font-weight: 500;
   letter-spacing: -0.02em;
 }
 
-/* ── HERO ────────────────────────────────────────── */
+/* ── HERO ─────────────────────────────────────────────────── */
 .hero {
   min-height: 100vh;
   display: grid;
@@ -68,7 +72,9 @@ nav {
 .hero-right {
   padding: 5rem 2.5rem 5rem 3rem;
   display: flex; flex-direction: column;
-  justify-content: center;
+  justify-content: center; align-items: center;
+  background: var(--gray-100);
+  position: relative; overflow: hidden;
 }
 .hero-eyebrow {
   font-family: var(--font-mono);
@@ -94,38 +100,64 @@ nav {
 }
 .hero-bio strong { color: var(--black); font-weight: 500; }
 
-/* equation card */
-.equation-card {
-  border: 1px solid var(--gray-200);
-  padding: 2.5rem;
-  margin-bottom: 2rem;
+/* ── RAVEN DISPLAY ────────────────────────────────────────── */
+.raven-display {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 2rem;
+  width: 100%;
 }
-.eq-line {
+.raven-main {
+  width: min(280px, 80%);
+  opacity: 0;
+  animation: ravenReveal 1.2s cubic-bezier(0.22,1,0.36,1) 0.3s forwards;
+  filter: drop-shadow(0 8px 32px rgba(0,0,0,0.12));
+}
+@keyframes ravenReveal {
+  from { opacity: 0; transform: translateY(24px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.raven-wordmark {
+  text-align: center;
+  opacity: 0;
+  animation: ravenReveal 1s ease 0.7s forwards;
+}
+.raven-wordmark-name {
   font-family: var(--font-serif);
-  font-size: 1.8rem; letter-spacing: -0.01em;
-  margin-bottom: 0.5rem;
+  font-size: 2.2rem; letter-spacing: -0.02em;
+  line-height: 1; margin-bottom: 0.3rem;
 }
-.eq-line em { font-style: italic; }
-.eq-breakdown {
-  margin-top: 1.5rem;
-  display: flex; flex-direction: column; gap: 0.5rem;
-}
-.eq-row {
+.raven-wordmark-name em { font-style: italic; }
+.raven-wordmark-sub {
   font-family: var(--font-mono);
-  font-size: 0.8rem; color: var(--gray-600);
-  display: flex; gap: 0.8rem;
+  font-size: 0.7rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gray-400);
 }
-.eq-key { color: var(--black); font-weight: 500; min-width: 50px; }
 
+/* ── EQUATION ─────────────────────────────────────────────── */
+.eq-strip {
+  display: flex; gap: 1.5rem; flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+.eq-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+  padding: 0.3rem 0.75rem; border-radius: 2px;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.eq-pill span { color: var(--black); font-weight: 500; }
+
+/* ── TAGLINE ──────────────────────────────────────────────── */
 .tagline {
   font-family: var(--font-serif);
   font-size: 1.1rem; font-style: italic;
   color: var(--gray-400);
   border-left: 2px solid var(--gray-200);
   padding-left: 1rem;
+  margin-top: 2rem;
 }
 
-/* ── FIELDS ──────────────────────────────────────── */
+/* ── FIELDS ───────────────────────────────────────────────── */
 .fields-section {
   padding: 6rem 2.5rem;
   max-width: 1100px; margin: 0 auto;
@@ -149,7 +181,9 @@ nav {
 .field-item {
   padding: 2rem;
   border: 1px solid var(--gray-200);
+  transition: border-color 0.2s;
 }
+.field-item:hover { border-color: var(--gray-400); }
 .field-num {
   font-family: var(--font-mono);
   font-size: 0.62rem; color: var(--gray-400);
@@ -164,7 +198,7 @@ nav {
   line-height: 1.6;
 }
 
-/* ── WORK ────────────────────────────────────────── */
+/* ── WORK ─────────────────────────────────────────────────── */
 .work-section {
   padding: 6rem 2.5rem;
   max-width: 1100px; margin: 0 auto;
@@ -177,7 +211,9 @@ nav {
   padding: 1.8rem 0;
   border-bottom: 1px solid var(--gray-200);
   text-decoration: none; color: inherit;
+  transition: background 0.15s;
 }
+.work-row:hover { background: var(--gray-100); margin: 0 -1rem; padding: 1.8rem 1rem; }
 .work-row:hover .wr-title { text-decoration: underline; text-decoration-thickness: 1px; }
 .wr-type {
   font-family: var(--font-mono);
@@ -192,17 +228,53 @@ nav {
 .wr-title em { font-style: italic; }
 .wr-arrow { font-size: 1rem; color: var(--gray-400); }
 
-/* ── FOOTER ──────────────────────────────────────── */
+/* ── BRAND STRIP ──────────────────────────────────────────── */
+.brand-strip {
+  padding: 4rem 2.5rem;
+  border-top: 1px solid var(--gray-200);
+  display: flex; align-items: center; justify-content: center;
+  gap: 2rem; flex-wrap: wrap;
+  background: var(--gray-100);
+}
+.brand-strip-raven { width: 48px; height: 48px; opacity: 0.85; }
+.brand-strip-text {
+  font-family: var(--font-serif);
+  font-size: 1rem; color: var(--gray-600);
+  font-style: italic; max-width: 380px; line-height: 1.6;
+}
+
+/* ── FOOTER ───────────────────────────────────────────────── */
 footer {
   border-top: 1px solid var(--gray-200);
   padding: 2rem 2.5rem;
   display: flex; align-items: center; justify-content: space-between;
   max-width: 1100px; margin: 0 auto;
 }
+.footer-brand { display: flex; align-items: center; gap: 0.5rem; }
+.footer-raven { width: 20px; height: 20px; }
 .footer-text { font-size: 0.72rem; color: var(--gray-400); }
 .footer-text a { color: inherit; }
 
-/* ── RESPONSIVE ──────────────────────────────────── */
+/* ── SOCIAL LINKS ─────────────────────────────────────────── */
+.social-links {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  margin-top: 2rem;
+}
+.social-link {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.04em;
+  color: var(--gray-600);
+  text-decoration: none;
+  border: 1px solid var(--gray-200);
+  padding: 0.35rem 0.85rem;
+  border-radius: 2px;
+  display: flex; align-items: center; gap: 0.45rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+.social-link:hover { border-color: var(--black); color: var(--black); }
+.social-link svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
 @media (max-width: 700px) {
   nav { padding: 0 1.2rem; }
   .hero { grid-template-columns: 1fr; min-height: auto; }
@@ -219,13 +291,46 @@ footer {
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ── RAVEN SVG SYMBOL (reused everywhere) ─────────────── -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="raven" viewBox="0 0 220 240">
+    <!-- Raven silhouette — facing right, perched on mound -->
+    <path fill="currentColor" d="
+      M165,72
+      C157,61 142,55 128,53
+      C114,49 100,51 89,59
+      C76,67 66,82 61,98
+      C55,114 54,133 60,149
+      C56,153 54,161 57,166
+      L63,170 65,163
+      L69,170 76,170 74,163
+      C78,167 84,169 89,167
+      L92,172 99,172 97,166
+      C103,159 107,149 105,139
+      C112,148 113,159 110,167
+      L117,171 118,164
+      L123,171 130,171 127,164
+      C132,156 132,145 127,136
+      C133,124 135,110 131,97
+      C127,84 118,73 107,67
+      C122,64 140,65 165,72
+      Z
+    "/>
+    <!-- Ground mound -->
+    <ellipse fill="currentColor" cx="95" cy="175" rx="58" ry="9"/>
+  </symbol>
+</svg>
+
+<!-- ── NAV ──────────────────────────────────────────────── -->
 <nav>
   <a class="nav-back" href="/">← PolyfdoS</a>
-  <span class="nav-name">PolyfdoR</span>
+  <div class="nav-brand">
+    <svg class="nav-raven" aria-hidden="true"><use href="#raven"/></svg>
+    <span class="nav-name">PolyfdoR</span>
+  </div>
 </nav>
 
-<!-- HERO -->
+<!-- ── HERO ─────────────────────────────────────────────── -->
 <div class="hero">
   <div class="hero-left">
     <div class="hero-eyebrow">The creator behind PolyfdoS</div>
@@ -238,23 +343,71 @@ footer {
       Founder of <strong>PolyfdoS</strong> — a universe of ideas
       bigger than the universe itself.
     </p>
+
+    <div class="eq-strip">
+      <div class="eq-pill"><span>POLY</span> Polymath</div>
+      <div class="eq-pill"><span>FD</span> Hafdi</div>
+      <div class="eq-pill"><span>R</span> Owner</div>
+    </div>
+
+    <p class="tagline">"The creator behind PolyfdoS."</p>
+
+    <div class="social-links">
+      <a class="social-link" href="https://www.linkedin.com/in/ahmed-hafdi-200528188/" target="_blank" rel="noopener">
+        <!-- LinkedIn icon -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <a class="social-link" href="https://www.youtube.com/@polyfdor" target="_blank" rel="noopener">
+        <!-- YouTube icon -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        YouTube
+      </a>
+      <a class="social-link" href="https://www.instagram.com/polyfdor" target="_blank" rel="noopener">
+        <!-- Instagram icon -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        Instagram
+      </a>
+    </div>
   </div>
 
   <div class="hero-right">
-    <div class="equation-card">
-      <div class="eq-line">Polyfd<em>o</em>R</div>
-      <div class="eq-breakdown">
-        <div class="eq-row"><span class="eq-key">PolyfdoS</span>+ R</div>
-        <div class="eq-row"><span class="eq-key">R</span>= Owner</div>
+    <div class="raven-display">
+      <svg class="raven-main" viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg" aria-label="PolyfdoR raven logo">
+        <path fill="#0a0a0a" d="
+          M165,72
+          C157,61 142,55 128,53
+          C114,49 100,51 89,59
+          C76,67 66,82 61,98
+          C55,114 54,133 60,149
+          C56,153 54,161 57,166
+          L63,170 65,163
+          L69,170 76,170 74,163
+          C78,167 84,169 89,167
+          L92,172 99,172 97,166
+          C103,159 107,149 105,139
+          C112,148 113,159 110,167
+          L117,171 118,164
+          L123,171 130,171 127,164
+          C132,156 132,145 127,136
+          C133,124 135,110 131,97
+          C127,84 118,73 107,67
+          C122,64 140,65 165,72
+          Z
+        "/>
+        <ellipse fill="#0a0a0a" cx="95" cy="175" rx="58" ry="9"/>
+      </svg>
+      <div class="raven-wordmark">
+        <div class="raven-wordmark-name">Polyfd<em>o</em>R</div>
+        <div class="raven-wordmark-sub">Ahmed Hafdi · PolyfdoS</div>
       </div>
     </div>
-    <p class="tagline">"The creator behind PolyfdoS."</p>
   </div>
 </div>
 
 <hr style="border:none;border-top:1px solid var(--gray-200);">
 
-<!-- FIELDS -->
+<!-- ── FIELDS ───────────────────────────────────────────── -->
 <section class="fields-section">
   <div class="section-label">Fields of study</div>
   <div class="fields-grid">
@@ -276,7 +429,7 @@ footer {
   </div>
 </section>
 
-<!-- WORK -->
+<!-- ── WORK ─────────────────────────────────────────────── -->
 <section class="work-section">
   <div class="section-label">Work</div>
 
@@ -310,16 +463,33 @@ footer {
     <div class="wr-arrow">→</div>
   </a>
 
-  <div class="work-row" style="opacity:.4;pointer-events:none;">
-    <div class="wr-type">World<br>PolyfdoS</div>
-    <div class="wr-title" style="color:var(--gray-400);">Systems &amp; Open Systems — Coming soon</div>
-  </div>
+  <a class="work-row" href="/matyos">
+    <div class="wr-type">Language<br>v1.0.9 · MIT</div>
+    <div class="wr-title">Maty<em>OS</em> — Proof Assistant Programming Language</div>
+    <div class="wr-arrow">→</div>
+  </a>
 
+  <a class="work-row" href="/polyfdos">
+    <div class="wr-type">OS<br>v1.4 · MIT</div>
+    <div class="wr-title">polyfd<em>OS</em> — Moroccan x86 Operating System</div>
+    <div class="wr-arrow">→</div>
+  </a>
 </section>
 
-<!-- FOOTER -->
+<!-- ── BRAND STRIP ───────────────────────────────────────── -->
+<div class="brand-strip">
+  <svg class="brand-strip-raven" aria-hidden="true"><use href="#raven"/></svg>
+  <p class="brand-strip-text">
+    "The raven sees what others miss. It perches at the intersection of knowledge domains and observes the patterns beneath."
+  </p>
+</div>
+
+<!-- ── FOOTER ───────────────────────────────────────────── -->
 <footer>
-  <span class="footer-text">Ahmed Hafdi · <a href="/">PolyfdoS</a> · 2026</span>
+  <div class="footer-brand">
+    <svg class="footer-raven" aria-hidden="true"><use href="#raven"/></svg>
+    <span class="footer-text">Ahmed Hafdi · <a href="/">PolyfdoS</a> · 2026</span>
+  </div>
   <span class="footer-text">@polyfdor</span>
 </footer>
 
