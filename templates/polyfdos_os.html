@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>polyfdOS — Moroccan x86 Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', monospace;
+  --c-bg:   #ffffff;
+  --c-text: #1a1a1a;
+  --c-muted:#6b7280;
+  --c-border:#e5e7eb;
+  --c-acc:  #f78c6c;   /* OS orange */
+  --c-acc2: #82aaff;   /* blue secondary */
+  --c-asm:  #c792ea;   /* assembly purple */
+  --c-kw:   #c3e88d;   /* C green */
+  --c-str:  #ffcb6b;   /* strings amber */
+  --c-cm:   #546e7a;   /* comments */
+  --c-num:  #f78c6c;   /* numbers */
+  --sidebar-w: 240px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-sans); font-size: 16px; color: var(--c-text); background: var(--c-bg); }
+
+/* ── NAV ─────────────────────────────────────────────────────── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 52px; background: rgba(255,255,255,0.92);
+  border-bottom: 1px solid var(--c-border);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center;
+  padding: 0 1.5rem; gap: 1rem;
+}
+.nav-back { font-family: var(--font-mono); font-size: 0.8rem; color: var(--c-muted); text-decoration: none; }
+.nav-back:hover { color: var(--c-text); }
+.nav-sep { color: var(--c-border); }
+.nav-brand { font-family: var(--font-serif); font-size: 1.15rem; font-weight: 500; }
+.nav-brand em { font-style: italic; }
+.nav-links { display: flex; gap: 1.5rem; margin-left: auto; list-style: none; }
+.nav-links a { font-size: 0.82rem; color: var(--c-muted); text-decoration: none; }
+.nav-links a:hover { color: var(--c-text); }
+.nav-version {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  background: var(--c-acc); color: #fff;
+  padding: 0.2rem 0.6rem; border-radius: 4px;
+}
+.nav-burger { display: none; background: none; border: none; cursor: pointer; font-size: 1.3rem; }
+
+/* ── LAYOUT ──────────────────────────────────────────────────── */
+.layout { display: flex; padding-top: 52px; min-height: 100vh; }
+
+/* ── SIDEBAR ─────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  position: sticky; top: 52px; height: calc(100vh - 52px);
+  overflow-y: auto; border-right: 1px solid var(--c-border);
+  padding: 1.5rem 0;
+}
+.sidebar-group { margin-bottom: 1.5rem; }
+.sidebar-group-title {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--c-muted);
+  padding: 0 1.2rem; margin-bottom: 0.3rem;
+}
+.sidebar-link {
+  display: block; padding: 0.28rem 1.2rem;
+  font-size: 0.82rem; color: #444; text-decoration: none;
+  border-left: 2px solid transparent; transition: all 0.15s;
+}
+.sidebar-link:hover { color: var(--c-text); background: #f9fafb; }
+.sidebar-link.active { color: var(--c-acc); border-left-color: var(--c-acc); background: #fff7f5; }
+.sidebar-link.sub { padding-left: 2rem; font-size: 0.78rem; color: #888; }
+.sidebar-link.sub:hover { color: var(--c-text); }
+.sidebar-link.sub.active { color: var(--c-acc); border-left-color: var(--c-acc); }
+
+/* ── MAIN ────────────────────────────────────────────────────── */
+.main { flex: 1; min-width: 0; padding: 3rem 4rem 6rem; max-width: 900px; }
+
+/* ── HERO ────────────────────────────────────────────────────── */
+.hero { padding-bottom: 3rem; border-bottom: 1px solid var(--c-border); margin-bottom: 3rem; }
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--c-muted); margin-bottom: 1rem;
+}
+.hero-title {
+  font-family: var(--font-serif); font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 400; line-height: 1; margin-bottom: 1.2rem; color: #111;
+}
+.hero-title em { font-style: italic; color: var(--c-acc); }
+.hero-tagline {
+  font-family: var(--font-serif); font-size: 1.25rem; font-style: italic;
+  color: var(--c-muted); margin-bottom: 1.5rem; min-height: 1.8rem;
+}
+.hero-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+.hero-badge {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  background: #f3f4f6; border: 1px solid var(--c-border);
+  padding: 0.25rem 0.7rem; border-radius: 4px; color: #444;
+}
+.hero-install {
+  background: #0d1117; border-radius: 10px; padding: 1.25rem 1.5rem;
+  font-family: var(--font-mono); font-size: 0.82rem;
+  line-height: 1.7; margin-bottom: 1.25rem;
+}
+.hero-install .cm { color: var(--c-cm); }
+.hero-install .acc { color: var(--c-acc); }
+.hero-gh {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.82rem;
+  color: var(--c-acc2); text-decoration: none;
+}
+.hero-gh:hover { text-decoration: underline; }
+
+/* ── SECTION ─────────────────────────────────────────────────── */
+.doc-section { padding-bottom: 3rem; margin-bottom: 0.5rem; }
+.section-eyebrow {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--c-acc); margin-bottom: 0.5rem;
+}
+.section-title {
+  font-family: var(--font-serif); font-size: 2rem; font-weight: 400;
+  margin-bottom: 1rem; color: #111;
+}
+.section-body p { font-size: 1rem; line-height: 1.7; color: #333; margin-bottom: 0.9rem; }
+.section-body code { font-family: var(--font-mono); font-size: 0.85em; background: #f3f4f6; padding: 0.1em 0.35em; border-radius: 3px; }
+.section-body em { font-style: italic; }
+.doc-divider { border: none; border-top: 1px solid var(--c-border); margin: 2.5rem 0; }
+h3 { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 400; margin: 1.5rem 0 0.6rem; color: #111; }
+h4 { font-family: var(--font-sans); font-size: 0.9rem; font-weight: 600; margin: 1rem 0 0.4rem; color: #333; }
+
+/* ── CODE BLOCKS ─────────────────────────────────────────────── */
+.code-block {
+  background: #0d1117; border-radius: 8px;
+  padding: 1.1rem 1.3rem; font-family: var(--font-mono);
+  font-size: 0.82rem; line-height: 1.65; color: #e6edf3;
+  overflow-x: auto; white-space: pre; margin: 0.75rem 0 1rem;
+  position: relative;
+}
+.copy-btn {
+  position: absolute; top: 0.6rem; right: 0.6rem;
+  background: #1c2128; border: 1px solid #30363d; border-radius: 4px;
+  color: #8892a4; font-family: var(--font-mono); font-size: 0.7rem;
+  padding: 0.2rem 0.5rem; cursor: pointer; transition: all 0.15s;
+}
+.copy-btn:hover { background: #2d333b; color: #e6edf3; }
+.kw  { color: #c3e88d; }
+.ty  { color: #82aaff; }
+.fn  { color: #82cfff; }
+.str { color: #ffcb6b; }
+.cm  { color: #546e7a; }
+.num { color: #f78c6c; }
+.asm { color: #c792ea; }
+.acc { color: #f78c6c; }
+.dir { color: #89ddff; }
+
+/* ── INFO CARDS ──────────────────────────────────────────────── */
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+.info-card {
+  border: 1px solid var(--c-border); border-radius: 8px; padding: 1.1rem;
+  border-left: 3px solid var(--c-acc);
+}
+.info-card-title { font-family: var(--font-mono); font-size: 0.72rem; color: var(--c-acc); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+.info-card-body { font-size: 0.88rem; color: #444; line-height: 1.5; }
+
+/* ── STEPS ───────────────────────────────────────────────────── */
+.steps { display: flex; flex-direction: column; gap: 1rem; margin: 1.25rem 0; }
+.step { display: flex; gap: 1rem; }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: var(--c-acc); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+}
+.step-body { flex: 1; padding-top: 0.2rem; }
+.step-body h4 { margin-top: 0; }
+
+/* ── BOOT ANIMATION ──────────────────────────────────────────── */
+.boot-anim {
+  background: #0d1117; border-radius: 10px;
+  padding: 1.5rem; margin: 1.5rem 0;
+}
+.boot-flow {
+  display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.boot-node {
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  padding: 0.75rem 1rem; border: 1px solid #30363d; border-radius: 8px;
+  background: #161b22; min-width: 90px; text-align: center;
+  transition: all 0.3s;
+}
+.boot-node.active { border-color: var(--c-acc); background: rgba(247,140,108,0.08); }
+.boot-node.done   { border-color: #3fb950; background: rgba(63,185,80,0.06); }
+.boot-node-icon { font-size: 1.2rem; }
+.boot-node-label { font-family: var(--font-mono); font-size: 0.65rem; color: #8892a4; }
+.boot-node.active .boot-node-label { color: var(--c-acc); }
+.boot-node.done   .boot-node-label { color: #3fb950; }
+.boot-arrow { color: #3a4455; font-size: 1rem; padding: 0 0.3rem; }
+.boot-desc {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  color: #8892a4; margin-bottom: 1rem; min-height: 1.2rem;
+  border-left: 2px solid var(--c-acc); padding-left: 0.75rem;
+}
+.boot-log {
+  background: #060a0f; border-radius: 6px; padding: 0.75rem 1rem;
+  font-family: var(--font-mono); font-size: 0.77rem; color: #3fb950;
+  min-height: 80px; white-space: pre-wrap; line-height: 1.5;
+}
+.boot-controls { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.boot-btn {
+  font-family: var(--font-mono); font-size: 0.75rem;
+  background: #1c2128; border: 1px solid #30363d; border-radius: 5px;
+  color: #8892a4; padding: 0.35rem 0.8rem; cursor: pointer;
+  transition: all 0.15s;
+}
+.boot-btn:hover { background: #2d333b; color: #e6edf3; border-color: #4a5568; }
+.boot-btn.primary { background: var(--c-acc); color: #fff; border-color: var(--c-acc); }
+.boot-btn.primary:hover { opacity: 0.85; }
+
+/* ── MEMORY MAP ──────────────────────────────────────────────── */
+.mem-map {
+  background: #0d1117; border-radius: 8px; padding: 1.25rem;
+  font-family: var(--font-mono); font-size: 0.78rem; margin: 1rem 0;
+}
+.mem-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.4rem 0; border-bottom: 1px solid #1e2535;
+}
+.mem-row:last-child { border-bottom: none; }
+.mem-addr { color: #546e7a; min-width: 155px; }
+.mem-bar { height: 14px; border-radius: 3px; min-width: 8px; }
+.mem-name { color: #e6edf3; }
+.mem-note { color: #546e7a; margin-left: auto; font-size: 0.7rem; }
+
+/* ── DRIVER CARDS ────────────────────────────────────────────── */
+.driver-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+.driver-card {
+  background: #f9fafb; border: 1px solid var(--c-border); border-radius: 8px;
+  padding: 1.1rem; border-top: 3px solid var(--c-acc);
+}
+.driver-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
+.driver-name { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 500; color: #111; margin-bottom: 0.3rem; }
+.driver-file { font-family: var(--font-mono); font-size: 0.7rem; color: var(--c-acc); margin-bottom: 0.5rem; }
+.driver-desc { font-size: 0.83rem; color: #555; line-height: 1.45; }
+
+/* ── COMMAND TABLE ───────────────────────────────────────────── */
+.cmd-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.88rem; }
+.cmd-table th { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--c-border); font-weight: 600; color: #555; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.cmd-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--c-border); vertical-align: top; }
+.cmd-table td:first-child { font-family: var(--font-mono); font-size: 0.82rem; color: var(--c-acc); white-space: nowrap; }
+.cmd-table tr:hover td { background: #f9fafb; }
+
+/* ── SHELL SIM ───────────────────────────────────────────────── */
+.shell-sim {
+  background: #0d1117; border-radius: 10px; overflow: hidden;
+  border: 1px solid #30363d; margin: 1.5rem 0;
+}
+.shell-sim-bar {
+  background: #161b22; border-bottom: 1px solid #30363d;
+  padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.5rem;
+}
+.shell-dot { width: 12px; height: 12px; border-radius: 50%; }
+.shell-dot.red   { background: #ff5f56; }
+.shell-dot.yellow{ background: #ffbd2e; }
+.shell-dot.green { background: #27c93f; }
+.shell-sim-title { font-family: var(--font-mono); font-size: 0.72rem; color: #546e7a; margin-left: auto; margin-right: auto; }
+.shell-output {
+  font-family: var(--font-mono); font-size: 0.82rem; color: #c9d1d9;
+  padding: 1rem; line-height: 1.6; min-height: 220px; max-height: 380px;
+  overflow-y: auto; white-space: pre-wrap;
+}
+.shell-input-row {
+  display: flex; align-items: center; gap: 0;
+  border-top: 1px solid #1e2535; padding: 0.6rem 1rem;
+  background: #0d1117;
+}
+.shell-prompt { font-family: var(--font-mono); font-size: 0.82rem; color: var(--c-acc); flex-shrink: 0; }
+.shell-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: var(--font-mono); font-size: 0.82rem; color: #c9d1d9;
+  padding: 0 0.5rem; caret-color: var(--c-acc);
+}
+.s-green  { color: #3fb950; }
+.s-yellow { color: #ffcb6b; }
+.s-blue   { color: #82aaff; }
+.s-orange { color: #f78c6c; }
+.s-purple { color: #c792ea; }
+.s-muted  { color: #546e7a; }
+.s-bold   { font-weight: 700; }
+
+/* ── REALISTIC TABLE ─────────────────────────────────────────── */
+.truth-table { border-collapse: collapse; font-family: var(--font-mono); font-size: 0.82rem; margin: 1rem 0; }
+.truth-table th, .truth-table td { border: 1px solid var(--c-border); padding: 0.4rem 0.8rem; text-align: center; }
+.truth-table th { background: #f3f4f6; font-size: 0.75rem; }
+.t-true { color: #3fb950; font-weight: 600; }
+.t-false { color: #f48771; font-weight: 600; }
+.t-real { color: #f78c6c; font-weight: 600; }
+
+/* ── ROADMAP ─────────────────────────────────────────────────── */
+.roadmap-phases { display: flex; flex-direction: column; gap: 1rem; margin: 1.25rem 0; }
+.phase-card {
+  border: 1px solid var(--c-border); border-radius: 8px; overflow: hidden;
+}
+.phase-header {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.75rem 1rem; background: #f9fafb;
+  border-bottom: 1px solid var(--c-border);
+}
+.phase-num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--c-muted); }
+.phase-name { font-weight: 600; font-size: 0.9rem; }
+.phase-status {
+  margin-left: auto; font-family: var(--font-mono); font-size: 0.7rem;
+  padding: 0.15rem 0.5rem; border-radius: 4px;
+}
+.phase-status.done { background: rgba(63,185,80,0.1); color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
+.phase-status.prog { background: rgba(247,140,108,0.1); color: var(--c-acc); border: 1px solid rgba(247,140,108,0.3); }
+.phase-status.todo { background: #f3f4f6; color: #9ca3af; border: 1px solid var(--c-border); }
+.phase-items { padding: 0.75rem 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.phase-item {
+  font-size: 0.82rem; padding: 0.2rem 0.6rem; border-radius: 4px;
+  display: flex; align-items: center; gap: 0.3rem;
+}
+.phase-item.done  { background: rgba(63,185,80,0.06); color: #3fb950; }
+.phase-item.todo  { background: #f3f4f6; color: #9ca3af; }
+.phase-item.prog  { background: rgba(247,140,108,0.06); color: var(--c-acc); }
+
+/* ── STATS ───────────────────────────────────────────────────── */
+.stats-row { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1.25rem 0; }
+.stat-pill {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0.75rem 1.25rem; border: 1px solid var(--c-border);
+  border-radius: 8px; min-width: 90px;
+}
+.stat-val { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 600; color: var(--c-acc); }
+.stat-lbl { font-size: 0.7rem; color: var(--c-muted); margin-top: 0.1rem; }
+
+/* ── SCROLL REVEAL ───────────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s, transform 0.5s; }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
+.doc-footer {
+  margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--c-border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+.doc-footer-left { font-family: var(--font-mono); font-size: 0.78rem; color: var(--c-muted); }
+.doc-footer-right a { font-family: var(--font-mono); font-size: 0.78rem; color: var(--c-acc2); text-decoration: none; }
+.doc-footer-right a:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .sidebar.open { display: block; position: fixed; top: 52px; left: 0; bottom: 0; z-index: 150; background: #fff; box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
+  .main { padding: 2rem 1.5rem 4rem; }
+  .nav-links { display: none; }
+  .nav-burger { display: block; }
+  .hero-title { font-size: 3rem; }
+}
+@media (max-width: 600px) {
+  .main { padding: 1.5rem 1rem 4rem; }
+  .boot-flow { flex-direction: column; align-items: flex-start; }
+  .boot-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────────── -->
+<nav class="nav">
+  <button class="nav-burger" id="navBurger" onclick="toggleSidebar()">☰</button>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-sep">/</span>
+  <span class="nav-brand">polyfd<em>OS</em></span>
+  <ul class="nav-links">
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#shell">Shell</a></li>
+    <li><a href="#realistic">Realistic</a></li>
+    <li><a href="#building">Build</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+  </ul>
+  <span class="nav-version">v1.4</span>
+</nav>
+
+<!-- ── LAYOUT ───────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- ── SIDEBAR ──────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Getting Started</div>
+      <a class="sidebar-link" href="#intro">Introduction</a>
+      <a class="sidebar-link" href="#quickstart">Quick Start</a>
+      <a class="sidebar-link sub" href="#building">Building</a>
+      <a class="sidebar-link sub" href="#running">Running</a>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Architecture</div>
+      <a class="sidebar-link" href="#architecture">Overview</a>
+      <a class="sidebar-link sub" href="#boot">Boot Sequence</a>
+      <a class="sidebar-link sub" href="#memmap">Memory Layout</a>
+      <a class="sidebar-link sub" href="#tables">System Tables</a>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Drivers</div>
+      <a class="sidebar-link" href="#drivers">Overview</a>
+      <a class="sidebar-link sub" href="#framebuffer">Framebuffer</a>
+      <a class="sidebar-link sub" href="#keyboard">Keyboard</a>
+      <a class="sidebar-link sub" href="#serial">Serial</a>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Shell</div>
+      <a class="sidebar-link" href="#shell">Commands</a>
+      <a class="sidebar-link sub" href="#filesystem">Filesystem</a>
+      <a class="sidebar-link sub" href="#snake">Snake Game</a>
+      <a class="sidebar-link sub" href="#shelldemo">Interactive Demo</a>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">System</div>
+      <a class="sidebar-link" href="#realistic">Realistic Type</a>
+      <a class="sidebar-link sub" href="#hardware">Hardware Detection</a>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Roadmap</div>
+      <a class="sidebar-link" href="#roadmap">Phases</a>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- ── HERO ─────────────────────────────────────────────── -->
+    <section class="hero" id="hero">
+      <div class="hero-eyebrow">OS · V1.4 · MIT License · x86 · Morocco 🇲🇦</div>
+      <h1 class="hero-title">polyfd<em>OS</em></h1>
+      <p class="hero-tagline" id="heroTagline">|</p>
+      <div class="hero-badges">
+        <span class="hero-badge">x86 Protected Mode</span>
+        <span class="hero-badge">GRUB Multiboot</span>
+        <span class="hero-badge">26 KB kernel</span>
+        <span class="hero-badge">490 KB ISO</span>
+        <span class="hero-badge">3-valued logic</span>
+      </div>
+      <div class="hero-install">
+<span class="cm"># Build and run in QEMU</span>
+<span class="acc">make run</span>
+
+<span class="cm"># Or manually</span>
+<span class="acc">qemu-system-i386 -cdrom polyfdos.iso</span>
+
+<span class="cm"># Run on real hardware</span>
+<span class="acc">sudo dd if=polyfdos.iso of=/dev/sdX bs=4M</span></div>
+      <a class="hero-gh" href="https://github.com/PolyfdOS/PolyfdOS" target="_blank">→ github.com/PolyfdOS/PolyfdOS</a>
+
+      <div class="stats-row" style="margin-top:1.5rem">
+        <div class="stat-pill"><span class="stat-val">~2k</span><span class="stat-lbl">lines of code</span></div>
+        <div class="stat-pill"><span class="stat-val">26KB</span><span class="stat-lbl">kernel binary</span></div>
+        <div class="stat-pill"><span class="stat-val">490KB</span><span class="stat-lbl">bootable ISO</span></div>
+        <div class="stat-pill"><span class="stat-val">&lt;1s</span><span class="stat-lbl">boot time</span></div>
+        <div class="stat-pill"><span class="stat-val">70%</span><span class="stat-lbl">C + 30% ASM</span></div>
+      </div>
+    </section>
+
+    <!-- ── INTRO ─────────────────────────────────────────────── -->
+    <section class="doc-section reveal" id="intro">
+      <div class="section-eyebrow">Getting Started</div>
+      <h2 class="section-title">Introduction</h2>
+      <div class="section-body">
+        <p>polyfdOS is a bare-metal x86 operating system built from scratch in Morocco by Daftyon. It runs entirely without a host OS — booting via GRUB directly into a custom kernel written in C and x86 Assembly.</p>
+        <p>The kernel initializes protected mode, sets up the GDT and IDT, loads hardware drivers, mounts a RAM filesystem, and drops the user into an interactive shell. Unique to polyfdOS is native <em>three-valued logic</em> through the <code>realistic</code> type — the same Kleene-extended logic found in the MatyOS language.</p>
+        <p>The source is ~2,000 lines across 15 C/Assembly files. The compiled kernel fits in 26 KB and boots in under one second on QEMU.</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-title">Organization</div>
+          <div class="info-card-body">Daftyon — Morocco 🇲🇦</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Status</div>
+          <div class="info-card-body">Active development — Phase 2 in progress</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">License</div>
+          <div class="info-card-body">MIT — open source</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Languages</div>
+          <div class="info-card-body">C (70%) · x86 Assembly (30%)</div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ── QUICK START ────────────────────────────────────────── -->
+    <section class="doc-section reveal" id="quickstart">
+      <div class="section-eyebrow">Getting Started</div>
+      <h2 class="section-title">Quick Start</h2>
+
+      <h3 id="building">Building</h3>
+      <div class="section-body">
+        <p>Install the prerequisites for your platform, then run <code>make</code> to produce <code>kernel.elf</code> and <code>polyfdos.iso</code>.</p>
+      </div>
+      <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm"># Linux / WSL2</span>
+sudo apt install build-essential nasm grub-pc-bin genisoimage qemu-system-x86
+
+<span class="cm"># macOS</span>
+brew install nasm qemu xorriso grub i386-elf-gcc
+
+<span class="cm"># Build</span>
+make clean && make
+
+<span class="cm"># Output</span>
+<span class="acc"># kernel.elf  → 26 KB compiled kernel
+# polyfdos.iso → 490 KB bootable ISO</span></pre>
+
+      <h3 id="running">Running</h3>
+      <div class="section-body">
+        <p>The fastest way is QEMU. polyfdOS also runs in Bochs, VirtualBox, VMware, and on real x86 hardware.</p>
+      </div>
+      <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm"># QEMU (recommended)</span>
+make run
+<span class="cm"># or manually</span>
+qemu-system-i386 -cdrom polyfdos.iso
+
+<span class="cm"># Bochs</span>
+bochs -f bochsrc.txt -q
+
+<span class="cm"># Real hardware (⚠ overwrites /dev/sdX)</span>
+sudo dd if=polyfdos.iso of=/dev/sdX bs=4M status=progress</pre>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ── ARCHITECTURE ───────────────────────────────────────── -->
+    <section class="doc-section reveal" id="architecture">
+      <div class="section-eyebrow">Architecture</div>
+      <h2 class="section-title">Architecture Overview</h2>
+      <div class="section-body">
+        <p>polyfdOS uses a monolithic flat-memory kernel. After GRUB hands off control, <code>loader.s</code> sets up the stack and jumps to <code>kmain()</code> in C. The kernel runs entirely in 32-bit protected mode at ring 0.</p>
+      </div>
+
+      <h3 id="boot">Boot Sequence</h3>
+      <div class="section-body">
+        <p>From power-on to interactive shell in under one second. Click Play to walk through each stage.</p>
+      </div>
+
+      <div class="boot-anim">
+        <div class="boot-flow" id="bootFlow">
+          <div class="boot-node" id="bn0"><span class="boot-node-icon">⚡</span><span class="boot-node-label">BIOS</span></div>
+          <span class="boot-arrow">→</span>
+          <div class="boot-node" id="bn1"><span class="boot-node-icon">🥾</span><span class="boot-node-label">GRUB</span></div>
+          <span class="boot-arrow">→</span>
+          <div class="boot-node" id="bn2"><span class="boot-node-icon">⚙️</span><span class="boot-node-label">loader.s</span></div>
+          <span class="boot-arrow">→</span>
+          <div class="boot-node" id="bn3"><span class="boot-node-icon">🏗️</span><span class="boot-node-label">kmain()</span></div>
+          <span class="boot-arrow">→</span>
+          <div class="boot-node" id="bn4"><span class="boot-node-icon">🔌</span><span class="boot-node-label">Drivers</span></div>
+          <span class="boot-arrow">→</span>
+          <div class="boot-node" id="bn5"><span class="boot-node-icon">$</span><span class="boot-node-label">Shell</span></div>
+        </div>
+        <div class="boot-desc" id="bootDesc">Press Play to walk through the boot sequence.</div>
+        <div class="boot-log" id="bootLog">// kernel boot log will appear here</div>
+        <div class="boot-controls">
+          <button class="boot-btn primary" id="bootPlayBtn" onclick="bootPlay()">▶ Play</button>
+          <button class="boot-btn" onclick="bootReset()">↺ Reset</button>
+        </div>
+      </div>
+
+      <h3 id="memmap">Memory Layout</h3>
+      <div class="section-body">
+        <p>polyfdOS uses a flat memory model with segmentation. The kernel loads at 1 MB (<code>0x100000</code>), the VGA framebuffer is memory-mapped at <code>0xB8000</code>.</p>
+      </div>
+      <div class="mem-map">
+        <div class="mem-row">
+          <span class="mem-addr">0x00000000–0x3FF</span>
+          <div class="mem-bar" style="width:16px;background:#546e7a"></div>
+          <span class="mem-name">Interrupt Vector Table (IVT)</span>
+          <span class="mem-note">Real Mode</span>
+        </div>
+        <div class="mem-row">
+          <span class="mem-addr">0x00000400–0x4FF</span>
+          <div class="mem-bar" style="width:10px;background:#546e7a"></div>
+          <span class="mem-name">BIOS Data Area</span>
+          <span class="mem-note">Reserved</span>
+        </div>
+        <div class="mem-row">
+          <span class="mem-addr">0x00007C00–0x7DFF</span>
+          <div class="mem-bar" style="width:16px;background:#c792ea"></div>
+          <span class="mem-name">GRUB Bootloader</span>
+          <span class="mem-note">Stage 1</span>
+        </div>
+        <div class="mem-row">
+          <span class="mem-addr">0x000A0000–0xBFFFF</span>
+          <div class="mem-bar" style="width:30px;background:#30363d"></div>
+          <span class="mem-name">VGA / Video Memory</span>
+          <span class="mem-note">Hardware</span>
+        </div>
+        <div class="mem-row">
+          <span class="mem-addr">0x000B8000–0xB8FA0</span>
+          <div class="mem-bar" style="width:20px;background:#f78c6c"></div>
+          <span class="mem-name">VGA Text Buffer (80×25)</span>
+          <span class="mem-note">Framebuffer</span>
+        </div>
+        <div class="mem-row">
+          <span class="mem-addr">0x00100000+</span>
+          <div class="mem-bar" style="width:60px;background:#3fb950"></div>
+          <span class="mem-name">Kernel Code &amp; Data</span>
+          <span class="mem-note">26 KB</span>
+        </div>
+      </div>
+
+      <h3 id="tables">System Tables</h3>
+      <div class="section-body">
+        <p>Two descriptor tables gate all memory and interrupt access in protected mode.</p>
+      </div>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-title">GDT — gdt.c / gdt_asm.s</div>
+          <div class="info-card-body">Global Descriptor Table. Defines flat code and data segments (base 0x0, limit 0xFFFFFFFF). Loaded via <code>lgdt</code> instruction from assembly stub.</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">IDT — idt.c / idt_asm.s</div>
+          <div class="info-card-body">48 interrupt handlers (0–47). PIC remapped: IRQ0–7 → INT 0x20–0x27, IRQ8–15 → INT 0x28–0x2F. Keyboard is IRQ1 → INT 0x21.</div>
+        </div>
+      </div>
+
+      <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">/* kmain.c — kernel initialization order */</span>
+<span class="ty">int</span> <span class="fn">kmain</span>(<span class="ty">void</span>) {
+    <span class="fn">serial_configure_baud_rate</span>(SERIAL_COM1_BASE, <span class="num">3</span>);  <span class="cm">// COM1 debug</span>
+    <span class="fn">gdt_install</span>();            <span class="cm">// load Global Descriptor Table</span>
+    <span class="fn">idt_install</span>();            <span class="cm">// load Interrupt Descriptor Table</span>
+    <span class="fn">keyboard_init</span>();          <span class="cm">// PS/2 keyboard (IRQ1)</span>
+    <span class="fn">fs_init</span>();                <span class="cm">// RAM filesystem</span>
+    <span class="fn">sysfiles_init</span>();          <span class="cm">// populate /etc, /bin, …</span>
+    __asm__ (<span class="str">"sti"</span>);           <span class="cm">// enable interrupts</span>
+    <span class="fn">bootsplash_show</span>();        <span class="cm">// animated ASCII splash</span>
+    <span class="fn">shell_init</span>();             <span class="cm">// print banner, set prompt</span>
+    <span class="kw">while</span> (<span class="num">1</span>) <span class="fn">shell_update</span>(); <span class="cm">// main loop</span>
+}</pre>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ── DRIVERS ────────────────────────────────────────────── -->
+    <section class="doc-section reveal" id="drivers">
+      <div class="section-eyebrow">Hardware Drivers</div>
+      <h2 class="section-title">Drivers</h2>
+      <div class="section-body">
+        <p>Three core drivers provide all hardware access. All I/O goes through <code>inb</code>/<code>outb</code> port operations defined in <code>io.s</code>.</p>
+      </div>
+
+      <div class="driver-grid">
+        <div class="driver-card">
+          <div class="driver-icon">🖥️</div>
+          <div class="driver-name">Framebuffer</div>
+          <div class="driver-file">fb.c / fb.h</div>
+          <div class="driver-desc">VGA text mode at <code>0xB8000</code>. 80×25 character grid. Direct memory writes for characters and color attributes. Hardware cursor via CRTC registers (0x3D4/0x3D5).</div>
+        </div>
+        <div class="driver-card">
+          <div class="driver-icon">⌨️</div>
+          <div class="driver-name">Keyboard</div>
+          <div class="driver-file">keyboard.c / keyboard.h</div>
+          <div class="driver-desc">PS/2 controller on IRQ1 (INT 0x21). Scan code to ASCII translation. US QWERTY layout. Interrupt-driven — no polling. Backspace and enter handling built in.</div>
+        </div>
+        <div class="driver-card">
+          <div class="driver-icon">🔌</div>
+          <div class="driver-name">Serial Port</div>
+          <div class="driver-file">serial.c / serial.h</div>
+          <div class="driver-desc">COM1 debug output at configurable baud rate. FIFO buffer management. Used for kernel log messages visible in <code>qemu -serial stdio</code>. Does not expose to shell.</div>
+        </div>
+      </div>
+
+      <h3 id="framebuffer">Framebuffer — VGA Text Mode</h3>
+      <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">/* VGA text buffer: 80×25 = 2000 cells, 2 bytes each */</span>
+<span class="cm">/* byte 0: ASCII char, byte 1: color attribute          */</span>
+
+<span class="asm">#define</span> FB_ADDRESS  <span class="num">0xB8000</span>
+<span class="asm">#define</span> FB_COLS     <span class="num">80</span>
+<span class="asm">#define</span> FB_ROWS     <span class="num">25</span>
+
+<span class="cm">/* Color layout: bits[7:4] = background, bits[3:0] = foreground */</span>
+<span class="asm">#define</span> FB_WHITE    <span class="num">15</span>   <span class="cm">// 0xF</span>
+<span class="asm">#define</span> FB_BLACK    <span class="num">0</span>
+<span class="asm">#define</span> FB_LIGHT_CYAN <span class="num">11</span> <span class="cm">// 0xB — used for prompts</span></pre>
+
+      <h3 id="keyboard">Keyboard — PS/2 IRQ Handler</h3>
+      <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">/* Keyboard interrupt fires on every key press/release */</span>
+<span class="cm">/* Data port 0x60, status port 0x64                    */</span>
+<span class="cm">/* Bit 7 of scan code = key release event              */</span>
+
+<span class="kw">void</span> <span class="fn">keyboard_handler</span>() {
+    <span class="ty">unsigned char</span> scan = <span class="fn">inb</span>(<span class="num">0x60</span>);
+    <span class="kw">if</span> (!(scan & <span class="num">0x80</span>)) {           <span class="cm">// key press (not release)</span>
+        <span class="ty">char</span> c = scan_to_ascii[scan]; <span class="cm">// US QWERTY table</span>
+        keyboard_buffer[buf_end++] = c;
+    }
+    <span class="fn">outb</span>(<span class="num">0x20</span>, <span class="num">0x20</span>);              <span class="cm">// PIC end-of-interrupt</span>
+}</pre>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ── SHELL ──────────────────────────────────────────────── -->
+    <section class="doc-section reveal" id="shell">
+      <div class="section-eyebrow">Shell</div>
+      <h2 class="section-title">Shell Commands</h2>
+      <div class="section-body">
+        <p>polyfdOS ships with a minimal but complete command-line interpreter. Commands are parsed in <code>shell.c</code> — a simple token split on the first space character.</p>
+      </div>
+
+      <table class="cmd-table">
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>help</td><td>List all available commands</td></tr>
+          <tr><td>clear</td><td>Clear the screen via framebuffer</td></tr>
+          <tr><td>about</td><td>Show OS name, version, and organization</td></tr>
+          <tr><td>echo &lt;text&gt;</td><td>Print text to screen</td></tr>
+          <tr><td>sysinfo</td><td>Full system info — real CPUID + CMOS memory detection</td></tr>
+          <tr><td>cpu</td><td>CPU vendor, family, model, stepping, feature flags</td></tr>
+          <tr><td>mem</td><td>RAM total and available via CMOS probing</td></tr>
+          <tr><td>cd / vst &lt;dir&gt;</td><td>Change working directory</td></tr>
+          <tr><td>pwd</td><td>Print current directory</td></tr>
+          <tr><td>ls</td><td>List directory contents (dirs and files)</td></tr>
+          <tr><td>cat &lt;file&gt;</td><td>Display file contents from RAM filesystem</td></tr>
+          <tr><td>mkdir / rmdir</td><td>Create / remove directory</td></tr>
+          <tr><td>touch / rm</td><td>Create empty file / delete file</td></tr>
+          <tr><td>mv / cp</td><td>Move·rename / copy files</td></tr>
+          <tr><td>edit &lt;file&gt;</td><td>Open built-in text editor</td></tr>
+          <tr><td>play</td><td>Launch Snake game (WASD to move, Q to quit)</td></tr>
+          <tr><td>realistic</td><td>Three-valued logic demo</td></tr>
+          <tr><td>sudo &lt;cmd&gt;</td><td>Run command with simulated elevated privileges</td></tr>
+          <tr><td>download &lt;pkg&gt;</td><td>Simulated package download</td></tr>
+          <tr><td>reboot</td><td>Restart via keyboard controller (port 0x64)</td></tr>
+          <tr><td>halt</td><td>Halt CPU with <code>cli; hlt</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="filesystem">RAM Filesystem</h3>
+      <div class="section-body">
+        <p>polyfdOS mounts a flat RAM filesystem at boot. Up to 50 files, 2 KB each. Standard directories are pre-created: <code>/bin /home /usr /etc /dev /tmp /var /proc /sys</code>. System files (<code>/etc/os-release</code>, <code>/etc/hostname</code>) are populated by <code>sysfiles_init()</code>.</p>
+      </div>
+      <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button">> ls
+Contents of /:
+
+  [DIR]  bin/
+  [DIR]  home/
+  [DIR]  usr/
+  [DIR]  etc/
+  [DIR]  dev/
+  [DIR]  tmp/
+  [DIR]  var/
+
+> cat /etc/os-release
+NAME="polyfdOS"
+VERSION="1.4"
+ID=polyfdos
+PRETTY_NAME="polyfdOS 1.4"
+HOME_URL="https://github.com/PolyfdOS"</pre>
+
+      <h3 id="snake">Snake Game</h3>
+      <div class="section-body">
+        <p>A fully playable Snake game rendered via direct framebuffer writes. Launched with <code>play</code>. WASD for movement, Q to quit. Features score tracking and progressive speed increase.</p>
+      </div>
+
+      <h3 id="shelldemo">Interactive Demo</h3>
+      <div class="section-body">
+        <p>Try the polyfdOS shell. Type any command from the table above — this is a faithful simulation of the real kernel shell.</p>
+      </div>
+
+      <div class="shell-sim">
+        <div class="shell-sim-bar">
+          <span class="shell-dot red"></span>
+          <span class="shell-dot yellow"></span>
+          <span class="shell-dot green"></span>
+          <span class="shell-sim-title">polyfdOS v1.4 — shell simulator</span>
+        </div>
+        <div class="shell-output" id="shellOutput"></div>
+        <div class="shell-input-row">
+          <span class="shell-prompt" id="shellPrompt">/ &gt;&nbsp;</span>
+          <input class="shell-input" id="shellInput" type="text" spellcheck="false"
+            autocomplete="off" placeholder="type a command…" />
+        </div>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ── REALISTIC TYPE ─────────────────────────────────────── -->
+    <section class="doc-section reveal" id="realistic">
+      <div class="section-eyebrow">System</div>
+      <h2 class="section-title">Realistic Type</h2>
+      <div class="section-body">
+        <p>polyfdOS implements <strong>three-valued logic</strong> at the kernel level via the <code>realistic_t</code> type in <code>realistic.h</code>. The same logic underpins the <code>realistic</code> type in the <a href="/matyos#types" style="color:var(--c-acc2)">MatyOS language</a>.</p>
+        <p>Based on Kleene's strong three-valued logic, it extends boolean with a third state: <strong>REALISTIC</strong> (uncertain / unknown / possible). This is useful for hardware detection where a value is <em>not yet known</em> rather than definitively true or false.</p>
+      </div>
+
+      <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">/* realistic.h — three-valued logic type */</span>
+<span class="kw">typedef enum</span> {
+    R_FALSE     = <span class="num">0</span>,  <span class="cm">/* Definitely false      */</span>
+    R_TRUE      = <span class="num">1</span>,  <span class="cm">/* Definitely true       */</span>
+    R_REALISTIC = <span class="num">2</span>   <span class="cm">/* Uncertain / unknown   */</span>
+} <span class="ty">realistic_t</span>;
+
+<span class="cm">/* Example: detect if feature is present */</span>
+<span class="ty">realistic_t</span> has_sse = <span class="fn">realistic_from_int</span>(feat_edx & (<span class="num">1</span> << <span class="num">25</span>));
+<span class="kw">if</span> (<span class="fn">realistic_is_true</span>(has_sse))  <span class="fn">fb_puts</span>(<span class="str">"SSE supported\n"</span>);
+<span class="kw">if</span> (<span class="fn">realistic_is_realistic</span>(has_sse)) <span class="fn">fb_puts</span>(<span class="str">"SSE: uncertain\n"</span>);</pre>
+
+      <h3 id="hardware">Truth Table</h3>
+      <table class="truth-table">
+        <thead>
+          <tr><th>A</th><th>B</th><th>AND</th><th>OR</th><th>NOT A</th><th>A → B</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="t-true">TRUE</td><td class="t-true">TRUE</td><td class="t-true">TRUE</td><td class="t-true">TRUE</td><td class="t-false">FALSE</td><td class="t-true">TRUE</td></tr>
+          <tr><td class="t-true">TRUE</td><td class="t-false">FALSE</td><td class="t-false">FALSE</td><td class="t-true">TRUE</td><td class="t-false">FALSE</td><td class="t-false">FALSE</td></tr>
+          <tr><td class="t-true">TRUE</td><td class="t-real">REAL</td><td class="t-real">REAL</td><td class="t-true">TRUE</td><td class="t-false">FALSE</td><td class="t-real">REAL</td></tr>
+          <tr><td class="t-false">FALSE</td><td class="t-false">FALSE</td><td class="t-false">FALSE</td><td class="t-false">FALSE</td><td class="t-true">TRUE</td><td class="t-true">TRUE</td></tr>
+          <tr><td class="t-false">FALSE</td><td class="t-real">REAL</td><td class="t-false">FALSE</td><td class="t-real">REAL</td><td class="t-true">TRUE</td><td class="t-true">TRUE</td></tr>
+          <tr><td class="t-real">REAL</td><td class="t-real">REAL</td><td class="t-real">REAL</td><td class="t-real">REAL</td><td class="t-real">REAL</td><td class="t-real">REAL</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-body" style="margin-top:1rem">
+        <p>Run <code>realistic</code> in the shell demo above to see a live demonstration of all logical operations.</p>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ── ROADMAP ────────────────────────────────────────────── -->
+    <section class="doc-section reveal" id="roadmap">
+      <div class="section-eyebrow">Development</div>
+      <h2 class="section-title">Roadmap</h2>
+      <div class="section-body">
+        <p>polyfdOS is actively developed. Phase 1 is complete — the kernel boots, drives hardware, and runs a shell. Phase 2 focuses on memory management.</p>
+      </div>
+
+      <div class="roadmap-phases">
+        <div class="phase-card">
+          <div class="phase-header">
+            <span class="phase-num">Phase 1</span>
+            <span class="phase-name">Foundation</span>
+            <span class="phase-status done">✓ Complete</span>
+          </div>
+          <div class="phase-items">
+            <span class="phase-item done">✓ Bootloader + protected mode</span>
+            <span class="phase-item done">✓ GDT + IDT</span>
+            <span class="phase-item done">✓ Framebuffer driver</span>
+            <span class="phase-item done">✓ Keyboard driver (IRQ1)</span>
+            <span class="phase-item done">✓ Serial debug (COM1)</span>
+            <span class="phase-item done">✓ Interactive shell</span>
+            <span class="phase-item done">✓ RAM filesystem</span>
+            <span class="phase-item done">✓ Snake game</span>
+            <span class="phase-item done">✓ Realistic type</span>
+            <span class="phase-item done">✓ Real hardware detection (CPUID)</span>
+          </div>
+        </div>
+
+        <div class="phase-card">
+          <div class="phase-header">
+            <span class="phase-num">Phase 2</span>
+            <span class="phase-name">Memory Management</span>
+            <span class="phase-status prog">In Progress</span>
+          </div>
+          <div class="phase-items">
+            <span class="phase-item prog">⟳ Physical memory manager (bitmap)</span>
+            <span class="phase-item todo">○ Virtual memory (paging)</span>
+            <span class="phase-item todo">○ Heap allocator (kmalloc/kfree)</span>
+            <span class="phase-item todo">○ Memory protection</span>
+          </div>
+        </div>
+
+        <div class="phase-card">
+          <div class="phase-header">
+            <span class="phase-num">Phase 3</span>
+            <span class="phase-name">Process Management</span>
+            <span class="phase-status todo">Planned</span>
+          </div>
+          <div class="phase-items">
+            <span class="phase-item todo">○ Task switching + scheduler</span>
+            <span class="phase-item todo">○ Process creation/termination</span>
+            <span class="phase-item todo">○ Context switching</span>
+            <span class="phase-item todo">○ System calls interface</span>
+          </div>
+        </div>
+
+        <div class="phase-card">
+          <div class="phase-header">
+            <span class="phase-num">Phase 4</span>
+            <span class="phase-name">File System</span>
+            <span class="phase-status todo">Planned</span>
+          </div>
+          <div class="phase-items">
+            <span class="phase-item todo">○ VFS layer</span>
+            <span class="phase-item todo">○ FAT32 implementation</span>
+            <span class="phase-item todo">○ File operations (open/read/write)</span>
+            <span class="phase-item todo">○ Directory support</span>
+          </div>
+        </div>
+
+        <div class="phase-card">
+          <div class="phase-header">
+            <span class="phase-num">Phase 5</span>
+            <span class="phase-name">Advanced Features</span>
+            <span class="phase-status todo">Future</span>
+          </div>
+          <div class="phase-items">
+            <span class="phase-item todo">○ Multi-core support</span>
+            <span class="phase-item todo">○ Network stack (TCP/IP)</span>
+            <span class="phase-item todo">○ ATA + USB drivers</span>
+            <span class="phase-item todo">○ ELF loader</span>
+            <span class="phase-item todo">○ User space programs</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FOOTER ─────────────────────────────────────────────── -->
+    <footer class="doc-footer">
+      <div class="doc-footer-left">polyfdOS v1.4 · MIT License · Daftyon · Morocco 🇲🇦</div>
+      <div class="doc-footer-right">
+        <a href="https://github.com/PolyfdOS/PolyfdOS" target="_blank">GitHub →</a>
+        &nbsp;·&nbsp;
+        <a href="/">← PolyfdoS</a>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+// ─── NAV ──────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  if (sb.classList.contains('open') && !sb.contains(e.target) && !document.getElementById('navBurger').contains(e.target))
+    sb.classList.remove('open');
+});
+
+// ─── SCROLL REVEAL ────────────────────────────────────────────
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ─── SIDEBAR SCROLLSPY ────────────────────────────────────────
+const sideLinks = document.querySelectorAll('.sidebar-link');
+const secIds = ['intro','quickstart','building','running','architecture','boot','memmap','tables','drivers','framebuffer','keyboard','serial','shell','filesystem','snake','shelldemo','realistic','hardware','roadmap'];
+const secEls = secIds.map(id => document.getElementById(id)).filter(Boolean);
+window.addEventListener('scroll', () => {
+  const top = window.scrollY + 80;
+  let cur = '';
+  secEls.forEach(el => { if (el.offsetTop <= top) cur = el.id; });
+  sideLinks.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + cur);
+  });
+}, { passive: true });
+
+// ─── HERO TYPEWRITER ──────────────────────────────────────────
+(function() {
+  const phrase = 'A Moroccan x86 OS, built from scratch.';
+  const el = document.getElementById('heroTagline');
+  let i = 0;
+  function type() {
+    if (i < phrase.length) { el.textContent = phrase.slice(0, ++i) + '|'; setTimeout(type, 45); }
+    else { el.textContent = phrase; }
+  }
+  setTimeout(type, 400);
+})();
+
+// ─── COPY BUTTONS ─────────────────────────────────────────────
+function copyCode(btn) {
+  const pre = btn.closest('pre');
+  const txt = pre.innerText.replace(/^Copy\n/, '').replace(/^Copy/, '');
+  navigator.clipboard.writeText(txt).then(() => {
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+// ─── BOOT ANIMATION ───────────────────────────────────────────
+const bootSteps = [
+  {
+    label: 'BIOS initializes hardware and scans for bootable media.',
+    log: 'BIOS: POST complete\nBIOS: Found bootable CD-ROM\nBIOS: Loading GRUB stage1...',
+  },
+  {
+    label: 'GRUB loads the multiboot-compliant kernel ELF image.',
+    log: 'GRUB: Loading kernel.elf...\nGRUB: Multiboot header found\nGRUB: Jumping to loader entry point',
+  },
+  {
+    label: 'loader.s sets up the C stack and jumps to kmain().',
+    log: 'loader.s: Setting up stack at 0x90000\nloader.s: Protected mode active (CR0.PE=1)\nloader.s: Calling kmain()...',
+  },
+  {
+    label: 'kmain() installs GDT, IDT, and initializes the filesystem.',
+    log: 'Kernel starting...\nGDT installed\nIDT installed\nFilesystem initialized\nStandard directories created',
+  },
+  {
+    label: 'Hardware drivers start: framebuffer, keyboard (IRQ1), serial COM1.',
+    log: 'Keyboard initialized\nInterrupts enabled (sti)\nBoot splash displayed\nSerial: COM1 @ 115200 baud',
+  },
+  {
+    label: 'Shell ready. Type "help" to see available commands.',
+    log: ' ____       _        __     _  ___  ____\n|  _ \\| |_   _ / _| __| |/ _ \\/ ___|\n| |_) | | | | | |_ / _` | | | \\___ \\\n|_|   |_|\\__, |_|  \\__,_|\\___/|____/\n\npolyfdOS v1.4 — Type \'help\'\n/ > ',
+  },
+];
+
+let bootCur = -1, bootRunning = false, bootTimer;
+function bootReset() {
+  clearTimeout(bootTimer); bootRunning = false; bootCur = -1;
+  for (let i = 0; i < 6; i++) {
+    const n = document.getElementById('bn' + i);
+    n.classList.remove('active', 'done');
+  }
+  document.getElementById('bootLog').textContent = '// kernel boot log will appear here';
+  document.getElementById('bootDesc').textContent = 'Press Play to walk through the boot sequence.';
+  document.getElementById('bootPlayBtn').textContent = '▶ Play';
+}
+function bootPlay() {
+  if (bootRunning) return;
+  if (bootCur >= bootSteps.length - 1) bootReset();
+  bootRunning = true;
+  document.getElementById('bootPlayBtn').textContent = '⟳ Running…';
+  function step() {
+    bootCur++;
+    if (bootCur >= bootSteps.length) { bootRunning = false; document.getElementById('bootPlayBtn').textContent = '↺ Replay'; return; }
+    const n = document.getElementById('bn' + bootCur);
+    for (let i = 0; i < bootCur; i++) {
+      const p = document.getElementById('bn' + i);
+      p.classList.remove('active'); p.classList.add('done');
+    }
+    n.classList.add('active');
+    document.getElementById('bootDesc').textContent = bootSteps[bootCur].label;
+    document.getElementById('bootLog').textContent = bootSteps[bootCur].log;
+    bootTimer = setTimeout(step, 1200);
+  }
+  step();
+}
+
+// ─── SHELL SIMULATOR ──────────────────────────────────────────
+let shellCwd = '/';
+const shellHistory = [];
+let histIdx = -1;
+
+const shellResponses = {
+  help() {
+    return `<span class="s-yellow">Commands:</span>
+  <span class="s-orange">help</span>     - List commands
+  <span class="s-orange">clear</span>    - Clear screen
+  <span class="s-orange">about</span>    - OS information
+  <span class="s-orange">echo</span>     - Echo text
+  <span class="s-orange">sysinfo</span>  - System info (real hardware data)
+  <span class="s-orange">cpu</span>      - CPU information
+  <span class="s-orange">mem</span>      - Memory information
+  <span class="s-orange">ls</span>       - List directory
+  <span class="s-orange">pwd</span>      - Print working dir
+  <span class="s-orange">cd</span>       - Change directory
+  <span class="s-orange">cat</span>      - Display file
+  <span class="s-orange">realistic</span>- Three-valued logic demo
+  <span class="s-orange">play</span>     - Snake game
+  <span class="s-orange">reboot</span>   - Restart system
+  <span class="s-orange">halt</span>     - Halt system`;
+  },
+  about() {
+    return `<span class="s-yellow">polyfdOS v1.4</span>
+Moroccan x86 Operating System
+Organization: <span class="s-blue">Daftyon</span>
+Location: Morocco 🇲🇦
+Kernel: 26 KB ELF
+Languages: C (70%) + Assembly (30%)`;
+  },
+  sysinfo() {
+    return `<span class="s-yellow">=============================================
+     polyfdOS System Information (REAL!)
+=============================================</span>
+
+<span class="s-blue">CPU:</span>
+  Vendor:   GenuineIntel
+  Family:   6  Model: 142  Stepping: 10
+  Features: FPU MMX SSE SSE2 SSE3
+
+<span class="s-blue">Memory:</span>
+  Total RAM: 128 MB (CMOS + probing)
+  Used: ~2 MB  Available: 126 MB
+
+<span class="s-blue">Filesystem:</span>
+  Type: RAM-based  Max Files: 50
+
+<span class="s-blue">System:</span>
+  OS: polyfdOS v1.4  Bootloader: GRUB
+<span class="s-yellow">=============================================</span>`;
+  },
+  cpu() {
+    return `<span class="s-yellow">=== CPU Information (REAL) ===</span>
+
+Vendor:   GenuineIntel
+Family:   6
+Model:    142
+Stepping: 10
+
+<span class="s-blue">Features:</span>
+  [x] FPU
+  [x] MMX
+  [x] SSE
+  [x] SSE2
+  [x] SSE3
+
+<span class="s-yellow">==============================</span>`;
+  },
+  mem() {
+    return `<span class="s-yellow">=== Memory (REAL) ===</span>
+
+Total:     128 MB
+Used:      ~2 MB
+Available: 126 MB
+Detection: CMOS + Probing
+
+<span class="s-yellow">=====================</span>`;
+  },
+  ls() {
+    if (shellCwd === '/') {
+      return `Contents of <span class="s-orange">/</span>:
+
+  <span class="s-blue">[DIR]</span>  bin/
+  <span class="s-blue">[DIR]</span>  home/
+  <span class="s-blue">[DIR]</span>  usr/
+  <span class="s-blue">[DIR]</span>  etc/
+  <span class="s-blue">[DIR]</span>  dev/
+  <span class="s-blue">[DIR]</span>  tmp/
+  <span class="s-blue">[DIR]</span>  var/`;
+    }
+    return `Contents of <span class="s-orange">${shellCwd}</span>:\n\n  (no files)`;
+  },
+  pwd() { return shellCwd; },
+  realistic() {
+    return `<span class="s-yellow">Three-Valued Logic Demo (realistic_t)</span>
+
+Values: <span class="s-green">TRUE(1)</span>  <span class="s-muted">FALSE(0)</span>  <span class="s-orange">REALISTIC(2)</span>
+
+<span class="s-blue">AND table:</span>
+  TRUE  AND TRUE      = <span class="s-green">TRUE</span>
+  TRUE  AND FALSE     = <span class="s-muted">FALSE</span>
+  TRUE  AND REALISTIC = <span class="s-orange">REALISTIC</span>
+  FALSE AND REALISTIC = <span class="s-muted">FALSE</span>  (short-circuit)
+
+<span class="s-blue">OR table:</span>
+  TRUE  OR  REALISTIC = <span class="s-green">TRUE</span>   (short-circuit)
+  FALSE OR  REALISTIC = <span class="s-orange">REALISTIC</span>
+
+<span class="s-blue">NOT:</span>
+  NOT TRUE      = <span class="s-muted">FALSE</span>
+  NOT FALSE     = <span class="s-green">TRUE</span>
+  NOT REALISTIC = <span class="s-orange">REALISTIC</span>  (uncertainty preserved)`;
+  },
+  play() {
+    return `<span class="s-yellow">Snake Game</span>
+────────────────────────────
+  <span class="s-green">●●●●●</span>
+
+  Score: 0
+  Use WASD to move, Q to quit
+
+<span class="s-muted">(In the real OS this is fully playable
+ via the framebuffer. Run in QEMU to try!)</span>`;
+  },
+  reboot() { return `<span class="s-yellow">Rebooting polyfdOS...</span>\n<span class="s-muted">Goodbye!</span>`; },
+  halt()   { return `<span class="s-yellow">Halting polyfdOS...</span>\n<span class="s-muted">CPU halted. (cli; hlt)</span>`; },
+};
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function shellExec(cmd) {
+  const parts = cmd.trim().split(/\s+/);
+  const c = parts[0].toLowerCase();
+  const args = parts.slice(1).join(' ');
+
+  if (c === '') return null;
+  if (c === 'clear') { document.getElementById('shellOutput').innerHTML = ''; return null; }
+  if (c === 'echo') return escHtml(args);
+  if (c === 'cd' || c === 'vst') {
+    const d = args || '/home';
+    const dirs = ['/','/home','/bin','/usr','/etc','/dev','/tmp','/var'];
+    const target = d.startsWith('/') ? d : '/' + d;
+    if (dirs.includes(target)) { shellCwd = target; return `Visited: <span class="s-orange">${shellCwd}</span>`; }
+    return `<span style="color:#f48771">Directory not found: ${escHtml(d)}</span>`;
+  }
+  if (c === 'cat') {
+    if (args === '/etc/os-release' || args === 'os-release') {
+      return `NAME="polyfdOS"\nVERSION="1.4"\nID=polyfdos\nPRETTY_NAME="polyfdOS 1.4"\nHOME_URL="https://github.com/PolyfdOS"`;
+    }
+    if (args === '/etc/hostname' || args === 'hostname') return 'polyfdos';
+    return `<span style="color:#f48771">cat: ${escHtml(args)}: No such file</span>`;
+  }
+  if (shellResponses[c]) return shellResponses[c]();
+  return `<span style="color:#f48771">Unknown command: ${escHtml(c)}</span>\n<span class="s-muted">Type 'help' for available commands.</span>`;
+}
+
+function shellPrint(html) {
+  const out = document.getElementById('shellOutput');
+  out.innerHTML += html + '\n';
+  out.scrollTop = out.scrollHeight;
+}
+function shellPrintPrompt(cmd) {
+  const prompt = `<span class="s-orange">${escHtml(shellCwd)} &gt;&nbsp;</span><span class="s-muted">${escHtml(cmd)}</span>`;
+  shellPrint(prompt);
+}
+
+// Initial boot output in shell
+(function initShell() {
+  const out = document.getElementById('shellOutput');
+  out.innerHTML = `<span class="s-yellow"> ____       _        __     _  ___  ____
+|  _ \\ ___ | |_   _ / _| __| |/ _ \\/ ___|
+| |_) / _ \\| | | | | |_ / _\` | | | \\___ \\
+|  __/ (_) | | |_| |  _| (_| | |_| |___) |
+|_|   \\___/|_|\\__, |_|  \\__,_|\\___/|____/
+              |___/                      </span>
+
+<span class="s-blue">===============================================
+   polyfdOS v1.4 — Shell Simulator
+   Morocco | Daftyon
+===============================================</span>
+
+Type <span class="s-orange">'help'</span> for available commands.
+
+`;
+})();
+
+document.getElementById('shellInput').addEventListener('keydown', e => {
+  const input = document.getElementById('shellInput');
+  if (e.key === 'Enter') {
+    const cmd = input.value;
+    input.value = '';
+    if (cmd.trim()) { shellHistory.unshift(cmd); histIdx = -1; }
+    shellPrintPrompt(cmd);
+    const out = shellExec(cmd);
+    if (out !== null) shellPrint(out + '\n');
+    document.getElementById('shellPrompt').textContent = shellCwd + ' > ';
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (histIdx < shellHistory.length - 1) input.value = shellHistory[++histIdx];
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (histIdx > 0) input.value = shellHistory[--histIdx]; else { histIdx = -1; input.value = ''; }
+  }
+});
+</script>
+</body>
+</html>

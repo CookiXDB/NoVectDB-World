@@ -45,6 +45,10 @@ def polyfdor():
 def matyos():
     return render_template("matyos.html")
 
+@app.route("/polyfdos")
+def polyfdos_os():
+    return render_template("polyfdos_os.html")
+
 @app.route("/papers/novectDB")
 def novectdb():
     return render_template("novectdb.html")
