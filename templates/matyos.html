@@ -19,9 +19,8 @@
   --font-serif: 'EB Garamond', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --max-w: 900px;
-  --section-gap: 96px;
-  /* syntax colors */
+  --sidebar-w: 260px;
+  --nav-h: 52px;
   --c-kw:  #c792ea;
   --c-ty:  #82aaff;
   --c-fn:  #82cfff;
@@ -30,909 +29,1755 @@
   --c-num: #f78c6c;
   --c-pr:  #ffcb6b;
   --c-op:  #89ddff;
+  --c-gold: #f4c542;
+  --c-green: #4caf50;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 17px; }
-body { font-family: var(--font-sans); background: var(--white); color: var(--black); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-sans); background: var(--white); color: var(--black); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
-/* ─── NAV ─────────────────────────────────────────────── */
+/* ─── NAV ──────────────────────────────────────────────────── */
 nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(255,255,255,0.97); backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--gray-200);
-  padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
-  height: 52px; transition: border-color .3s;
+  padding: 0 1.5rem; display: flex; align-items: center;
+  height: var(--nav-h); gap: 1rem;
 }
-nav.scrolled { border-bottom-color: var(--gray-300); }
-.nav-back { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; }
+.nav-burger {
+  display: none; background: none; border: none; cursor: pointer;
+  width: 32px; height: 32px; align-items: center; justify-content: center; flex-direction: column; gap: 5px;
+}
+.nav-burger span { display: block; width: 20px; height: 1.5px; background: var(--black); transition: all .3s; }
+.nav-back { font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; white-space: nowrap; }
 .nav-back:hover { color: var(--black); }
-.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-sep { color: var(--gray-300); font-size: 0.8rem; }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.88rem; letter-spacing: -0.02em; }
 .nav-logo em { font-style: italic; font-family: var(--font-serif); }
-.nav-links { display: flex; gap: 1.5rem; list-style: none; }
-.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); transition: color .2s; }
+.nav-links { display: flex; gap: 1.2rem; align-items: center; margin-left: auto; }
+.nav-links a { font-size: 0.75rem; color: var(--gray-500); text-decoration: none; transition: color .2s; white-space: nowrap; }
 .nav-links a:hover { color: var(--black); }
-.nav-burger { display: none; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px; }
-.nav-burger span { display: block; height: 2px; background: var(--black); transition: transform .3s, opacity .3s; }
-.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav-burger.open span:nth-child(2) { opacity: 0; }
-.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-.nav-drawer { display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99; background: rgba(255,255,255,0.98); backdrop-filter: blur(8px); border-bottom: 1px solid var(--gray-200); flex-direction: column; max-height: 0; overflow: hidden; transition: max-height .35s; }
-.nav-drawer.open { max-height: 400px; }
-.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
-.nav-drawer a { display: block; padding: 0.9rem 2rem; font-size: 0.9rem; text-decoration: none; color: var(--black); }
-.nav-drawer a:hover { background: var(--gray-50); }
+.nav-badge { font-family: var(--font-mono); font-size: 0.65rem; background: var(--black); color: var(--white); padding: 2px 7px; border-radius: 3px; }
 
-/* ─── LAYOUT ──────────────────────────────────────────── */
-.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
-section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
-section:last-of-type { border-bottom: none; }
-p { margin-bottom: 1rem; }
-
-/* ─── SCROLL REVEAL ───────────────────────────────────── */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
-.reveal.visible { opacity: 1; transform: none; }
-.reveal-delay-1 { transition-delay: .08s; }
-.reveal-delay-2 { transition-delay: .16s; }
-.reveal-delay-3 { transition-delay: .24s; }
-.reveal-delay-4 { transition-delay: .32s; }
-.reveal-delay-5 { transition-delay: .40s; }
-
-/* ─── HERO ────────────────────────────────────────────── */
-#hero { padding-top: 130px; padding-bottom: 80px; border-bottom: 2px solid var(--black); }
-.hero-eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem; display: flex; align-items: center; gap: 1rem; }
-.hero-eyebrow::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--gray-300); }
-h1.hero-title { font-family: var(--font-serif); font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; margin-bottom: 1.2rem; }
-h1.hero-title em { font-style: italic; }
-.hero-tagline { font-family: var(--font-serif); font-style: italic; font-size: 1.35rem; color: var(--gray-700); border-left: 3px solid var(--black); padding-left: 1rem; margin: 1.8rem 0 2rem; }
-#typewriter::after { content: '|'; animation: blink .7s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-.hero-badges { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
-.badge { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--gray-300); padding: 0.3rem 0.8rem; color: var(--gray-700); display: inline-flex; align-items: center; gap: 0.4rem; }
-.badge::before { content: ''; display: block; width: 5px; height: 5px; background: var(--black); border-radius: 50%; }
-.hero-install { background: #0d1117; border: 1px solid #30363d; padding: 1.5rem 1.8rem; margin-bottom: 2rem; position: relative; }
-.hero-install pre { font-family: var(--font-mono); font-size: 0.82rem; color: #e6edf3; line-height: 1.8; white-space: pre-wrap; }
-.hero-install .cm { color: var(--c-cm); }
-.hero-github { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray-700); text-decoration: none; border-bottom: 1px solid var(--gray-300); transition: color .2s, border-color .2s; }
-.hero-github:hover { color: var(--black); border-color: var(--black); }
-
-/* ─── SECTION HEADINGS ────────────────────────────────── */
-h2.section-num { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
-h2.section-title { font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 400; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.15; }
-h3.subsec { font-size: 0.95rem; font-weight: 600; letter-spacing: 0.01em; margin: 2.5rem 0 1rem; text-transform: uppercase; font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-500); letter-spacing: 0.1em; }
-
-/* ─── CODE BLOCKS ──────────────────────────────────────── */
-.code-block {
-  background: #0d1117;
-  border: 1px solid #30363d;
-  padding: 1.5rem 1.8rem;
-  margin: 1.2rem 0;
-  position: relative;
-  overflow-x: auto;
+/* ─── LAYOUT ─────────────────────────────────────────────────── */
+.docs-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  padding-top: var(--nav-h);
+  min-height: 100vh;
 }
-.code-block pre { font-family: var(--font-mono); font-size: 0.82rem; color: #e6edf3; line-height: 1.9; white-space: pre; }
+
+/* ─── SIDEBAR ────────────────────────────────────────────────── */
+.sidebar {
+  position: sticky;
+  top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  overflow-y: auto;
+  border-right: 1px solid var(--gray-200);
+  padding: 1.5rem 0 3rem;
+  background: var(--gray-50);
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-300) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+.sidebar-group { margin-bottom: 0.25rem; }
+.sidebar-group-label {
+  font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--gray-500); padding: 0.9rem 1.25rem 0.35rem;
+}
+.sidebar-link {
+  display: block; padding: 0.32rem 1.25rem;
+  font-size: 0.8rem; color: var(--gray-700); text-decoration: none;
+  transition: color .15s, background .15s;
+  border-left: 2px solid transparent;
+}
+.sidebar-link:hover { color: var(--black); background: var(--gray-100); }
+.sidebar-link.active { color: var(--black); font-weight: 500; border-left-color: var(--black); background: rgba(0,0,0,0.04); }
+.sidebar-link.sub { padding-left: 2rem; font-size: 0.77rem; }
+
+/* sidebar overlay (mobile) */
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150;
+}
+.sidebar-overlay.open { display: block; }
+
+/* ─── MAIN CONTENT ──────────────────────────────────────────── */
+.docs-content {
+  padding: 3.5rem 3rem 6rem;
+  max-width: 900px;
+}
+
+/* ─── SECTIONS ──────────────────────────────────────────────── */
+.doc-section { margin-bottom: 5rem; scroll-margin-top: calc(var(--nav-h) + 20px); }
+.section-eyebrow {
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--gray-500); margin-bottom: 0.5rem;
+}
+.section-title {
+  font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400;
+  letter-spacing: -0.02em; margin-bottom: 1rem; line-height: 1.2;
+}
+.section-title em { font-style: italic; }
+.section-sub {
+  font-family: var(--font-serif); font-size: 1.4rem; font-weight: 400;
+  margin: 2rem 0 0.75rem; color: var(--black);
+}
+.section-body { font-size: 0.92rem; color: #333; line-height: 1.75; max-width: 720px; }
+.section-body p { margin-bottom: 1rem; }
+.section-body a { color: var(--black); text-underline-offset: 3px; }
+
+/* ─── HERO ───────────────────────────────────────────────────── */
+.hero-section { padding-top: 1rem; margin-bottom: 4rem; }
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-weight: 400; letter-spacing: -0.03em;
+  line-height: 1.05; margin-bottom: 1rem;
+}
+.hero-title em { font-style: italic; }
+.hero-tagline {
+  font-size: 1.1rem; color: var(--gray-700);
+  font-family: var(--font-serif); font-style: italic;
+  margin-bottom: 1.5rem; min-height: 1.7em;
+}
+#typewriter-cursor { animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.hero-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+.badge {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  border: 1px solid var(--gray-300); padding: 3px 10px; border-radius: 20px;
+  color: var(--gray-700);
+}
+.hero-install {
+  background: #0d1117; border-radius: 8px; padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem; max-width: 560px;
+}
+.hero-install pre { font-family: var(--font-mono); font-size: 0.8rem; color: #e6edf3; line-height: 1.8; }
+.hero-install .cm { color: var(--c-cm); }
+.hero-link { font-size: 0.85rem; color: var(--gray-700); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; transition: color .2s; }
+.hero-link:hover { color: var(--black); }
+
+/* ─── CODE BLOCKS ─────────────────────────────────────────────── */
+.code-block-wrap { position: relative; margin: 1.25rem 0; }
+.code-block-label {
+  font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--c-cm); padding: 0.6rem 1rem 0;
+  background: #0d1117; border-radius: 8px 8px 0 0; display: block;
+}
+.code-block {
+  background: #0d1117; border-radius: 8px; padding: 1.25rem 1.5rem;
+  font-family: var(--font-mono); font-size: 0.82rem; color: #e6edf3;
+  line-height: 1.75; overflow-x: auto; position: relative;
+}
+.code-block-label + .code-block { border-radius: 0 0 8px 8px; padding-top: 0.75rem; }
 .code-block .kw  { color: var(--c-kw); }
 .code-block .ty  { color: var(--c-ty); }
 .code-block .fn  { color: var(--c-fn); }
 .code-block .str { color: var(--c-str); }
-.code-block .cm  { color: var(--c-cm); font-style: italic; }
+.code-block .cm  { color: var(--c-cm); }
 .code-block .num { color: var(--c-num); }
-.code-block .pr  { color: var(--c-pr); font-weight: 500; }
+.code-block .pr  { color: var(--c-pr); }
 .code-block .op  { color: var(--c-op); }
-.code-block-label {
-  font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase;
-  letter-spacing: 0.1em; color: #8b949e; margin-bottom: 0.8rem;
-  display: flex; align-items: center; justify-content: space-between;
-}
 .copy-btn {
-  font-family: var(--font-mono); font-size: 0.65rem; background: none;
-  border: 1px solid #30363d; color: #8b949e; padding: 0.15rem 0.6rem;
-  cursor: pointer; transition: color .15s, border-color .15s; letter-spacing: 0.04em;
+  position: absolute; top: 0.6rem; right: 0.6rem;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: #aaa; font-family: var(--font-mono); font-size: 0.65rem;
+  padding: 3px 9px; border-radius: 4px; cursor: pointer; transition: all .2s;
 }
-.copy-btn:hover { color: #e6edf3; border-color: #8b949e; }
-.copy-btn.copied { color: var(--c-str); border-color: var(--c-str); }
+.copy-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
-/* ─── STEP CARDS ───────────────────────────────────────── */
-.step-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; margin-top: 2rem; }
-.step-card { border: 1px solid var(--gray-200); padding: 1.8rem; position: relative; }
-.step-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--black); }
-.step-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; }
-.step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.8rem; }
+/* ─── STEP CARDS ─────────────────────────────────────────────── */
+.step-cards { display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0; }
+.step-card { display: flex; gap: 1rem; align-items: flex-start; }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--black);
+  color: var(--white); font-family: var(--font-mono); font-size: 0.7rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+}
+.step-body h4 { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.25rem; }
+.step-body p { font-size: 0.83rem; color: var(--gray-700); }
 
-/* ─── LANG REFERENCE TABS ─────────────────────────────── */
-.ref-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--gray-200); margin-top: 2rem; overflow-x: auto; scrollbar-width: none; }
-.ref-tabs::-webkit-scrollbar { display: none; }
-.ref-tab { font-family: var(--font-mono); font-size: 0.75rem; padding: 0.6rem 1.2rem; cursor: pointer; border-bottom: 2px solid transparent; color: var(--gray-500); white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; transition: color .15s; }
-.ref-tab:hover { color: var(--black); }
-.ref-tab.active { color: var(--black); border-bottom-color: var(--black); }
-.ref-panel { display: none; padding-top: 1.5rem; }
-.ref-panel.active { display: block; }
+/* ─── INFO BOX ───────────────────────────────────────────────── */
+.info-box {
+  border-left: 3px solid var(--black); background: var(--gray-50);
+  padding: 0.9rem 1.25rem; margin: 1.25rem 0; border-radius: 0 6px 6px 0;
+  font-size: 0.85rem; color: #333;
+}
+.info-box.warn { border-left-color: #e6a817; background: #fffdf0; }
+.info-box strong { display: block; margin-bottom: 0.25rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
-/* ─── TYPE TABLE ───────────────────────────────────────── */
-.type-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; margin-top: 1rem; }
-.type-table th { text-align: left; padding: 0.5rem 1rem; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--font-mono); }
-.type-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--gray-200); }
-.type-table td code { font-family: var(--font-mono); font-size: 0.82rem; color: var(--c-ty); background: #0d1117; padding: 0.1rem 0.4rem; }
-.type-table tr:hover td { background: var(--gray-50); }
-.type-highlight { font-family: var(--font-mono); font-size: 0.72rem; background: #1a1a2e; color: var(--c-pr); padding: 0.15rem 0.5rem; }
+/* ─── LANGUAGE REFERENCE TABS ────────────────────────────────── */
+.tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
+.tab-btn {
+  font-family: var(--font-sans); font-size: 0.8rem; font-weight: 500;
+  padding: 0.6rem 1.1rem; background: none; border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  cursor: pointer; color: var(--gray-500); transition: all .2s;
+}
+.tab-btn.active { color: var(--black); border-bottom-color: var(--black); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
 
-/* ─── PROOF SECTION ─────────────────────────────────────── */
-#proofs { background: #0a0d13; border-top: 1px solid #21262d; border-bottom: 1px solid #21262d; }
-#proofs h2.section-num { color: #8b949e; }
-#proofs h2.section-title { color: #e6edf3; }
-#proofs p { color: #8b949e; }
-#proofs h3.subsec { color: #6e7681; }
-.proof-primitives { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
-.proof-kw-card { border: 1px solid #21262d; padding: 1.4rem 1.6rem; background: #161b22; }
-.proof-kw { font-family: var(--font-mono); font-size: 1.1rem; color: var(--c-pr); font-weight: 500; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
-.proof-kw-desc { font-size: 0.85rem; color: #8b949e; line-height: 1.6; }
-.proof-kw-card.full { grid-column: 1 / -1; }
-.annotated-block { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; align-items: start; }
-.annotation-list { list-style: none; padding: 0; }
-.annotation-list li { font-family: var(--font-mono); font-size: 0.75rem; color: #8b949e; padding: 0.4rem 0; border-bottom: 1px solid #21262d; display: flex; gap: 0.8rem; align-items: baseline; }
-.annotation-list li:last-child { border-bottom: none; }
-.ann-kw { color: var(--c-pr); flex-shrink: 0; min-width: 80px; }
-.realistic-card { border: 1px solid #21262d; padding: 1.4rem 1.6rem; background: #161b22; margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: center; }
-.realistic-states { display: flex; flex-direction: column; gap: 0.6rem; }
-.rs { font-family: var(--font-mono); font-size: 0.82rem; display: flex; align-items: center; gap: 0.8rem; }
-.rs-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.rs-true .rs-dot { background: #16a34a; }
-.rs-false .rs-dot { background: #dc2626; }
-.rs-realistic .rs-dot { background: var(--c-pr); }
-.rs-label { color: #8b949e; }
+/* ─── TYPE TABLE ─────────────────────────────────────────────── */
+.type-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+.type-table th { text-align: left; font-weight: 600; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--gray-200); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-700); }
+.type-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+.type-table tr:last-child td { border-bottom: none; }
+.type-table code { font-family: var(--font-mono); font-size: 0.78rem; background: var(--gray-100); padding: 1px 6px; border-radius: 3px; }
 
-/* ─── PACKAGE CARDS ─────────────────────────────────────── */
-.pkg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
-.pkg-card { border: 1px solid var(--gray-200); padding: 1.4rem; }
-.pkg-card-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; }
+/* ─── PROOF WORKFLOW ANIMATION ──────────────────────────────── */
+.proof-workflow {
+  background: #0a0d13; border-radius: 12px; padding: 2.5rem 2rem 2rem;
+  margin: 2rem 0; position: relative; overflow: hidden;
+}
+.proof-workflow::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(244,197,66,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.workflow-label {
+  font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: #546e7a; margin-bottom: 2rem; text-align: center;
+}
+.workflow-stages {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-bottom: 2rem; flex-wrap: wrap; row-gap: 1rem;
+}
+.workflow-node {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  position: relative; z-index: 1;
+}
+.workflow-node-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  border: 2px solid #2a3040; background: #121825;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; transition: all .4s ease;
+  position: relative;
+}
+.workflow-node.active .workflow-node-circle {
+  border-color: var(--c-gold); background: rgba(244,197,66,0.1);
+  box-shadow: 0 0 20px rgba(244,197,66,0.3);
+}
+.workflow-node.done .workflow-node-circle {
+  border-color: var(--c-green); background: rgba(76,175,80,0.1);
+  box-shadow: 0 0 12px rgba(76,175,80,0.2);
+}
+.workflow-node-label {
+  font-family: var(--font-mono); font-size: 0.65rem; color: #4a5568;
+  text-align: center; transition: color .4s;
+}
+.workflow-node.active .workflow-node-label { color: var(--c-gold); }
+.workflow-node.done .workflow-node-label { color: var(--c-green); }
+.workflow-connector {
+  width: 40px; height: 2px; background: #2a3040;
+  position: relative; margin: 0 -2px; flex-shrink: 0; margin-top: -28px;
+  overflow: hidden;
+}
+.workflow-connector-fill {
+  height: 100%; width: 0; background: var(--c-green);
+  transition: width .5s ease;
+}
+.workflow-connector.done .workflow-connector-fill { width: 100%; }
+.workflow-panel {
+  background: #111827; border-radius: 8px; padding: 1.25rem 1.5rem;
+  min-height: 120px; position: relative; border: 1px solid #1e2535;
+}
+.workflow-panel pre { font-family: var(--font-mono); font-size: 0.78rem; color: #e6edf3; line-height: 1.75; white-space: pre-wrap; }
+.workflow-panel .kw  { color: var(--c-kw); }
+.workflow-panel .pr  { color: var(--c-pr); }
+.workflow-panel .cm  { color: var(--c-cm); }
+.workflow-panel .str { color: var(--c-str); }
+.workflow-panel .op  { color: var(--c-op); }
+.workflow-desc { font-size: 0.78rem; color: #8892a4; margin-top: 0.75rem; min-height: 1.5em; }
+.workflow-controls { display: flex; gap: 0.75rem; margin-top: 1.5rem; justify-content: center; }
+.wf-btn {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  background: #1e2535; border: 1px solid #2a3040; color: #8892a4;
+  padding: 0.4rem 1rem; border-radius: 5px; cursor: pointer; transition: all .2s;
+}
+.wf-btn:hover { border-color: #4a5568; color: #c8d3e0; }
+.wf-btn.primary { background: rgba(244,197,66,0.1); border-color: rgba(244,197,66,0.3); color: var(--c-gold); }
+.wf-btn.primary:hover { background: rgba(244,197,66,0.18); }
 
-/* ─── CLI TABLE ─────────────────────────────────────────── */
-.cli-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.87rem; }
-.cli-table th { text-align: left; padding: 0.6rem 1.2rem; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--font-mono); }
-.cli-table td { padding: 0.65rem 1.2rem; border-bottom: 1px solid var(--gray-200); vertical-align: top; }
-.cli-table td:first-child { font-family: var(--font-mono); font-size: 0.8rem; color: var(--c-fn); background: #0d1117; white-space: nowrap; }
-.cli-table tr:hover td { background: var(--gray-50); }
-.cli-table tr:hover td:first-child { background: #161b22; }
+/* ─── PROOF KEYWORD CARDS ───────────────────────────────────── */
+.proof-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1.5rem 0; }
+.proof-card {
+  background: #0d1117; border: 1px solid #1e2535; border-radius: 8px;
+  padding: 1rem 1.1rem;
+}
+.proof-card-kw { font-family: var(--font-mono); font-size: 0.85rem; color: var(--c-pr); margin-bottom: 0.35rem; }
+.proof-card-sym { font-size: 1.1rem; float: right; opacity: 0.6; }
+.proof-card-desc { font-size: 0.78rem; color: #8892a4; line-height: 1.5; }
 
-/* ─── PIPELINE ──────────────────────────────────────────── */
-.pipeline-flow { display: flex; align-items: center; gap: 0; margin: 2rem 0; overflow-x: auto; padding-bottom: 0.5rem; }
-.pipeline-stage { border: 2px solid var(--black); padding: 0.7rem 1.2rem; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
-.pipeline-arrow { font-family: var(--font-mono); font-size: 1rem; color: var(--gray-500); padding: 0 0.5rem; flex-shrink: 0; }
-.pipeline-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
-.pipeline-card { border: 1px solid var(--gray-200); padding: 1.4rem; }
-.pc-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
-.pc-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.6rem; }
-.pc-desc { font-size: 0.82rem; color: var(--gray-700); line-height: 1.6; }
+/* ─── REALISTIC CARD ─────────────────────────────────────────── */
+.realistic-card {
+  background: #0d1117; border: 1px solid rgba(244,197,66,0.2);
+  border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+}
+.realistic-title { font-family: var(--font-mono); font-size: 0.75rem; color: var(--c-gold); margin-bottom: 0.75rem; letter-spacing: 0.05em; }
+.realistic-states { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.realistic-state {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  padding: 3px 10px; border-radius: 4px;
+}
+.realistic-state.t { color: #4caf50; border-color: rgba(76,175,80,.3); }
+.realistic-state.f { color: #f44336; border-color: rgba(244,67,54,.3); }
+.realistic-state.r { color: var(--c-gold); border-color: rgba(244,197,66,.3); }
+.realistic-desc { font-size: 0.8rem; color: #8892a4; }
 
-/* ─── EXAMPLES GRID ─────────────────────────────────────── */
-.examples-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
-.example-card { border: 1px solid var(--gray-200); overflow: hidden; }
-.example-card-header { padding: 0.8rem 1.2rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
-.example-card-title { font-weight: 600; font-size: 0.88rem; }
-.example-card-lang { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.08em; }
-.example-card .code-block { margin: 0; border: none; border-radius: 0; }
+/* ─── BRING SECTION ───────────────────────────────────────────── */
+.bring-syntax-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+.bring-syntax-card { background: #0d1117; border: 1px solid #1e2535; border-radius: 8px; padding: 1rem 1.25rem; }
+.bring-syntax-card h4 { font-family: var(--font-mono); font-size: 0.72rem; color: var(--c-fn); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.06em; }
 
-/* ─── FOOTER ──────────────────────────────────────────── */
-footer { background: var(--gray-50); border-top: 1px solid var(--gray-200); padding: 3rem 0; }
-.footer-inner { display: flex; gap: 4rem; align-items: flex-start; flex-wrap: wrap; }
-.footer-brand { font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 0.4rem; }
-.footer-brand em { font-style: italic; }
-.footer-meta { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); line-height: 1.8; }
-.footer-links { display: flex; flex-direction: column; gap: 0.6rem; }
-.footer-links a { font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray-700); text-decoration: none; transition: color .2s; display: flex; align-items: center; gap: 0.5rem; }
-.footer-links a:hover { color: var(--black); }
+/* ─── PLAYGROUND ─────────────────────────────────────────────── */
+.playground {
+  background: #0a0d13; border: 1px solid #1e2535; border-radius: 12px;
+  overflow: hidden; margin: 2rem 0;
+}
+.playground-header {
+  background: #111827; border-bottom: 1px solid #1e2535;
+  padding: 0.65rem 1.25rem; display: flex; align-items: center; justify-content: space-between;
+}
+.playground-title { font-family: var(--font-mono); font-size: 0.72rem; color: #8892a4; }
+.playground-examples { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.playground-example-btn {
+  font-family: var(--font-mono); font-size: 0.65rem; background: #1e2535;
+  border: 1px solid #2a3040; color: #6b7280; padding: 2px 8px; border-radius: 3px;
+  cursor: pointer; transition: all .2s;
+}
+.playground-example-btn:hover { border-color: #4a5568; color: #9ca3af; }
+.playground-body { display: grid; grid-template-columns: 1fr 1fr; }
+.playground-editor-wrap { border-right: 1px solid #1e2535; }
+.playground-editor {
+  width: 100%; background: #0d1117; color: #e6edf3;
+  font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6;
+  border: none; outline: none; padding: 1.25rem; resize: none;
+  min-height: 200px; tab-size: 2;
+}
+.playground-output {
+  padding: 1.25rem; font-family: var(--font-mono); font-size: 0.8rem;
+  color: #8892a4; background: #0a0d13; min-height: 200px;
+  overflow-y: auto; line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+}
+.playground-output.has-output { color: #e6edf3; }
+.playground-output .out-success { color: #c3e88d; }
+.playground-output .out-proof   { color: var(--c-pr); }
+.playground-output .out-error   { color: #f48771; }
+.playground-output .out-axiom   { color: var(--c-op); }
+.playground-output .out-theorem { color: var(--c-kw); }
+.playground-footer {
+  background: #111827; border-top: 1px solid #1e2535;
+  padding: 0.6rem 1.25rem; display: flex; align-items: center; justify-content: space-between;
+}
+.run-btn {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500;
+  background: var(--black); color: var(--white); border: none;
+  padding: 0.45rem 1.25rem; border-radius: 5px; cursor: pointer; transition: opacity .2s;
+}
+.run-btn:hover { opacity: 0.8; }
+.run-btn:disabled { opacity: 0.4; cursor: default; }
+.run-status { font-family: var(--font-mono); font-size: 0.7rem; color: #546e7a; }
 
-/* ─── RESPONSIVE ──────────────────────────────────────── */
-@media (max-width: 700px) {
-  nav { padding: 0 1.2rem; }
-  .nav-links { display: none; }
+/* ─── BRING PLAYGROUND TREE ──────────────────────────────────── */
+.bring-tree {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  color: #e6edf3; line-height: 1.7;
+}
+.bring-tree .bt-key   { color: var(--c-fn); }
+.bring-tree .bt-type  { color: var(--c-ty); font-size: 0.7rem; opacity: 0.7; }
+.bring-tree .bt-str   { color: var(--c-str); }
+.bring-tree .bt-num   { color: var(--c-num); }
+.bring-tree .bt-bool  { color: var(--c-kw); }
+.bring-tree .bt-null  { color: var(--c-cm); }
+.bring-tree .bt-schema { color: var(--c-pr); }
+.bring-tree .bt-obj   { color: #e6edf3; }
+.bring-tree .bt-arr   { color: var(--c-op); }
+.bring-tree .bt-indent { padding-left: 1.25rem; border-left: 1px solid #1e2535; margin-left: 0.25rem; }
+.bring-error { color: #f48771; font-family: var(--font-mono); font-size: 0.78rem; }
+
+/* ─── CLI TABLE ──────────────────────────────────────────────── */
+.cli-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+.cli-table th { text-align: left; padding: 0.5rem 1rem; border-bottom: 2px solid var(--gray-200); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-700); font-weight: 600; }
+.cli-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+.cli-table td:first-child { font-family: var(--font-mono); font-size: 0.78rem; color: #333; white-space: nowrap; }
+.cli-table tr:last-child td { border-bottom: none; }
+
+/* ─── PIPELINE ────────────────────────────────────────────────── */
+.pipeline-flow {
+  display: flex; align-items: center; gap: 0.5rem;
+  flex-wrap: wrap; margin: 1.5rem 0; row-gap: 0.75rem;
+}
+.pipeline-stage {
+  background: var(--black); color: var(--white);
+  font-family: var(--font-mono); font-size: 0.78rem;
+  padding: 0.45rem 1rem; border-radius: 5px;
+}
+.pipeline-arrow { color: var(--gray-500); font-size: 1rem; }
+.pipeline-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+.pipeline-card { border: 1px solid var(--gray-200); border-radius: 8px; padding: 1.1rem 1.25rem; }
+.pipeline-card h4 { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 500; margin-bottom: 0.35rem; }
+.pipeline-card p { font-size: 0.8rem; color: var(--gray-700); line-height: 1.6; }
+
+/* ─── EXAMPLE GALLERY ────────────────────────────────────────── */
+.examples-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.5rem 0; }
+.example-card { border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }
+.example-card-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
+.example-card-title { font-size: 0.82rem; font-weight: 600; }
+.example-card-tag { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); background: var(--gray-100); padding: 2px 7px; border-radius: 3px; }
+.example-card .code-block { border-radius: 0; margin: 0; font-size: 0.75rem; max-height: 240px; overflow-y: auto; }
+
+/* ─── INLINE CODE ─────────────────────────────────────────────── */
+code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-100); padding: 1px 5px; border-radius: 3px; }
+
+/* ─── REVEAL ANIMATION ───────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .5s, transform .5s; }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ─── DIVIDER ─────────────────────────────────────────────────── */
+.doc-divider { border: none; border-top: 1px solid var(--gray-200); margin: 3rem 0; }
+
+/* ─── FOOTER ─────────────────────────────────────────────────── */
+.docs-footer {
+  border-top: 1px solid var(--gray-200); margin-top: 4rem;
+  padding: 2rem 0; display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+.footer-left { font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-500); }
+.footer-right { display: flex; gap: 1.5rem; }
+.footer-right a { font-size: 0.8rem; color: var(--gray-700); text-decoration: none; transition: color .2s; }
+.footer-right a:hover { color: var(--black); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .docs-layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; left: -280px; top: var(--nav-h); width: var(--sidebar-w);
+    height: calc(100vh - var(--nav-h)); z-index: 160; transition: left .3s;
+    box-shadow: 4px 0 20px rgba(0,0,0,.1);
+  }
+  .sidebar.open { left: 0; }
   .nav-burger { display: flex; }
-  .nav-drawer { display: flex; }
-  .container { padding: 0 1.2rem; }
-  .step-grid { grid-template-columns: 1fr; }
-  .proof-primitives { grid-template-columns: 1fr; }
-  .pkg-grid { grid-template-columns: 1fr; }
-  .pipeline-cards { grid-template-columns: 1fr 1fr; }
+  .docs-content { padding: 2rem 1.25rem 4rem; }
+  .playground-body { grid-template-columns: 1fr; }
+  .playground-editor-wrap { border-right: none; border-bottom: 1px solid #1e2535; }
   .examples-grid { grid-template-columns: 1fr; }
-  .annotated-block { grid-template-columns: 1fr; }
-  .realistic-card { grid-template-columns: 1fr; }
+  .pipeline-cards { grid-template-columns: 1fr; }
+  .bring-syntax-cards { grid-template-columns: 1fr; }
+  .proof-cards { grid-template-columns: 1fr 1fr; }
+  .workflow-connector { width: 20px; }
+  .nav-links { display: none; }
 }
 @media (max-width: 500px) {
-  .pipeline-cards { grid-template-columns: 1fr; }
+  .hero-title { font-size: 2.4rem; }
+  .proof-cards { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav id="main-nav">
-  <a class="nav-back" href="/">← PolyfdoS</a>
-  <span class="nav-logo">Maty<em>OS</em></span>
-  <ul class="nav-links">
-    <li><a href="#quickstart">Quick Start</a></li>
-    <li><a href="#types">Language</a></li>
-    <li><a href="#proofs">Proof System</a></li>
-    <li><a href="#packages">Packages</a></li>
-    <li><a href="#cli">CLI</a></li>
-    <li><a href="#examples" style="font-weight:500;">Examples</a></li>
-  </ul>
-  <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMenu()">
+<nav>
+  <button class="nav-burger" id="navBurger" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-sep">/</span>
+  <span class="nav-logo">Maty<em>OS</em></span>
+  <div class="nav-links">
+    <a href="#introduction">Intro</a>
+    <a href="#quickstart">Quick Start</a>
+    <a href="#types">Reference</a>
+    <a href="#proofs">Proof System</a>
+    <a href="#bring">Bring Format</a>
+    <a href="#examples">Examples</a>
+    <span class="nav-badge">v1.0.9</span>
+  </div>
 </nav>
 
-<ul class="nav-drawer" id="nav-drawer">
-  <li><a href="#quickstart" onclick="closeMenu()">Quick Start</a></li>
-  <li><a href="#types" onclick="closeMenu()">Language Reference</a></li>
-  <li><a href="#proofs" onclick="closeMenu()">Proof System</a></li>
-  <li><a href="#packages" onclick="closeMenu()">Packages</a></li>
-  <li><a href="#cli" onclick="closeMenu()">CLI</a></li>
-  <li><a href="#pipeline" onclick="closeMenu()">Pipeline</a></li>
-  <li><a href="#examples" onclick="closeMenu()">Examples</a></li>
-</ul>
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<!-- HERO -->
-<section id="hero">
-  <div class="container">
-    <div class="hero-eyebrow">Language · v1.0.9 · MIT License · .el extension</div>
-    <h1 class="hero-title">Maty<em>OS</em></h1>
-    <div class="hero-tagline">
-      <span id="typewriter"></span>
-    </div>
-    <div class="hero-badges reveal">
-      <span class="badge">12 proof keywords</span>
-      <span class="badge">3-valued boolean logic</span>
-      <span class="badge">recursive descent parser</span>
-      <span class="badge">bring package system</span>
-    </div>
-    <div class="hero-install reveal">
-      <pre><span class="cm"># Run a MatyOS program</span>
-el run your_program.el
+<!-- DOCS LAYOUT -->
+<div class="docs-layout">
 
-<span class="cm"># Run inline code</span>
-el run -c <span class="str">"ALGORITHM x { show \"hello\"; }"</span>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Getting Started</div>
+      <a class="sidebar-link" href="#introduction">Introduction</a>
+      <a class="sidebar-link" href="#installation">Installation</a>
+      <a class="sidebar-link" href="#quickstart">Quick Start</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Language Reference</div>
+      <a class="sidebar-link" href="#variables">Variables &amp; Constants</a>
+      <a class="sidebar-link" href="#types">Type System</a>
+      <a class="sidebar-link" href="#operators">Operators</a>
+      <a class="sidebar-link" href="#control-flow">Control Flow</a>
+      <a class="sidebar-link" href="#functions">Functions</a>
+      <a class="sidebar-link" href="#objects">Objects &amp; Arrays</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Proof System</div>
+      <a class="sidebar-link" href="#proofs">Overview</a>
+      <a class="sidebar-link sub" href="#axioms">Axioms</a>
+      <a class="sidebar-link sub" href="#theorems">Theorems</a>
+      <a class="sidebar-link sub" href="#proof-blocks">Proof Blocks</a>
+      <a class="sidebar-link sub" href="#proof-workflow">Workflow Animation</a>
+      <a class="sidebar-link sub" href="#realistic">Realistic Logic</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Bring Format</div>
+      <a class="sidebar-link" href="#bring">Overview</a>
+      <a class="sidebar-link sub" href="#bring-syntax">Syntax</a>
+      <a class="sidebar-link sub" href="#bring-schemas">Schemas</a>
+      <a class="sidebar-link sub" href="#bring-playground">Live Playground</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Packages &amp; CLI</div>
+      <a class="sidebar-link" href="#packages">Package System</a>
+      <a class="sidebar-link" href="#cli">CLI Reference</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Architecture</div>
+      <a class="sidebar-link" href="#pipeline">Compiler Pipeline</a>
+    </div>
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Playground &amp; Examples</div>
+      <a class="sidebar-link" href="#playground">Live El Playground</a>
+      <a class="sidebar-link" href="#examples">Examples Gallery</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="docs-content">
+
+    <!-- ══ HERO ══════════════════════════════════════════════════ -->
+    <div class="hero-section">
+      <div class="section-eyebrow">Language · v1.0.9 · MIT License · .el extension</div>
+      <h1 class="hero-title">Maty<em>OS</em></h1>
+      <p class="hero-tagline" id="tagline"><span id="typewriter"></span><span id="typewriter-cursor">|</span></p>
+      <div class="hero-badges">
+        <span class="badge">Proof Assistant</span>
+        <span class="badge">3-valued boolean logic</span>
+        <span class="badge">12 proof keywords</span>
+        <span class="badge">Python runtime</span>
+        <span class="badge">MIT License</span>
+      </div>
+      <div class="hero-install">
+        <pre><span class="cm"># Run a source file</span>
+el run hello_world.el
 
 <span class="cm"># Compile from Python</span>
 from compiler.main import El
-El.compile_file(<span class="str">'app'</span>)   <span class="cm"># reads src/app.el</span></pre>
+El.compile_file('app')</pre>
+      </div>
+      <a class="hero-link" href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener">
+        → github.com/MatyOS-Project/MatyOS
+      </a>
     </div>
-    <a class="hero-github reveal" href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener">
-      ↗ github.com/MatyOS-Project/MatyOS
-    </a>
-  </div>
-</section>
 
-<!-- §1 QUICK START -->
-<section id="quickstart">
-  <div class="container">
-    <h2 class="section-num reveal">§ 1</h2>
-    <h2 class="section-title reveal">Quick Start</h2>
-    <p class="reveal">MatyOS programs are written in the <strong>El</strong> (Elnamic) language with the <code style="font-family:var(--font-mono);font-size:0.9em;background:var(--gray-100);padding:0.1rem 0.4rem;">.el</code> file extension. Every program begins with an <code style="font-family:var(--font-mono);font-size:0.9em;background:var(--gray-100);padding:0.1rem 0.4rem;">ALGORITHM</code> block. Write a file, run it, then write your first formal proof — in three steps.</p>
+    <hr class="doc-divider"/>
 
-    <div class="step-grid">
-      <div class="step-card reveal reveal-delay-1">
-        <div class="step-num">Step 01 · Write</div>
-        <div class="step-title">Hello World</div>
-        <div class="code-block" style="margin-top:0.8rem;">
-          <div class="code-block-label">hello_world.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <pre><span class="kw">ALGORITHM</span> hello_world {
-    <span class="fn">show</span> <span class="str">"Hello, MatyOS!"</span>;
-}</pre>
+    <!-- ══ INTRODUCTION ══════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="introduction">
+      <div class="section-eyebrow">Getting Started</div>
+      <h2 class="section-title">Introduction</h2>
+      <div class="section-body">
+        <p>MatyOS is a proof-assistant programming language where formal verification is first-class syntax, not an afterthought. Theorems, axioms, and QED live at the same level as variables and functions. The language is built on a Lexer → Parser → Semantic Analyzer → Interpreter pipeline written entirely in Python.</p>
+        <p>The source file extension is <code>.el</code> (for <em>Elnamic Language</em>). Programs are case-insensitive for keywords — <code>VAR</code>, <code>var</code>, and <code>Var</code> are all valid. Identifiers support alphanumeric characters and underscores.</p>
+        <p>Comments use <code>&#123;&#123; &#125;&#125;</code> for multi-line blocks and <code>//</code> for single-line, keeping the aesthetic close to traditional proof notation.</p>
+      </div>
+      <div class="info-box">
+        <strong>Design Philosophy</strong>
+        Proof is syntax, not ceremony. A theorem that cannot be proven is a compile-time concern, not a runtime surprise.
+      </div>
+    </section>
+
+    <!-- ══ INSTALLATION ══════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="installation">
+      <h2 class="section-title">Installation</h2>
+      <div class="section-body">
+        <p>Clone the repository and use Python 3.8+ to run programs. No external dependencies are required for the core language runtime.</p>
+      </div>
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Clone the repository</h4>
+            <div class="code-block-wrap">
+              <pre class="code-block">git clone https://github.com/MatyOS-Project/MatyOS.git
+cd MatyOS</pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Install optional dependencies</h4>
+            <div class="code-block-wrap">
+              <pre class="code-block">pip install -r requirements.txt</pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Run a program</h4>
+            <div class="code-block-wrap">
+              <pre class="code-block">python -m compiler.main  <span class="cm">// or use el CLI</span>
+el run src/hello_world.el</pre>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="step-card reveal reveal-delay-2">
-        <div class="step-num">Step 02 · Run</div>
-        <div class="step-title">Execute</div>
-        <div class="code-block" style="margin-top:0.8rem;">
-          <div class="code-block-label">terminal <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <pre>el run hello_world.el
+    </section>
 
-<span class="cm"># Output:</span>
-<span class="str">Hello, MatyOS!</span></pre>
-        </div>
+    <!-- ══ QUICK START ═══════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="quickstart">
+      <h2 class="section-title">Quick Start</h2>
+      <h3 class="section-sub">Hello World</h3>
+      <div class="code-block-wrap">
+        <span class="code-block-label">hello_world.el</span>
+        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> HelloWorld;
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="str">"Hello, World!"</span>;
+<span class="kw">end</span></pre></div>
       </div>
-      <div class="step-card reveal reveal-delay-3">
-        <div class="step-num">Step 03 · Prove</div>
-        <div class="step-title">First Formal Proof</div>
-        <div class="code-block" style="margin-top:0.8rem;">
-          <div class="code-block-label">proof.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <pre><span class="pr">axiom</span> id: <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-<span class="pr">theorem</span> t: <span class="kw">true</span>;
-<span class="pr">proof</span> t {
-    <span class="pr">hypothesis</span> h: <span class="kw">true</span>;
-    <span class="pr">test</span> v: h: <span class="kw">true</span>;
+
+      <h3 class="section-sub">Variables and Output</h3>
+      <div class="code-block-wrap">
+        <span class="code-block-label">variables.el</span>
+        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> Variables;
+
+<span class="kw">var</span> name  : <span class="ty">string</span>  = <span class="str">"MatyOS"</span>;
+<span class="kw">var</span> ver   : <span class="ty">real</span>    = <span class="num">1.0</span>;
+<span class="kw">var</span> lines : <span class="ty">integer</span> = <span class="num">2800</span>;
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> name;
+  <span class="kw">show</span> ver;
+  <span class="kw">show</span> lines;
+<span class="kw">end</span></pre></div>
+      </div>
+
+      <h3 class="section-sub">First Proof</h3>
+      <div class="code-block-wrap">
+        <span class="code-block-label">first_proof.el</span>
+        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> FirstProof;
+
+<span class="pr">axiom</span> truth_holds : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+
+<span class="pr">theorem</span> basic_truth : <span class="kw">true</span>;
+
+<span class="pr">proof</span> basic_truth <span class="op">{</span>
+    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
+    <span class="pr">test</span> verify  : h1 : <span class="kw">true</span>;
     <span class="pr">QED</span>;
-}</pre>
+<span class="op">}</span>
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="str">"Proof complete."</span>;
+<span class="kw">end</span></pre></div>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ══ VARIABLES ═════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="variables">
+      <div class="section-eyebrow">Language Reference</div>
+      <h2 class="section-title">Variables &amp; Constants</h2>
+      <div class="section-body">
+        <p>Variables are declared with <code>var</code>, constants with <code>const</code>. Constants are immutable after declaration — the semantic analyzer enforces this at compile time.</p>
+      </div>
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Variable declaration</span>
+<span class="kw">var</span> counter   : <span class="ty">integer</span> = <span class="num">0</span>;
+<span class="kw">var</span> pi        : <span class="ty">real</span>    = <span class="num">3.14159</span>;
+<span class="kw">var</span> greeting  : <span class="ty">string</span>  = <span class="str">"hello"</span>;
+<span class="kw">var</span> flag      : <span class="ty">boolean</span> = <span class="kw">true</span>;
+<span class="kw">var</span> uncertain : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
+
+<span class="cm">// Constant declaration (immutable)</span>
+<span class="kw">const</span> MAX_SIZE : <span class="ty">integer</span> = <span class="num">100</span>;
+<span class="kw">const</span> APP_NAME : <span class="ty">string</span>  = <span class="str">"MatyOS"</span>;
+
+<span class="cm">// Assignment</span>
+counter = counter + <span class="num">1</span>;
+<span class="kw">show</span> counter;</pre></div>
+    </section>
+
+    <!-- ══ TYPES ══════════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="types">
+      <h2 class="section-title">Type System</h2>
+      <div class="section-body">
+        <p>MatyOS is statically typed. The type of a variable is declared at definition time and enforced by the semantic analyzer. The type system includes the unique <code>realistic</code> three-valued boolean.</p>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('types', 'primitives', this)">Primitives</button>
+        <button class="tab-btn" onclick="switchTab('types', 'boolean', this)">Boolean &amp; Realistic</button>
+        <button class="tab-btn" onclick="switchTab('types', 'strings', this)">Strings</button>
+        <button class="tab-btn" onclick="switchTab('types', 'objects', this)">Objects</button>
+      </div>
+
+      <div id="types-primitives" class="tab-panel active">
+        <table class="type-table">
+          <thead><tr><th>Type</th><th>Description</th><th>Literal Example</th><th>Aliases</th></tr></thead>
+          <tbody>
+            <tr><td><code>integer</code></td><td>Whole number (64-bit)</td><td><code>42</code></td><td><code>int</code></td></tr>
+            <tr><td><code>real</code></td><td>Floating-point number</td><td><code>3.14</code></td><td><code>float</code></td></tr>
+            <tr><td><code>string</code></td><td>UTF-8 text sequence</td><td><code>"hello"</code></td><td><code>str</code></td></tr>
+            <tr><td><code>boolean</code></td><td>True/false logic value</td><td><code>true</code> / <code>false</code></td><td>—</td></tr>
+            <tr><td><code>realistic</code></td><td>Three-valued boolean: true, false, or uncertain</td><td><code>realistic</code></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="types-boolean" class="tab-panel">
+        <div class="realistic-card">
+          <div class="realistic-title">REALISTIC — THREE-VALUED BOOLEAN LOGIC</div>
+          <div class="realistic-states">
+            <span class="realistic-state t">true</span>
+            <span class="realistic-state f">false</span>
+            <span class="realistic-state r">realistic</span>
+          </div>
+          <p class="realistic-desc">The <code>realistic</code> value extends classical boolean logic with a third state representing uncertainty or incomplete knowledge. Useful for modeling real-world conditions where truth is not yet determined.</p>
         </div>
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> confirmed  : <span class="ty">boolean</span> = <span class="kw">true</span>;
+<span class="kw">var</span> rejected   : <span class="ty">boolean</span> = <span class="kw">false</span>;
+<span class="kw">var</span> confidence : <span class="ty">boolean</span> = <span class="kw">realistic</span>;  <span class="cm">// uncertain state</span>
+
+<span class="kw">if</span> confirmed <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"confirmed"</span>;
+<span class="op">}</span> <span class="kw">elif</span> confidence <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"uncertain"</span>;
+<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"rejected"</span>;
+<span class="op">}</span></pre></div>
       </div>
-    </div>
-  </div>
-</section>
 
-<!-- §2 LANGUAGE REFERENCE -->
-<section id="types">
-  <div class="container">
-    <h2 class="section-num reveal">§ 2</h2>
-    <h2 class="section-title reveal">Language Reference</h2>
-    <p class="reveal">The El language is statically typed with explicit variable declarations and supports five primitive types including the unique <strong>realistic</strong> three-valued boolean. Keywords are case-insensitive.</p>
+      <div id="types-strings" class="tab-panel">
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> s1 : <span class="ty">string</span> = <span class="str">"double quoted"</span>;
+<span class="kw">var</span> s2 : <span class="ty">string</span> = <span class="str">'single quoted'</span>;
 
-    <div class="ref-tabs reveal">
-      <button class="ref-tab active" onclick="switchTab('variables')">Variables</button>
-      <button class="ref-tab" onclick="switchTab('types')">Types</button>
-      <button class="ref-tab" onclick="switchTab('control')">Control Flow</button>
-      <button class="ref-tab" onclick="switchTab('functions')">Functions</button>
-      <button class="ref-tab" onclick="switchTab('arrays')">Arrays</button>
-    </div>
+<span class="cm">// Show string value</span>
+<span class="kw">show</span> s1;
 
-    <!-- Variables -->
-    <div class="ref-panel active" id="panel-variables">
-      <div class="code-block">
-        <div class="code-block-label">Variable & constant declarations <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-        <pre><span class="cm">// Declare with type</span>
-<span class="kw">var</span> x, y     : <span class="ty">integer</span>;
-<span class="kw">var</span> s        : <span class="ty">real</span>;
-<span class="kw">var</span> name     : <span class="ty">string</span> = <span class="str">"El"</span>;
-<span class="kw">var</span> flag     : <span class="ty">boolean</span> = <span class="kw">true</span>;
-<span class="kw">var</span> state    : <span class="ty">realistic</span>;
+<span class="cm">// String variable in function return</span>
+<span class="kw">function</span> <span class="fn">greet</span>() : <span class="ty">string</span> <span class="op">{</span>
+  <span class="kw">return</span> <span class="str">"Hello from MatyOS"</span>;
+<span class="op">}</span>
 
-<span class="cm">// Constants (immutable)</span>
-<span class="kw">const</span> PI     : <span class="ty">real</span>    = <span class="num">3.14159</span>;
-<span class="kw">const</span> MAX_N  : <span class="ty">integer</span> = <span class="num">1000</span>;
-
-<span class="cm">// Multiple same-type declarations</span>
-<span class="kw">var</span> a, b, c  : <span class="ty">string</span> = <span class="str">"same"</span>;
-
-<span class="cm">// Arithmetic assignment</span>
-x = <span class="num">1</span> * <span class="num">2</span> + <span class="num">3</span> - <span class="num">4</span> / <span class="num">5</span> * (<span class="num">1</span> + <span class="num">2</span>);
-
-<span class="cm">// Boolean expressions</span>
-flag = <span class="kw">true</span> <span class="op">and</span> <span class="kw">false</span> <span class="op">or</span> !<span class="kw">false</span>;
-flag = x &lt; <span class="num">5</span> <span class="op">and</span> y &gt; <span class="num">0</span>;</pre>
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="fn">greet</span>();
+<span class="kw">end</span></pre></div>
       </div>
-    </div>
 
-    <!-- Types -->
-    <div class="ref-panel" id="panel-types">
+      <div id="types-objects" class="tab-panel">
+        <div class="code-block-wrap"><pre class="code-block"><span class="cm">// Object declaration</span>
+<span class="kw">object</span> <span class="fn">Point</span> <span class="op">{</span>
+  x : <span class="ty">integer</span>;
+  y : <span class="ty">integer</span>;
+<span class="op">}</span>
+
+<span class="kw">var</span> p : <span class="fn">Point</span>;
+p.x = <span class="num">10</span>;
+p.y = <span class="num">20</span>;
+
+<span class="kw">show</span> p.x;
+<span class="kw">show</span> p.y;</pre></div>
+      </div>
+    </section>
+
+    <!-- ══ OPERATORS ══════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="operators">
+      <h2 class="section-title">Operators</h2>
+      <div class="section-body">
+        <p>MatyOS supports arithmetic, comparison, and logical operators. Notably, strict equality uses <code>===</code> (three equals), which mirrors proof-system notation for identity.</p>
+      </div>
       <table class="type-table">
-        <thead>
-          <tr><th>Type</th><th>Description</th><th>Example literal</th><th>Notes</th></tr>
-        </thead>
+        <thead><tr><th>Category</th><th>Operators</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr>
-            <td><code>integer</code></td>
-            <td>Whole number (signed)</td>
-            <td><code>42</code>, <code>-7</code></td>
-            <td>Default numeric type</td>
-          </tr>
-          <tr>
-            <td><code>real</code></td>
-            <td>Floating-point number</td>
-            <td><code>3.14</code>, <code>-0.5</code></td>
-            <td>Also aliased as <code>float</code></td>
-          </tr>
-          <tr>
-            <td><code>string</code></td>
-            <td>Text, double-quoted</td>
-            <td><code>"hello"</code></td>
-            <td>Supports <code>trim()</code>, <code>upper()</code></td>
-          </tr>
-          <tr>
-            <td><code>boolean</code></td>
-            <td>Two-valued logic</td>
-            <td><code>true</code>, <code>false</code></td>
-            <td>Operators: <code>and</code>, <code>or</code>, <code>!</code></td>
-          </tr>
-          <tr>
-            <td><code>realistic</code></td>
-            <td>Three-valued Kleene logic</td>
-            <td><code>true</code> | <code>false</code> | <code>realistic</code></td>
-            <td><span class="type-highlight">★ unique to El</span></td>
-          </tr>
+          <tr><td>Arithmetic</td><td><code>+  -  *  /  div</code></td><td><code>div</code> = integer division</td></tr>
+          <tr><td>Comparison</td><td><code>===  !=  &gt;  &lt;  &gt;=  &lt;=</code></td><td><code>===</code> strict identity</td></tr>
+          <tr><td>Logical</td><td><code>and  or  !</code></td><td><code>!</code> = logical NOT</td></tr>
+          <tr><td>Assignment</td><td><code>=</code></td><td>Only for mutable vars</td></tr>
         </tbody>
       </table>
-      <p style="font-size:0.85rem;color:var(--gray-700);margin-top:1rem;">The <strong>realistic</strong> type extends boolean with a third truth value representing uncertainty or superposition — implementing Kleene's K3 three-valued logic natively in the type system.</p>
-    </div>
+      <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> a : <span class="ty">integer</span> = <span class="num">10</span>;
+<span class="kw">var</span> b : <span class="ty">integer</span> = <span class="num">3</span>;
 
-    <!-- Control Flow -->
-    <div class="ref-panel" id="panel-control">
-      <div class="code-block">
-        <div class="code-block-label">if / elif / else, for, while, do-while, switch <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-        <pre><span class="cm">// Conditional</span>
-<span class="kw">if</span> x > <span class="num">5</span> {
-    <span class="fn">show</span> <span class="str">"greater"</span>;
-} <span class="kw">elif</span> x < <span class="num">5</span> {
-    <span class="fn">show</span> <span class="str">"less"</span>;
-} <span class="kw">else</span> {
-    <span class="fn">show</span> <span class="str">"equal"</span>;
-}
+<span class="kw">show</span> a + b;       <span class="cm">// 13</span>
+<span class="kw">show</span> a - b;       <span class="cm">// 7</span>
+<span class="kw">show</span> a * b;       <span class="cm">// 30</span>
+<span class="kw">show</span> a <span class="kw">div</span> b;    <span class="cm">// 3  (integer division)</span>
+<span class="kw">show</span> a / b;       <span class="cm">// 3.333...</span>
 
-<span class="cm">// For loop (C-style)</span>
-<span class="kw">for</span> i: <span class="ty">integer</span> = <span class="num">0</span>; i < <span class="num">10</span>; i = i + <span class="num">1</span> {
-    <span class="fn">show</span> i;
-}
+<span class="pr">axiom</span> ten_is_ten : a <span class="op">===</span> <span class="num">10</span>;</pre></div>
+    </section>
 
-<span class="cm">// While loop</span>
-<span class="kw">while</span> counter <= <span class="num">10</span> <span class="kw">do</span> {
-    <span class="fn">show</span> counter;
-    counter = counter + <span class="num">1</span>;
-}
+    <!-- ══ CONTROL FLOW ═══════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="control-flow">
+      <h2 class="section-title">Control Flow</h2>
 
-<span class="cm">// Do-while loop</span>
-<span class="kw">do</span> {
-    <span class="fn">show</span> x;
-    x = x + <span class="num">1</span>;
-} <span class="kw">while</span> x < <span class="num">5</span>
-
-<span class="cm">// Switch statement</span>
-<span class="kw">switch</span>(value) {
-    <span class="kw">case</span> <span class="num">1</span>: <span class="fn">show</span> <span class="str">"one"</span>;
-    <span class="kw">case</span> <span class="num">2</span>: <span class="fn">show</span> <span class="str">"two"</span>;
-    <span class="kw">default</span>: <span class="fn">show</span> <span class="str">"other"</span>;
-}</pre>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('cf', 'if', this)">if / elif / else</button>
+        <button class="tab-btn" onclick="switchTab('cf', 'for', this)">for loop</button>
+        <button class="tab-btn" onclick="switchTab('cf', 'while', this)">while</button>
+        <button class="tab-btn" onclick="switchTab('cf', 'switch', this)">switch</button>
       </div>
-    </div>
 
-    <!-- Functions -->
-    <div class="ref-panel" id="panel-functions">
-      <div class="code-block">
-        <div class="code-block-label">Function declarations, nesting, recursion <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-        <pre><span class="cm">// Basic function</span>
-<span class="kw">function</span> <span class="fn">add</span>(a: <span class="ty">integer</span>, b: <span class="ty">integer</span>) {
-    <span class="kw">return</span> a + b;
-}
+      <div id="cf-if" class="tab-panel active">
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> x : <span class="ty">integer</span> = <span class="num">42</span>;
 
-<span class="cm">// Nested function</span>
-<span class="kw">function</span> <span class="fn">outer</span>(s: <span class="ty">string</span>) {
-    <span class="kw">var</span> c : <span class="ty">string</span>;
-    <span class="kw">function</span> <span class="fn">inner</span>() {
-        <span class="kw">return</span> <span class="num">42</span>;
-    }
-    <span class="kw">return</span> <span class="fn">inner</span>();
-}
+<span class="kw">if</span> x > <span class="num">100</span> <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"big"</span>;
+<span class="op">}</span> <span class="kw">elif</span> x > <span class="num">10</span> <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"medium"</span>;
+<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"small"</span>;
+<span class="op">}</span></pre></div>
+      </div>
+
+      <div id="cf-for" class="tab-panel">
+        <div class="info-box warn">
+          <strong>Syntax Note</strong>
+          The <code>for</code> loop initializer does NOT take a type annotation. Use <code>for i = 0;</code> not <code>for i: integer = 0;</code>
+        </div>
+        <div class="code-block-wrap"><pre class="code-block"><span class="cm">// Correct for-loop syntax</span>
+<span class="kw">for</span> i = <span class="num">0</span>; i < <span class="num">5</span>; i = i + <span class="num">1</span> <span class="op">{</span>
+  <span class="kw">show</span> i;
+<span class="op">}</span>
+
+<span class="cm">// Count down</span>
+<span class="kw">for</span> n = <span class="num">10</span>; n > <span class="num">0</span>; n = n - <span class="num">1</span> <span class="op">{</span>
+  <span class="kw">show</span> n;
+<span class="op">}</span></pre></div>
+      </div>
+
+      <div id="cf-while" class="tab-panel">
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> count : <span class="ty">integer</span> = <span class="num">0</span>;
+
+<span class="kw">while</span> count < <span class="num">5</span> <span class="op">{</span>
+  <span class="kw">show</span> count;
+  count = count + <span class="num">1</span>;
+<span class="op">}</span>
+
+<span class="cm">// break is supported</span>
+<span class="kw">while</span> <span class="kw">true</span> <span class="op">{</span>
+  <span class="kw">if</span> count > <span class="num">10</span> <span class="op">{</span>
+    <span class="kw">break</span>;
+  <span class="op">}</span>
+  count = count + <span class="num">1</span>;
+<span class="op">}</span></pre></div>
+      </div>
+
+      <div id="cf-switch" class="tab-panel">
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> day : <span class="ty">integer</span> = <span class="num">3</span>;
+
+<span class="kw">switch</span> day <span class="op">{</span>
+  <span class="kw">case</span> <span class="num">1</span>: <span class="kw">show</span> <span class="str">"Monday"</span>;
+  <span class="kw">case</span> <span class="num">2</span>: <span class="kw">show</span> <span class="str">"Tuesday"</span>;
+  <span class="kw">case</span> <span class="num">3</span>: <span class="kw">show</span> <span class="str">"Wednesday"</span>;
+  <span class="kw">default</span>: <span class="kw">show</span> <span class="str">"Other"</span>;
+<span class="op">}</span></pre></div>
+      </div>
+    </section>
+
+    <!-- ══ FUNCTIONS ═════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="functions">
+      <h2 class="section-title">Functions</h2>
+      <div class="section-body">
+        <p>Functions are declared with the <code>function</code> keyword, optionally accepting typed parameters and returning typed values. Recursive functions are supported.</p>
+      </div>
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Basic function</span>
+<span class="kw">function</span> <span class="fn">add</span>(a : <span class="ty">integer</span>, b : <span class="ty">integer</span>) : <span class="ty">integer</span> <span class="op">{</span>
+  <span class="kw">return</span> a + b;
+<span class="op">}</span>
 
 <span class="cm">// Recursive function</span>
-<span class="kw">function</span> <span class="fn">fibonacci</span>(n: <span class="ty">integer</span>) {
-    <span class="kw">if</span> n <= <span class="num">1</span> { <span class="kw">return</span> n; }
-    <span class="kw">return</span> <span class="fn">fibonacci</span>(n - <span class="num">1</span>) + <span class="fn">fibonacci</span>(n - <span class="num">2</span>);
+<span class="kw">function</span> <span class="fn">factorial</span>(n : <span class="ty">integer</span>) : <span class="ty">integer</span> <span class="op">{</span>
+  <span class="kw">if</span> n <= <span class="num">1</span> <span class="op">{</span>
+    <span class="kw">return</span> <span class="num">1</span>;
+  <span class="op">}</span>
+  <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>);
+<span class="op">}</span>
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>);         <span class="cm">// 7</span>
+  <span class="kw">show</span> <span class="fn">factorial</span>(<span class="num">5</span>);    <span class="cm">// 120</span>
+<span class="kw">end</span></pre></div>
+    </section>
+
+    <!-- ══ OBJECTS ════════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="objects">
+      <h2 class="section-title">Objects &amp; Arrays</h2>
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Object type definition</span>
+<span class="kw">object</span> <span class="fn">Vector</span> <span class="op">{</span>
+  x : <span class="ty">real</span>;
+  y : <span class="ty">real</span>;
+<span class="op">}</span>
+
+<span class="kw">var</span> v : <span class="fn">Vector</span>;
+v.x = <span class="num">1.0</span>;
+v.y = <span class="num">2.5</span>;
+
+<span class="cm">// Array declaration</span>
+<span class="kw">var</span> nums : <span class="ty">integer</span>[] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
+<span class="kw">show</span> nums;</pre></div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ══ PROOF SYSTEM ══════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="proofs">
+      <div class="section-eyebrow">Proof System</div>
+      <h2 class="section-title">Formal Verification</h2>
+      <div class="section-body">
+        <p>The proof system is MatyOS's defining feature. Formal mathematical proofs are written directly in source code. The semantic analyzer links theorems to their proofs and verifies structural correctness. The interpreter executes the proof steps and prints a verified trace.</p>
+        <p>The system draws from the axiomatic method: you state self-evident truths (axioms), declare propositions (theorems), and provide structured proofs using hypotheses, tests, and QED.</p>
+      </div>
+
+      <div class="proof-cards">
+        <div class="proof-card">
+          <span class="proof-card-sym">⊢</span>
+          <div class="proof-card-kw">axiom</div>
+          <div class="proof-card-desc">A self-evident truth that requires no proof. Foundation of all reasoning in the system.</div>
+        </div>
+        <div class="proof-card">
+          <span class="proof-card-sym">∀</span>
+          <div class="proof-card-kw">theorem</div>
+          <div class="proof-card-desc">A proposition declared to be provable. Must be matched by a corresponding proof block.</div>
+        </div>
+        <div class="proof-card">
+          <span class="proof-card-sym">{ }</span>
+          <div class="proof-card-kw">proof</div>
+          <div class="proof-card-desc">Block that provides the structured argument for a theorem. Contains hypotheses and tests.</div>
+        </div>
+        <div class="proof-card">
+          <span class="proof-card-sym">∃</span>
+          <div class="proof-card-kw">hypothesis</div>
+          <div class="proof-card-desc">An assumed truth scoped within the proof block. Forms the basis of the argument.</div>
+        </div>
+        <div class="proof-card">
+          <span class="proof-card-sym">?</span>
+          <div class="proof-card-kw">test</div>
+          <div class="proof-card-desc">An inline verification step. Tests that a hypothesis holds against declared axioms.</div>
+        </div>
+        <div class="proof-card">
+          <span class="proof-card-sym">∎</span>
+          <div class="proof-card-kw">QED</div>
+          <div class="proof-card-desc">Seals and terminates the proof. Quod Erat Demonstrandum — "which was to be demonstrated."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AXIOMS -->
+    <section class="doc-section reveal" id="axioms">
+      <h3 class="section-sub">Axioms</h3>
+      <div class="section-body">
+        <p>Axioms are self-evident truths. They require no proof. Every axiomatic system begins with a set of axioms that serve as the foundation for all theorems.</p>
+      </div>
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Identity axiom</span>
+<span class="pr">axiom</span> identity : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+
+<span class="cm">// Law of excluded middle</span>
+<span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
+
+<span class="cm">// Non-contradiction</span>
+<span class="pr">axiom</span> non_contradiction : !(<span class="kw">true</span> <span class="kw">and</span> <span class="kw">false</span>);
+
+<span class="cm">// Named with definition for documentation</span>
+<span class="pr">definition</span> truth_is_stable : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;</pre></div>
+    </section>
+
+    <!-- THEOREMS -->
+    <section class="doc-section reveal" id="theorems">
+      <h3 class="section-sub">Theorems</h3>
+      <div class="section-body">
+        <p>A theorem declares a proposition. The semantic analyzer requires each theorem to be matched by a proof block of the same name. A theorem without a proof is a compile-time error.</p>
+      </div>
+      <div class="code-block-wrap"><pre class="code-block"><span class="pr">theorem</span> truth_is_consistent : <span class="kw">true</span>;
+<span class="pr">theorem</span> conjunction_holds   : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;</pre></div>
+    </section>
+
+    <!-- PROOF BLOCKS -->
+    <section class="doc-section reveal" id="proof-blocks">
+      <h3 class="section-sub">Proof Blocks</h3>
+      <div class="section-body">
+        <p>A proof block contains the structured argument for a theorem. It consists of hypotheses (assumed truths) and tests (verification steps), terminated with <code>QED</code>.</p>
+      </div>
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+<span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
+
+<span class="pr">theorem</span> simple_theorem : <span class="kw">true</span>;
+
+<span class="pr">proof</span> simple_theorem <span class="op">{</span>
+    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;              <span class="cm">// assume h1 holds</span>
+    <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;        <span class="cm">// verify against axioms</span>
+    <span class="pr">QED</span>;                               <span class="cm">// ∎ proof complete</span>
+<span class="op">}</span>
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="str">"Theorem proved."</span>;
+<span class="kw">end</span></pre></div>
+    </section>
+
+    <!-- PROOF WORKFLOW ANIMATION -->
+    <section class="doc-section reveal" id="proof-workflow">
+      <h3 class="section-sub">Proof Workflow</h3>
+      <div class="section-body">
+        <p>The proof pipeline runs through six stages. Each stage builds on the last, culminating in a verified QED seal.</p>
+      </div>
+
+      <div class="proof-workflow">
+        <div class="workflow-label">PROOF EXECUTION PIPELINE — CLICK PLAY TO ANIMATE</div>
+
+        <div class="workflow-stages" id="wfStages">
+          <div class="workflow-node" data-step="0">
+            <div class="workflow-node-circle">⊢</div>
+            <div class="workflow-node-label">Axiom</div>
+          </div>
+          <div class="workflow-connector" data-conn="0"><div class="workflow-connector-fill"></div></div>
+          <div class="workflow-node" data-step="1">
+            <div class="workflow-node-circle">∀</div>
+            <div class="workflow-node-label">Theorem</div>
+          </div>
+          <div class="workflow-connector" data-conn="1"><div class="workflow-connector-fill"></div></div>
+          <div class="workflow-node" data-step="2">
+            <div class="workflow-node-circle">{}</div>
+            <div class="workflow-node-label">Proof Context</div>
+          </div>
+          <div class="workflow-connector" data-conn="2"><div class="workflow-connector-fill"></div></div>
+          <div class="workflow-node" data-step="3">
+            <div class="workflow-node-circle">∃</div>
+            <div class="workflow-node-label">Hypothesis</div>
+          </div>
+          <div class="workflow-connector" data-conn="3"><div class="workflow-connector-fill"></div></div>
+          <div class="workflow-node" data-step="4">
+            <div class="workflow-node-circle">?</div>
+            <div class="workflow-node-label">Test</div>
+          </div>
+          <div class="workflow-connector" data-conn="4"><div class="workflow-connector-fill"></div></div>
+          <div class="workflow-node" data-step="5">
+            <div class="workflow-node-circle">∎</div>
+            <div class="workflow-node-label">QED</div>
+          </div>
+        </div>
+
+        <div class="workflow-panel">
+          <pre id="wfCode"><span class="cm">// Press Play to walk through the proof pipeline</span></pre>
+        </div>
+        <div class="workflow-desc" id="wfDesc">Each stage builds upon the last. Axioms ground the system; QED seals it.</div>
+
+        <div class="workflow-controls">
+          <button class="wf-btn primary" id="wfPlay" onclick="wfPlay()">▶ Play</button>
+          <button class="wf-btn" onclick="wfPause()">⏸ Pause</button>
+          <button class="wf-btn" onclick="wfReset()">↺ Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- REALISTIC LOGIC -->
+    <section class="doc-section reveal" id="realistic">
+      <h3 class="section-sub">Realistic Logic</h3>
+      <div class="section-body">
+        <p>The <code>realistic</code> keyword introduces a third boolean state — uncertain. Classical logic operates on a closed world assumption; realistic logic acknowledges incomplete information.</p>
+      </div>
+      <div class="code-block-wrap"><pre class="code-block"><span class="pr">axiom</span> known_true  : <span class="kw">true</span>;
+<span class="pr">axiom</span> known_false : <span class="kw">false</span>;
+
+<span class="kw">var</span> sensor_reading : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
+
+<span class="cm">// Realistic-aware branching</span>
+<span class="kw">if</span> sensor_reading <span class="op">===</span> <span class="kw">true</span> <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"confirmed"</span>;
+<span class="op">}</span> <span class="kw">elif</span> sensor_reading <span class="op">===</span> <span class="kw">false</span> <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"denied"</span>;
+<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+  <span class="kw">show</span> <span class="str">"uncertain"</span>;
+<span class="op">}</span></pre></div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ══ BRING FORMAT ═══════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="bring">
+      <div class="section-eyebrow">Bring Format</div>
+      <h2 class="section-title">The Bring Data Format</h2>
+      <div class="section-body">
+        <p>Bring is a human-readable data serialization format designed for configuration files and package manifests. It is similar in spirit to TOML but with a simpler syntax and native schema support. MatyOS uses <code>.bring</code> files for package configuration and dependency management.</p>
+        <p>Bring is parsed by the <code>bring-parser</code> library and accessible from El programs via the <code>bring</code> import system.</p>
+      </div>
+    </section>
+
+    <!-- BRING SYNTAX -->
+    <section class="doc-section reveal" id="bring-syntax">
+      <h3 class="section-sub">Syntax</h3>
+      <div class="section-body">
+        <p>Bring files use <code>key = value</code> pairs. Values can be primitives, objects, or arrays. Objects use <code>{}</code> blocks and arrays use <code>[]</code>. Attributes annotate values with <code>@attr = val</code>.</p>
+      </div>
+      <div class="bring-syntax-cards">
+        <div class="bring-syntax-card">
+          <h4>Primitives</h4>
+          <pre class="code-block" style="border-radius:6px;padding:.75rem 1rem;font-size:.77rem;margin:0">name = "MatyOS"
+version = 1
+pi = 3.14
+active = true</pre>
+        </div>
+        <div class="bring-syntax-card">
+          <h4>Objects</h4>
+          <pre class="code-block" style="border-radius:6px;padding:.75rem 1rem;font-size:.77rem;margin:0">author {
+  name = "Daftyon"
+  email = "dev@daftyon.io"
+}</pre>
+        </div>
+        <div class="bring-syntax-card">
+          <h4>Arrays</h4>
+          <pre class="code-block" style="border-radius:6px;padding:.75rem 1rem;font-size:.77rem;margin:0">tags = ["math", "proof", "logic"]
+ports = [8080, 8443, 9000]</pre>
+        </div>
+        <div class="bring-syntax-card">
+          <h4>Attributes</h4>
+          <pre class="code-block" style="border-radius:6px;padding:.75rem 1rem;font-size:.77rem;margin:0">@required = true
+@type = "string"
+name = "MatyOS"</pre>
+        </div>
+      </div>
+
+      <h3 class="section-sub" style="margin-top:2rem">Complete Example</h3>
+      <div class="code-block-wrap">
+        <span class="code-block-label">package.bring</span>
+        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>name    = "my-project"
+version = "1.0.0"
+stable  = true
+
+author {
+  name  = "Dev"
+  email = "dev@example.com"
 }
 
-<span class="cm">// Call it</span>
-<span class="fn">show</span> <span class="fn">fibonacci</span>(<span class="num">10</span>);   <span class="cm">// → 55</span>
-<span class="fn">show</span> <span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>);       <span class="cm">// → 7</span></pre>
+dependencies = ["math_utils", "neural_networks"]
+
+config {
+  debug   = false
+  timeout = 30
+  tags    = ["production", "stable"]
+}</pre></div>
       </div>
-    </div>
+    </section>
 
-    <!-- Arrays -->
-    <div class="ref-panel" id="panel-arrays">
-      <div class="code-block">
-        <div class="code-block-label">Array declaration and iteration <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-        <pre><span class="cm">// Declare typed array</span>
-<span class="kw">var</span> numbers: <span class="ty">array</span>[<span class="ty">integer</span>] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
-<span class="kw">var</span> names:   <span class="ty">array</span>[<span class="ty">string</span>]  = [<span class="str">"El"</span>, <span class="str">"Lean"</span>, <span class="str">"Coq"</span>];
-
-<span class="cm">// Iterate with for-in</span>
-<span class="kw">var</span> total: <span class="ty">integer</span> = <span class="num">0</span>;
-<span class="kw">for</span> num <span class="kw">in</span> numbers {
-    total = total + num;
-}
-<span class="fn">show</span> total;   <span class="cm">// → 15</span>
-
-<span class="cm">// Index access</span>
-<span class="fn">show</span> numbers[<span class="num">0</span>];   <span class="cm">// → 1</span>
-<span class="fn">show</span> names[<span class="num">2</span>];    <span class="cm">// → Coq</span></pre>
+    <!-- BRING SCHEMAS -->
+    <section class="doc-section reveal" id="bring-schemas">
+      <h3 class="section-sub">Schemas</h3>
+      <div class="section-body">
+        <p>Bring supports inline schema declarations using the <code>schema</code> keyword. Schemas define the structure of objects and their types, enabling validation at parse time.</p>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- §3 PROOF SYSTEM -->
-<section id="proofs">
-  <div class="container">
-    <h2 class="section-num reveal">§ 3</h2>
-    <h2 class="section-title reveal">Proof System</h2>
-    <p class="reveal" style="max-width:640px;">The defining feature of the El language is formal verification built directly into the syntax. Proofs are not documentation — they are first-class language constructs verified by the semantic analyzer before any code runs.</p>
-
-    <h3 class="subsec reveal">Proof Primitives</h3>
-    <div class="proof-primitives reveal">
-      <div class="proof-kw-card">
-        <div class="proof-kw">axiom</div>
-        <div class="proof-kw-desc">Self-evident foundation. Declared true without proof — the bedrock on which theorems are built.</div>
-      </div>
-      <div class="proof-kw-card">
-        <div class="proof-kw">theorem</div>
-        <div class="proof-kw-desc">A proposition asserted to be provable. Must be matched by a <code style="color:var(--c-pr);font-family:var(--font-mono);">proof</code> block bearing its name.</div>
-      </div>
-      <div class="proof-kw-card">
-        <div class="proof-kw">hypothesis</div>
-        <div class="proof-kw-desc">An assumption declared within a proof scope. Held true for the duration of the proof, then discharged at QED.</div>
-      </div>
-      <div class="proof-kw-card">
-        <div class="proof-kw">test</div>
-        <div class="proof-kw-desc">An inline verification step. Checks that a hypothesis or expression holds against established axioms.</div>
-      </div>
-      <div class="proof-kw-card full">
-        <div class="proof-kw">QED &nbsp;<span style="color:var(--c-cm);font-size:0.85rem;font-weight:400;">Quod Erat Demonstrandum &nbsp; ∎</span></div>
-        <div class="proof-kw-desc">Seals and terminates the proof block. Causes the semantic analyzer to verify that all hypotheses have been tested and all required conditions satisfied.</div>
-      </div>
-    </div>
-
-    <h3 class="subsec reveal" style="margin-top:2.5rem;">Annotated Example</h3>
-    <div class="annotated-block reveal">
-      <div class="code-block" style="margin:0;">
-        <div class="code-block-label">axiomatic_method.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-        <pre><span class="cm">// Lay the axiomatic foundation</span>
-<span class="pr">axiom</span> identity:
-    <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-
-<span class="pr">axiom</span> excluded_middle:
-    <span class="kw">true</span> <span class="op">or</span> !<span class="kw">true</span>;
-
-<span class="cm">// Declare the theorem</span>
-<span class="pr">theorem</span> simple_theorem: <span class="kw">true</span>;
-
-<span class="cm">// Construct the proof</span>
-<span class="pr">proof</span> simple_theorem {
-    <span class="pr">hypothesis</span> h1: <span class="kw">true</span>;
-    <span class="pr">test</span> verify_h1: h1: <span class="kw">true</span>;
-    <span class="pr">QED</span>;   <span class="cm">// ∎</span>
-}</pre>
-      </div>
-      <ul class="annotation-list">
-        <li><span class="ann-kw">axiom</span>Self-evident truth — no proof required. Added to the axiom pool.</li>
-        <li><span class="ann-kw">axiom</span>Second axiom extends the logical foundation.</li>
-        <li><span class="ann-kw">theorem</span>Declares a claim. The semantic analyzer registers it as "unproven".</li>
-        <li><span class="ann-kw">proof</span>Opens a proof scope tied to <code style="font-family:var(--font-mono);color:var(--c-fn);">simple_theorem</code>.</li>
-        <li><span class="ann-kw">hypothesis</span>Assumes h1 = true within this scope.</li>
-        <li><span class="ann-kw">test</span>Verifies h1 holds. Fails with SemanticError if inconsistent.</li>
-        <li><span class="ann-kw">QED</span>Seals proof. Theorem marked "proven" in symbol table. ∎</li>
-      </ul>
-    </div>
-
-    <h3 class="subsec reveal" style="margin-top:2.5rem;">Realistic — Three-Valued Logic</h3>
-    <div class="realistic-card reveal">
-      <div>
-        <p style="color:#8b949e;font-size:0.88rem;margin-bottom:1rem;">The <code style="font-family:var(--font-mono);color:var(--c-pr);">realistic</code> type extends boolean with a third truth value — implementing Kleene's K3 logic for expressing uncertainty, superposition, or probabilistic states.</p>
-        <div class="realistic-states">
-          <div class="rs rs-true"><div class="rs-dot"></div><code style="font-family:var(--font-mono);font-size:0.8rem;color:var(--c-str);">true</code><span class="rs-label">— definite truth</span></div>
-          <div class="rs rs-false"><div class="rs-dot"></div><code style="font-family:var(--font-mono);font-size:0.8rem;color:#dc2626;">false</code><span class="rs-label">— definite falsity</span></div>
-          <div class="rs rs-realistic"><div class="rs-dot"></div><code style="font-family:var(--font-mono);font-size:0.8rem;color:var(--c-pr);">realistic</code><span class="rs-label">— indeterminate / uncertain</span></div>
-        </div>
-      </div>
-      <div class="code-block" style="margin:0;">
-        <div class="code-block-label">realistic_demo.el</div>
-        <pre><span class="kw">var</span> confidence: <span class="ty">realistic</span>;
-<span class="kw">var</span> certainty:  <span class="ty">realistic</span> = <span class="kw">true</span>;
-<span class="kw">var</span> doubt:      <span class="ty">realistic</span> = <span class="ty">realistic</span>;
-
-<span class="cm">// Kleene conjunction table:</span>
-<span class="cm">// true ∧ realistic  → realistic</span>
-<span class="cm">// false ∧ realistic → false</span>
-<span class="cm">// realistic ∧ realistic → realistic</span>
-
-<span class="kw">if</span> confidence {
-    <span class="fn">show</span> <span class="str">"definitively true"</span>;
-} <span class="kw">else</span> {
-    <span class="fn">show</span> <span class="str">"uncertain or false"</span>;
-}</pre>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- §4 PACKAGE SYSTEM -->
-<section id="packages">
-  <div class="container">
-    <h2 class="section-num reveal">§ 4</h2>
-    <h2 class="section-title reveal">Package System</h2>
-    <p class="reveal">The <strong>Bring</strong> system is El's module import mechanism — analogous to Python's <code style="font-family:var(--font-mono);background:var(--gray-100);padding:0.1rem 0.4rem;font-size:0.88em;">import</code> or JavaScript's <code style="font-family:var(--font-mono);background:var(--gray-100);padding:0.1rem 0.4rem;font-size:0.88em;">import from</code>. Packages are resolved from the Easier Hub registry and cached locally.</p>
-
-    <div class="pkg-grid reveal">
-      <div class="pkg-card">
-        <div class="pkg-card-label">Full package import</div>
-        <div class="code-block" style="margin:0;">
-          <pre><span class="kw">bring</span> math_utils;</pre>
-        </div>
-      </div>
-      <div class="pkg-card">
-        <div class="pkg-card-label">Import with alias</div>
-        <div class="code-block" style="margin:0;">
-          <pre><span class="kw">bring</span> neural_networks <span class="kw">as</span> nn;</pre>
-        </div>
-      </div>
-      <div class="pkg-card">
-        <div class="pkg-card-label">Named imports (destructured)</div>
-        <div class="code-block" style="margin:0;">
-          <pre><span class="kw">bring</span> { Vector, Matrix }
-    <span class="kw">from</span> math_package;</pre>
-        </div>
-      </div>
-      <div class="pkg-card">
-        <div class="pkg-card-label">Scoped source</div>
-        <div class="code-block" style="margin:0;">
-          <pre><span class="kw">bring</span> linear_algebra
-    <span class="kw">from</span> scientific_hub;</pre>
-        </div>
-      </div>
-    </div>
-
-    <h3 class="subsec reveal" style="margin-top:2rem;">Installing Packages</h3>
-    <div class="code-block reveal">
-      <div class="code-block-label">package.bring config + CLI install <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="cm"># Generate a sample package config</span>
-el download --sample
-
-<span class="cm"># Install all packages from config</span>
-el download package.bring
-
-<span class="cm"># Inspect local cache</span>
-el package cache list
-el package cache clear</pre>
-    </div>
-  </div>
-</section>
-
-<!-- §5 CLI REFERENCE -->
-<section id="cli">
-  <div class="container">
-    <h2 class="section-num reveal">§ 5</h2>
-    <h2 class="section-title reveal">CLI Reference</h2>
-    <p class="reveal">The <code style="font-family:var(--font-mono);background:var(--gray-100);padding:0.1rem 0.4rem;font-size:0.88em;">el</code> command-line tool (v1.0.9) is the primary interface for running El programs, managing packages, and inspecting the cache.</p>
-
-    <table class="cli-table reveal">
-      <thead>
-        <tr>
-          <th>Command</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>el run &lt;file.el&gt;</td>
-          <td>Execute an El source file through the full compiler pipeline</td>
-        </tr>
-        <tr>
-          <td>el run -c "code"</td>
-          <td>Compile and run inline El code directly from the shell</td>
-        </tr>
-        <tr>
-          <td>el download [config]</td>
-          <td>Install packages declared in a <code style="font-family:var(--font-mono);font-size:0.82em;">.bring</code> configuration file</td>
-        </tr>
-        <tr>
-          <td>el download --sample</td>
-          <td>Generate a sample <code style="font-family:var(--font-mono);font-size:0.82em;">package.bring</code> file in the current directory</td>
-        </tr>
-        <tr>
-          <td>el package cache list</td>
-          <td>List all packages currently stored in the local cache</td>
-        </tr>
-        <tr>
-          <td>el package cache clear</td>
-          <td>Remove all packages from the local cache</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- §6 COMPILER PIPELINE -->
-<section id="pipeline">
-  <div class="container">
-    <h2 class="section-num reveal">§ 6</h2>
-    <h2 class="section-title reveal">Compiler Pipeline</h2>
-    <p class="reveal">El is a fully compiled language with a four-stage pipeline implemented in Python. Each stage produces a well-defined artifact consumed by the next — source text → token stream → AST → validated AST → runtime output.</p>
-
-    <div class="pipeline-flow reveal">
-      <div class="pipeline-stage">Lexer</div>
-      <span class="pipeline-arrow">→</span>
-      <div class="pipeline-stage">Parser</div>
-      <span class="pipeline-arrow">→</span>
-      <div class="pipeline-stage">Semantic Analyzer</div>
-      <span class="pipeline-arrow">→</span>
-      <div class="pipeline-stage">Interpreter</div>
-    </div>
-
-    <div class="pipeline-cards reveal">
-      <div class="pipeline-card">
-        <div class="pc-num">Stage 01</div>
-        <div class="pc-name">Lexer</div>
-        <div class="pc-desc">Character-by-character tokenizer. Handles case-insensitive keywords, <code style="font-family:var(--font-mono);font-size:0.8em;">&#123;&#123; &#125;&#125;</code> multi-line comments, <code style="font-family:var(--font-mono);font-size:0.8em;">//</code> line comments, and multi-char operators (<code style="font-family:var(--font-mono);font-size:0.8em;">===</code>, <code style="font-family:var(--font-mono);font-size:0.8em;">!=</code>, <code style="font-family:var(--font-mono);font-size:0.8em;">>=</code>). Emits <code style="font-family:var(--font-mono);font-size:0.8em;">LexerError</code> on invalid tokens.</div>
-      </div>
-      <div class="pipeline-card">
-        <div class="pc-num">Stage 02</div>
-        <div class="pc-name">Parser</div>
-        <div class="pc-desc">1,152-line recursive descent parser. Builds a complete typed AST for all language constructs — including proof blocks, switch statements, bring declarations, and nested functions. Emits <code style="font-family:var(--font-mono);font-size:0.8em;">ParserError</code> on syntax violations.</div>
-      </div>
-      <div class="pipeline-card">
-        <div class="pc-num">Stage 03</div>
-        <div class="pc-name">Semantic Analyzer</div>
-        <div class="pc-desc">Traverses the AST for semantic validity: scope & symbol resolution, duplicate identifiers, constant immutability enforcement, theorem–proof linkage verification, and argument count checks. Emits <code style="font-family:var(--font-mono);font-size:0.8em;">SemanticError</code>.</div>
-      </div>
-      <div class="pipeline-card">
-        <div class="pc-num">Stage 04</div>
-        <div class="pc-name">Interpreter</div>
-        <div class="pc-desc">AST visitor-pattern executor. Runs proof blocks, resolves and executes package imports via the Easier Hub registry, evaluates all built-in functions, and handles runtime errors with structured <code style="font-family:var(--font-mono);font-size:0.8em;">InterpreterError</code> messages.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- §7 EXAMPLES -->
-<section id="examples">
-  <div class="container">
-    <h2 class="section-num reveal">§ 7</h2>
-    <h2 class="section-title reveal">Examples</h2>
-    <p class="reveal">Four complete programs demonstrating the range of El — from classic algorithms to formal axiomatic proofs.</p>
-
-    <div class="examples-grid reveal">
-
-      <div class="example-card">
-        <div class="example-card-header">
-          <span class="example-card-title">Fibonacci</span>
-          <span class="example-card-lang">Recursion</span>
-        </div>
-        <div class="code-block">
-          <div class="code-block-label">fibonacci.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <pre><span class="kw">ALGORITHM</span> fibonacci_demo {
-
-    <span class="kw">function</span> <span class="fn">fib</span>(n: <span class="ty">integer</span>) {
-        <span class="kw">if</span> n <= <span class="num">1</span> { <span class="kw">return</span> n; }
-        <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="num">1</span>) + <span class="fn">fib</span>(n-<span class="num">2</span>);
-    }
-
-    <span class="kw">for</span> i: <span class="ty">integer</span> = <span class="num">0</span>; i < <span class="num">10</span>; i = i+<span class="num">1</span> {
-        <span class="fn">show</span> <span class="fn">fib</span>(i);
-    }
-}</pre>
-        </div>
-      </div>
-
-      <div class="example-card">
-        <div class="example-card-header">
-          <span class="example-card-title">Calculator</span>
-          <span class="example-card-lang">Variables & Arithmetic</span>
-        </div>
-        <div class="code-block">
-          <div class="code-block-label">calculator.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <pre><span class="kw">ALGORITHM</span> calculator {
-
-    <span class="kw">var</span> a: <span class="ty">real</span> = <span class="num">10.5</span>;
-    <span class="kw">var</span> b: <span class="ty">real</span> = <span class="num">3.2</span>;
-
-    <span class="fn">show</span> <span class="str">"Sum:    "</span>; <span class="fn">show</span> a + b;
-    <span class="fn">show</span> <span class="str">"Diff:   "</span>; <span class="fn">show</span> a - b;
-    <span class="fn">show</span> <span class="str">"Product:"</span>; <span class="fn">show</span> a * b;
-    <span class="fn">show</span> <span class="str">"Quotient:"</span>;<span class="fn">show</span> a / b;
-
-    <span class="kw">const</span> PI: <span class="ty">real</span> = <span class="num">3.14159</span>;
-    <span class="fn">show</span> <span class="str">"Circle:"</span>;
-    <span class="fn">show</span> PI * a * a;
-}</pre>
-        </div>
-      </div>
-
-      <div class="example-card">
-        <div class="example-card-header">
-          <span class="example-card-title">Axiomatic Method</span>
-          <span class="example-card-lang">Formal Proofs</span>
-        </div>
-        <div class="code-block">
-          <div class="code-block-label">axiomatic_method.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <pre><span class="pr">axiom</span> identity:
-    <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-<span class="pr">axiom</span> excluded_middle:
-    <span class="kw">true</span> <span class="op">or</span> !<span class="kw">true</span>;
-
-<span class="pr">theorem</span> t1: <span class="kw">true</span>;
-<span class="pr">proof</span> t1 {
-    <span class="pr">hypothesis</span> h1: <span class="kw">true</span>;
-    <span class="pr">test</span> v1: h1: <span class="kw">true</span>;
-    <span class="pr">QED</span>;
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>schema Package {
+  name    : string
+  version : string
+  stable  : bool
 }
 
-<span class="kw">ALGORITHM</span> main {
-    <span class="fn">show</span> <span class="str">"All theorems verified."</span>;
-}</pre>
-        </div>
+schema Author {
+  name  : string
+  email : string
+}
+
+name    = "my-project"
+version = "1.0.0"
+stable  = true</pre></div>
+    </section>
+
+    <!-- BRING PLAYGROUND -->
+    <section class="doc-section reveal" id="bring-playground">
+      <h3 class="section-sub">Live Bring Playground</h3>
+      <div class="section-body">
+        <p>Type or paste Bring content below and click Parse to see the parsed structure in real time.</p>
       </div>
 
-      <div class="example-card">
-        <div class="example-card-header">
-          <span class="example-card-title">Advanced Proof</span>
-          <span class="example-card-lang">Multi-hypothesis</span>
+      <div class="playground">
+        <div class="playground-header">
+          <span class="playground-title">bring playground — live parser</span>
+          <div class="playground-examples">
+            <button class="playground-example-btn" onclick="setBringExample('basic')">Basic</button>
+            <button class="playground-example-btn" onclick="setBringExample('nested')">Nested</button>
+            <button class="playground-example-btn" onclick="setBringExample('schema')">Schema</button>
+          </div>
         </div>
-        <div class="code-block">
-          <div class="code-block-label">proof_demo.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <pre><span class="pr">axiom</span> p_true: <span class="kw">true</span>;
-<span class="pr">axiom</span> q_true: <span class="kw">true</span>;
+        <div class="playground-body">
+          <div class="playground-editor-wrap">
+            <textarea class="playground-editor" id="bringEditor" spellcheck="false" placeholder="name = &quot;example&quot;&#10;version = 1&#10;active = true">name    = "MatyOS"
+version = "1.0.9"
+stable  = true
 
-<span class="pr">theorem</span> conjunction: <span class="kw">true</span>;
-<span class="pr">proof</span> conjunction {
-    <span class="pr">hypothesis</span> hp: <span class="kw">true</span>;
-    <span class="pr">hypothesis</span> hq: <span class="kw">true</span>;
-    <span class="pr">test</span> check_p: hp: <span class="kw">true</span>;
-    <span class="pr">test</span> check_q: hq: <span class="kw">true</span>;
-    <span class="pr">test</span> both: hp <span class="op">and</span> hq: <span class="kw">true</span>;
-    <span class="pr">QED</span>;   <span class="cm">// ∎</span>
-}</pre>
+author {
+  name  = "MatyOS-Project"
+}</textarea>
+          </div>
+          <div class="playground-output" id="bringOutput">
+            <span style="color:#546e7a">// parsed tree will appear here</span>
+          </div>
+        </div>
+        <div class="playground-footer">
+          <button class="run-btn" id="bringRunBtn" onclick="runBring()">Parse</button>
+          <span class="run-status" id="bringStatus"></span>
         </div>
       </div>
+    </section>
 
+    <hr class="doc-divider"/>
+
+    <!-- ══ PACKAGE SYSTEM ════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="packages">
+      <div class="section-eyebrow">Packages &amp; CLI</div>
+      <h2 class="section-title">Package System</h2>
+      <div class="section-body">
+        <p>MatyOS uses the <code>bring</code> keyword for importing packages. Packages are resolved from the MatyOS package registry (Easier Hub) and cached locally. The <code>from</code> and <code>as</code> keywords enable named and aliased imports.</p>
+      </div>
+
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Import full package</span>
+<span class="kw">bring</span> math_utils;
+
+<span class="cm">// Import with alias</span>
+<span class="kw">bring</span> neural_networks <span class="kw">as</span> nn;
+
+<span class="cm">// Named imports from package</span>
+<span class="kw">bring</span> <span class="op">{</span> Vector, Matrix <span class="op">}</span> <span class="kw">from</span> math_package;
+
+<span class="cm">// Scoped import from registry</span>
+<span class="kw">bring</span> linear_algebra <span class="kw">from</span> scientific_hub;</pre></div>
+
+      <h3 class="section-sub">Package Manifest</h3>
+      <div class="section-body">
+        <p>Package dependencies are declared in a <code>.bring</code> file at the project root. The CLI installs and caches all declared dependencies.</p>
+      </div>
+      <div class="code-block-wrap">
+        <span class="code-block-label">deps.bring</span>
+        <div class="code-block-wrap"><pre class="code-block">name = "my_project"
+
+[dependencies]
+math_utils       = "^1.2.0"
+neural_networks  = "^0.9.1"</pre></div>
+      </div>
+    </section>
+
+    <!-- ══ CLI ════════════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="cli">
+      <h2 class="section-title">CLI Reference</h2>
+      <table class="cli-table">
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>el run &lt;file.el&gt;</td><td>Execute a source file</td></tr>
+          <tr><td>el run -c "code"</td><td>Run inline El code from string</td></tr>
+          <tr><td>el download [config]</td><td>Install packages from a <code>.bring</code> config file</td></tr>
+          <tr><td>el package cache list</td><td>List all cached packages</td></tr>
+          <tr><td>el package cache clear</td><td>Clear the local package cache</td></tr>
+          <tr><td>el check &lt;file.el&gt;</td><td>Run lexer + parser + semantic analysis only (no exec)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ══ PIPELINE ═══════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="pipeline">
+      <div class="section-eyebrow">Architecture</div>
+      <h2 class="section-title">Compiler Pipeline</h2>
+      <div class="section-body">
+        <p>Every El program passes through four stages. Each stage can raise a typed error (<code>LexerError</code>, <code>ParserError</code>, <code>SemanticError</code>) with line and column information.</p>
+      </div>
+
+      <div class="pipeline-flow">
+        <span class="pipeline-stage">Lexer</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-stage">Parser</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-stage">Semantic Analyzer</span>
+        <span class="pipeline-arrow">→</span>
+        <span class="pipeline-stage">Interpreter</span>
+      </div>
+
+      <div class="pipeline-cards">
+        <div class="pipeline-card">
+          <h4>Lexer</h4>
+          <p>Converts raw source text into a token stream. Case-insensitive keyword matching. Supports <code>&#123;&#123; &#125;&#125;</code> multi-line comments and <code>//</code> single-line. Recognizes <code>===</code>, <code>!=</code>, <code>&gt;=</code>, <code>&lt;=</code> as compound operators. Handles single- and double-quoted strings.</p>
+        </div>
+        <div class="pipeline-card">
+          <h4>Parser</h4>
+          <p>~1150-line recursive descent parser. Builds a full AST for all language constructs: variables, constants, functions, objects, control flow, proofs (axiom / theorem / proof / hypothesis / test / QED), and package imports.</p>
+        </div>
+        <div class="pipeline-card">
+          <h4>Semantic Analyzer</h4>
+          <p>Multi-pass AST visitor. Resolves scope chains and symbol tables. Enforces constant immutability. Links each <code>theorem</code> to its corresponding <code>proof</code> block. Detects undeclared identifiers and type mismatches before execution.</p>
+        </div>
+        <div class="pipeline-card">
+          <h4>Interpreter</h4>
+          <p>Tree-walking interpreter. Evaluates all AST nodes including proof steps, package imports (Easier Hub), built-in <code>show</code>, <code>involve</code>, and object access. Proof execution prints a colored verification trace to stdout: <code>[AXIOM]</code>, <code>[THEOREM]</code>, <code>[HYPOTHESIS]</code>, <code>[TEST ✓]</code>, <code>[QED ∎]</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ══ LIVE EL PLAYGROUND ══════════════════════════════════════ -->
+    <section class="doc-section reveal" id="playground">
+      <div class="section-eyebrow">Interactive</div>
+      <h2 class="section-title">Live El Playground</h2>
+      <div class="section-body">
+        <p>Write and run El programs directly in the browser. Your code executes on the real MatyOS interpreter — proof traces, colored output and all.</p>
+      </div>
+
+      <div class="playground">
+        <div class="playground-header">
+          <span class="playground-title">El interpreter — live execution</span>
+          <div class="playground-examples">
+            <button class="playground-example-btn" onclick="setElExample('hello')">Hello World</button>
+            <button class="playground-example-btn" onclick="setElExample('proof')">Proof Demo</button>
+            <button class="playground-example-btn" onclick="setElExample('axiomatic')">Axiomatic</button>
+            <button class="playground-example-btn" onclick="setElExample('funcs')">Functions</button>
+          </div>
+        </div>
+        <div class="playground-body">
+          <div class="playground-editor-wrap">
+            <textarea class="playground-editor" id="elEditor" spellcheck="false" style="min-height:260px">program HelloWorld;
+
+begin
+  show "Hello, World!";
+  show "MatyOS v1.0.9";
+end</textarea>
+          </div>
+          <div class="playground-output" id="elOutput">
+            <span style="color:#546e7a">// output will appear here</span>
+          </div>
+        </div>
+        <div class="playground-footer">
+          <button class="run-btn" id="elRunBtn" onclick="runEl()">▶ Run</button>
+          <span class="run-status" id="elStatus"></span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ══ EXAMPLES GALLERY ═══════════════════════════════════════ -->
+    <section class="doc-section reveal" id="examples">
+      <div class="section-eyebrow">Examples</div>
+      <h2 class="section-title">Examples Gallery</h2>
+      <div class="section-body">
+        <p>Real programs from the MatyOS examples directory. Click any example to load it into the playground above.</p>
+      </div>
+
+      <div class="examples-grid">
+        <div class="example-card">
+          <div class="example-card-header">
+            <span class="example-card-title">Hello World</span>
+            <span class="example-card-tag">beginner</span>
+          </div>
+          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> HelloWorld;
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="str">"Hello, World!"</span>;
+<span class="kw">end</span></pre>
+        </div>
+
+        <div class="example-card">
+          <div class="example-card-header">
+            <span class="example-card-title">Proof Demo</span>
+            <span class="example-card-tag">proof system</span>
+          </div>
+          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="pr">axiom</span> identity : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+<span class="pr">axiom</span> excl_mid  : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
+
+<span class="pr">theorem</span> basic_truth : <span class="kw">true</span>;
+
+<span class="pr">proof</span> basic_truth <span class="op">{</span>
+  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
+  <span class="pr">test</span> v1 : h1 : <span class="kw">true</span>;
+  <span class="pr">QED</span>;
+<span class="op">}</span>
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="str">"theorem proved"</span>;
+<span class="kw">end</span></pre>
+        </div>
+
+        <div class="example-card">
+          <div class="example-card-header">
+            <span class="example-card-title">Axiomatic Method</span>
+            <span class="example-card-tag">advanced proof</span>
+          </div>
+          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="pr">axiom</span> A1 : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+<span class="pr">axiom</span> A2 : !<span class="kw">false</span>;
+<span class="pr">definition</span> D1 : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
+
+<span class="pr">theorem</span> compound : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
+
+<span class="pr">proof</span> compound <span class="op">{</span>
+  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
+  <span class="pr">hypothesis</span> h2 : <span class="kw">true</span>;
+  <span class="pr">test</span> t1 : h1 : <span class="kw">true</span>;
+  <span class="pr">test</span> t2 : h2 : <span class="kw">true</span>;
+  <span class="pr">QED</span>;
+<span class="op">}</span>
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="str">"compound proved"</span>;
+<span class="kw">end</span></pre>
+        </div>
+
+        <div class="example-card">
+          <div class="example-card-header">
+            <span class="example-card-title">Recursive Factorial</span>
+            <span class="example-card-tag">functions</span>
+          </div>
+          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> Factorial;
+
+<span class="kw">function</span> <span class="fn">fact</span>(n : <span class="ty">integer</span>) : <span class="ty">integer</span> <span class="op">{</span>
+  <span class="kw">if</span> n <= <span class="num">1</span> <span class="op">{</span>
+    <span class="kw">return</span> <span class="num">1</span>;
+  <span class="op">}</span>
+  <span class="kw">return</span> n * <span class="fn">fact</span>(n - <span class="num">1</span>);
+<span class="op">}</span>
+
+<span class="kw">begin</span>
+  <span class="kw">show</span> <span class="fn">fact</span>(<span class="num">5</span>);
+  <span class="kw">show</span> <span class="fn">fact</span>(<span class="num">10</span>);
+<span class="kw">end</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="docs-footer">
+      <div class="footer-left">
+        Maty<em style="font-family:var(--font-serif);font-style:italic">OS</em> · v1.0.9 · MIT License<br>
+        <span style="font-size:0.68rem;color:#aaa">El / Elnamic Language · Lexer + Parser + Semantic Analyzer + Interpreter</span>
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="/">← PolyfdoS</a>
+      </div>
     </div>
-  </div>
-</section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="container">
-    <div class="footer-inner">
-      <div>
-        <div class="footer-brand">Maty<em>OS</em></div>
-        <div class="footer-meta">
-          El Language &nbsp;·&nbsp; v1.0.9 &nbsp;·&nbsp; MIT License<br>
-          A world inside PolyfdoS
-        </div>
-      </div>
-      <div style="flex:1;"></div>
-      <div class="footer-links">
-        <a href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener">↗ GitHub — MatyOS-Project/MatyOS</a>
-        <a href="/">← Back to PolyfdoS</a>
-        <a href="/polyfdor">PolyfdoR — The creator</a>
-      </div>
-    </div>
-  </div>
-</footer>
+  </main>
+</div><!-- /.docs-layout -->
 
-<!-- ── JS ───────────────────────────────────────── -->
 <script>
-/* NAV */
-function toggleMenu() {
-  document.getElementById('nav-burger').classList.toggle('open');
-  document.getElementById('nav-drawer').classList.toggle('open');
-}
-function closeMenu() {
-  document.getElementById('nav-burger').classList.remove('open');
-  document.getElementById('nav-drawer').classList.remove('open');
-}
-window.addEventListener('scroll', () => {
-  document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 20);
-});
-
-/* TYPEWRITER — single phrase, typed once */
+// ─── TYPEWRITER ────────────────────────────────────────────────
 (function(){
   const phrase = "Where proof is syntax, not ceremony.";
   let i = 0;
   const el = document.getElementById('typewriter');
-  function tick() {
-    if (i < phrase.length) { el.textContent += phrase[i++]; setTimeout(tick, 38); }
+  function type(){
+    if(i <= phrase.length){
+      el.textContent = phrase.slice(0,i);
+      i++;
+      setTimeout(type, i === 1 ? 400 : 45);
+    }
   }
-  setTimeout(tick, 500);
+  setTimeout(type, 600);
 })();
 
-/* SCROLL REVEAL */
-const revealObs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
-}, { threshold: 0.07 });
-document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+// ─── SIDEBAR MOBILE ────────────────────────────────────────────
+const sidebar  = document.getElementById('sidebar');
+const overlay  = document.getElementById('sidebarOverlay');
+const burger   = document.getElementById('navBurger');
+burger.addEventListener('click', ()=>{
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+});
+overlay.addEventListener('click', ()=>{
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+});
+sidebar.querySelectorAll('.sidebar-link').forEach(a=>{
+  a.addEventListener('click',()=>{
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+});
 
-/* LANGUAGE REFERENCE TABS */
-function switchTab(name) {
-  document.querySelectorAll('.ref-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.ref-panel').forEach(p => p.classList.remove('active'));
-  document.querySelector('[onclick="switchTab(\'' + name + '\')"]').classList.add('active');
-  document.getElementById('panel-' + name).classList.add('active');
+// ─── SCROLLSPY ──────────────────────────────────────────────────
+const sectionIds = [
+  'introduction','installation','quickstart',
+  'variables','types','operators','control-flow','functions','objects',
+  'proofs','axioms','theorems','proof-blocks','proof-workflow','realistic',
+  'bring','bring-syntax','bring-schemas','bring-playground',
+  'packages','cli',
+  'pipeline',
+  'playground','examples'
+];
+const sideLinks = {};
+sectionIds.forEach(id=>{
+  const a = sidebar.querySelector(`a[href="#${id}"]`);
+  if(a) sideLinks[id] = a;
+});
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting && sideLinks[e.target.id]){
+      Object.values(sideLinks).forEach(a=>a.classList.remove('active'));
+      sideLinks[e.target.id].classList.add('active');
+    }
+  });
+},{rootMargin:'-52px 0px -60% 0px', threshold:0});
+sectionIds.forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) observer.observe(el);
+});
+
+// ─── REVEAL ────────────────────────────────────────────────────
+const revealObserver = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
+
+// ─── TABS ──────────────────────────────────────────────────────
+function switchTab(group, name, btn){
+  const bar = btn.closest('.tab-bar');
+  bar.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // find sibling panels
+  let el = bar.nextElementSibling;
+  while(el && el.classList.contains('tab-panel')){
+    el.classList.remove('active');
+    el = el.nextElementSibling;
+  }
+  const panel = document.getElementById(group+'-'+name);
+  if(panel) panel.classList.add('active');
 }
 
-/* COPY BUTTONS */
-function copyCode(btn) {
-  const pre = btn.closest('.code-block').querySelector('pre');
-  const text = pre ? pre.innerText : '';
-  navigator.clipboard.writeText(text).then(() => {
+// ─── COPY BUTTONS ──────────────────────────────────────────────
+function copyCode(btn){
+  const pre = btn.closest('pre');
+  const text = pre.innerText.replace('Copy\n','').replace('Copy','');
+  navigator.clipboard.writeText(text).then(()=>{
     btn.textContent = 'Copied ✓';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
-  }).catch(() => {});
+    setTimeout(()=>{ btn.textContent = 'Copy'; }, 1800);
+  });
 }
-</script>
 
+// ─── PROOF WORKFLOW ANIMATION ──────────────────────────────────
+const wfSteps = [
+  {
+    code: '<span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;\n<span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;',
+    desc: '⊢ AXIOM — Self-evident truths registered into the proof context. No proof required; these are the foundation.'
+  },
+  {
+    code: '<span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;\n<span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;\n\n<span class="pr">theorem</span> simple_theorem : <span class="kw">true</span>;',
+    desc: '∀ THEOREM — A proposition declared to be true. The semantic analyzer registers it and requires a matching proof block.'
+  },
+  {
+    code: '<span class="pr">proof</span> simple_theorem <span class="op">{</span>\n  <span class="cm">// proof context opened</span>\n  <span class="cm">// scope chain established</span>',
+    desc: '{ } PROOF CONTEXT — The interpreter opens a scoped proof context. Hypotheses and tests are isolated here.'
+  },
+  {
+    code: '<span class="pr">proof</span> simple_theorem <span class="op">{</span>\n  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;  <span class="cm">// assume h1 holds</span>',
+    desc: '∃ HYPOTHESIS — An assumed truth within the proof scope. The interpreter registers h1 as a named assumption.'
+  },
+  {
+    code: '<span class="pr">proof</span> simple_theorem <span class="op">{</span>\n  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;\n  <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;  <span class="cm">// [TEST ✓]</span>',
+    desc: '? TEST — The test step verifies h1 against the declared axioms. If it passes, [TEST ✓] is printed to the proof trace.'
+  },
+  {
+    code: '<span class="pr">proof</span> simple_theorem <span class="op">{</span>\n  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;\n  <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;\n  <span class="pr">QED</span>;  <span class="cm">// ∎ proof complete</span>\n<span class="op">}</span>',
+    desc: '∎ QED — Quod Erat Demonstrandum. The proof is sealed. The interpreter prints [QED ∎] and closes the proof context.'
+  }
+];
+
+let wfCurrent = -1;
+let wfTimer = null;
+let wfRunning = false;
+
+function wfSetStep(step){
+  const nodes = document.querySelectorAll('.workflow-node');
+  const conns = document.querySelectorAll('.workflow-connector');
+  nodes.forEach((n,i)=>{
+    n.classList.remove('active','done');
+    if(i < step) n.classList.add('done');
+    else if(i === step) n.classList.add('active');
+  });
+  conns.forEach((c,i)=>{
+    c.classList.remove('done');
+    if(i < step) c.classList.add('done');
+  });
+  if(step >= 0 && step < wfSteps.length){
+    document.getElementById('wfCode').innerHTML = wfSteps[step].code;
+    document.getElementById('wfDesc').textContent = wfSteps[step].desc;
+  }
+  wfCurrent = step;
+}
+
+function wfPlay(){
+  if(wfRunning) return;
+  wfRunning = true;
+  if(wfCurrent >= wfSteps.length - 1) wfReset();
+  function advance(){
+    const next = wfCurrent + 1;
+    if(next >= wfSteps.length){ wfRunning = false; return; }
+    wfSetStep(next);
+    wfTimer = setTimeout(advance, 1400);
+  }
+  advance();
+}
+function wfPause(){ clearTimeout(wfTimer); wfRunning = false; }
+function wfReset(){
+  wfPause();
+  wfCurrent = -1;
+  document.querySelectorAll('.workflow-node').forEach(n=>n.classList.remove('active','done'));
+  document.querySelectorAll('.workflow-connector').forEach(c=>c.classList.remove('done'));
+  document.getElementById('wfCode').innerHTML = '<span class="cm">// Press Play to walk through the proof pipeline</span>';
+  document.getElementById('wfDesc').textContent = 'Each stage builds upon the last. Axioms ground the system; QED seals it.';
+}
+
+// ─── EL PLAYGROUND ─────────────────────────────────────────────
+const elExamples = {
+  hello: `program HelloWorld;\n\nbegin\n  show "Hello, World!";\n  show "MatyOS v1.0.9";\nend`,
+  proof: `axiom identity        : true === true;\naxiom excluded_middle : true or !true;\n\ntheorem simple_theorem : true;\n\nproof simple_theorem {\n    hypothesis h1 : true;\n    test verify_h1 : h1 : true;\n    QED;\n}\n\nbegin\n  show "Theorem proved successfully.";\nend`,
+  axiomatic: `axiom A1 : true === true;\naxiom A2 : !false;\ndefinition D1 : true and true;\n\ntheorem compound : true and true;\n\nproof compound {\n  hypothesis h1 : true;\n  hypothesis h2 : true;\n  test t1 : h1 : true;\n  test t2 : h2 : true;\n  QED;\n}\n\nbegin\n  show "compound theorem proved";\nend`,
+  funcs: `program Functions;\n\nfunction add(a : integer, b : integer) : integer {\n  return a + b;\n}\n\nfunction square(n : integer) : integer {\n  return n * n;\n}\n\nbegin\n  show add(3, 4);\n  show square(7);\n  show add(square(3), square(4));\nend`
+};
+function setElExample(name){
+  document.getElementById('elEditor').value = elExamples[name] || '';
+}
+
+function colorizeOutput(raw){
+  if(!raw) return '';
+  return raw.split('\n').map(line=>{
+    if(line.includes('[AXIOM]'))     return '<span class="out-axiom">'+escHtml(line)+'</span>';
+    if(line.includes('[THEOREM]'))   return '<span class="out-theorem">'+escHtml(line)+'</span>';
+    if(line.includes('[PROOF]'))     return '<span class="out-proof">'+escHtml(line)+'</span>';
+    if(line.includes('[QED]') || line.includes('QED')) return '<span class="out-proof">'+escHtml(line)+'</span>';
+    if(line.includes('[TEST') || line.includes('✓'))   return '<span class="out-success">'+escHtml(line)+'</span>';
+    if(line.includes('[HYPOTHESIS]'))return '<span class="out-success">'+escHtml(line)+'</span>';
+    return escHtml(line);
+  }).join('\n');
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function runEl(){
+  const code = document.getElementById('elEditor').value;
+  const out  = document.getElementById('elOutput');
+  const btn  = document.getElementById('elRunBtn');
+  const status = document.getElementById('elStatus');
+  if(!code.trim()){ out.innerHTML='<span style="color:#546e7a">// nothing to run</span>'; return; }
+  btn.disabled = true;
+  status.textContent = 'running...';
+  out.innerHTML = '<span style="color:#546e7a">// running...</span>';
+  try {
+    const r = await fetch('/api/run-el',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({code})
+    });
+    const data = await r.json();
+    out.classList.add('has-output');
+    let html = '';
+    if(data.output) html += colorizeOutput(data.output);
+    if(data.error)  html += (html?'\n':'') + '<span class="out-error">'+escHtml(data.error)+'</span>';
+    if(!html)       html = '<span style="color:#546e7a">// (no output)</span>';
+    out.innerHTML = html;
+    status.textContent = data.error ? '✗ error' : '✓ done';
+  } catch(e){
+    out.innerHTML = '<span class="out-error">Network error: '+escHtml(String(e))+'</span>';
+    status.textContent = '✗ failed';
+  }
+  btn.disabled = false;
+  setTimeout(()=>{ status.textContent=''; }, 3000);
+}
+
+// Ctrl+Enter to run
+document.getElementById('elEditor').addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); runEl(); }
+});
+
+// ─── BRING PLAYGROUND ──────────────────────────────────────────
+const bringExamples = {
+  basic: `name    = "MatyOS"\nversion = "1.0.9"\nstable  = true\nauthor {\n  name  = "MatyOS-Project"\n}`,
+  nested: `app {\n  name    = "example"\n  port    = 8080\n  debug   = false\n  tags    = ["web", "api"]\n  db {\n    host = "localhost"\n    port = 5432\n  }\n}`,
+  schema: `schema Package {\n  name    : string\n  version : string\n  stable  : bool\n}\n\nname    = "my-project"\nversion = "1.0.0"\nstable  = true`
+};
+function setBringExample(name){
+  document.getElementById('bringEditor').value = bringExamples[name] || '';
+}
+
+function renderBringTree(obj, indent){
+  if(obj === null || obj === undefined) return '<span class="bt-null">null</span>';
+  const pad = indent || 0;
+  if(typeof obj !== 'object') return String(obj);
+
+  if(obj.t === 'null')   return '<span class="bt-null">null</span>';
+  if(obj.t === 'int')    return '<span class="bt-num">'+obj.v+'</span>';
+  if(obj.t === 'float')  return '<span class="bt-num">'+obj.v+'</span>';
+  if(obj.t === 'bool')   return '<span class="bt-bool">'+obj.v+'</span>';
+  if(obj.t === 'str')    return '<span class="bt-str">"'+escHtml(String(obj.v))+'"</span>';
+  if(obj.t === 'array'){
+    if(!obj.v || obj.v.length === 0) return '<span class="bt-arr">[]</span>';
+    const items = obj.v.map(i=>'  '+renderBringTree(i, pad+1)).join('\n');
+    return '<span class="bt-arr">[\n'+items+'\n]</span>';
+  }
+  if(obj.t === 'object'){
+    const keys = Object.keys(obj.v||{});
+    if(keys.length === 0) return '<span class="bt-obj">{}</span>';
+    const lines = keys.map(k=>'  <span class="bt-key">'+escHtml(k)+'</span>: '+renderBringTree(obj.v[k], pad+1));
+    let attrs = '';
+    if(obj.attrs && Object.keys(obj.attrs).length){
+      attrs = ' <span class="bt-type">@{'+Object.entries(obj.attrs).map(([k,v])=>k+'='+v).join(', ')+'}</span>';
+    }
+    return '<span class="bt-obj">{'+attrs+'\n'+lines.join('\n')+'\n}</span>';
+  }
+  if(obj.t === 'schema'){
+    const rules = (obj.rules||[]).map(r=>'  <span class="bt-key">'+escHtml(r.key)+'</span>: <span class="bt-type">'+escHtml(r.type)+'</span>');
+    return '<span class="bt-schema">schema '+escHtml(obj.name)+' {\n'+rules.join('\n')+'\n}</span>';
+  }
+  return '<span class="bt-null">'+escHtml(JSON.stringify(obj))+'</span>';
+}
+
+async function runBring(){
+  const content = document.getElementById('bringEditor').value;
+  const out     = document.getElementById('bringOutput');
+  const btn     = document.getElementById('bringRunBtn');
+  const status  = document.getElementById('bringStatus');
+  if(!content.trim()){ out.innerHTML='<span style="color:#546e7a">// nothing to parse</span>'; return; }
+  btn.disabled = true;
+  status.textContent = 'parsing...';
+  out.innerHTML = '<span style="color:#546e7a">// parsing...</span>';
+  try {
+    const r = await fetch('/api/parse-bring',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({content})
+    });
+    const data = await r.json();
+    if(data.error){
+      out.innerHTML = '<span class="bring-error">Error: '+escHtml(data.error)+'</span>';
+      status.textContent = '✗ error';
+    } else {
+      const result = data.result || {};
+      const keys   = Object.keys(result);
+      if(keys.length === 0){
+        out.innerHTML = '<span style="color:#546e7a">// (empty result)</span>';
+      } else {
+        const lines = keys.map(k=>'<span class="bt-key">'+escHtml(k)+'</span>: '+renderBringTree(result[k]));
+        out.innerHTML = '<div class="bring-tree">'+lines.join('\n')+'</div>';
+      }
+      status.textContent = '✓ parsed';
+    }
+  } catch(e){
+    out.innerHTML = '<span class="bring-error">Network error: '+escHtml(String(e))+'</span>';
+    status.textContent = '✗ failed';
+  }
+  btn.disabled = false;
+  setTimeout(()=>{ status.textContent=''; }, 3000);
+}
+
+document.getElementById('bringEditor').addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); runBring(); }
+});
+</script>
 </body>
 </html>

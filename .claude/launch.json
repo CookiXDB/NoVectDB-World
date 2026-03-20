@@ -4,7 +4,7 @@
     {
       "name": "novectdb",
       "runtimeExecutable": "/usr/bin/python3",
-      "runtimeArgs": ["/Users/vpro/Documents/novectdb_site/app.py"],
+      "runtimeArgs": ["/Users/vpro/Desktop/novectdb_site/app.py"],
       "port": 5050
     }
   ]
