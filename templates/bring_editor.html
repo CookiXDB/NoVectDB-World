@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bring Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #0d0f14;
+  --bg2:       #111318;
+  --bg3:       #161820;
+  --bg4:       #1c1f2b;
+  --border:    #252838;
+  --border2:   #2e3148;
+  --text:      #abb2bf;
+  --text-dim:  #4b5263;
+  --text-mid:  #7c85a0;
+  --accent:    #48c8ef;
+  --accent2:   #3b5bdb;
+  --green:     #98c379;
+  --red:       #e06c75;
+  --gold:      #e5c07b;
+  --purple:    #c678dd;
+  --orange:    #d19a66;
+  --tok-key:   #61afef;
+  --tok-str:   #98c379;
+  --tok-num:   #d19a66;
+  --tok-bool:  #c678dd;
+  --tok-cm:    #5c6370;
+  --tok-attr:  #e5c07b;
+  --tok-schema:#e06c75;
+  --tok-eq:    #4b5263;
+  --tok-brack: #c8c8c8;
+  --bar-h:     48px;
+  --status-h:  28px;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+html, body {
+  height: 100%; width: 100%;
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TOP BAR ────────────────────────────────────────────────── */
+#topbar {
+  height: var(--bar-h);
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 1rem;
+  gap: 0;
+  position: relative; z-index: 100;
+  user-select: none;
+}
+.tb-brand {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding-right: 1.5rem;
+  border-right: 1px solid var(--border);
+  margin-right: 0.5rem;
+  text-decoration: none;
+}
+.tb-brand img { width: 22px; height: 22px; }
+.tb-brand span { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600; color: var(--accent); letter-spacing: -0.02em; }
+.tb-brand span em { color: var(--text-mid); font-style: normal; font-size: 0.72rem; font-weight: 400; margin-left: 0.3rem; }
+
+/* menu items */
+.tb-menu { display: flex; align-items: stretch; height: 100%; }
+.tb-menu-item {
+  position: relative; height: 100%;
+  display: flex; align-items: center;
+  padding: 0 0.9rem;
+  font-size: 0.78rem; color: var(--text-mid);
+  cursor: pointer; transition: color .15s, background .15s;
+  white-space: nowrap;
+}
+.tb-menu-item:hover { color: var(--text); background: var(--bg4); }
+.tb-menu-item.open  { color: var(--text); background: var(--bg4); }
+
+.tb-dropdown {
+  position: absolute; top: calc(100% + 1px); left: 0;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 4px; min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 200; display: none;
+  overflow: hidden;
+}
+.tb-menu-item.open .tb-dropdown { display: block; }
+.dd-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.5rem 1rem; font-size: 0.78rem;
+  color: var(--text-mid); cursor: pointer;
+  transition: background .12s, color .12s;
+  gap: 2rem;
+}
+.dd-item:hover { background: var(--bg4); color: var(--text); }
+.dd-item .dd-shortcut { font-size: 0.68rem; color: var(--text-dim); }
+.dd-sep { height: 1px; background: var(--border); margin: 3px 0; }
+.dd-label { padding: 0.3rem 1rem; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* right side toolbar */
+.tb-right {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-left: auto;
+}
+.tb-btn {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  padding: 0.3rem 0.85rem; border-radius: 3px;
+  cursor: pointer; border: none; transition: all .15s;
+  display: flex; align-items: center; gap: 0.35rem;
+}
+.btn-run    { background: var(--accent2); color: #fff; }
+.btn-run:hover { background: #2f4cbf; }
+.btn-dl     { background: var(--bg4); color: var(--text-mid); border: 1px solid var(--border2); }
+.btn-dl:hover { color: var(--text); border-color: var(--text-dim); }
+.btn-docs   { background: transparent; color: var(--text-dim); border: 1px solid var(--border); font-size: 0.7rem; }
+.btn-docs:hover { color: var(--text); border-color: var(--text-mid); }
+
+/* ── SPLIT WORKSPACE ────────────────────────────────────────── */
+#workspace {
+  display: flex;
+  height: calc(100vh - var(--bar-h) - var(--status-h));
+  overflow: hidden;
+}
+
+/* ── LEFT PANE ──────────────────────────────────────────────── */
+#leftPane {
+  display: flex; flex-direction: column;
+  width: 50%; min-width: 200px;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+#leftPane .pane-tab-bar {
+  display: flex; align-items: center;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  height: 36px; padding: 0; flex-shrink: 0;
+}
+.pane-tab {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 1.2rem; height: 100%;
+  font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-mid);
+  border-right: 1px solid var(--border);
+  cursor: pointer; transition: background .12s;
+}
+.pane-tab.active { background: var(--bg); color: var(--text); border-bottom: 2px solid var(--accent2); }
+.pane-tab .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.pane-tab-action {
+  margin-left: auto; padding: 0 0.8rem;
+  font-size: 0.65rem; color: var(--text-dim);
+  cursor: pointer; transition: color .15s; white-space: nowrap;
+}
+.pane-tab-action:hover { color: var(--text); }
+
+.editor-wrap {
+  display: flex; flex: 1; overflow: hidden;
+}
+.line-nums {
+  font-family: var(--font-mono); font-size: 0.8rem;
+  line-height: 1.65; color: var(--text-dim);
+  padding: 0.85rem 0.6rem 0.85rem 1rem;
+  text-align: right; background: var(--bg);
+  border-right: 1px solid #1a1d27;
+  user-select: none; overflow: hidden;
+  min-width: 46px; flex-shrink: 0;
+  white-space: pre;
+}
+#codeInput {
+  flex: 1;
+  font-family: var(--font-mono); font-size: 0.8rem;
+  line-height: 1.65; color: var(--text);
+  background: var(--bg); border: none; outline: none;
+  resize: none; padding: 0.85rem 1rem;
+  tab-size: 2; overflow: auto;
+  caret-color: var(--accent);
+  white-space: pre;
+}
+#codeInput::selection { background: #3b4a6b; }
+#codeInput::-webkit-scrollbar { width: 6px; height: 6px; }
+#codeInput::-webkit-scrollbar-track { background: var(--bg); }
+#codeInput::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* error panel */
+#errorPanel {
+  background: #1e0f0f;
+  border-top: 1px solid #4a1a1a;
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--red); padding: 0; max-height: 0;
+  overflow: hidden; transition: max-height .2s, padding .2s;
+  flex-shrink: 0;
+}
+#errorPanel.show { max-height: 80px; padding: 0.6rem 1rem; }
+#errorPanel .ep-row { display: flex; align-items: flex-start; gap: 0.5rem; }
+#errorPanel .ep-icon { font-size: 0.9rem; flex-shrink: 0; }
+#errorPanel .ep-msg { line-height: 1.5; }
+
+/* ── DIVIDER ────────────────────────────────────────────────── */
+#divider {
+  width: 5px; flex-shrink: 0; cursor: col-resize;
+  background: var(--border);
+  transition: background .15s;
+  position: relative;
+}
+#divider:hover, #divider.dragging { background: var(--accent2); }
+#divider::after {
+  content: '⋮';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-dim); font-size: 1rem;
+  pointer-events: none;
+}
+
+/* ── RIGHT PANE ─────────────────────────────────────────────── */
+#rightPane {
+  display: flex; flex-direction: column;
+  flex: 1; min-width: 200px;
+  background: var(--bg);
+  overflow: hidden;
+}
+#rightPane .pane-tab-bar {
+  display: flex; align-items: center;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  height: 36px; flex-shrink: 0;
+}
+.view-toggle {
+  display: flex; align-items: center;
+  margin-left: auto; padding-right: 0.75rem; gap: 0;
+}
+.vt-btn {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  padding: 0.2rem 0.6rem; cursor: pointer; border: none;
+  background: var(--bg4); color: var(--text-dim);
+  transition: all .12s;
+}
+.vt-btn:first-child { border-radius: 3px 0 0 3px; border: 1px solid var(--border2); border-right: none; }
+.vt-btn:last-child  { border-radius: 0 3px 3px 0; border: 1px solid var(--border2); }
+.vt-btn.active { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+
+#outputWrap {
+  flex: 1; overflow: auto; padding: 0.85rem 1.2rem;
+}
+#outputWrap::-webkit-scrollbar { width: 6px; height: 6px; }
+#outputWrap::-webkit-scrollbar-track { background: var(--bg); }
+#outputWrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+#outputContent {
+  font-family: var(--font-mono); font-size: 0.8rem;
+  line-height: 1.65; white-space: pre;
+  color: var(--text);
+}
+
+/* ── TREE VIEW ──────────────────────────────────────────────── */
+.tree-root { padding: 0; }
+.tree-node { padding: 0.12rem 0; }
+.tree-key  { color: var(--tok-key); cursor: pointer; }
+.tree-key:hover { text-decoration: underline; }
+.tree-str  { color: var(--tok-str); }
+.tree-num  { color: var(--tok-num); }
+.tree-bool { color: var(--tok-bool); }
+.tree-null { color: var(--tok-bool); }
+.tree-bracket { color: var(--tok-brack); }
+.tree-punct  { color: var(--text-dim); }
+.tree-schema { color: var(--tok-schema); }
+.tree-collapse {
+  display: inline-block; width: 14px; cursor: pointer;
+  color: var(--text-dim); font-size: 0.7rem;
+  text-align: center; flex-shrink: 0;
+  user-select: none;
+}
+.tree-children { margin-left: 1.6rem; }
+.tree-children.collapsed { display: none; }
+.tree-count { color: var(--text-dim); font-size: 0.7rem; }
+
+/* ── STATUS BAR ─────────────────────────────────────────────── */
+#statusBar {
+  height: var(--status-h); background: var(--accent2);
+  display: flex; align-items: center;
+  padding: 0 1rem; gap: 1.5rem;
+  font-family: var(--font-mono); font-size: 0.65rem;
+  color: rgba(255,255,255,0.75);
+  flex-shrink: 0;
+}
+#statusBar.error { background: #7c1f1f; }
+.sb-item { display: flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+.sb-item strong { color: #fff; }
+#sbStatus { font-weight: 600; color: #fff; }
+#sbRight  { margin-left: auto; }
+
+/* ── SCHEMA PANEL (right tab) ────────────────────────────────── */
+#schemaWrap {
+  flex: 1; overflow: auto; padding: 0.85rem 1.2rem; display: none;
+}
+#schemaWrap::-webkit-scrollbar { width: 6px; }
+#schemaWrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.schema-block { margin-bottom: 1.5rem; }
+.sb-name { font-family: var(--font-mono); font-size: 0.78rem; color: var(--tok-schema); font-weight: 600; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+.sb-name::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.schema-table { width: 100%; border-collapse: collapse; }
+.schema-table th { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; }
+.schema-table td { font-family: var(--font-mono); font-size: 0.75rem; padding: 0.35rem 0.5rem; border-bottom: 1px solid #1a1d27; color: var(--text-mid); }
+.schema-table td:first-child { color: var(--tok-key); }
+.schema-table td:nth-child(2) { color: var(--tok-bool); }
+.attr-pill { display: inline-block; background: var(--bg4); border: 1px solid var(--border2); border-radius: 2px; padding: 0 5px; font-size: 0.65rem; color: var(--tok-attr); margin: 1px; }
+.no-schema { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); padding: 1rem 0; }
+</style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ════════════════════════════════════════════════ -->
+<div id="topbar">
+  <a class="tb-brand" href="/bring">
+    <img src="/static/img/bring.svg" alt="Bring">
+    <span>Bring <em>Editor</em></span>
+  </a>
+
+  <div class="tb-menu">
+    <!-- FILE -->
+    <div class="tb-menu-item" id="menuFile" onclick="toggleMenu('menuFile')">
+      File
+      <div class="tb-dropdown">
+        <div class="dd-label">Examples</div>
+        <div class="dd-item" onclick="loadPreset('config')">Server Config <span class="dd-shortcut">example</span></div>
+        <div class="dd-item" onclick="loadPreset('package')">Package Definition <span class="dd-shortcut">example</span></div>
+        <div class="dd-item" onclick="loadPreset('schema')">Schema Validation <span class="dd-shortcut">example</span></div>
+        <div class="dd-item" onclick="loadPreset('transaction')">Transaction (v2) <span class="dd-shortcut">example</span></div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" onclick="newFile()">New file <span class="dd-shortcut">⌘N</span></div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" onclick="downloadJSON()">Download as JSON <span class="dd-shortcut">⌘D</span></div>
+        <div class="dd-item" onclick="downloadBring()">Download .bring file <span class="dd-shortcut">⌘S</span></div>
+      </div>
+    </div>
+    <!-- EDIT -->
+    <div class="tb-menu-item" id="menuEdit" onclick="toggleMenu('menuEdit')">
+      Edit
+      <div class="tb-dropdown">
+        <div class="dd-item" onclick="formatBring()">Format / Align <span class="dd-shortcut">⌥F</span></div>
+        <div class="dd-item" onclick="clearEditor()">Clear all <span class="dd-shortcut">⌘K</span></div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" onclick="document.execCommand('selectAll')">Select all <span class="dd-shortcut">⌘A</span></div>
+        <div class="dd-item" onclick="copyAll()">Copy all <span class="dd-shortcut">⌘C</span></div>
+      </div>
+    </div>
+    <!-- VIEW -->
+    <div class="tb-menu-item" id="menuView" onclick="toggleMenu('menuView')">
+      View
+      <div class="tb-dropdown">
+        <div class="dd-item" onclick="setLayout('split')">Split view <span class="dd-shortcut">default</span></div>
+        <div class="dd-item" onclick="setLayout('editor')">Editor only</div>
+        <div class="dd-item" onclick="setLayout('output')">Output only</div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" onclick="setOutputTab('json')">JSON output</div>
+        <div class="dd-item" onclick="setOutputTab('schema')">Schema view</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tb-right">
+    <button class="tb-btn btn-docs" onclick="window.location='/bring'">← Back to Docs</button>
+    <button class="tb-btn btn-dl" onclick="downloadJSON()">⬇ JSON</button>
+    <button class="tb-btn btn-run" onclick="parseNow()">▶ Parse</button>
+  </div>
+</div>
+
+<!-- ══ WORKSPACE ══════════════════════════════════════════════ -->
+<div id="workspace">
+
+  <!-- LEFT: EDITOR -->
+  <div id="leftPane">
+    <div class="pane-tab-bar">
+      <div class="pane-tab active">
+        <span class="dot"></span>
+        <span id="fileName">untitled.bring</span>
+      </div>
+      <span class="pane-tab-action" onclick="formatBring()" title="Format">⌥ Format</span>
+    </div>
+    <div class="editor-wrap">
+      <div class="line-nums" id="lineNums">1</div>
+      <textarea id="codeInput" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+    </div>
+    <div id="errorPanel">
+      <div class="ep-row"><span class="ep-icon">⚠</span><span class="ep-msg" id="epMsg"></span></div>
+    </div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div id="divider"></div>
+
+  <!-- RIGHT: OUTPUT -->
+  <div id="rightPane">
+    <div class="pane-tab-bar">
+      <div class="pane-tab active" id="tabJson" onclick="setOutputTab('json')">
+        <span>Parsed Output</span>
+      </div>
+      <div class="pane-tab" id="tabSchema" onclick="setOutputTab('schema')">
+        <span>Schemas</span>
+      </div>
+      <div class="view-toggle">
+        <button class="vt-btn active" id="vt-tree"  onclick="setViewMode('tree')">Tree</button>
+        <button class="vt-btn"        id="vt-raw"   onclick="setViewMode('raw')">Raw</button>
+      </div>
+    </div>
+    <div id="outputWrap"><div id="outputContent"><span style="color:var(--text-dim)">// Output will appear here...</span></div></div>
+    <div id="schemaWrap"></div>
+  </div>
+
+</div>
+
+<!-- ══ STATUS BAR ═════════════════════════════════════════════ -->
+<div id="statusBar">
+  <span class="sb-item"><strong id="sbStatus">Ready</strong></span>
+  <span class="sb-item">Lines: <strong id="sbLines">0</strong></span>
+  <span class="sb-item">Keys: <strong id="sbKeys">0</strong></span>
+  <span class="sb-item">Schemas: <strong id="sbSchemas">0</strong></span>
+  <span class="sb-item" id="sbRight">Bring Parser v1.0 · JS</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  BRING PARSER — JS
+// ══════════════════════════════════════════════════════════════
+class BringParserJS {
+  constructor(text) { this.text = text; this.pos = 0; this.line = 1; this.col = 1; }
+  parse() {
+    const r = {};
+    while (!this.isEof()) {
+      this.skipWS();
+      if (this.isEof()) break;
+      if (this.peek() === '#') { this.skipComment(); continue; }
+      if (this.matchStr('schema')) { this.skipWS(); const s = this.parseSchema(); r['schema:'+s.name] = s; continue; }
+      const kv = this.parseKV();
+      r[kv.key] = kv.value;
+    }
+    return r;
+  }
+  parseKV() {
+    const key = this.parseKey(); this.skipWS(); this.expect('='); this.skipWS();
+    const value = this.parseValue(); this.skipWS();
+    const ann = {};
+    while (this.peek() === '@') {
+      this.advance(); const n = this.parseIdent(); this.skipWS(); this.expect('='); this.skipWS();
+      ann[n] = this.parsePrimitive(); this.skipWS();
+    }
+    return { key, value, ann };
+  }
+  parseValue() {
+    const c = this.peek();
+    if (c === '{') return this.parseObject();
+    if (c === '[') return this.parseArray();
+    if (c === '"' || c === "'") return this.parseString();
+    if ((c >= '0' && c <= '9') || c === '-') return this.parseNumber();
+    if (this.matchStr('true'))  return true;
+    if (this.matchStr('false')) return false;
+    if (this.matchStr('null'))  return null;
+    throw this.err(`Unexpected character: '${c}'`);
+  }
+  parseObject() {
+    this.expect('{'); this.skipWS();
+    const items = {};
+    while (!this.isEof() && this.peek() !== '}') {
+      if (this.peek() === '#') { this.skipComment(); this.skipWS(); continue; }
+      const kv = this.parseKV(); items[kv.key] = kv.value; this.skipWS();
+      if (this.peek() === ',') { this.advance(); this.skipWS(); }
+    }
+    this.expect('}'); return items;
+  }
+  parseArray() {
+    this.expect('['); this.skipWS(); const items = [];
+    while (!this.isEof() && this.peek() !== ']') {
+      if (this.peek() === '#') { this.skipComment(); this.skipWS(); continue; }
+      items.push(this.parseValue()); this.skipWS();
+      if (this.peek() === ',') { this.advance(); this.skipWS(); }
+    }
+    this.expect(']'); return items;
+  }
+  parseSchema() {
+    const name = this.parseIdent(); this.skipWS(); this.expect('{'); this.skipWS();
+    const rules = [];
+    while (!this.isEof() && this.peek() !== '}') {
+      if (this.peek() === '#') { this.skipComment(); this.skipWS(); continue; }
+      const key = this.parseKey(); this.skipWS(); this.expect('='); this.skipWS();
+      const type = this.parseIdent(); this.skipWS();
+      const attrs = [];
+      while (this.peek() === '@') {
+        this.advance(); const an = this.parseIdent(); this.skipWS(); this.expect('='); this.skipWS();
+        attrs.push({ name: an, value: this.parsePrimitive() }); this.skipWS();
+      }
+      rules.push({ key, type, attrs }); this.skipWS();
+    }
+    this.expect('}'); return { name, rules };
+  }
+  parseKey() { return (this.peek() === '"' || this.peek() === "'") ? this.parseString() : this.parseIdent(); }
+  parsePrimitive() {
+    const c = this.peek();
+    if (c === '"' || c === "'") return this.parseString();
+    if ((c >= '0' && c <= '9') || c === '-') return this.parseNumber();
+    if (this.matchStr('true'))  return true;
+    if (this.matchStr('false')) return false;
+    if (this.matchStr('null'))  return null;
+    throw this.err('Expected primitive value');
+  }
+  parseString() {
+    const q = this.advance(); const res = [];
+    while (!this.isEof() && this.peek() !== q) {
+      if (this.peek() === '\\') { this.advance(); const e = this.advance(); res.push(e === 'n' ? '\n' : e === 't' ? '\t' : e); }
+      else res.push(this.advance());
+    }
+    if (this.isEof()) throw this.err('Unterminated string');
+    this.advance(); return res.join('');
+  }
+  parseNumber() {
+    let s = '';
+    if (this.peek() === '-') s += this.advance();
+    while (!this.isEof() && this.peek() >= '0' && this.peek() <= '9') s += this.advance();
+    let f = false;
+    if (!this.isEof() && this.peek() === '.') { f = true; s += this.advance(); while (!this.isEof() && this.peek() >= '0' && this.peek() <= '9') s += this.advance(); }
+    return f ? parseFloat(s) : parseInt(s, 10);
+  }
+  parseIdent() {
+    const c = this.peek();
+    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_')) throw this.err(`Expected identifier, got '${c}'`);
+    let r = '';
+    while (!this.isEof()) { const ch = this.peek(); if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch === '_') r += this.advance(); else break; }
+    return r;
+  }
+  skipWS() { while (!this.isEof() && ' \t\r\n'.includes(this.peek())) { if (this.peek() === '\n') { this.line++; this.col = 1; } else this.col++; this.advance(); } }
+  skipComment() { while (!this.isEof() && this.peek() !== '\n') this.advance(); }
+  matchStr(s) {
+    if (!this.text.startsWith(s, this.pos)) return false;
+    const nx = this.text[this.pos + s.length];
+    if (nx && /[a-zA-Z0-9_]/.test(nx)) return false;
+    for (let i = 0; i < s.length; i++) this.advance(); return true;
+  }
+  expect(s) { if (!this.matchStr(s)) throw this.err(`Expected '${s}', got '${this.peek() || 'EOF'}'`); }
+  peek() { return this.pos < this.text.length ? this.text[this.pos] : ''; }
+  advance() { if (this.isEof()) return ''; const c = this.text[this.pos++]; if (c === '\n') { this.line++; this.col = 1; } else this.col++; return c; }
+  isEof() { return this.pos >= this.text.length; }
+  err(msg) { return new SyntaxError(`${msg} at line ${this.line}, col ${this.col}`); }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PRESETS
+// ══════════════════════════════════════════════════════════════
+const PRESETS = {
+  config: `# Server configuration
+server = {
+    name = "prod-server-01"
+    host = "0.0.0.0"
+    port = 8080
+    ssl = {
+        enabled   = true
+        cert_path = "/etc/ssl/server.crt"
+        key_path  = "/etc/ssl/server.key"
+    }
+}
+
+database = {
+    host      = "db.example.com"
+    port      = 5432
+    name      = "myapp"
+    pool_size = 20
+}
+
+allowed_ips = ["127.0.0.1", "192.168.1.0/24", "10.0.0.0/8"]
+
+features = [
+    {
+        name    = "caching"
+        enabled = true
+        ttl     = 3600
+    },
+    {
+        name    = "analytics"
+        enabled = false
+    }
+]`,
+
+  package: `# EasierLang package definition
+package = {
+    name         = "http-server"
+    version      = "2.3.0"
+    description  = "High-performance HTTP server for EasierLang"
+    author       = "Daftyon Team"
+    license      = "MIT"
+    dependencies = ["json-parser", "logger", "utils"]
+}
+
+build = {
+    entry  = "src/main.el"
+    output = "dist/"
+    target = "easierlang-1.0"
+}
+
+registry = {
+    hub    = "hub.daftyon.com"
+    public = true
+}`,
+
+  schema: `# Schema definitions with validation rules
+schema Product {
+    id    = number @min=1
+    name  = string @maxLength=100
+    price = float  @min=0
+    tags  = array
+}
+
+schema User {
+    id       = number @required=true
+    username = string @minLength=3 @maxLength=32
+    email    = string @format="email"
+    active   = bool
+    role     = string
+}
+
+# Sample data
+product = {
+    id    = 1
+    name  = "Bring Parser"
+    price = 0.0
+    tags  = ["parser", "config", "bring"]
+}
+
+user = {
+    id       = 42
+    username = "alice"
+    email    = "alice@example.com"
+    active   = true
+    role     = "admin"
+}`,
+
+  transaction: `# Payment transaction (Bring v2)
+transaction = {
+    id        = "txn_20260101_001"  @unique=true
+    amount    = 100.50              @currency="USD" @min=0
+    receiver  = "merchant@example.com" @verified=true
+    timestamp = "2026-01-01T12:00:00Z" @format="ISO8601"
+    status    = "pending"
+}
+
+sender = {
+    id      = "usr_alice_001"
+    name    = "Alice Hafdi"
+    country = "MA"
+}
+
+metadata = {
+    platform   = "DaftyonPay"
+    risk_score = 0.02   @max=1.0
+}`
+};
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let lastResult = null;
+let viewMode   = 'tree';  // 'tree' | 'raw'
+let outputTab  = 'json';  // 'json' | 'schema'
+
+const codeInput   = document.getElementById('codeInput');
+const lineNums    = document.getElementById('lineNums');
+const outputContent = document.getElementById('outputContent');
+const outputWrap  = document.getElementById('outputWrap');
+const schemaWrap  = document.getElementById('schemaWrap');
+const errorPanel  = document.getElementById('errorPanel');
+const epMsg       = document.getElementById('epMsg');
+const statusBar   = document.getElementById('statusBar');
+
+// ══════════════════════════════════════════════════════════════
+//  LINE NUMBERS
+// ══════════════════════════════════════════════════════════════
+function updateLineNums() {
+  const n = codeInput.value.split('\n').length;
+  lineNums.textContent = Array.from({length:n},(_,i)=>i+1).join('\n');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PARSE
+// ══════════════════════════════════════════════════════════════
+let parseTimer;
+function scheduleParse() { clearTimeout(parseTimer); parseTimer = setTimeout(parseNow, 250); updateLineNums(); updateStatusCounts(); }
+
+function parseNow() {
+  const text = codeInput.value.trim();
+  if (!text) {
+    outputContent.innerHTML = '<span style="color:var(--text-dim)">// Nothing to parse yet.</span>';
+    schemaWrap.innerHTML = '';
+    errorPanel.classList.remove('show');
+    setStatusBar('ready', true);
+    lastResult = null;
+    return;
+  }
+  try {
+    const parser = new BringParserJS(text);
+    lastResult = parser.parse();
+    errorPanel.classList.remove('show');
+    renderOutput(lastResult);
+    renderSchemas(lastResult);
+    setStatusBar('valid', true);
+  } catch(e) {
+    lastResult = null;
+    outputContent.innerHTML = `<span style="color:var(--red)">// Parse error\n\n${esc(e.message)}</span>`;
+    schemaWrap.innerHTML = '';
+    epMsg.textContent = e.message;
+    errorPanel.classList.add('show');
+    setStatusBar(e.message, false);
+  }
+}
+
+function setStatusBar(msg, ok) {
+  statusBar.className = ok ? '' : 'error';
+  document.getElementById('sbStatus').textContent = ok ? (msg === 'ready' ? 'Ready' : '✓ Valid') : '✗ Error';
+  updateStatusCounts();
+}
+
+function updateStatusCounts() {
+  const text = codeInput.value;
+  document.getElementById('sbLines').textContent = text.split('\n').length;
+  document.getElementById('sbKeys').textContent  = lastResult ? countKeys(lastResult) : '—';
+  const schemas = lastResult ? Object.keys(lastResult).filter(k=>k.startsWith('schema:')).length : 0;
+  document.getElementById('sbSchemas').textContent = lastResult ? schemas : '—';
+}
+
+function countKeys(obj) {
+  if (!obj || typeof obj !== 'object') return 0;
+  let n = 0;
+  for (const k of Object.keys(obj)) { n++; if (typeof obj[k] === 'object' && obj[k] !== null && !obj[k].rules) n += countKeys(obj[k]); }
+  return n;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  OUTPUT RENDERING
+// ══════════════════════════════════════════════════════════════
+function renderOutput(data) {
+  if (viewMode === 'tree') {
+    outputContent.innerHTML = buildTree(data, 0);
+  } else {
+    outputContent.innerHTML = colorizeJSON(data, 0);
+  }
+}
+
+// ── RAW JSON COLORIZER ──────────────────────────────────────
+function colorizeJSON(obj, indent) {
+  const p = '  '.repeat(indent), p1 = '  '.repeat(indent+1);
+  const e = esc;
+  if (obj === null)    return `<span class="tree-null">null</span>`;
+  if (obj === true)    return `<span class="tree-bool">true</span>`;
+  if (obj === false)   return `<span class="tree-bool">false</span>`;
+  if (typeof obj === 'number') return `<span class="tree-num">${obj}</span>`;
+  if (typeof obj === 'string') return `<span class="tree-str">${e(JSON.stringify(obj))}</span>`;
+  if (obj && obj.name && obj.rules) {
+    return `<span class="tree-bracket">{</span>\n${p1}<span class="tree-schema">"$schema"</span><span class="tree-punct">:</span> <span class="tree-str">"${e(obj.name)}"</span>,\n${p1}<span class="tree-key">"rules"</span><span class="tree-punct">:</span> ${colorizeJSON(obj.rules, indent+1)}\n${p}<span class="tree-bracket">}</span>`;
+  }
+  if (Array.isArray(obj)) {
+    if (!obj.length) return `<span class="tree-bracket">[]</span>`;
+    const items = obj.map(v=>`${p1}${colorizeJSON(v,indent+1)}`).join(',\n');
+    return `<span class="tree-bracket">[</span>\n${items}\n${p}<span class="tree-bracket">]</span>`;
+  }
+  if (typeof obj === 'object') {
+    const keys = Object.keys(obj);
+    if (!keys.length) return `<span class="tree-bracket">{}</span>`;
+    const entries = keys.map(k=>`${p1}<span class="tree-key">${e(JSON.stringify(k))}</span><span class="tree-punct">:</span> ${colorizeJSON(obj[k],indent+1)}`).join(',\n');
+    return `<span class="tree-bracket">{</span>\n${entries}\n${p}<span class="tree-bracket">}</span>`;
+  }
+  return String(obj);
+}
+
+// ── COLLAPSIBLE TREE ────────────────────────────────────────
+let _tid = 0;
+function buildTree(obj, depth) {
+  if (obj === null)    return `<span class="tree-null">null</span>`;
+  if (obj === true)    return `<span class="tree-bool">true</span>`;
+  if (obj === false)   return `<span class="tree-bool">false</span>`;
+  if (typeof obj === 'number') return `<span class="tree-num">${obj}</span>`;
+  if (typeof obj === 'string') return `<span class="tree-str">${esc(JSON.stringify(obj))}</span>`;
+  if (obj && obj.name && obj.rules) {
+    const id = 'tn'+(_tid++);
+    return `<span class="tree-collapse" onclick="toggleNode('${id}')">▾</span> <span class="tree-schema">schema:${esc(obj.name)}</span> <span class="tree-count">[${obj.rules.length} rules]</span><div id="${id}" class="tree-children">${obj.rules.map(r=>`<div class="tree-node"><span class="tree-key">${esc(r.key)}</span><span class="tree-punct"> = </span><span class="tree-bool">${esc(r.type)}</span>${r.attrs.map(a=>`<span class="attr-pill">@${a.name}=${JSON.stringify(a.value)}</span>`).join('')}</div>`).join('')}</div>`;
+  }
+  if (Array.isArray(obj)) {
+    if (!obj.length) return `<span class="tree-bracket">[]</span>`;
+    const id = 'tn'+(_tid++);
+    const items = obj.map((v,i)=>`<div class="tree-node"><span class="tree-punct">[${i}]</span> ${buildTree(v,depth+1)}</div>`).join('');
+    return `<span class="tree-collapse" onclick="toggleNode('${id}')">▾</span> <span class="tree-bracket">[${obj.length}]</span><div id="${id}" class="tree-children">${items}</div>`;
+  }
+  if (typeof obj === 'object') {
+    const keys = Object.keys(obj);
+    if (!keys.length) return `<span class="tree-bracket">{}</span>`;
+    const id = 'tn'+(_tid++);
+    const entries = keys.map(k=>`<div class="tree-node"><span class="tree-key">${esc(k)}</span><span class="tree-punct">: </span>${buildTree(obj[k],depth+1)}</div>`).join('');
+    const preview = keys.slice(0,3).join(', ') + (keys.length > 3 ? '…' : '');
+    return `<span class="tree-collapse" onclick="toggleNode('${id}')">▾</span> <span class="tree-bracket">{</span><span class="tree-count">${keys.length} keys</span><span class="tree-bracket">}</span><div id="${id}" class="tree-children">${entries}</div>`;
+  }
+  return String(obj);
+}
+
+function toggleNode(id) {
+  const el = document.getElementById(id);
+  const btn = el.previousElementSibling;
+  while(btn && !btn.classList.contains('tree-collapse')) { }
+  if (!el) return;
+  el.classList.toggle('collapsed');
+  const col = el.previousSibling;
+  // find the collapse span
+  let s = el;
+  while (s && s.previousSibling) {
+    s = s.previousSibling;
+    if (s.classList && s.classList.contains('tree-collapse')) {
+      s.textContent = el.classList.contains('collapsed') ? '▸' : '▾';
+      break;
+    }
+  }
+}
+
+// ── SCHEMA VIEW ─────────────────────────────────────────────
+function renderSchemas(data) {
+  const schemas = Object.entries(data).filter(([k]) => k.startsWith('schema:'));
+  if (!schemas.length) {
+    schemaWrap.innerHTML = `<div class="no-schema">No schemas defined in this file.<br><br>Add a schema block:<br><br><span style="color:var(--tok-schema)">schema</span> <span style="color:var(--tok-key)">User</span> <span style="color:var(--tok-brack)">{</span><br>&nbsp;&nbsp;<span style="color:var(--tok-key)">id</span> = <span style="color:var(--tok-bool)">number</span> <span style="color:var(--tok-attr)">@required</span>=<span style="color:var(--tok-bool)">true</span><br><span style="color:var(--tok-brack)">}</span></div>`;
+    return;
+  }
+  schemaWrap.innerHTML = schemas.map(([, s]) => `
+    <div class="schema-block">
+      <div class="sb-name">schema ${esc(s.name)}</div>
+      <table class="schema-table">
+        <thead><tr><th>Key</th><th>Type</th><th>Attributes</th></tr></thead>
+        <tbody>
+          ${s.rules.map(r=>`<tr>
+            <td>${esc(r.key)}</td>
+            <td>${esc(r.type)}</td>
+            <td>${r.attrs.map(a=>`<span class="attr-pill">@${esc(a.name)}=${esc(JSON.stringify(a.value))}</span>`).join('')||'<span style="color:var(--text-dim)">—</span>'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`).join('');
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════════════════════════════════════
+//  CONTROLS
+// ══════════════════════════════════════════════════════════════
+function setOutputTab(tab) {
+  outputTab = tab;
+  outputWrap.style.display  = tab === 'json'   ? 'block' : 'none';
+  schemaWrap.style.display  = tab === 'schema' ? 'block' : 'none';
+  document.getElementById('tabJson').classList.toggle('active',   tab==='json');
+  document.getElementById('tabSchema').classList.toggle('active', tab==='schema');
+}
+
+function setViewMode(mode) {
+  viewMode = mode;
+  document.getElementById('vt-tree').classList.toggle('active', mode==='tree');
+  document.getElementById('vt-raw').classList.toggle('active',  mode==='raw');
+  if (lastResult) renderOutput(lastResult);
+}
+
+function setLayout(layout) {
+  const lp = document.getElementById('leftPane');
+  const rp = document.getElementById('rightPane');
+  const dv = document.getElementById('divider');
+  if (layout === 'split')  { lp.style.display='flex'; rp.style.display='flex'; dv.style.display='block'; lp.style.width='50%'; }
+  if (layout === 'editor') { lp.style.display='flex'; rp.style.display='none'; dv.style.display='none';  lp.style.width='100%'; }
+  if (layout === 'output') { lp.style.display='none'; rp.style.display='flex'; dv.style.display='none'; }
+}
+
+function loadPreset(name) {
+  codeInput.value = PRESETS[name] || '';
+  document.getElementById('fileName').textContent = name + '.bring';
+  updateLineNums(); parseNow();
+}
+
+function newFile() {
+  codeInput.value = '';
+  document.getElementById('fileName').textContent = 'untitled.bring';
+  outputContent.innerHTML = '<span style="color:var(--text-dim)">// Nothing to parse yet.</span>';
+  errorPanel.classList.remove('show');
+  lastResult = null;
+  updateLineNums(); updateStatusCounts();
+}
+
+function clearEditor() { newFile(); }
+
+function copyAll() { navigator.clipboard.writeText(codeInput.value); }
+
+function formatBring() {
+  // Basic formatter: consistent spacing around =
+  codeInput.value = codeInput.value
+    .replace(/([^\s!@#$%^&*])\s*=\s*/g, '$1 = ')
+    .replace(/\{\s*\n\s*\}/g, '{}');
+  updateLineNums(); parseNow();
+}
+
+function downloadJSON() {
+  if (!lastResult) { alert('Parse your .bring file first.'); return; }
+  const blob = new Blob([JSON.stringify(lastResult, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = document.getElementById('fileName').textContent.replace('.bring','.json');
+  a.click();
+}
+
+function downloadBring() {
+  const blob = new Blob([codeInput.value], { type: 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = document.getElementById('fileName').textContent;
+  a.click();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MENU SYSTEM
+// ══════════════════════════════════════════════════════════════
+function toggleMenu(id) {
+  const el = document.getElementById(id);
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.tb-menu-item').forEach(m => m.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.tb-menu-item')) {
+    document.querySelectorAll('.tb-menu-item').forEach(m => m.classList.remove('open'));
+  }
+});
+// Close dropdowns on dd-item click
+document.querySelectorAll('.dd-item').forEach(d => {
+  d.addEventListener('click', () => {
+    setTimeout(() => document.querySelectorAll('.tb-menu-item').forEach(m => m.classList.remove('open')), 50);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════
+//  RESIZABLE DIVIDER
+// ══════════════════════════════════════════════════════════════
+const divider   = document.getElementById('divider');
+const leftPane  = document.getElementById('leftPane');
+const workspace = document.getElementById('workspace');
+let dragging = false, startX = 0, startW = 0;
+
+divider.addEventListener('mousedown', e => {
+  dragging = true; startX = e.clientX; startW = leftPane.offsetWidth;
+  divider.classList.add('dragging');
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+});
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - startX;
+  const total = workspace.offsetWidth;
+  const newW = Math.max(200, Math.min(total - 220, startW + dx));
+  leftPane.style.width = newW + 'px';
+  leftPane.style.flexShrink = '0';
+});
+document.addEventListener('mouseup', () => {
+  if (dragging) { dragging = false; divider.classList.remove('dragging'); document.body.style.cursor = ''; document.body.style.userSelect = ''; }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════════════════════
+codeInput.addEventListener('keydown', e => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = codeInput.selectionStart, end = codeInput.selectionEnd;
+    codeInput.value = codeInput.value.substring(0,s) + '  ' + codeInput.value.substring(end);
+    codeInput.selectionStart = codeInput.selectionEnd = s + 2;
+    scheduleParse();
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); parseNow(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'd') { e.preventDefault(); downloadJSON(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); downloadBring(); }
+});
+codeInput.addEventListener('input', scheduleParse);
+codeInput.addEventListener('scroll', () => { lineNums.style.marginTop = '-' + codeInput.scrollTop + 'px'; });
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Check if preset passed in URL hash
+  const hash = location.hash.replace('#','') || 'config';
+  loadPreset(PRESETS[hash] ? hash : 'config');
+});
+</script>
+</body>
+</html>

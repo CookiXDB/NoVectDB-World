@@ -221,7 +221,16 @@ nav {
 }
 .preset-btn:hover { background: #252840; color: #abb2bf; border-color: #4a4f6a; }
 .preset-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-.editor-actions { display: flex; gap: 0.5rem; }
+.editor-actions { display: flex; gap: 0.5rem; align-items: center; }
+.btn-fullscreen {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  background: transparent; color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 0.3rem 0.85rem; border-radius: 3px;
+  cursor: pointer; transition: all .15s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;
+}
+.btn-fullscreen:hover { background: var(--accent); color: #fff; }
 .action-btn {
   font-family: var(--font-mono); font-size: 0.72rem;
   padding: 0.35rem 1rem; border-radius: 3px; cursor: pointer;
@@ -611,6 +620,7 @@ data = parse_bring_file("config.bring")</pre>
         <div class="editor-actions">
           <button class="action-btn btn-clear" onclick="clearEditor()">Clear</button>
           <button class="action-btn btn-parse" onclick="parseNow()">▶ Parse</button>
+          <a class="btn-fullscreen" href="/bring/editor" target="_blank">⤢ Full Editor</a>
         </div>
       </div>
 

@@ -53,6 +53,10 @@ def polyfdos_os():
 def bring():
     return render_template("bring.html")
 
+@app.route("/bring/editor")
+def bring_editor():
+    return render_template("bring_editor.html")
+
 @app.route("/papers/novectDB")
 def novectdb():
     return render_template("novectdb.html")
