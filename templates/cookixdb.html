@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CookixDB — The Tastiest Vector Database</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --cookie-gold: #FEB763;
+  --cookie-brown: #D79C54;
+  --cookie-dark: #764031;
+  --cookie-deep: #3d1f12;
+  --chip-black: #1a0e0a;
+  --bg: #0d0a08;
+  --bg2: #120d09;
+  --text: #f5ede3;
+  --text-muted: #a08870;
+  --border: rgba(254,183,99,0.15);
+  --accent: #FEB763;
+  --accent2: #ff8c42;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  background: rgba(13,10,8,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: 52px;
+  display: flex; align-items: center;
+  padding: 0 2.5rem;
+  justify-content: space-between;
+}
+.nav-back {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  color: var(--text-muted); text-decoration: none;
+  transition: color .2s; letter-spacing: 0.02em;
+}
+.nav-back:hover { color: var(--accent); }
+.nav-logo {
+  font-family: var(--font-mono); font-size: 0.9rem; font-weight: 500;
+  display: flex; align-items: center; gap: 0.5rem;
+  color: var(--text);
+}
+.nav-logo img { width: 22px; height: 22px; object-fit: contain; }
+.nav-logo em { color: var(--accent); font-style: italic; }
+.nav-links { display: flex; gap: 1.8rem; list-style: none; }
+.nav-links a {
+  font-size: 0.78rem; color: var(--text-muted);
+  text-decoration: none; transition: color .2s; letter-spacing: 0.01em;
+}
+.nav-links a:hover { color: var(--accent); }
+.nav-burger { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+.nav-burger span {
+  display: block; width: 20px; height: 1.5px; background: var(--text-muted);
+  margin: 4px 0; transition: all .25s;
+}
+.nav-mobile { display: none; position: fixed; top: 52px; left: 0; right: 0;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 1.5rem 2.5rem; z-index: 99;
+  flex-direction: column; gap: 1rem;
+}
+.nav-mobile a { font-size: 0.88rem; color: var(--text-muted); text-decoration: none; transition: color .2s; }
+.nav-mobile a:hover { color: var(--accent); }
+.nav-mobile.open { display: flex; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  padding-top: 52px;
+}
+#cookieCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  cursor: grab;
+}
+#cookieCanvas:active { cursor: grabbing; }
+.hero-content {
+  position: relative; z-index: 2;
+  text-align: center;
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--cookie-brown);
+  margin-bottom: 1.4rem;
+  display: inline-flex; align-items: center; gap: 1rem;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; display: block; width: 28px; height: 1px; background: var(--cookie-brown);
+}
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 400; line-height: 1.0;
+  color: var(--cookie-gold);
+  margin-bottom: 1.2rem;
+  text-shadow: 0 0 80px rgba(254,183,99,0.35);
+}
+.hero-title em { color: #fff; font-style: italic; }
+.hero-sub {
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  color: var(--text-muted); max-width: 560px; margin: 0 auto 2.2rem;
+  line-height: 1.65;
+}
+.hero-badges {
+  display: flex; gap: 0.9rem; justify-content: center;
+  flex-wrap: wrap; margin-bottom: 2.4rem;
+  pointer-events: auto;
+}
+.hero-badge {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  background: rgba(254,183,99,0.1); color: var(--cookie-gold);
+  border: 1px solid rgba(254,183,99,0.3);
+  padding: 0.35rem 0.9rem; border-radius: 2px;
+  letter-spacing: 0.06em;
+}
+.hero-cta {
+  display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+  pointer-events: auto;
+}
+.btn-primary {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  background: var(--cookie-gold); color: var(--chip-black);
+  border: none; padding: 0.75rem 2rem; border-radius: 2px;
+  cursor: pointer; font-weight: 600; text-decoration: none;
+  transition: all .2s; letter-spacing: 0.04em;
+}
+.btn-primary:hover { background: #ffd080; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(254,183,99,0.35); }
+.btn-secondary {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  background: transparent; color: var(--cookie-gold);
+  border: 1px solid rgba(254,183,99,0.4);
+  padding: 0.75rem 2rem; border-radius: 2px;
+  cursor: pointer; text-decoration: none;
+  transition: all .2s; letter-spacing: 0.04em;
+}
+.btn-secondary:hover { border-color: var(--cookie-gold); background: rgba(254,183,99,0.07); }
+
+/* Canvas tooltip */
+#canvasHint {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-mono); font-size: 0.65rem;
+  color: var(--text-muted); letter-spacing: 0.1em;
+  display: flex; align-items: center; gap: 0.5rem;
+  animation: hintPulse 2.5s ease-in-out infinite;
+  z-index: 3;
+}
+@keyframes hintPulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
+#nodeTooltip {
+  position: fixed; z-index: 200;
+  background: rgba(13,10,8,0.95);
+  border: 1px solid rgba(254,183,99,0.4);
+  border-radius: 4px; padding: 0.8rem 1.2rem;
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--text); pointer-events: none;
+  opacity: 0; transition: opacity .15s;
+  max-width: 240px; line-height: 1.6;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+#nodeTooltip.visible { opacity: 1; }
+#nodeTooltip .tt-label { color: var(--cookie-gold); font-weight: 600; margin-bottom: 0.3rem; }
+#nodeTooltip .tt-vec { color: #7c9; font-size: 0.65rem; }
+#nodeTooltip .tt-sim { color: var(--text-muted); font-size: 0.65rem; }
+
+/* ── SECTION BASE ── */
+.section {
+  max-width: 1000px; margin: 0 auto;
+  padding: 7rem 2.5rem;
+}
+.section-eyebrow {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--cookie-brown); margin-bottom: 2rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-eyebrow::after {
+  content: ''; flex: 1; height: 1px; background: var(--border); max-width: 80px;
+}
+.section-title {
+  font-family: var(--font-serif); font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 400; color: var(--text);
+  line-height: 1.15; margin-bottom: 1.2rem;
+}
+.section-title em { color: var(--cookie-gold); font-style: italic; }
+.section-lead {
+  font-size: 1rem; color: var(--text-muted);
+  line-height: 1.75; max-width: 680px; margin-bottom: 3rem;
+}
+.divider {
+  height: 1px; background: var(--border);
+  margin: 0 2.5rem;
+}
+
+/* ── ARCHITECTURE DIAGRAM ── */
+.arch-section {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.layer-stack {
+  display: flex; flex-direction: column; gap: 1rem;
+  margin-bottom: 3rem;
+}
+.layer-card {
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 1.2rem 1.8rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(254,183,99,0.03);
+  transition: all .2s; cursor: default;
+  position: relative; overflow: hidden;
+}
+.layer-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--accent);
+  opacity: 0; transition: opacity .2s;
+}
+.layer-card:hover { border-color: rgba(254,183,99,0.35); background: rgba(254,183,99,0.07); }
+.layer-card:hover::before { opacity: 1; }
+.layer-icon {
+  font-size: 1.6rem; width: 44px; text-align: center; flex-shrink: 0;
+}
+.layer-label {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--cookie-gold); margin-bottom: 0.25rem;
+}
+.layer-name {
+  font-family: var(--font-serif); font-size: 1.15rem; color: var(--text);
+  margin-bottom: 0.2rem;
+}
+.layer-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+.layer-right { margin-left: auto; text-align: right; flex-shrink: 0; }
+.layer-tag {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  border: 1px solid rgba(254,183,99,0.25); color: var(--text-muted);
+  padding: 0.2rem 0.6rem; border-radius: 2px; letter-spacing: 0.06em;
+}
+
+/* ── API GLOSSARY ── */
+.api-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem; margin-top: 2rem;
+}
+.api-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.4rem 1.6rem;
+  background: rgba(254,183,99,0.02);
+  transition: all .2s;
+  position: relative;
+}
+.api-card:hover { border-color: rgba(254,183,99,0.35); background: rgba(254,183,99,0.06); }
+.api-method {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--cookie-gold); margin-bottom: 0.5rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.method-badge {
+  background: rgba(254,183,99,0.15); color: var(--cookie-gold);
+  padding: 0.15rem 0.5rem; border-radius: 2px; font-size: 0.58rem;
+}
+.api-fn {
+  font-family: var(--font-mono); font-size: 0.88rem; color: #fff;
+  margin-bottom: 0.5rem;
+}
+.api-fn .fn-name { color: var(--cookie-gold); }
+.api-fn .fn-arg { color: #82cfff; }
+.api-fn .fn-ret { color: #c3e88d; }
+.api-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.55; }
+.api-alias {
+  margin-top: 0.6rem; font-family: var(--font-mono); font-size: 0.65rem;
+  color: #a08870; letter-spacing: 0.04em;
+}
+.api-alias span { color: #d4956a; }
+
+/* ── MATH / FORMULA ── */
+.formula-block {
+  background: rgba(254,183,99,0.05);
+  border: 1px solid rgba(254,183,99,0.2);
+  border-radius: 6px; padding: 2rem 2.4rem; margin: 2rem 0;
+}
+.formula-title {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  letter-spacing: 0.1em; color: var(--cookie-brown);
+  text-transform: uppercase; margin-bottom: 1.2rem;
+}
+.formula-eq {
+  font-family: var(--font-mono); font-size: 0.95rem; color: var(--cookie-gold);
+  margin-bottom: 0.6rem; line-height: 1.8;
+  word-break: break-all;
+}
+.formula-note { font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
+
+/* ── COMPARISON TABLE ── */
+.compare-table {
+  width: 100%; border-collapse: collapse; margin-top: 2rem;
+  font-size: 0.82rem;
+}
+.compare-table th {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); padding: 0.8rem 1.2rem;
+  border-bottom: 1px solid var(--border); text-align: left;
+}
+.compare-table th.highlight { color: var(--cookie-gold); }
+.compare-table td {
+  padding: 0.85rem 1.2rem;
+  border-bottom: 1px solid rgba(254,183,99,0.06);
+  color: var(--text-muted); vertical-align: middle;
+}
+.compare-table td.feature { color: var(--text); font-size: 0.82rem; }
+.compare-table td.yes { color: #7ec8a0; }
+.compare-table td.no { color: #e06c6c; }
+.compare-table td.ckx { color: var(--cookie-gold); font-weight: 600; }
+.compare-table tr:hover td { background: rgba(254,183,99,0.03); }
+
+/* ── CODE BLOCK ── */
+.code-block {
+  background: #0a0703; border: 1px solid var(--border);
+  border-radius: 6px; overflow-x: auto; margin: 1.5rem 0;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(254,183,99,0.04);
+}
+.code-lang {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; color: var(--text-muted);
+}
+.copy-btn {
+  font-family: var(--font-mono); font-size: 0.6rem;
+  background: none; border: 1px solid var(--border);
+  color: var(--text-muted); padding: 0.2rem 0.6rem;
+  border-radius: 2px; cursor: pointer; transition: all .15s;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+pre { padding: 1.4rem 1.6rem; line-height: 1.7; font-family: var(--font-mono); font-size: 0.78rem; }
+.kw  { color: #c792ea; }
+.fn  { color: var(--cookie-gold); }
+.st  { color: #c3e88d; }
+.cm  { color: #4a5568; }
+.nu  { color: #f78c6c; }
+.ty  { color: #82aaff; }
+.op  { color: #89ddff; }
+.ck  { color: #FEB763; font-weight: 600; } /* cookie keywords */
+
+/* ── INTERACTIVE SIM ── */
+.sim-section { background: #090705; }
+.sim-container {
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; margin-top: 2rem; position: relative;
+}
+#simCanvas {
+  width: 100%; height: 480px; display: block;
+  cursor: crosshair;
+}
+.sim-controls {
+  display: flex; gap: 0.75rem; flex-wrap: wrap;
+  padding: 1rem 1.5rem;
+  background: rgba(254,183,99,0.04);
+  border-top: 1px solid var(--border);
+}
+.sim-btn {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  background: rgba(254,183,99,0.08); color: var(--cookie-gold);
+  border: 1px solid rgba(254,183,99,0.25);
+  padding: 0.4rem 1rem; border-radius: 3px;
+  cursor: pointer; transition: all .15s; letter-spacing: 0.04em;
+}
+.sim-btn:hover { background: rgba(254,183,99,0.2); }
+.sim-btn.active { background: var(--cookie-gold); color: var(--chip-black); font-weight: 600; }
+.sim-info {
+  padding: 0.8rem 1.5rem;
+  background: rgba(254,183,99,0.03);
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--text-muted); display: flex; gap: 2rem; flex-wrap: wrap;
+}
+.sim-info span { color: var(--cookie-gold); }
+
+/* ── STATS ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden; margin: 2.5rem 0;
+}
+.stat-cell {
+  background: var(--bg2); padding: 2rem 1.5rem;
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--font-mono); font-size: 2rem;
+  color: var(--cookie-gold); font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+.stat-label { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; }
+
+/* ── FUN FACTS ── */
+.fun-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem; margin-top: 2rem;
+}
+.fun-card {
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 1.6rem 1.8rem; background: rgba(254,183,99,0.02);
+  transition: all .2s; cursor: default;
+}
+.fun-card:hover { border-color: rgba(254,183,99,0.3); background: rgba(254,183,99,0.05); }
+.fun-emoji { font-size: 2rem; margin-bottom: 0.8rem; }
+.fun-title { font-family: var(--font-serif); font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
+.fun-text { font-size: 0.8rem; color: var(--text-muted); line-height: 1.65; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 3rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1.5rem;
+}
+.footer-brand {
+  font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.footer-brand img { width: 18px; height: 18px; object-fit: contain; filter: sepia(1) saturate(3) hue-rotate(-10deg); }
+.footer-links { display: flex; gap: 2rem; }
+.footer-links a {
+  font-size: 0.78rem; color: var(--text-muted);
+  text-decoration: none; transition: color .2s; letter-spacing: 0.01em;
+}
+.footer-links a:hover { color: var(--accent); }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .nav-links { display: none; }
+  .nav-burger { display: block; }
+  .hero-title { font-size: clamp(2.2rem, 11vw, 3.5rem); }
+  .section { padding: 4rem 1.5rem; }
+  .layer-right { display: none; }
+  .compare-table { font-size: 0.75rem; }
+  .compare-table th, .compare-table td { padding: 0.6rem 0.7rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-logo">
+    <img src="/static/img/cookie.svg" alt="CookixDB">
+    <span>Cooxi<em>x</em>DB</span>
+  </span>
+  <ul class="nav-links">
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="#playground">Playground</a></li>
+    <li><a href="#math">Math</a></li>
+    <li><a href="#compare">Compare</a></li>
+  </ul>
+  <button class="nav-burger" id="navBurger" aria-label="menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="#architecture">Architecture</a>
+  <a href="#api">API</a>
+  <a href="#playground">Playground</a>
+  <a href="#math">Math</a>
+  <a href="#compare">Compare</a>
+</div>
+
+<!-- TOOLTIP -->
+<div id="nodeTooltip">
+  <div class="tt-label" id="ttLabel">chip_042</div>
+  <div class="tt-vec" id="ttVec">vec: [0.82, -0.31, 0.54, ...]</div>
+  <div class="tt-sim" id="ttSim">cosine_sim: 0.971</div>
+</div>
+
+<!-- HERO + 3D CANVAS -->
+<section class="hero">
+  <canvas id="cookieCanvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Vector Database · v0.9-alpha · MIT · Inherits NoVectDB</div>
+    <h1 class="hero-title">Cooxi<em>x</em>DB</h1>
+    <p class="hero-sub">
+      A post-vector database where data lives in <em>crumbs</em>, queries are
+      <em>nibbles</em>, and every embedding cluster is a <em>chip</em>.
+      Scientifically rigorous. Shamelessly delicious.
+    </p>
+    <div class="hero-badges">
+      <span class="hero-badge">Crumb-based storage</span>
+      <span class="hero-badge">O(log n) chip search</span>
+      <span class="hero-badge">Contextual indexing</span>
+      <span class="hero-badge">NoVectDB kernel</span>
+      <span class="hero-badge">Zero sugar added</span>
+    </div>
+    <div class="hero-cta">
+      <a class="btn-primary" href="#playground">🍪 Try the Playground</a>
+      <a class="btn-secondary" href="#architecture">Explore Architecture ↓</a>
+    </div>
+  </div>
+  <div id="canvasHint">⟵ drag to rotate · scroll to zoom · hover chips</div>
+</section>
+
+<!-- STATS -->
+<div class="section" style="padding-top:5rem;padding-bottom:3rem;">
+  <div class="stats-row reveal">
+    <div class="stat-cell"><div class="stat-num">O(log n)</div><div class="stat-label">Chip Lookup</div></div>
+    <div class="stat-cell"><div class="stat-num">∞</div><div class="stat-label">Crumb Dimensions</div></div>
+    <div class="stat-cell"><div class="stat-num">3.14</div><div class="stat-label">Deliciousness π</div></div>
+    <div class="stat-cell"><div class="stat-num">0.97</div><div class="stat-label">Avg Cosine Sim</div></div>
+    <div class="stat-cell"><div class="stat-num">42°C</div><div class="stat-label">Baking Temperature</div></div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<section class="arch-section" id="architecture">
+  <div class="section">
+    <div class="section-eyebrow reveal">System Architecture</div>
+    <h2 class="section-title reveal">The <em>Cookie Layer</em> Model</h2>
+    <p class="section-lead reveal">
+      CookixDB inherits NoVectDB's contextual indexing kernel and wraps it in a
+      four-layer architecture inspired by the physical structure of a chocolate-chip cookie.
+      Each layer solves a distinct computer science problem — and tastes great.
+    </p>
+
+    <div class="layer-stack">
+      <div class="layer-card reveal">
+        <div class="layer-icon">🔥</div>
+        <div>
+          <div class="layer-label">Layer 1</div>
+          <div class="layer-name">Crust — The Inverted Index</div>
+          <div class="layer-desc">
+            Outer shell. A hash-mapped inverted index with jump-consistent sharding.
+            All queries enter here. O(1) bucket lookup on 64-bit key digests.
+          </div>
+        </div>
+        <div class="layer-right"><span class="layer-tag">index</span></div>
+      </div>
+      <div class="layer-card reveal">
+        <div class="layer-icon">🍪</div>
+        <div>
+          <div class="layer-label">Layer 2</div>
+          <div class="layer-name">Dough — The Context Tensor</div>
+          <div class="layer-desc">
+            Inherited from NoVectDB: a multi-dimensional context tensor field.
+            Crumbs (data nodes) exist as sparse coordinate tensors in this field.
+            Supports up to 65 536 embedding dimensions before crying.
+          </div>
+        </div>
+        <div class="layer-right"><span class="layer-tag">context</span></div>
+      </div>
+      <div class="layer-card reveal">
+        <div class="layer-icon">🍫</div>
+        <div>
+          <div class="layer-label">Layer 3</div>
+          <div class="layer-name">Chips — The Cluster Nodes</div>
+          <div class="layer-desc">
+            HNSW-adjacent graph where each chip is a centroid of a Voronoi cell.
+            k-nearest-chip search navigates the graph in O(log n) expected time.
+            Chips self-organise via online Lloyd's algorithm during ingestion.
+          </div>
+        </div>
+        <div class="layer-right"><span class="layer-tag">cluster</span></div>
+      </div>
+      <div class="layer-card reveal">
+        <div class="layer-icon">✨</div>
+        <div>
+          <div class="layer-label">Layer 4</div>
+          <div class="layer-name">Sugar Glaze — The Query Rewriter</div>
+          <div class="layer-desc">
+            Syntactic sugar on top of everything. Rewrites natural language, SQL-like,
+            and bring-format queries into CookixDB's internal crumb-vector ops.
+            The most unnecessary and most beloved layer.
+          </div>
+        </div>
+        <div class="layer-right"><span class="layer-tag">query</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section class="section" id="api">
+  <div class="section-eyebrow reveal">CookixDB API Reference</div>
+  <h2 class="section-title reveal">
+    Bake. Nibble. <em>Search.</em>
+  </h2>
+  <p class="section-lead reveal">
+    Every database operation has a culinary alias. The serious names work too, but
+    using <code style="color:var(--cookie-gold);font-size:0.9em">nibble()</code>
+    instead of <code style="color:#ccc;font-size:0.9em">query()</code>
+    will make your tests 40% more enjoyable. Peer-reviewed.
+  </p>
+
+  <div class="code-block reveal">
+    <div class="code-header">
+      <span class="code-lang">python</span>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+<pre><span class="kw">from</span> cookixdb <span class="kw">import</span> <span class="ty">CookieJar</span>
+
+<span class="cm"># Open (or bake) a database</span>
+jar <span class="op">=</span> <span class="ty">CookieJar</span>.<span class="ck">open</span>(<span class="st">"my_db"</span>)          <span class="cm"># alias: .bake()</span>
+
+<span class="cm"># Insert a vector (crumbs)</span>
+jar.<span class="ck">bake</span>(id<span class="op">=</span><span class="st">"doc_001"</span>, vec<span class="op">=</span>[<span class="nu">0.82</span>, <span class="nu">-0.31</span>, <span class="nu">0.54</span>],
+         meta<span class="op">=</span>{<span class="st">"text"</span>: <span class="st">"hello world"</span>})
+
+<span class="cm"># Query nearest neighbours (nibble)</span>
+results <span class="op">=</span> jar.<span class="ck">nibble</span>(vec<span class="op">=</span>[<span class="nu">0.79</span>, <span class="nu">-0.28</span>, <span class="nu">0.60</span>], k<span class="op">=</span><span class="nu">5</span>)
+
+<span class="cm"># Delete a document (crumble)</span>
+jar.<span class="ck">crumble</span>(id<span class="op">=</span><span class="st">"doc_001"</span>)
+
+<span class="cm"># Flush to disk (cool_down)</span>
+jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .flush()</span></pre>
+  </div>
+
+  <div class="api-grid">
+    <div class="api-card reveal">
+      <div class="api-method"><span class="method-badge">INSERT</span> insert crumb</div>
+      <div class="api-fn"><span class="fn-name">bake</span>(<span class="fn-arg">id, vec, meta</span>) <span class="fn-ret">→ CrumbID</span></div>
+      <div class="api-desc">Inserts a vector embedding into the dough layer. Triggers chip re-clustering if the nearest chip's variance exceeds <code>σ²_max</code>.</div>
+      <div class="api-alias">alias: <span>insert()</span></div>
+    </div>
+    <div class="api-card reveal">
+      <div class="api-method"><span class="method-badge">QUERY</span> k-nearest</div>
+      <div class="api-fn"><span class="fn-name">nibble</span>(<span class="fn-arg">vec, k, ef</span>) <span class="fn-ret">→ List[Crumb]</span></div>
+      <div class="api-desc">Approximate k-NN search across all chips. <code>ef</code> controls exploration factor (default 64). Bigger ef = slower + tastier results.</div>
+      <div class="api-alias">alias: <span>query()</span> · <span>search()</span></div>
+    </div>
+    <div class="api-card reveal">
+      <div class="api-method"><span class="method-badge">DELETE</span> remove</div>
+      <div class="api-fn"><span class="fn-name">crumble</span>(<span class="fn-arg">id</span>) <span class="fn-ret">→ bool</span></div>
+      <div class="api-desc">Soft-deletes a crumb. The crumb is marked as stale in the chip graph and excluded from future nibbles. Actual GC happens at cool_down().</div>
+      <div class="api-alias">alias: <span>delete()</span> · <span>drop()</span></div>
+    </div>
+    <div class="api-card reveal">
+      <div class="api-method"><span class="method-badge">UPDATE</span> re-embed</div>
+      <div class="api-fn"><span class="fn-name">re_glaze</span>(<span class="fn-arg">id, vec</span>) <span class="fn-ret">→ CrumbID</span></div>
+      <div class="api-desc">Updates the vector embedding of an existing crumb. Automatically migrates the crumb to its new nearest chip. No full re-index needed.</div>
+      <div class="api-alias">alias: <span>update()</span></div>
+    </div>
+    <div class="api-card reveal">
+      <div class="api-method"><span class="method-badge">SCAN</span> full table</div>
+      <div class="api-fn"><span class="fn-name">lick</span>(<span class="fn-arg">filter, limit</span>) <span class="fn-ret">→ Iterator</span></div>
+      <div class="api-desc">Sequential scan over all crumbs with optional metadata filter. Slow. Beautiful. Like eating a cookie one molecule at a time.</div>
+      <div class="api-alias">alias: <span>scan()</span> · <span>all()</span></div>
+    </div>
+    <div class="api-card reveal">
+      <div class="api-method"><span class="method-badge">FLUSH</span> persist</div>
+      <div class="api-fn"><span class="fn-name">cool_down</span>(<span class="fn-arg">fsync</span>) <span class="fn-ret">→ None</span></div>
+      <div class="api-desc">Commits in-memory write buffer to disk. Runs GC on crumbled entries. Rebuilds chip centroids if drift &gt; 0.03 radians.</div>
+      <div class="api-alias">alias: <span>flush()</span> · <span>commit()</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 2D INTERACTIVE PLAYGROUND -->
+<section class="sim-section" id="playground">
+  <div class="section">
+    <div class="section-eyebrow reveal">Interactive Simulation</div>
+    <h2 class="section-title reveal">
+      Vector Space <em>Playground</em>
+    </h2>
+    <p class="section-lead reveal">
+      A live 2D projection of CookixDB's chip-clustering algorithm.
+      Insert random crumbs, trigger a <em>nibble</em> query, or watch chips
+      self-organise via online k-means. Every crumb is a data point.
+      Every chip is a cluster centroid. Every query is delicious.
+    </p>
+
+    <div class="sim-container reveal">
+      <canvas id="simCanvas"></canvas>
+      <div class="sim-controls">
+        <button class="sim-btn active" id="btnBake" onclick="simAction('bake')">🍪 bake() — Insert 10 crumbs</button>
+        <button class="sim-btn" id="btnNibble" onclick="simAction('nibble')">🔍 nibble() — Query nearest</button>
+        <button class="sim-btn" id="btnCluster" onclick="simAction('cluster')">🔄 re-cluster chips</button>
+        <button class="sim-btn" id="btnReset" onclick="simAction('reset')">✕ reset</button>
+      </div>
+      <div class="sim-info">
+        <div>crumbs: <span id="simCrumbCount">0</span></div>
+        <div>chips: <span id="simChipCount">0</span></div>
+        <div>last query: <span id="simLastQuery">—</span></div>
+        <div>nearest chip: <span id="simNearest">—</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MATH -->
+<section class="section" id="math">
+  <div class="section-eyebrow reveal">Mathematical Foundation</div>
+  <h2 class="section-title reveal">The <em>Science</em> of Chips</h2>
+  <p class="section-lead reveal">
+    CookixDB's search complexity derives from a combination of Voronoi partitioning
+    and navigable small-world graphs. The cookie metaphor is aesthetic; the math is real.
+  </p>
+
+  <div class="formula-block reveal">
+    <div class="formula-title">Chip Assignment (Voronoi)</div>
+    <div class="formula-eq">chip(q) = argmin_c  ‖q − μ_c‖₂   for all chips c ∈ C</div>
+    <div class="formula-note">
+      A query vector <strong>q</strong> is assigned to the chip whose centroid <strong>μ_c</strong>
+      minimises Euclidean distance. This gives the Voronoi cell partitioning — the "chocolate chip
+      territory" metaphor is scientifically accurate.
+    </div>
+  </div>
+
+  <div class="formula-block reveal">
+    <div class="formula-title">Cosine Similarity (Crumb Ranking)</div>
+    <div class="formula-eq">sim(a, b)  =  (a · b) / (‖a‖ · ‖b‖)  ∈ [−1, 1]</div>
+    <div class="formula-note">
+      Within a chip's Voronoi cell, crumbs are ranked by cosine similarity to the query.
+      This is direction-agnostic to magnitude, which means your crumbs don't need to be
+      unit-normalised before baking (though it's faster if they are).
+    </div>
+  </div>
+
+  <div class="formula-block reveal">
+    <div class="formula-title">Chip Variance Threshold (Auto-Split)</div>
+    <div class="formula-eq">split_chip(c)  ⟺  Var(c) = (1/|c|) Σᵢ ‖xᵢ − μ_c‖²  &gt;  σ²_max</div>
+    <div class="formula-note">
+      When a chip's intra-cluster variance exceeds the threshold <strong>σ²_max</strong> (default: 0.15),
+      the chip is automatically split into two via bisecting k-means. This is why CookixDB
+      never has one giant chip that knows everything — because a cookie with one giant chocolate
+      chip is just a chocolate bar and that's not what we're making.
+    </div>
+  </div>
+
+  <div class="formula-block reveal">
+    <div class="formula-title">Expected Search Complexity</div>
+    <div class="formula-eq">T(n)  =  O(log n)  [chip navigation]  +  O(|c|)  [linear scan in cell]</div>
+    <div class="formula-note">
+      Total expected query time where <strong>n</strong> is the total crumb count and <strong>|c|</strong>
+      is the average chip size. With auto-split keeping chips balanced,
+      <strong>|c| ≈ n / K</strong> where K is the number of chips, giving
+      <strong>O(log n + n/K)</strong> overall. At K = √n, this is <strong>O(√n)</strong>.
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section class="arch-section" id="compare">
+  <div class="section">
+    <div class="section-eyebrow reveal">Competitive Analysis</div>
+    <h2 class="section-title reveal">
+      CookixDB vs <em>Everything Else</em>
+    </h2>
+    <p class="section-lead reveal">
+      Honest comparison. We win on naming. We're competitive on everything else.
+    </p>
+    <table class="compare-table reveal">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Pinecone</th>
+          <th>Weaviate</th>
+          <th>Chroma</th>
+          <th class="highlight">CookixDB 🍪</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="feature">Fun method names</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td><td class="ckx">✓ nibble()</td></tr>
+        <tr><td class="feature">Built-in context tensor</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td><td class="ckx">✓ NoVectDB</td></tr>
+        <tr><td class="feature">Cosine similarity</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="ckx">✓</td></tr>
+        <tr><td class="feature">HNSW index</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td><td class="ckx">✓ chip-HNSW</td></tr>
+        <tr><td class="feature">Bring-format queries</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td><td class="ckx">✓</td></tr>
+        <tr><td class="feature">Open source</td><td class="no">✗</td><td class="yes">✓</td><td class="yes">✓</td><td class="ckx">✓ MIT</td></tr>
+        <tr><td class="feature">Delicious metaphors</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td><td class="ckx">✓✓✓</td></tr>
+        <tr><td class="feature">Written in Python</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td><td class="ckx">✓</td></tr>
+        <tr><td class="feature">Auto chip splitting</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td><td class="ckx">✓ σ² threshold</td></tr>
+        <tr><td class="feature">Smells like cookies</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td><td class="ckx">scientifically unclear</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- FUN FACTS -->
+<section class="section">
+  <div class="section-eyebrow reveal">Design Philosophy</div>
+  <h2 class="section-title reveal">Serious Science, <em>Silly Names</em></h2>
+  <div class="fun-grid">
+    <div class="fun-card reveal">
+      <div class="fun-emoji">🧪</div>
+      <div class="fun-title">The Crumb Hypothesis</div>
+      <div class="fun-text">
+        Every piece of data, no matter how large, can be decomposed into
+        atomic vector units called crumbs. A crumb has a position in ℝⁿ
+        and zero opinions about being called a crumb.
+      </div>
+    </div>
+    <div class="fun-card reveal">
+      <div class="fun-emoji">🍫</div>
+      <div class="fun-title">Why "Chips"?</div>
+      <div class="fun-text">
+        Cluster centroids are called chips because they are the best part
+        of the cookie. They are also the most mathematically interesting part:
+        a chip is a Voronoi seed in disguise wearing a chocolate hat.
+      </div>
+    </div>
+    <div class="fun-card reveal">
+      <div class="fun-emoji">🔥</div>
+      <div class="fun-title">Baking = Indexing</div>
+      <div class="fun-text">
+        When you <code style="color:var(--cookie-gold)">bake()</code> a vector,
+        you are not just inserting data — you are applying heat (computation)
+        to transform raw ingredients (floats) into a structured, queryable
+        crumb. The metaphor is basically a free PhD thesis.
+      </div>
+    </div>
+    <div class="fun-card reveal">
+      <div class="fun-emoji">🧊</div>
+      <div class="fun-title">cool_down() = fsync</div>
+      <div class="fun-text">
+        Cookies need to cool before you eat them. Databases need to flush
+        before you trust them. <code style="color:var(--cookie-gold)">cool_down()</code>
+        does both metaphorically and literally. It also runs the garbage
+        collector on your crumbled data.
+      </div>
+    </div>
+    <div class="fun-card reveal">
+      <div class="fun-emoji">∞</div>
+      <div class="fun-title">Infinite Dimensions</div>
+      <div class="fun-text">
+        CookixDB supports up to 65 536 embedding dimensions. Nobody has
+        actually used more than 4096. But the option is there, sitting
+        quietly like the last cookie in the jar that everyone is too polite to take.
+      </div>
+    </div>
+    <div class="fun-card reveal">
+      <div class="fun-emoji">🎓</div>
+      <div class="fun-title">NoVectDB Heritage</div>
+      <div class="fun-text">
+        CookixDB inherits its context tensor architecture from
+        <a href="/papers/novectDB" style="color:var(--cookie-gold)">NoVectDB</a>,
+        which proved that contextual indexing outperforms pure vector similarity
+        for semantic search tasks. CookixDB adds the crumb model on top.
+        Standing on the shoulders of giants — and cookies.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <img src="/static/img/cookie.svg" alt="">
+    CookixDB v0.9-alpha · MIT License · Built on NoVectDB
+  </div>
+  <div class="footer-links">
+    <a href="/papers/novectDB">NoVectDB Paper →</a>
+    <a href="/">← PolyfdoS</a>
+  </div>
+</footer>
+
+<!-- THREE.JS -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════
+   HERO — 3D COOKIE WITH CHIP NODES
+   ═══════════════════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('cookieCanvas');
+  const tooltip = document.getElementById('nodeTooltip');
+  const W = () => canvas.clientWidth, H = () => canvas.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W(), H());
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, W()/H(), 0.1, 100);
+  camera.position.set(0, 0, 5.5);
+
+  // Lights
+  const amb = new THREE.AmbientLight(0xffffff, 0.3);
+  scene.add(amb);
+  const sun = new THREE.DirectionalLight(0xffdd88, 1.4);
+  sun.position.set(3, 5, 4);
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xff9944, 0.4);
+  fill.position.set(-3, -2, 2);
+  scene.add(fill);
+  const rim = new THREE.DirectionalLight(0x8844ff, 0.25);
+  rim.position.set(0, -4, -3);
+  scene.add(rim);
+
+  // ── Cookie body (flat cylinder) ──
+  const cookieGeo = new THREE.CylinderGeometry(2.1, 2.0, 0.38, 64, 4, false);
+  // Deform vertices slightly for organic look
+  const pos = cookieGeo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const angle = Math.atan2(pos.getZ(i), pos.getX(i));
+    const r = Math.sqrt(pos.getX(i)**2 + pos.getZ(i)**2);
+    const noise = 1 + 0.04 * Math.sin(angle * 7 + 1.3) + 0.02 * Math.sin(angle * 13);
+    pos.setX(i, pos.getX(i) * noise);
+    pos.setZ(i, pos.getZ(i) * noise);
+    // Slight y warp on top face
+    if (pos.getY(i) > 0.1) {
+      pos.setY(i, pos.getY(i) + 0.03 * Math.sin(r * 2 + angle * 3));
+    }
+  }
+  cookieGeo.computeVertexNormals();
+  const cookieMat = new THREE.MeshStandardMaterial({
+    color: 0xFEB763, roughness: 0.82, metalness: 0.02,
+    bumpScale: 0.04
+  });
+  const cookie = new THREE.Mesh(cookieGeo, cookieMat);
+  cookie.rotation.x = -0.18;
+  scene.add(cookie);
+
+  // ── Cookie edge ring (darker) ──
+  const edgeGeo = new THREE.TorusGeometry(2.05, 0.09, 16, 64);
+  const edgeMat = new THREE.MeshStandardMaterial({ color: 0xc4893a, roughness: 0.9 });
+  const edge = new THREE.Mesh(edgeGeo, edgeMat);
+  edge.rotation.x = Math.PI / 2;
+  cookie.add(edge);
+
+  // ── Chip data nodes (chocolate chips on surface) ──
+  const CHIPS = 14;
+  const chipData = [];
+  const chipGroup = new THREE.Group();
+  cookie.add(chipGroup);
+
+  // Random but stable chip positions on top face
+  const chipPositions = [
+    [0.6, 0.9], [-0.8, 0.7], [1.2, 0.3], [-0.3, 1.4],
+    [0.9, -1.1], [-1.3, 0.2], [-0.7, -1.0], [0.2, -1.5],
+    [1.5, -0.4], [-1.6, -0.6], [0.0, 0.3], [-1.0, 1.2],
+    [1.0, 1.1], [-0.4, -0.5]
+  ];
+  const chipLabels = [
+    "context_vec", "embed_root", "token_000", "crumb_42",
+    "query_node", "knn_pivot", "cluster_c", "dough_ref",
+    "bake_001", "schema_ptr", "index_key", "cosine_ref",
+    "voronoi_c", "nibble_q"
+  ];
+
+  const chipGeom = new THREE.CylinderGeometry(0.13, 0.09, 0.10, 12);
+  const chipMat  = new THREE.MeshStandardMaterial({ color: 0x1a0e0a, roughness: 0.7, metalness: 0.1 });
+  const chipMatHover = new THREE.MeshStandardMaterial({ color: 0xFEB763, roughness: 0.4, metalness: 0.3, emissive: 0xFEB763, emissiveIntensity: 0.6 });
+
+  // Glow rings per chip
+  const glowGeom = new THREE.RingGeometry(0.18, 0.26, 24);
+  const glowMat  = new THREE.MeshBasicMaterial({ color: 0xFEB763, transparent: true, opacity: 0, side: THREE.DoubleSide });
+
+  chipPositions.forEach(([cx, cz], i) => {
+    const chip = new THREE.Mesh(chipGeom, chipMat.clone());
+    chip.position.set(cx * 0.88, 0.24, cz * 0.88);
+    chip.rotation.x = -0.15 + (Math.random()-0.5)*0.1;
+
+    const glow = new THREE.Mesh(glowGeom, glowMat.clone());
+    glow.position.set(0, 0.08, 0);
+    glow.rotation.x = -Math.PI/2;
+    chip.add(glow);
+
+    chipGroup.add(chip);
+    chipData.push({
+      mesh: chip, glow, hovered: false, glowPhase: Math.random() * Math.PI * 2,
+      label: chipLabels[i],
+      vec: `[${(Math.random()*2-1).toFixed(2)}, ${(Math.random()*2-1).toFixed(2)}, ${(Math.random()*2-1).toFixed(2)}, ...]`,
+      sim: (0.85 + Math.random() * 0.14).toFixed(3)
+    });
+  });
+
+  // ── Floating crumb particles ──
+  const CRUMBS = 180;
+  const crumbGeo = new THREE.BufferGeometry();
+  const crumbPos = new Float32Array(CRUMBS * 3);
+  const crumbVel = [];
+  for (let i = 0; i < CRUMBS; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(2 * Math.random() - 1);
+    const r     = 2.8 + Math.random() * 1.8;
+    crumbPos[i*3+0] = r * Math.sin(phi) * Math.cos(theta);
+    crumbPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    crumbPos[i*3+2] = r * Math.cos(phi);
+    crumbVel.push({ theta, phi, r, speed: 0.0003 + Math.random() * 0.0005, phase: Math.random() * Math.PI * 2 });
+  }
+  crumbGeo.setAttribute('position', new THREE.BufferAttribute(crumbPos, 3));
+  const crumbMat = new THREE.PointsMaterial({ color: 0xFEB763, size: 0.04, transparent: true, opacity: 0.55 });
+  const crumbs = new THREE.Points(crumbGeo, crumbMat);
+  scene.add(crumbs);
+
+  // ── Connection lines (vector edges) ──
+  const lineGroup = new THREE.Group();
+  scene.add(lineGroup);
+  const lineMat = new THREE.LineBasicMaterial({ color: 0xFEB763, transparent: true, opacity: 0.12 });
+  // Draw a few edges between chips to suggest graph
+  const edges = [[0,10],[1,11],[2,8],[3,12],[4,9],[5,13],[6,7],[0,3],[1,6],[8,12]];
+  edges.forEach(([a, b]) => {
+    const pa = chipData[a].mesh.position.clone().add(cookie.position);
+    const pb = chipData[b].mesh.position.clone().add(cookie.position);
+    const geo = new THREE.BufferGeometry().setFromPoints([pa, pb]);
+    lineGroup.add(new THREE.Line(geo, lineMat.clone()));
+  });
+
+  // ── Mouse interaction ──
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2(-9,-9);
+  let hoveredChip = null;
+
+  const toNDC = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x =  ((e.clientX - rect.left)  / rect.width)  * 2 - 1;
+    mouse.y = -((e.clientY - rect.top)   / rect.height) * 2 + 1;
+  };
+  canvas.addEventListener('mousemove', e => {
+    toNDC(e);
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(chipData.map(c => c.mesh));
+    if (hits.length > 0) {
+      const hit = hits[0];
+      const idx = chipData.findIndex(c => c.mesh === hit.object);
+      if (idx !== -1) {
+        hoveredChip = idx;
+        const d = chipData[idx];
+        document.getElementById('ttLabel').textContent = d.label;
+        document.getElementById('ttVec').textContent = 'vec: ' + d.vec;
+        document.getElementById('ttSim').textContent = 'cosine_sim: ' + d.sim;
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top  = (e.clientY - 10) + 'px';
+        tooltip.classList.add('visible');
+        canvas.style.cursor = 'pointer';
+      }
+    } else {
+      hoveredChip = null;
+      tooltip.classList.remove('visible');
+      canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+    }
+  });
+  canvas.addEventListener('mouseleave', () => {
+    hoveredChip = null;
+    tooltip.classList.remove('visible');
+  });
+
+  // ── Orbit drag ──
+  let isDragging = false, lastX = 0, lastY = 0;
+  let rotX = -0.18, rotY = 0;
+  canvas.addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+  window.addEventListener('mouseup', () => { isDragging = false; });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = (e.clientX - lastX) * 0.008;
+    const dy = (e.clientY - lastY) * 0.005;
+    rotY += dx; rotX += dy;
+    rotX = Math.max(-0.9, Math.min(0.9, rotX));
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  // Touch
+  let lastTX = 0;
+  canvas.addEventListener('touchstart', e => { isDragging = true; lastTX = e.touches[0].clientX; }, {passive:true});
+  canvas.addEventListener('touchend', () => isDragging = false);
+  canvas.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    const dx = (e.touches[0].clientX - lastTX) * 0.01;
+    rotY += dx; lastTX = e.touches[0].clientX;
+  }, {passive:true});
+
+  // ── Scroll zoom ──
+  let zoomDist = 5.5;
+  canvas.addEventListener('wheel', e => {
+    zoomDist = Math.max(3.5, Math.min(9, zoomDist + e.deltaY * 0.007));
+  }, {passive:true});
+
+  // ── Resize ──
+  const ro = new ResizeObserver(() => {
+    renderer.setSize(W(), H());
+    camera.aspect = W()/H();
+    camera.updateProjectionMatrix();
+  });
+  ro.observe(canvas);
+
+  // ── Animation loop ──
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.012;
+
+    // Auto-rotate cookie when not dragging
+    if (!isDragging) rotY += 0.004;
+    cookie.rotation.y = rotY;
+    cookie.rotation.x = rotX;
+
+    // Smooth zoom
+    camera.position.z += (zoomDist - camera.position.z) * 0.06;
+
+    // Animate crumbs in orbital motion
+    for (let i = 0; i < CRUMBS; i++) {
+      const v = crumbVel[i];
+      v.theta += v.speed;
+      const wobble = 0.04 * Math.sin(t * 0.6 + v.phase);
+      crumbPos[i*3+0] = (v.r + wobble) * Math.sin(v.phi) * Math.cos(v.theta);
+      crumbPos[i*3+1] = (v.r + wobble) * Math.sin(v.phi) * Math.sin(v.theta);
+      crumbPos[i*3+2] = (v.r + wobble) * Math.cos(v.phi);
+    }
+    crumbGeo.attributes.position.needsUpdate = true;
+
+    // Chip glow animation
+    chipData.forEach((c, i) => {
+      const isHov = i === hoveredChip;
+      c.hovered = isHov;
+      const glowTarget = isHov ? 0.85 : 0.0;
+      c.glow.material.opacity += (glowTarget - c.glow.material.opacity) * 0.12;
+      if (isHov) {
+        c.mesh.material.color.lerp(new THREE.Color(0xFEB763), 0.15);
+        c.mesh.material.emissive = new THREE.Color(0xFEB763);
+        c.mesh.material.emissiveIntensity = 0.4 + 0.2 * Math.sin(t * 4 + c.glowPhase);
+      } else {
+        c.mesh.material.color.lerp(new THREE.Color(0x1a0e0a), 0.1);
+        c.mesh.material.emissiveIntensity *= 0.88;
+      }
+    });
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+
+/* ═══════════════════════════════════════════════════════
+   2D PLAYGROUND — CHIP CLUSTERING SIMULATION
+   ═══════════════════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('simCanvas');
+  const ctx    = canvas.getContext('2d');
+  const K      = 5;  // Number of chips
+  const CHIP_COLORS = ['#FEB763','#ff8c42','#82cfff','#c3e88d','#c792ea'];
+  const W = () => canvas.width, H = () => canvas.height;
+
+  let crumbs = [];   // {x, y, chip}
+  let chips  = [];   // {x, y, id}
+  let queryPt = null;
+  let queryResults = [];
+  let animFrame = null;
+  let mode = 'idle';
+
+  function resize() {
+    canvas.width  = canvas.offsetWidth  * Math.min(window.devicePixelRatio, 2);
+    canvas.height = canvas.offsetHeight * Math.min(window.devicePixelRatio, 2);
+    ctx.scale(window.devicePixelRatio > 1 ? 2 : 1, window.devicePixelRatio > 1 ? 2 : 1);
+  }
+
+  function initChips() {
+    chips = [];
+    for (let i = 0; i < K; i++) {
+      chips.push({
+        x: 60 + Math.random() * (canvas.offsetWidth  - 120),
+        y: 40 + Math.random() * (canvas.offsetHeight - 80),
+        id: i
+      });
+    }
+  }
+
+  function assignCrumbs() {
+    crumbs.forEach(c => {
+      let best = 0, bestD = Infinity;
+      chips.forEach((ch, i) => {
+        const d = Math.hypot(c.x - ch.x, c.y - ch.y);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      c.chip = best;
+    });
+  }
+
+  function recluster() {
+    const sums = chips.map(() => ({sx:0, sy:0, n:0}));
+    crumbs.forEach(c => {
+      sums[c.chip].sx += c.x;
+      sums[c.chip].sy += c.y;
+      sums[c.chip].n++;
+    });
+    chips.forEach((ch, i) => {
+      if (sums[i].n > 0) {
+        ch.x = sums[i].sx / sums[i].n;
+        ch.y = sums[i].sy / sums[i].n;
+      }
+    });
+    assignCrumbs();
+  }
+
+  function dist(a, b) { return Math.hypot(a.x-b.x, a.y-b.y); }
+
+  function updateInfo() {
+    document.getElementById('simCrumbCount').textContent = crumbs.length;
+    document.getElementById('simChipCount').textContent  = chips.length;
+  }
+
+  function draw() {
+    const cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+    ctx.clearRect(0, 0, cw, ch);
+
+    // Background grid
+    ctx.strokeStyle = 'rgba(254,183,99,0.05)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x < cw; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,ch); ctx.stroke(); }
+    for (let y = 0; y < ch; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(cw,y); ctx.stroke(); }
+
+    // Voronoi-ish: light fill per chip territory (approximated by radial gradient per chip)
+    if (chips.length && crumbs.length > 0) {
+      const img = ctx.createImageData(Math.ceil(cw), Math.ceil(ch));
+      for (let px = 0; px < Math.ceil(cw); px+=3) {
+        for (let py = 0; py < Math.ceil(ch); py+=3) {
+          let best = 0, bestD = Infinity;
+          chips.forEach((c, i) => { const d = Math.hypot(px-c.x, py-c.y); if(d<bestD){bestD=d; best=i;} });
+          const hex = CHIP_COLORS[best % CHIP_COLORS.length];
+          const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+          for (let ox=0;ox<3;ox++) for (let oy=0;oy<3;oy++) {
+            const idx = ((py+oy)*Math.ceil(cw) + (px+ox))*4;
+            img.data[idx+0]=r; img.data[idx+1]=g; img.data[idx+2]=b; img.data[idx+3]=13;
+          }
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    // Draw crumbs
+    crumbs.forEach(c => {
+      const col = chips[c.chip] ? CHIP_COLORS[c.chip % CHIP_COLORS.length] : '#888';
+      const isResult = queryResults.includes(c);
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, isResult ? 5 : 3, 0, Math.PI*2);
+      if (isResult) {
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      ctx.fillStyle = col + (isResult ? 'ff' : '99');
+      ctx.fill();
+    });
+
+    // Draw query point
+    if (queryPt) {
+      ctx.beginPath(); ctx.arc(queryPt.x, queryPt.y, 8, 0, Math.PI*2);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fill();
+      // Lines to results
+      queryResults.forEach(c => {
+        ctx.beginPath(); ctx.moveTo(queryPt.x, queryPt.y); ctx.lineTo(c.x, c.y);
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1; ctx.stroke();
+      });
+    }
+
+    // Draw chips (centroids)
+    chips.forEach((c, i) => {
+      const col = CHIP_COLORS[i % CHIP_COLORS.length];
+      // Glow
+      const grad = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 22);
+      grad.addColorStop(0, col + '33');
+      grad.addColorStop(1, 'transparent');
+      ctx.beginPath(); ctx.arc(c.x, c.y, 22, 0, Math.PI*2);
+      ctx.fillStyle = grad; ctx.fill();
+      // Core
+      ctx.beginPath(); ctx.arc(c.x, c.y, 7, 0, Math.PI*2);
+      ctx.fillStyle = col; ctx.fill();
+      ctx.strokeStyle = '#fff2'; ctx.lineWidth = 1.5; ctx.stroke();
+      // Label
+      ctx.fillStyle = col; ctx.font = '500 10px JetBrains Mono, monospace';
+      ctx.fillText('chip_' + String(i).padStart(2,'0'), c.x + 10, c.y - 8);
+    });
+  }
+
+  window.simAction = function(action) {
+    document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn' + action.charAt(0).toUpperCase() + action.slice(1))?.classList.add('active');
+
+    if (action === 'reset') {
+      crumbs = []; queryPt = null; queryResults = [];
+      initChips();
+      updateInfo();
+      document.getElementById('simLastQuery').textContent = '—';
+      document.getElementById('simNearest').textContent = '—';
+      draw(); return;
+    }
+    if (action === 'bake') {
+      for (let i = 0; i < 10; i++) {
+        crumbs.push({
+          x: 40 + Math.random() * (canvas.offsetWidth - 80),
+          y: 30 + Math.random() * (canvas.offsetHeight - 60),
+          chip: 0
+        });
+      }
+      assignCrumbs(); updateInfo(); draw(); return;
+    }
+    if (action === 'cluster') {
+      if (crumbs.length < 2) { draw(); return; }
+      let iter = 0;
+      const maxIter = 8;
+      function step() {
+        recluster(); draw(); iter++;
+        if (iter < maxIter) setTimeout(step, 80);
+      }
+      step(); return;
+    }
+    if (action === 'nibble') {
+      if (crumbs.length === 0) return;
+      queryPt = {
+        x: 80 + Math.random() * (canvas.offsetWidth - 160),
+        y: 50 + Math.random() * (canvas.offsetHeight - 100)
+      };
+      // Find nearest chip
+      let nearestChip = 0, nearestD = Infinity;
+      chips.forEach((c, i) => { const d = dist(queryPt, c); if(d<nearestD){nearestD=d;nearestChip=i;} });
+      // Get k=5 nearest crumbs in that chip
+      const inChip = crumbs.filter(c => c.chip === nearestChip);
+      inChip.sort((a,b) => dist(queryPt,a) - dist(queryPt,b));
+      queryResults = inChip.slice(0, 5);
+      document.getElementById('simLastQuery').textContent = `(${queryPt.x.toFixed(0)}, ${queryPt.y.toFixed(0)})`;
+      document.getElementById('simNearest').textContent = `chip_${String(nearestChip).padStart(2,'0')}`;
+      draw(); return;
+    }
+  };
+
+  // Init
+  new ResizeObserver(() => { resize(); initChips(); draw(); }).observe(canvas);
+  resize(); initChips(); draw();
+})();
+
+/* ── NAV ── */
+document.getElementById('navBurger').addEventListener('click', () => {
+  document.getElementById('navMobile').classList.toggle('open');
+});
+
+/* ── COPY ── */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'copied ✓'; setTimeout(() => btn.textContent = 'copy', 1800);
+  });
+}
+
+/* ── REVEAL ── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
