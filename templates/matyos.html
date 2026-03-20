@@ -52,8 +52,9 @@ nav {
 .nav-back { font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; white-space: nowrap; }
 .nav-back:hover { color: var(--black); }
 .nav-sep { color: var(--gray-300); font-size: 0.8rem; }
-.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.88rem; letter-spacing: -0.02em; }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.88rem; letter-spacing: -0.02em; display: flex; align-items: center; gap: 0.45rem; }
 .nav-logo em { font-style: italic; font-family: var(--font-serif); }
+.nav-logo-img { width: 22px; height: 22px; display: block; }
 .nav-links { display: flex; gap: 1.2rem; align-items: center; margin-left: auto; }
 .nav-links a { font-size: 0.75rem; color: var(--gray-500); text-decoration: none; transition: color .2s; white-space: nowrap; }
 .nav-links a:hover { color: var(--black); }
@@ -129,6 +130,18 @@ nav {
 
 /* ─── HERO ───────────────────────────────────────────────────── */
 .hero-section { padding-top: 1rem; margin-bottom: 4rem; }
+.hero-logo-mark {
+  width: clamp(60px, 10vw, 90px);
+  height: clamp(60px, 10vw, 90px);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: heroLogoIn 1s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.10));
+}
+@keyframes heroLogoIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 .hero-title {
   font-family: var(--font-serif);
   font-size: clamp(2.8rem, 6vw, 5rem);
@@ -581,7 +594,7 @@ code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-
   </button>
   <a class="nav-back" href="/">← PolyfdoS</a>
   <span class="nav-sep">/</span>
-  <span class="nav-logo">Maty<em>OS</em></span>
+  <span class="nav-logo"><img class="nav-logo-img" src="/static/img/matyos.svg" alt="">Maty<em>OS</em></span>
   <div class="nav-links">
     <a href="#introduction">Intro</a>
     <a href="#quickstart">Quick Start</a>
@@ -653,6 +666,7 @@ code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-
 
     <!-- ══ HERO ══════════════════════════════════════════════════ -->
     <div class="hero-section">
+      <img class="hero-logo-mark" src="/static/img/matyos.svg" alt="MatyOS logo">
       <div class="section-eyebrow">Language · v1.0.9 · MIT License · .el extension</div>
       <h1 class="hero-title">Maty<em>OS</em></h1>
       <p class="hero-tagline" id="tagline"><span id="typewriter"></span><span id="typewriter-cursor">|</span></p>
