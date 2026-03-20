@@ -291,41 +291,13 @@ footer {
 </head>
 <body>
 
-<!-- ── RAVEN SVG SYMBOL (reused everywhere) ─────────────── -->
-<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
-  <symbol id="raven" viewBox="0 0 220 240">
-    <!-- Raven silhouette — facing right, perched on mound -->
-    <path fill="currentColor" d="
-      M165,72
-      C157,61 142,55 128,53
-      C114,49 100,51 89,59
-      C76,67 66,82 61,98
-      C55,114 54,133 60,149
-      C56,153 54,161 57,166
-      L63,170 65,163
-      L69,170 76,170 74,163
-      C78,167 84,169 89,167
-      L92,172 99,172 97,166
-      C103,159 107,149 105,139
-      C112,148 113,159 110,167
-      L117,171 118,164
-      L123,171 130,171 127,164
-      C132,156 132,145 127,136
-      C133,124 135,110 131,97
-      C127,84 118,73 107,67
-      C122,64 140,65 165,72
-      Z
-    "/>
-    <!-- Ground mound -->
-    <ellipse fill="currentColor" cx="95" cy="175" rx="58" ry="9"/>
-  </symbol>
-</svg>
+<!-- crow.svg loaded from /static/img/crow.svg -->
 
 <!-- ── NAV ──────────────────────────────────────────────── -->
 <nav>
   <a class="nav-back" href="/">← PolyfdoS</a>
   <div class="nav-brand">
-    <svg class="nav-raven" aria-hidden="true"><use href="#raven"/></svg>
+    <img class="nav-raven" src="/static/img/crow.svg" alt="" aria-hidden="true">
     <span class="nav-name">PolyfdoR</span>
   </div>
 </nav>
@@ -373,30 +345,7 @@ footer {
 
   <div class="hero-right">
     <div class="raven-display">
-      <svg class="raven-main" viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg" aria-label="PolyfdoR raven logo">
-        <path fill="#0a0a0a" d="
-          M165,72
-          C157,61 142,55 128,53
-          C114,49 100,51 89,59
-          C76,67 66,82 61,98
-          C55,114 54,133 60,149
-          C56,153 54,161 57,166
-          L63,170 65,163
-          L69,170 76,170 74,163
-          C78,167 84,169 89,167
-          L92,172 99,172 97,166
-          C103,159 107,149 105,139
-          C112,148 113,159 110,167
-          L117,171 118,164
-          L123,171 130,171 127,164
-          C132,156 132,145 127,136
-          C133,124 135,110 131,97
-          C127,84 118,73 107,67
-          C122,64 140,65 165,72
-          Z
-        "/>
-        <ellipse fill="#0a0a0a" cx="95" cy="175" rx="58" ry="9"/>
-      </svg>
+      <img class="raven-main" src="/static/img/crow.svg" alt="PolyfdoR raven logo">
       <div class="raven-wordmark">
         <div class="raven-wordmark-name">Polyfd<em>o</em>R</div>
         <div class="raven-wordmark-sub">Ahmed Hafdi · PolyfdoS</div>
@@ -478,7 +427,7 @@ footer {
 
 <!-- ── BRAND STRIP ───────────────────────────────────────── -->
 <div class="brand-strip">
-  <svg class="brand-strip-raven" aria-hidden="true"><use href="#raven"/></svg>
+  <img class="brand-strip-raven" src="/static/img/crow.svg" alt="" aria-hidden="true">
   <p class="brand-strip-text">
     "The raven sees what others miss. It perches at the intersection of knowledge domains and observes the patterns beneath."
   </p>
@@ -487,7 +436,7 @@ footer {
 <!-- ── FOOTER ───────────────────────────────────────────── -->
 <footer>
   <div class="footer-brand">
-    <svg class="footer-raven" aria-hidden="true"><use href="#raven"/></svg>
+    <img class="footer-raven" src="/static/img/crow.svg" alt="" aria-hidden="true">
     <span class="footer-text">Ahmed Hafdi · <a href="/">PolyfdoS</a> · 2026</span>
   </div>
   <span class="footer-text">@polyfdor</span>
