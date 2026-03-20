@@ -474,6 +474,102 @@ code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-
   .hero-title { font-size: 2.4rem; }
   .proof-cards { grid-template-columns: 1fr; }
 }
+
+/* ── FLOATING PLAYGROUND ─────────────────────────────────────── */
+.fp-toggle {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 1100;
+  background: #c792ea; color: #0d1117;
+  border: none; border-radius: 50px;
+  padding: 0.65rem 1.2rem;
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+  box-shadow: 0 4px 24px rgba(199,146,234,0.45);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.fp-toggle:hover { transform: scale(1.05); box-shadow: 0 6px 30px rgba(199,146,234,0.6); }
+
+.fp-widget {
+  position: fixed; bottom: 5.5rem; right: 2rem; z-index: 1099;
+  width: 720px; height: 480px;
+  max-width: calc(100vw - 1.5rem);
+  max-height: calc(100vh - 7rem);
+  background: #161b22;
+  border: 1px solid #30363d; border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: opacity 0.2s, transform 0.2s;
+  resize: both;
+}
+.fp-widget.fp-hidden { opacity: 0; pointer-events: none; transform: translateY(16px) scale(0.96); }
+.fp-widget.fp-minimized { height: 48px !important; resize: none; overflow: hidden; }
+.fp-widget.fp-minimized .fp-examples,
+.fp-widget.fp-minimized .fp-body,
+.fp-widget.fp-minimized .fp-footer { display: none; }
+.fp-widget.fp-fullscreen {
+  position: fixed; top: 3.5rem; left: 0; right: 0; bottom: 0;
+  width: auto; height: auto; max-width: none; max-height: none;
+  resize: none; border-radius: 0; border-left: none; border-right: none; border-bottom: none;
+}
+
+.fp-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 1rem; height: 48px; min-height: 48px;
+  background: #1c2128; border-bottom: 1px solid #30363d;
+  cursor: grab; user-select: none; flex-shrink: 0;
+}
+.fp-header:active { cursor: grabbing; }
+.fp-drag-hint { font-size: 0.75rem; color: #3a4455; margin-right: 0.25rem; }
+.fp-title { font-family: var(--font-mono); font-size: 0.72rem; color: #8892a4; flex: 1; }
+.fp-title strong { color: #c792ea; }
+.fp-kbd { font-family: var(--font-mono); font-size: 0.65rem; color: #3a4455; margin-left: auto; margin-right: 0.5rem; }
+.fp-controls { display: flex; gap: 0.3rem; }
+.fp-ctrl-btn {
+  width: 26px; height: 26px; border-radius: 5px;
+  border: 1px solid #30363d; background: transparent;
+  color: #8892a4; cursor: pointer; font-size: 0.8rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.fp-ctrl-btn:hover { background: #2d333b; color: #e6edf3; border-color: #4a5568; }
+.fp-ctrl-btn.fp-close:hover { background: #da3633; color: #fff; border-color: #da3633; }
+
+.fp-examples {
+  display: flex; gap: 0.4rem; padding: 0.5rem 1rem;
+  background: #1c2128; border-bottom: 1px solid #30363d;
+  flex-wrap: wrap; flex-shrink: 0;
+}
+.fp-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  flex: 1; overflow: hidden; min-height: 0;
+}
+.fp-editor-wrap { border-right: 1px solid #1e2535; display: flex; flex-direction: column; overflow: hidden; }
+.fp-editor {
+  flex: 1; width: 100%; background: #0d1117; color: #e6edf3;
+  border: none; resize: none; padding: 1rem;
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.6;
+  outline: none; tab-size: 2;
+}
+.fp-output {
+  background: #0d1117; color: #546e7a;
+  padding: 1rem; font-family: var(--font-mono); font-size: 0.82rem;
+  line-height: 1.6; overflow-y: auto; white-space: pre-wrap; overflow-x: hidden;
+}
+.fp-output.fp-has-out { color: #e6edf3; }
+.fp-footer {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.55rem 1rem; background: #1c2128;
+  border-top: 1px solid #30363d; flex-shrink: 0;
+}
+.fp-footer-hint { font-family: var(--font-mono); font-size: 0.68rem; color: #3a4455; margin-left: auto; }
+
+@media (max-width: 700px) {
+  .fp-widget { width: calc(100vw - 1rem); right: 0.5rem; left: 0.5rem; bottom: 5rem; }
+  .fp-body { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .fp-editor-wrap { border-right: none; border-bottom: 1px solid #1e2535; }
+  .fp-widget.fp-fullscreen { top: 3rem; left: 0; right: 0; }
+  .fp-toggle { bottom: 1.2rem; right: 1rem; }
+}
 </style>
 </head>
 <body>
@@ -1775,6 +1871,159 @@ async function runBring(){
 document.getElementById('bringEditor').addEventListener('keydown', e=>{
   if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); runBring(); }
 });
+
+// ─── FLOATING PLAYGROUND ───────────────────────────────────────
+let _fpOpen = false, _fpMin = false, _fpFs = false;
+let _fpDragging = false, _fpOX = 0, _fpOY = 0;
+
+const _fpW  = () => document.getElementById('fpWidget');
+const _fpTg = () => document.getElementById('fpToggle');
+
+function fpOpen() {
+  _fpOpen = true;
+  _fpW().classList.remove('fp-hidden');
+  _fpTg().innerHTML = '<span>✕</span> Close';
+  _fpTg().onclick = fpClose;
+}
+function fpClose() {
+  _fpOpen = false; _fpMin = false; _fpFs = false;
+  const w = _fpW();
+  w.classList.add('fp-hidden');
+  w.classList.remove('fp-minimized', 'fp-fullscreen');
+  _fpTg().innerHTML = '<span>▶</span> El Playground';
+  _fpTg().onclick = fpOpen;
+}
+function fpMinimize() {
+  _fpMin = !_fpMin;
+  _fpW().classList.toggle('fp-minimized', _fpMin);
+  document.getElementById('fpMinBtn').title = _fpMin ? 'Restore' : 'Minimize';
+  document.getElementById('fpMinBtn').textContent = _fpMin ? '▢' : '─';
+}
+function fpFullscreen() {
+  _fpFs = !_fpFs;
+  const w = _fpW();
+  w.classList.toggle('fp-fullscreen', _fpFs);
+  if (_fpFs && _fpMin) { _fpMin = false; w.classList.remove('fp-minimized'); }
+  document.getElementById('fpFsBtn').title = _fpFs ? 'Exit Fullscreen' : 'Fullscreen';
+  document.getElementById('fpFsBtn').textContent = _fpFs ? '⊡' : '⛶';
+}
+function fpSetExample(name) {
+  document.getElementById('fpEditor').value = elExamples[name] || '';
+}
+
+// ─── Drag ───────────────────────────────────────────────────────
+(function() {
+  const header = document.getElementById('fpHeader');
+
+  function startDrag(cx, cy) {
+    if (_fpFs) return;
+    const w = _fpW();
+    const r = w.getBoundingClientRect();
+    w.style.right = 'auto'; w.style.bottom = 'auto';
+    w.style.left = r.left + 'px'; w.style.top = r.top + 'px';
+    _fpDragging = true;
+    _fpOX = cx - r.left; _fpOY = cy - r.top;
+  }
+  function moveDrag(cx, cy) {
+    if (!_fpDragging) return;
+    const w = _fpW();
+    let nx = Math.max(0, Math.min(cx - _fpOX, window.innerWidth - w.offsetWidth));
+    let ny = Math.max(0, Math.min(cy - _fpOY, window.innerHeight - 48));
+    w.style.left = nx + 'px'; w.style.top = ny + 'px';
+  }
+  function endDrag() { _fpDragging = false; }
+
+  header.addEventListener('mousedown', e => {
+    if (e.target.closest('.fp-ctrl-btn')) return;
+    startDrag(e.clientX, e.clientY);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+  function onMouseMove(e) { moveDrag(e.clientX, e.clientY); }
+  function onMouseUp()    { endDrag(); document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); }
+
+  header.addEventListener('touchstart', e => {
+    if (e.target.closest('.fp-ctrl-btn')) return;
+    startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  header.addEventListener('touchmove', e => {
+    moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  header.addEventListener('touchend', endDrag, { passive: true });
+})();
+
+// ─── Run ────────────────────────────────────────────────────────
+document.getElementById('fpEditor').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runFp(); }
+});
+
+async function runFp() {
+  const code = document.getElementById('fpEditor').value;
+  const out  = document.getElementById('fpOutput');
+  const btn  = document.getElementById('fpRunBtn');
+  const st   = document.getElementById('fpStatus');
+  if (!code.trim()) { out.textContent = '// nothing to run'; return; }
+  btn.disabled = true; st.textContent = 'running…';
+  out.classList.remove('fp-has-out');
+  out.textContent = '// running…';
+  try {
+    const r = await fetch('/api/run-el', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await r.json();
+    let html = '';
+    if (data.output) html += colorizeOutput(data.output);
+    if (data.error)  html += (html ? '\n' : '') + '<span class="out-error">' + escHtml(data.error) + '</span>';
+    if (!html)       html = '<span style="color:#546e7a">// (no output)</span>';
+    out.classList.add('fp-has-out');
+    out.innerHTML = html;
+    st.textContent = data.error ? '✗ error' : '✓ done';
+  } catch (err) {
+    out.innerHTML = '<span class="out-error">Network error: ' + escHtml(String(err)) + '</span>';
+    st.textContent = '✗ failed';
+  }
+  btn.disabled = false;
+  setTimeout(() => { st.textContent = ''; }, 3000);
+}
 </script>
+
+<!-- ── FLOATING PLAYGROUND WIDGET ──────────────────────────── -->
+<button class="fp-toggle" id="fpToggle" onclick="fpOpen()">
+  <span>▶</span> El Playground
+</button>
+
+<div class="fp-widget fp-hidden" id="fpWidget">
+  <div class="fp-header" id="fpHeader">
+    <span class="fp-drag-hint">⠿</span>
+    <span class="fp-title"><strong>El</strong> interpreter — live</span>
+    <span class="fp-kbd">Ctrl+Enter to run</span>
+    <div class="fp-controls">
+      <button class="fp-ctrl-btn" id="fpMinBtn" title="Minimize" onclick="fpMinimize()">─</button>
+      <button class="fp-ctrl-btn" id="fpFsBtn"  title="Fullscreen" onclick="fpFullscreen()">⛶</button>
+      <button class="fp-ctrl-btn fp-close" title="Close" onclick="fpClose()">✕</button>
+    </div>
+  </div>
+  <div class="fp-examples">
+    <button class="playground-example-btn" onclick="fpSetExample('hello')">Hello World</button>
+    <button class="playground-example-btn" onclick="fpSetExample('proof')">Proof Demo</button>
+    <button class="playground-example-btn" onclick="fpSetExample('axiomatic')">Axiomatic</button>
+    <button class="playground-example-btn" onclick="fpSetExample('funcs')">Functions</button>
+  </div>
+  <div class="fp-body">
+    <div class="fp-editor-wrap">
+      <textarea class="fp-editor" id="fpEditor" spellcheck="false">ALGORITHM HelloWorld {
+  show "Hello, World!";
+  show "MatyOS v1.0.9";
+}</textarea>
+    </div>
+    <div class="fp-output" id="fpOutput">// output will appear here</div>
+  </div>
+  <div class="fp-footer">
+    <button class="run-btn" id="fpRunBtn" onclick="runFp()">▶ Run</button>
+    <span class="run-status" id="fpStatus"></span>
+    <span class="fp-footer-hint">draggable · resizable · fullscreen</span>
+  </div>
+</div>
 </body>
 </html>
