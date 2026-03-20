@@ -61,6 +61,10 @@ def bring_editor():
 def cookixdb():
     return render_template("cookixdb.html")
 
+@app.route("/cookixdb/sim")
+def cookixdb_sim():
+    return render_template("cookixdb_sim.html")
+
 @app.route("/papers/novectDB")
 def novectdb():
     return render_template("novectdb.html")

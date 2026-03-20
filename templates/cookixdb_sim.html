@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CookixDB — Full 3D Vector Space Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --gold:   #FEB763;
+  --gold2:  #D79C54;
+  --orange: #ff8c42;
+  --bg:     #050302;
+  --bg2:    #0c0907;
+  --panel:  rgba(12,9,7,0.92);
+  --border: rgba(254,183,99,0.15);
+  --text:   #f0e8dc;
+  --muted:  #8a7560;
+  --mono:   'JetBrains Mono', monospace;
+  --sans:   'Inter', sans-serif;
+  --chip0: #FEB763; --chip1: #ff8c42; --chip2: #82cfff;
+  --chip3: #c3e88d; --chip4: #c792ea; --chip5: #ff6b6b;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
+body { font-family: var(--sans); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+/* ── TOPBAR ── */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 46px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0; padding: 0;
+}
+.tb-brand {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0 1.4rem; border-right: 1px solid var(--border);
+  height: 100%; text-decoration: none;
+}
+.tb-brand img { width: 20px; height: 20px; object-fit: contain; }
+.tb-brand span { font-family: var(--mono); font-size: 0.82rem; color: var(--gold); letter-spacing: 0.03em; }
+.tb-title {
+  padding: 0 1.4rem; font-family: var(--mono); font-size: 0.7rem;
+  color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+  border-right: 1px solid var(--border); height: 100%; display: flex; align-items: center;
+}
+.tb-controls {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 1.2rem; flex: 1;
+}
+.tb-btn {
+  font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.04em;
+  background: rgba(254,183,99,0.08); color: var(--gold);
+  border: 1px solid rgba(254,183,99,0.22);
+  padding: 0.28rem 0.75rem; border-radius: 3px; cursor: pointer; transition: all .15s;
+}
+.tb-btn:hover { background: rgba(254,183,99,0.18); }
+.tb-btn.active { background: var(--gold); color: #110900; font-weight: 600; }
+.tb-btn.danger { color: #ff8a8a; border-color: rgba(255,138,138,0.3); }
+.tb-btn.danger:hover { background: rgba(255,138,138,0.15); }
+.tb-sep { width: 1px; height: 20px; background: var(--border); margin: 0 0.4rem; }
+.tb-right {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 1.2rem; border-left: 1px solid var(--border); height: 100%;
+}
+.tb-toggle {
+  font-family: var(--mono); font-size: 0.64rem; color: var(--muted);
+  display: flex; align-items: center; gap: 0.4rem; cursor: pointer;
+  padding: 0.25rem 0.6rem; border-radius: 3px; border: 1px solid transparent;
+  transition: all .15s;
+}
+.tb-toggle:hover { border-color: var(--border); color: var(--text); }
+.tb-toggle input { display: none; }
+.tb-toggle.on { color: var(--gold); border-color: rgba(254,183,99,0.25); }
+.tb-back {
+  font-family: var(--mono); font-size: 0.7rem; color: var(--muted);
+  text-decoration: none; padding: 0 1.2rem; border-left: 1px solid var(--border);
+  height: 100%; display: flex; align-items: center; transition: color .15s;
+}
+.tb-back:hover { color: var(--gold); }
+
+/* ── MAIN CANVAS ── */
+#simFullCanvas {
+  position: fixed; top: 46px; left: 0; right: 0; bottom: 46px;
+  width: 100%; height: calc(100vh - 92px);
+  display: block; cursor: grab;
+}
+#simFullCanvas:active { cursor: grabbing; }
+
+/* ── FORMULA PANEL (right slide-in) ── */
+#formulaPanel {
+  position: fixed; top: 46px; right: 0; bottom: 46px;
+  width: 320px; z-index: 50;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  transform: translateX(100%);
+  transition: transform .3s ease;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 1.5rem 1.4rem;
+}
+#formulaPanel.open { transform: translateX(0); }
+.fp-title {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--gold2); margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem; border-bottom: 1px solid var(--border);
+}
+.fp-section { margin-bottom: 1.4rem; }
+.fp-label {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem;
+}
+.fp-formula {
+  background: rgba(254,183,99,0.06); border: 1px solid rgba(254,183,99,0.18);
+  border-radius: 4px; padding: 0.7rem 0.9rem;
+  font-family: var(--mono); font-size: 0.72rem; color: var(--gold);
+  line-height: 1.7; word-break: break-all;
+}
+.fp-note { font-size: 0.74rem; color: var(--muted); line-height: 1.55; margin-top: 0.5rem; }
+.fp-active {
+  background: rgba(254,183,99,0.12); border-color: rgba(254,183,99,0.45);
+  animation: fp-pulse .8s ease-in-out;
+}
+@keyframes fp-pulse { 0%{opacity:.5} 50%{opacity:1} 100%{opacity:.5} }
+.fp-ko {
+  margin-top: 0.5rem; font-family: var(--mono); font-size: 0.68rem;
+  color: var(--text); line-height: 1.8;
+}
+.fp-ko .sym { color: var(--gold); }
+.fp-ko .typ { color: #82cfff; }
+
+/* ── LEGEND OVERLAY (bottom-left) ── */
+#legend {
+  position: fixed; bottom: 56px; left: 16px; z-index: 50;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.7rem 1rem;
+  font-family: var(--mono); font-size: 0.62rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
+  transition: opacity .2s;
+}
+.leg-item { display: flex; align-items: center; gap: 0.5rem; color: var(--muted); }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.leg-line { width: 16px; height: 2px; flex-shrink: 0; opacity: 0.5; }
+.leg-sq   { width: 8px; height: 8px; flex-shrink: 0; opacity: 0.4; }
+
+/* ── STATUS BAR ── */
+#statusbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  height: 46px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0;
+  font-family: var(--mono); font-size: 0.65rem;
+}
+.sb-cell {
+  padding: 0 1.4rem; height: 100%;
+  display: flex; align-items: center; gap: 0.5rem;
+  border-right: 1px solid var(--border); color: var(--muted);
+  white-space: nowrap;
+}
+.sb-cell span { color: var(--gold); }
+.sb-formula {
+  flex: 1; padding: 0 1.4rem; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sb-formula span { color: var(--gold2); }
+.sb-status {
+  padding: 0 1.4rem; border-left: 1px solid var(--border); height: 100%;
+  display: flex; align-items: center; gap: 0.4rem; color: var(--muted);
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #4a9;
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+/* ── TOOLTIP ── */
+#tooltip3 {
+  position: fixed; z-index: 200;
+  background: rgba(5,3,2,0.96); border: 1px solid rgba(254,183,99,0.4);
+  border-radius: 4px; padding: 0.6rem 1rem;
+  font-family: var(--mono); font-size: 0.68rem; color: var(--text);
+  pointer-events: none; opacity: 0; transition: opacity .12s;
+  max-width: 220px; line-height: 1.6;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.7);
+}
+#tooltip3.vis { opacity: 1; }
+#tooltip3 .tt-h { color: var(--gold); font-size: 0.65rem; margin-bottom: 0.2rem; }
+
+/* ── QUERY ANIM ── */
+.query-flash {
+  animation: qFlash .6s ease-out;
+}
+@keyframes qFlash { 0%{opacity:0} 30%{opacity:1} 100%{opacity:0} }
+
+@media (max-width: 600px) {
+  #formulaPanel { width: 100%; }
+  .tb-title { display: none; }
+  .tb-sep { display: none; }
+  #legend { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <a class="tb-brand" href="/cookixdb">
+    <img src="/static/img/cookie.svg" alt="CookixDB">
+    <span>CookixDB</span>
+  </a>
+  <div class="tb-title">3D Vector Space Simulator</div>
+
+  <div class="tb-controls">
+    <button class="tb-btn active" id="tbBake" onclick="sfAction('bake')">🍪 bake() +15</button>
+    <button class="tb-btn" id="tbNibble" onclick="sfAction('nibble')">🔍 nibble()</button>
+    <button class="tb-btn" id="tbCluster" onclick="sfAction('cluster')">🔄 Lloyd's</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="tbManifold" onclick="sfAction('manifold')">◉ manifold</button>
+    <button class="tb-btn" id="tbGraph" onclick="sfAction('graph')">⬡ HNSW graph</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn danger" onclick="sfAction('reset')">✕ reset</button>
+  </div>
+
+  <div class="tb-right">
+    <label class="tb-toggle on" id="toggleCrumbs">
+      <input type="checkbox" checked onchange="toggleLayer('crumbs',this.checked)">
+      ● crumbs
+    </label>
+    <label class="tb-toggle on" id="toggleChips">
+      <input type="checkbox" checked onchange="toggleLayer('chips',this.checked)">
+      ◉ chips
+    </label>
+    <label class="tb-toggle on" id="toggleEdges">
+      <input type="checkbox" checked onchange="toggleLayer('edges',this.checked)">
+      ⬡ edges
+    </label>
+    <label class="tb-toggle on" id="toggleGrid">
+      <input type="checkbox" checked onchange="toggleLayer('grid',this.checked)">
+      ⊞ grid
+    </label>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" onclick="toggleFormula()">∑ Formula</button>
+    <a class="tb-back" href="/cookixdb">← back</a>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<canvas id="simFullCanvas"></canvas>
+
+<!-- TOOLTIP -->
+<div id="tooltip3"><div class="tt-h" id="tt3h"></div><div id="tt3b"></div></div>
+
+<!-- FORMULA PANEL -->
+<div id="formulaPanel">
+  <div class="fp-title">NoVectDB · Mathematical Foundation</div>
+
+  <div class="fp-section">
+    <div class="fp-label">Knowledge Object</div>
+    <div class="fp-formula fp-ko">
+      <span class="sym">K</span> = (<span class="typ">G</span>, <span class="typ">T</span>, <span class="typ">V</span>, <span class="typ">S</span>)<br>
+      <span class="sym">G</span>: geodesic coordinate (manifold)<br>
+      <span class="sym">T</span>: type signature<br>
+      <span class="sym">V</span>: vector embedding ∈ ℝⁿ<br>
+      <span class="sym">S</span>: sheaf section
+    </div>
+  </div>
+
+  <div class="fp-section">
+    <div class="fp-label">Composite Distance (Def 3.4)</div>
+    <div class="fp-formula" id="fpDist">
+      d(Kₐ,K_b) =<br>
+      α·d_geo(a,b)<br>
+      + β·(1 − TVS(Tₐ,T_b))<br>
+      + γ·‖Sₐ ∘_π S_b‖
+    </div>
+    <div class="fp-note">α,β,γ ≥ 0 are weighting coefficients. When the sheaf is globally consistent, this is a true metric space (ε = 0).</div>
+  </div>
+
+  <div class="fp-section">
+    <div class="fp-label">Chip Assignment (Voronoi)</div>
+    <div class="fp-formula">
+      chip(q) = argmin_c ‖q − μ_c‖₂
+    </div>
+    <div class="fp-note">q is assigned to the chip whose centroid μ_c minimises Euclidean distance — the Voronoi cell.</div>
+  </div>
+
+  <div class="fp-section">
+    <div class="fp-label">Cosine Similarity (Crumb Rank)</div>
+    <div class="fp-formula">
+      sim(a,b) = (a·b)/(‖a‖·‖b‖) ∈ [−1,1]
+    </div>
+    <div class="fp-note">Within a chip's Voronoi cell, crumbs are ranked by cosine similarity to the query vector.</div>
+  </div>
+
+  <div class="fp-section">
+    <div class="fp-label">Variance Threshold (Auto-Split)</div>
+    <div class="fp-formula">
+      Var(c) = (1/|c|)Σᵢ‖xᵢ−μ_c‖² &gt; σ²_max<br>
+      → bisecting k-means split
+    </div>
+  </div>
+
+  <div class="fp-section">
+    <div class="fp-label">Expected Complexity</div>
+    <div class="fp-formula">
+      T(n) = O(log n) + O(|c|)<br>
+      At K = √n → O(√n)
+    </div>
+    <div class="fp-note">O(log n) for chip navigation (HNSW). O(|c|) for linear scan within the Voronoi cell.</div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div id="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:var(--chip0)"></div> chip_00</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--chip1)"></div> chip_01</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--chip2)"></div> chip_02</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--chip3)"></div> chip_03</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--chip4)"></div> chip_04</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--chip5)"></div> chip_05</div>
+  <div style="height:6px"></div>
+  <div class="leg-item"><div class="leg-line" style="background:var(--gold)"></div> HNSW edge</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#fff;width:10px;height:10px;border-radius:50%"></div> query point</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#fff;border:2px solid var(--gold);width:10px;height:10px"></div> k-NN result</div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div class="sb-cell">crumbs: <span id="sb-crumbs">0</span></div>
+  <div class="sb-cell">chips (K): <span id="sb-chips">6</span></div>
+  <div class="sb-cell">query: <span id="sb-query">—</span></div>
+  <div class="sb-cell">nearest: <span id="sb-nearest">—</span></div>
+  <div class="sb-cell">d_geo: <span id="sb-dgeo">—</span></div>
+  <div class="sb-formula">formula: <span>d(Kₐ,K_b) = α·d_geo + β·(1−TVS) + γ·‖S∘S‖</span></div>
+  <div class="sb-status"><div class="status-dot"></div>sim live</div>
+</div>
+
+<!-- THREE.JS -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   COOKIXDB FULL 3D SIMULATOR
+   Based on NoVectDB: d(Ka,Kb) = α·d_geo + β·(1-TVS) + γ·‖S∘S‖
+   Chip = Voronoi centroid (HNSW cluster node)
+   Crumb = vector embedding (Knowledge Object)
+   ═══════════════════════════════════════════════════════════════ */
+
+const canvas = document.getElementById('simFullCanvas');
+const W = () => canvas.clientWidth, H = () => canvas.clientHeight;
+
+// ── Renderer ──────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(W(), H());
+renderer.setClearColor(0x050302, 1);
+renderer.shadowMap.enabled = true;
+
+// ── Scene + Camera ────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x050302, 0.025);
+
+const camera = new THREE.PerspectiveCamera(50, W()/H(), 0.1, 200);
+
+// ── Lights ─────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.18));
+const sun = new THREE.DirectionalLight(0xffdd88, 0.85);
+sun.position.set(6, 10, 6); sun.castShadow = true; scene.add(sun);
+const fillL = new THREE.PointLight(0x4466ff, 0.3, 30);
+fillL.position.set(-8, 4, -8); scene.add(fillL);
+const rimL  = new THREE.PointLight(0xff6633, 0.25, 25);
+rimL.position.set(8, -3, -6); scene.add(rimL);
+
+// ── Grid (dough-space context tensor) ─────────────────────────
+const gridH = new THREE.GridHelper(14, 28, 0xFEB763, 0xFEB763);
+gridH.material.opacity = 0.06; gridH.material.transparent = true;
+gridH.position.y = -3.2; scene.add(gridH);
+
+const gridV = new THREE.GridHelper(14, 28, 0xFEB763, 0xFEB763);
+gridV.material.opacity = 0.025; gridV.material.transparent = true;
+gridV.rotation.z = Math.PI/2; gridV.position.x = -7; scene.add(gridV);
+
+// ── State ──────────────────────────────────────────────────────
+const K = 6;
+const CHIP_HEX = [0xFEB763, 0xff8c42, 0x82cfff, 0xc3e88d, 0xc792ea, 0xff6b6b];
+const CHIP_NAMES = ['chip_00','chip_01','chip_02','chip_03','chip_04','chip_05'];
+
+let crumbs = [];         // {pos: Vector3, chip: int, vel: Vector3 (manifold drift)}
+let chips  = [];         // {mesh, glow, ring, id}
+let edgeGroup  = null;
+let crumbCloud = null;
+let querySphere = null, queryLines = null;
+let queryResultIdx = [];
+let manifoldMesh = null;
+let showManifold = false, showGraph = true;
+let simT = 0;
+
+// ── Shaders ────────────────────────────────────────────────────
+const CRUMB_VS = `
+  attribute float aChip;
+  attribute float aHL;
+  attribute float aPhase;
+  uniform float uTime;
+  varying float vC;
+  varying float vH;
+  void main() {
+    vC = aChip; vH = aHL;
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    float sz = vH > 0.5 ? 12.0 : 5.0;
+    if(vH > 0.5) sz += 3.0 * sin(uTime * 6.0 + aPhase);
+    gl_PointSize = max(1.2, sz * 220.0 / (-mv.z));
+    gl_Position  = projectionMatrix * mv;
+  }`;
+const CRUMB_FS = `
+  varying float vC;
+  varying float vH;
+  vec3 cc(float id){
+    if(id<.5) return vec3(1.00,.72,.39);
+    if(id<1.5) return vec3(1.00,.55,.26);
+    if(id<2.5) return vec3(.51,.79,1.0);
+    if(id<3.5) return vec3(.76,.93,.55);
+    if(id<4.5) return vec3(.78,.57,.92);
+    return vec3(1.0,.42,.42);
+  }
+  void main(){
+    vec2 uv = gl_PointCoord - 0.5;
+    float r = length(uv);
+    if(r > 0.5) discard;
+    float a = smoothstep(0.5, 0.04, r);
+    vec3 col = cc(vC);
+    if(vH > 0.5){
+      col = mix(col, vec3(1.0), 0.6);
+      a = min(a * 1.5, 1.0);
+      // hard ring
+      float ring = smoothstep(0.5, 0.42, r) * smoothstep(0.35, 0.44, r);
+      col = mix(col, vec3(1.0), ring * 0.8);
+    }
+    gl_FragColor = vec4(col, a * 0.9);
+  }`;
+
+// HNSW edge flow shader
+const EDGE_VS = `
+  attribute float aT;       // position along edge [0,1]
+  attribute float aFlow;    // flow particle t offset
+  uniform float uTime;
+  varying float vFlow;
+  void main() {
+    vFlow = aFlow;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }`;
+const EDGE_FS = `
+  varying float vFlow;
+  uniform float uTime;
+  uniform vec3  uColor;
+  void main() {
+    // Base edge
+    gl_FragColor = vec4(uColor, 0.18);
+  }`;
+
+// ── Chip init ──────────────────────────────────────────────────
+const chipGeo = new THREE.SphereGeometry(0.22, 24, 24);
+const ringGeo = new THREE.TorusGeometry(0.4, 0.025, 8, 32);
+
+function initChips() {
+  chips.forEach(c => { scene.remove(c.mesh); scene.remove(c.glow); scene.remove(c.ring); });
+  chips = [];
+  for (let i = 0; i < K; i++) {
+    const p = new THREE.Vector3(
+      (Math.random()-0.5)*8, (Math.random()-0.5)*3, (Math.random()-0.5)*8
+    );
+    const col = CHIP_HEX[i];
+    // Main sphere
+    const mat = new THREE.MeshStandardMaterial({
+      color: col, emissive: col, emissiveIntensity: 0.5,
+      roughness: 0.22, metalness: 0.18
+    });
+    const mesh = new THREE.Mesh(chipGeo, mat);
+    mesh.position.copy(p); mesh.castShadow = true;
+
+    // Glow shell
+    const glowMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.09, side: THREE.BackSide });
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.50, 16, 16), glowMat);
+    glow.position.copy(p);
+
+    // Equatorial ring
+    const ringMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.35 });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.copy(p); ring.rotation.x = Math.PI/2 + (Math.random()-0.5)*0.4;
+
+    scene.add(mesh); scene.add(glow); scene.add(ring);
+    chips.push({ mesh, glow, ring, id: i, phase: Math.random()*Math.PI*2 });
+  }
+  rebuildEdges();
+}
+
+// ── HNSW graph edges ──────────────────────────────────────────
+function rebuildEdges() {
+  if (edgeGroup) scene.remove(edgeGroup);
+  edgeGroup = new THREE.Group();
+
+  chips.forEach((a, i) => {
+    const dists = chips.map((b,j) => ({j, d:a.mesh.position.distanceTo(b.mesh.position)}))
+                       .filter((_,j)=>j!==i).sort((x,y)=>x.d-y.d);
+    dists.slice(0, 2).forEach(nb => {
+      if (nb.j > i) {
+        const pts = [a.mesh.position.clone(), chips[nb.j].mesh.position.clone()];
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        const mat = new THREE.LineBasicMaterial({
+          color: CHIP_HEX[i], transparent: true, opacity: 0.22
+        });
+        edgeGroup.add(new THREE.Line(geo, mat));
+
+        // Flow particles along edge
+        const NFLOW = 5;
+        const flowPts = [];
+        for (let f=0; f<NFLOW; f++) {
+          const t = f / NFLOW;
+          const fp = a.mesh.position.clone().lerp(chips[nb.j].mesh.position, t);
+          flowPts.push(fp);
+        }
+        const fgeo = new THREE.BufferGeometry().setFromPoints(flowPts);
+        // Store edge endpoints for animation
+        const fm = new THREE.PointsMaterial({ color: CHIP_HEX[i], size: 0.05, transparent: true, opacity: 0.55 });
+        const fp = new THREE.Points(fgeo, fm);
+        fp.userData = { a: a.mesh.position.clone(), b: chips[nb.j].mesh.position.clone(), t: Math.random() };
+        edgeGroup.add(fp);
+      }
+    });
+  });
+
+  if (showGraph) scene.add(edgeGroup);
+}
+
+// ── Crumb cloud (custom shader) ────────────────────────────────
+function assignCrumbs() {
+  crumbs.forEach(c => {
+    let best=0, bestD=Infinity;
+    chips.forEach((ch,i)=>{ const d=c.pos.distanceTo(ch.mesh.position); if(d<bestD){bestD=d;best=i;} });
+    c.chip = best;
+  });
+}
+
+function rebuildCloud() {
+  if (crumbCloud) scene.remove(crumbCloud);
+  if (!crumbs.length) return;
+  const n = crumbs.length;
+  const pos = new Float32Array(n*3), ca = new Float32Array(n), hl = new Float32Array(n), ph = new Float32Array(n);
+  crumbs.forEach((c,i) => {
+    pos[i*3]=c.pos.x; pos[i*3+1]=c.pos.y; pos[i*3+2]=c.pos.z;
+    ca[i]=c.chip; hl[i]=queryResultIdx.includes(i)?1:0; ph[i]=c.phase||0;
+  });
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('aChip',    new THREE.BufferAttribute(ca,1));
+  geo.setAttribute('aHL',      new THREE.BufferAttribute(hl,1));
+  geo.setAttribute('aPhase',   new THREE.BufferAttribute(ph,1));
+  crumbCloud = new THREE.Points(geo, new THREE.ShaderMaterial({
+    vertexShader: CRUMB_VS, fragmentShader: CRUMB_FS,
+    transparent: true, depthWrite: false,
+    uniforms: { uTime: { value: 0 } }
+  }));
+  scene.add(crumbCloud);
+}
+
+// ── Manifold surface (Gaussian density mesh) ──────────────────
+function buildManifold() {
+  if (manifoldMesh) { scene.remove(manifoldMesh); manifoldMesh = null; }
+  if (!crumbs.length || !showManifold) return;
+
+  const RES = 28, RANGE = 6;
+  const geo = new THREE.PlaneGeometry(RANGE*2, RANGE*2, RES-1, RES-1);
+  geo.rotateX(-Math.PI/2);
+  const vpos = geo.attributes.position;
+
+  for (let i=0; i<vpos.count; i++) {
+    const x = vpos.getX(i), z = vpos.getZ(i);
+    let density = 0;
+    crumbs.forEach(c => {
+      const dx=x-c.pos.x, dz=z-c.pos.z;
+      density += Math.exp(-(dx*dx+dz*dz)/2.5);
+    });
+    vpos.setY(i, -3.2 + Math.min(density*0.06, 1.5));
+  }
+  geo.computeVertexNormals();
+  manifoldMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+    color: 0xFEB763, emissive: 0x332200, roughness: 0.8,
+    transparent: true, opacity: 0.22, side: THREE.DoubleSide, wireframe: false
+  }));
+  scene.add(manifoldMesh);
+
+  // Wireframe overlay
+  const wf = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+    color: 0xFEB763, wireframe: true, transparent: true, opacity: 0.06
+  }));
+  scene.add(wf);
+}
+
+// ── Query ──────────────────────────────────────────────────────
+function doQuery() {
+  if (!crumbs.length) return;
+  const q = new THREE.Vector3((Math.random()-.5)*8,(Math.random()-.5)*2.5,(Math.random()-.5)*8);
+
+  if (querySphere) scene.remove(querySphere);
+  if (queryLines)  scene.remove(queryLines);
+
+  const qMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.15,16,16),
+    new THREE.MeshBasicMaterial({ color: 0xffffff })
+  );
+  qMesh.position.copy(q); scene.add(querySphere = qMesh);
+
+  // Glow around query
+  const qGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(0.35,16,16),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.08, side: THREE.BackSide })
+  );
+  qGlow.position.copy(q); scene.add(qGlow);
+
+  // Nearest chip
+  let nearIdx=0, nearD=Infinity;
+  chips.forEach((c,i)=>{ const d=q.distanceTo(c.mesh.position); if(d<nearD){nearD=d;nearIdx=i;} });
+
+  // k-NN crumbs
+  queryResultIdx = crumbs.map((c,i)=>({i,d:q.distanceTo(c.pos)})).sort((a,b)=>a.d-b.d).slice(0,7).map(x=>x.i);
+  rebuildCloud();
+
+  // Lines to k-NN results
+  const linesGroup = new THREE.Group();
+  queryResultIdx.forEach(idx => {
+    const geo = new THREE.BufferGeometry().setFromPoints([q, crumbs[idx].pos]);
+    linesGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 })));
+  });
+  // Bold line to nearest chip
+  const geoToChip = new THREE.BufferGeometry().setFromPoints([q, chips[nearIdx].mesh.position]);
+  linesGroup.add(new THREE.Line(geoToChip, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 })));
+  scene.add(queryLines = linesGroup);
+
+  // Composite distance
+  const dGeo = nearD.toFixed(3);
+  document.getElementById('sb-dgeo').textContent = dGeo;
+  document.getElementById('sb-query').textContent = `(${q.x.toFixed(1)},${q.y.toFixed(1)},${q.z.toFixed(1)})`;
+  document.getElementById('sb-nearest').textContent = CHIP_NAMES[nearIdx];
+  document.getElementById('fpDist').classList.add('fp-active');
+  setTimeout(()=>document.getElementById('fpDist').classList.remove('fp-active'),900);
+
+  sbUpdate();
+}
+
+function sbUpdate() {
+  document.getElementById('sb-crumbs').textContent = crumbs.length;
+  document.getElementById('sb-chips').textContent  = chips.length;
+}
+
+// ── Orbit ──────────────────────────────────────────────────────
+let drag=false, lx=0, ly=0, az=-0.3, el=0.42, rad=13;
+function camUpdate(){
+  camera.position.set(
+    rad*Math.cos(el)*Math.sin(az),
+    rad*Math.sin(el),
+    rad*Math.cos(el)*Math.cos(az)
+  ); camera.lookAt(0,0,0);
+}
+camUpdate();
+
+canvas.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;});
+window.addEventListener('mouseup',()=>drag=false);
+window.addEventListener('mousemove',e=>{
+  if(!drag)return;
+  az+=(e.clientX-lx)*.006; el-=(e.clientY-ly)*.004;
+  el=Math.max(-1.3,Math.min(1.3,el)); lx=e.clientX; ly=e.clientY; camUpdate();
+});
+canvas.addEventListener('wheel',e=>{
+  rad=Math.max(4,Math.min(20,rad+e.deltaY*.012)); camUpdate();
+},{passive:true});
+canvas.addEventListener('touchstart',e=>{drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;},{passive:true});
+canvas.addEventListener('touchend',()=>drag=false);
+canvas.addEventListener('touchmove',e=>{
+  if(!drag)return;
+  az+=(e.touches[0].clientX-lx)*.007;
+  el-=(e.touches[0].clientY-ly)*.004;
+  el=Math.max(-1.3,Math.min(1.3,el)); lx=e.touches[0].clientX; ly=e.touches[0].clientY; camUpdate();
+},{passive:true});
+
+// Resize
+new ResizeObserver(()=>{
+  renderer.setSize(W(),H()); camera.aspect=W()/H(); camera.updateProjectionMatrix();
+}).observe(canvas);
+
+// ── Raycaster (hover chips) ────────────────────────────────────
+const ray = new THREE.Raycaster();
+const mouse = new THREE.Vector2(-9,-9);
+const tooltip3 = document.getElementById('tooltip3');
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(chips.map(c=>c.mesh));
+  if (hits.length) {
+    const i = chips.findIndex(c=>c.mesh===hits[0].object);
+    if (i !== -1) {
+      const ch = chips[i];
+      document.getElementById('tt3h').textContent = CHIP_NAMES[i];
+      const inChip = crumbs.filter(c=>c.chip===i).length;
+      const variance = crumbs.filter(c=>c.chip===i)
+        .reduce((s,c)=>s+c.pos.distanceTo(ch.mesh.position)**2,0) / Math.max(inChip,1);
+      document.getElementById('tt3b').innerHTML =
+        `crumbs: ${inChip}<br>centroid: (${ch.mesh.position.x.toFixed(1)},${ch.mesh.position.y.toFixed(1)},${ch.mesh.position.z.toFixed(1)})<br>Var(c): ${variance.toFixed(4)}<br>split_needed: ${variance > 0.15 ? '⚠ yes' : '✓ no'}`;
+      tooltip3.style.left = (e.clientX+12)+'px'; tooltip3.style.top = (e.clientY-8)+'px';
+      tooltip3.classList.add('vis');
+    }
+  } else { tooltip3.classList.remove('vis'); }
+});
+canvas.addEventListener('mouseleave',()=>tooltip3.classList.remove('vis'));
+
+// ── Animation Loop ─────────────────────────────────────────────
+(function loop(){
+  requestAnimationFrame(loop); simT+=0.014;
+
+  // Auto-rotate
+  if (!drag) { az += 0.0025; camUpdate(); }
+
+  // Chip pulse
+  chips.forEach((c,i)=>{
+    const p = 0.5+0.3*Math.sin(simT*1.6+c.phase);
+    c.mesh.material.emissiveIntensity = p;
+    c.glow.material.opacity = 0.06 + 0.04*Math.sin(simT*1.6+c.phase);
+    c.ring.rotation.y = simT*0.4 + i*0.8;
+    c.ring.rotation.x = Math.PI/2 + 0.2*Math.sin(simT*0.3+i);
+  });
+
+  // Crumb shader time
+  if (crumbCloud) crumbCloud.material.uniforms.uTime.value = simT;
+
+  // Flow particles along edges
+  if (edgeGroup) {
+    edgeGroup.children.forEach(obj=>{
+      if (obj.isPoints && obj.userData.a) {
+        obj.userData.t = (obj.userData.t + 0.008) % 1;
+        const pts = [];
+        const NFLOW = 5;
+        for (let f=0;f<NFLOW;f++){
+          const t = (obj.userData.t + f/NFLOW) % 1;
+          pts.push(obj.userData.a.clone().lerp(obj.userData.b, t));
+        }
+        obj.geometry.setFromPoints(pts);
+      }
+    });
+  }
+
+  // Slight manifold drift
+  if (manifoldMesh) manifoldMesh.rotation.y += 0.0002;
+
+  renderer.render(scene, camera);
+})();
+
+// ── Public actions ─────────────────────────────────────────────
+window.sfAction = function(action) {
+  // Highlight active btn
+  ['tbBake','tbNibble','tbCluster','tbManifold','tbGraph'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.remove('active');
+  });
+  const btnId = {bake:'tbBake',nibble:'tbNibble',cluster:'tbCluster',manifold:'tbManifold',graph:'tbGraph'}[action];
+  if(btnId) document.getElementById(btnId)?.classList.add('active');
+
+  if (action==='reset') {
+    crumbs=[]; queryResultIdx=[];
+    if(crumbCloud){scene.remove(crumbCloud);crumbCloud=null;}
+    if(querySphere){scene.remove(querySphere);querySphere=null;}
+    if(queryLines){scene.remove(queryLines);queryLines=null;}
+    if(manifoldMesh){scene.remove(manifoldMesh);manifoldMesh=null;}
+    initChips(); sbUpdate();
+    document.getElementById('sb-query').textContent='—';
+    document.getElementById('sb-nearest').textContent='—';
+    document.getElementById('sb-dgeo').textContent='—';
+    return;
+  }
+
+  if (action==='bake') {
+    for(let i=0;i<15;i++)
+      crumbs.push({
+        pos:new THREE.Vector3((Math.random()-.5)*8,(Math.random()-.5)*2.8,(Math.random()-.5)*8),
+        chip:0, phase:Math.random()*Math.PI*2
+      });
+    assignCrumbs(); rebuildCloud(); sbUpdate();
+    if(showManifold) buildManifold();
+    return;
+  }
+
+  if (action==='cluster') {
+    if(crumbs.length<2) return;
+    let iter=0;
+    (function step(){
+      const sums=chips.map(()=>({x:0,y:0,z:0,n:0}));
+      crumbs.forEach(c=>{ sums[c.chip].x+=c.pos.x; sums[c.chip].y+=c.pos.y; sums[c.chip].z+=c.pos.z; sums[c.chip].n++; });
+      chips.forEach((ch,i)=>{
+        if(sums[i].n>0){
+          ch.mesh.position.set(sums[i].x/sums[i].n, sums[i].y/sums[i].n, sums[i].z/sums[i].n);
+          ch.glow.position.copy(ch.mesh.position); ch.ring.position.copy(ch.mesh.position);
+        }
+      });
+      assignCrumbs(); rebuildCloud(); rebuildEdges(); iter++;
+      if(iter<12) setTimeout(step, 80);
+      else if(showManifold) buildManifold();
+    })(); return;
+  }
+
+  if (action==='nibble') { doQuery(); return; }
+
+  if (action==='manifold') {
+    showManifold = !showManifold;
+    document.getElementById('tbManifold').classList.toggle('active', showManifold);
+    if (showManifold) buildManifold();
+    else { scene.remove(manifoldMesh); manifoldMesh=null; }
+    return;
+  }
+
+  if (action==='graph') {
+    showGraph = !showGraph;
+    document.getElementById('tbGraph').classList.toggle('active', showGraph);
+    if (showGraph) scene.add(edgeGroup);
+    else           scene.remove(edgeGroup);
+    return;
+  }
+};
+
+window.toggleLayer = function(layer, visible) {
+  document.getElementById('toggle'+layer.charAt(0).toUpperCase()+layer.slice(1))?.classList.toggle('on', visible);
+  if (layer==='crumbs'  && crumbCloud) crumbCloud.visible = visible;
+  if (layer==='chips')  chips.forEach(c=>{ c.mesh.visible=visible; c.glow.visible=visible; c.ring.visible=visible; });
+  if (layer==='edges'   && edgeGroup)  edgeGroup.visible = visible;
+  if (layer==='grid')   { gridH.visible=visible; gridV.visible=visible; }
+};
+
+window.toggleFormula = function() {
+  document.getElementById('formulaPanel').classList.toggle('open');
+};
+
+// ── Seed ──────────────────────────────────────────────────────
+initChips();
+for (let i=0; i<40; i++)
+  crumbs.push({
+    pos: new THREE.Vector3((Math.random()-.5)*8,(Math.random()-.5)*2.8,(Math.random()-.5)*8),
+    chip:0, phase:Math.random()*Math.PI*2
+  });
+assignCrumbs(); rebuildCloud(); sbUpdate();
+document.getElementById('tbBake').classList.add('active');
+</script>
+</body>
+</html>

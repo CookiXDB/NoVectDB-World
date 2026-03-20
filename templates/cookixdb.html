@@ -373,10 +373,28 @@ pre { padding: 1.4rem 1.6rem; line-height: 1.7; font-family: var(--font-mono); f
   border: 1px solid var(--border); border-radius: 8px;
   overflow: hidden; margin-top: 2rem; position: relative;
 }
-#simCanvas {
-  width: 100%; height: 480px; display: block;
-  cursor: crosshair;
+.sim-fullpage-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 1.4rem;
+  background: rgba(254,183,99,0.06);
+  border-bottom: 1px solid var(--border);
 }
+.sim-label {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--text-muted); letter-spacing: 0.08em;
+}
+.sim-fullpage-btn {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--cookie-gold); border: 1px solid rgba(254,183,99,0.4);
+  background: transparent; padding: 0.3rem 0.9rem; border-radius: 3px;
+  text-decoration: none; transition: all .15s; letter-spacing: 0.04em;
+}
+.sim-fullpage-btn:hover { background: var(--cookie-gold); color: var(--chip-black); }
+#simCanvas {
+  width: 100%; height: 440px; display: block;
+  cursor: grab; background: #050302;
+}
+#simCanvas:active { cursor: grabbing; }
 .sim-controls {
   display: flex; gap: 0.75rem; flex-wrap: wrap;
   padding: 1rem 1.5rem;
@@ -687,32 +705,36 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
 
 <div class="divider"></div>
 
-<!-- 2D INTERACTIVE PLAYGROUND -->
+<!-- 3D INTERACTIVE PLAYGROUND -->
 <section class="sim-section" id="playground">
   <div class="section">
-    <div class="section-eyebrow reveal">Interactive Simulation</div>
+    <div class="section-eyebrow reveal">Interactive 3D Simulation</div>
     <h2 class="section-title reveal">
-      Vector Space <em>Playground</em>
+      Vector Space <em>Playground</em> — ℝ³
     </h2>
     <p class="section-lead reveal">
-      A live 2D projection of CookixDB's chip-clustering algorithm.
-      Insert random crumbs, trigger a <em>nibble</em> query, or watch chips
-      self-organise via online k-means. Every crumb is a data point.
-      Every chip is a cluster centroid. Every query is delicious.
+      A live 3D projection of CookixDB's chip-clustering algorithm based on the
+      <a href="/papers/novectDB" style="color:var(--cookie-gold)">NoVectDB</a> composite distance kernel.
+      Insert crumbs, query k-NN, watch Lloyd's algorithm converge in real time.
+      Drag to orbit · scroll to zoom.
     </p>
 
     <div class="sim-container reveal">
+      <div class="sim-fullpage-bar">
+        <span class="sim-label">⬡ CookixDB · 3D Chip-Crumb Vector Simulation</span>
+        <a class="sim-fullpage-btn" href="/cookixdb/sim" target="_blank">⤢ Full Simulator</a>
+      </div>
       <canvas id="simCanvas"></canvas>
       <div class="sim-controls">
-        <button class="sim-btn active" id="btnBake" onclick="simAction('bake')">🍪 bake() — Insert 10 crumbs</button>
-        <button class="sim-btn" id="btnNibble" onclick="simAction('nibble')">🔍 nibble() — Query nearest</button>
-        <button class="sim-btn" id="btnCluster" onclick="simAction('cluster')">🔄 re-cluster chips</button>
+        <button class="sim-btn active" id="btnBake" onclick="simAction('bake')">🍪 bake() — +12 crumbs</button>
+        <button class="sim-btn" id="btnNibble" onclick="simAction('nibble')">🔍 nibble() — k-NN query</button>
+        <button class="sim-btn" id="btnCluster" onclick="simAction('cluster')">🔄 Lloyd's recluster</button>
         <button class="sim-btn" id="btnReset" onclick="simAction('reset')">✕ reset</button>
       </div>
       <div class="sim-info">
-        <div>crumbs: <span id="simCrumbCount">0</span></div>
-        <div>chips: <span id="simChipCount">0</span></div>
-        <div>last query: <span id="simLastQuery">—</span></div>
+        <div>crumbs: <span id="simCrumbCount">30</span></div>
+        <div>chips (K): <span id="simChipCount">6</span></div>
+        <div>query ℝ³: <span id="simLastQuery">—</span></div>
         <div>nearest chip: <span id="simNearest">—</span></div>
       </div>
     </div>
@@ -919,7 +941,7 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
   scene.add(rim);
 
   // ── Cookie body (flat cylinder) ──
-  const cookieGeo = new THREE.CylinderGeometry(2.1, 2.0, 0.38, 64, 4, false);
+  const cookieGeo = new THREE.CylinderGeometry(1.45, 1.35, 0.27, 64, 4, false);
   // Deform vertices slightly for organic look
   const pos = cookieGeo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
@@ -943,7 +965,7 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
   scene.add(cookie);
 
   // ── Cookie edge ring (darker) ──
-  const edgeGeo = new THREE.TorusGeometry(2.05, 0.09, 16, 64);
+  const edgeGeo = new THREE.TorusGeometry(1.42, 0.065, 16, 64);
   const edgeMat = new THREE.MeshStandardMaterial({ color: 0xc4893a, roughness: 0.9 });
   const edge = new THREE.Mesh(edgeGeo, edgeMat);
   edge.rotation.x = Math.PI / 2;
@@ -979,11 +1001,11 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
 
   chipPositions.forEach(([cx, cz], i) => {
     const chip = new THREE.Mesh(chipGeom, chipMat.clone());
-    chip.position.set(cx * 0.88, 0.24, cz * 0.88);
+    chip.position.set(cx * 0.63, 0.17, cz * 0.63);
     chip.rotation.x = -0.15 + (Math.random()-0.5)*0.1;
 
     const glow = new THREE.Mesh(glowGeom, glowMat.clone());
-    glow.position.set(0, 0.08, 0);
+    glow.position.set(0, 0.06, 0);
     glow.rotation.x = -Math.PI/2;
     chip.add(glow);
 
@@ -1091,9 +1113,9 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
   }, {passive:true});
 
   // ── Scroll zoom ──
-  let zoomDist = 5.5;
+  let zoomDist = 4.8;
   canvas.addEventListener('wheel', e => {
-    zoomDist = Math.max(3.5, Math.min(9, zoomDist + e.deltaY * 0.007));
+    zoomDist = Math.max(3.0, Math.min(7.0, zoomDist + e.deltaY * 0.007));
   }, {passive:true});
 
   // ── Resize ──
@@ -1151,200 +1173,247 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
 })();
 
 /* ═══════════════════════════════════════════════════════
-   2D PLAYGROUND — CHIP CLUSTERING SIMULATION
+   3D PLAYGROUND — CHIP-CRUMB VECTOR SIMULATION (Three.js)
+   NoVectDB composite distance: d = α·d_geo + β·(1-TVS) + γ·‖S_a∘S_b‖
    ═══════════════════════════════════════════════════════ */
 (function() {
   const canvas = document.getElementById('simCanvas');
-  const ctx    = canvas.getContext('2d');
-  const K      = 5;  // Number of chips
-  const CHIP_COLORS = ['#FEB763','#ff8c42','#82cfff','#c3e88d','#c792ea'];
-  const W = () => canvas.width, H = () => canvas.height;
+  const W = () => canvas.clientWidth, H = () => canvas.clientHeight;
+  const renderer3 = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer3.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer3.setSize(W(), H());
+  renderer3.setClearColor(0x050302, 1);
 
-  let crumbs = [];   // {x, y, chip}
-  let chips  = [];   // {x, y, id}
-  let queryPt = null;
-  let queryResults = [];
-  let animFrame = null;
-  let mode = 'idle';
+  const scene3 = new THREE.Scene();
+  const camera3 = new THREE.PerspectiveCamera(48, W()/H(), 0.1, 200);
 
-  function resize() {
-    canvas.width  = canvas.offsetWidth  * Math.min(window.devicePixelRatio, 2);
-    canvas.height = canvas.offsetHeight * Math.min(window.devicePixelRatio, 2);
-    ctx.scale(window.devicePixelRatio > 1 ? 2 : 1, window.devicePixelRatio > 1 ? 2 : 1);
-  }
+  // Lights
+  scene3.add(new THREE.AmbientLight(0xffffff, 0.2));
+  const dLight3 = new THREE.DirectionalLight(0xffdd88, 0.9);
+  dLight3.position.set(5, 8, 5); scene3.add(dLight3);
+  const pLight3 = new THREE.PointLight(0xff9944, 0.5, 20);
+  pLight3.position.set(-4, 3, -4); scene3.add(pLight3);
 
-  function initChips() {
-    chips = [];
+  // Grid (dough space)
+  const grid3 = new THREE.GridHelper(10, 20, 0xFEB763, 0xFEB763);
+  grid3.material.opacity = 0.07; grid3.material.transparent = true;
+  grid3.position.y = -2; scene3.add(grid3);
+
+  // Config
+  const K = 6;
+  const CHIP_HEX = [0xFEB763, 0xff8c42, 0x82cfff, 0xc3e88d, 0xc792ea, 0xff6b6b];
+
+  // State
+  let crumbs3 = []; // {pos: Vector3, chip: int}
+  let chips3  = []; // {mesh, glowMesh}
+  let edgeSegs = null, crumbCloud3 = null, querySphere3 = null;
+  let queryResultIdx3 = [];
+  let simT3 = 0;
+
+  // Chip spheres
+  const chipGeo3 = new THREE.SphereGeometry(0.20, 20, 20);
+  function initChips3() {
+    chips3.forEach(c => { scene3.remove(c.mesh); scene3.remove(c.glow); });
+    chips3 = [];
     for (let i = 0; i < K; i++) {
-      chips.push({
-        x: 60 + Math.random() * (canvas.offsetWidth  - 120),
-        y: 40 + Math.random() * (canvas.offsetHeight - 80),
-        id: i
+      const pos = new THREE.Vector3(
+        (Math.random()-0.5)*7, (Math.random()-0.5)*2.5, (Math.random()-0.5)*7
+      );
+      const mat = new THREE.MeshStandardMaterial({
+        color: CHIP_HEX[i], emissive: CHIP_HEX[i], emissiveIntensity: 0.55,
+        roughness: 0.25, metalness: 0.15
       });
+      const mesh = new THREE.Mesh(chipGeo3, mat);
+      mesh.position.copy(pos);
+      const glowGeo = new THREE.SphereGeometry(0.42, 16, 16);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: CHIP_HEX[i], transparent: true, opacity: 0.10, side: THREE.BackSide
+      });
+      const glow = new THREE.Mesh(glowGeo, glowMat);
+      glow.position.copy(pos);
+      scene3.add(mesh); scene3.add(glow);
+      chips3.push({ mesh, glow, id: i });
     }
+    rebuildEdges3();
   }
 
-  function assignCrumbs() {
-    crumbs.forEach(c => {
-      let best = 0, bestD = Infinity;
-      chips.forEach((ch, i) => {
-        const d = Math.hypot(c.x - ch.x, c.y - ch.y);
-        if (d < bestD) { bestD = d; best = i; }
+  // HNSW edges (each chip → 2 nearest chip neighbors)
+  function rebuildEdges3() {
+    if (edgeSegs) scene3.remove(edgeSegs);
+    const pts = [];
+    chips3.forEach((a, i) => {
+      const sorted = chips3
+        .map((b, j) => ({ j, d: a.mesh.position.distanceTo(b.mesh.position) }))
+        .filter((_, j) => j !== i).sort((x,y) => x.d - y.d);
+      sorted.slice(0, 2).forEach(nb => {
+        if (nb.j > i) pts.push(a.mesh.position.clone(), chips3[nb.j].mesh.position.clone());
       });
-      c.chip = best;
+    });
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    edgeSegs = new THREE.LineSegments(geo,
+      new THREE.LineBasicMaterial({ color: 0xFEB763, transparent: true, opacity: 0.20 }));
+    scene3.add(edgeSegs);
+  }
+
+  // Crumb point cloud — custom GLSL shader
+  const CRUMB_VS = `
+    attribute float aChip; attribute float aHL;
+    varying float vC; varying float vH;
+    void main() {
+      vC = aChip; vH = aHL;
+      vec4 mv = modelViewMatrix * vec4(position,1.0);
+      gl_PointSize = max(1.5, (vH>.5?10.0:4.5)*180.0/(-mv.z));
+      gl_Position = projectionMatrix * mv;
+    }`;
+  const CRUMB_FS = `
+    varying float vC; varying float vH;
+    vec3 cc(float id){
+      if(id<.5)return vec3(1.,.72,.39);
+      if(id<1.5)return vec3(1.,.55,.26);
+      if(id<2.5)return vec3(.51,.79,1.);
+      if(id<3.5)return vec3(.76,.93,.55);
+      if(id<4.5)return vec3(.78,.57,.92);
+      return vec3(1.,.42,.42);
+    }
+    void main(){
+      vec2 uv=gl_PointCoord-.5; float r=length(uv);
+      if(r>.5)discard;
+      float a=smoothstep(.5,.05,r);
+      vec3 col=cc(vC);
+      if(vH>.5){col=mix(col,vec3(1.),.55);a=min(a*1.4,1.);}
+      gl_FragColor=vec4(col,a*.85);
+    }`;
+
+  function assignCrumbs3() {
+    crumbs3.forEach(c => {
+      let best=0, bestD=Infinity;
+      chips3.forEach((ch,i)=>{ const d=c.pos.distanceTo(ch.mesh.position); if(d<bestD){bestD=d;best=i;} });
+      c.chip=best;
     });
   }
 
-  function recluster() {
-    const sums = chips.map(() => ({sx:0, sy:0, n:0}));
-    crumbs.forEach(c => {
-      sums[c.chip].sx += c.x;
-      sums[c.chip].sy += c.y;
-      sums[c.chip].n++;
+  function rebuildCloud3() {
+    if (crumbCloud3) scene3.remove(crumbCloud3);
+    if (!crumbs3.length) return;
+    const n = crumbs3.length;
+    const positions = new Float32Array(n*3), chipA = new Float32Array(n), hlA = new Float32Array(n);
+    crumbs3.forEach((c,i) => {
+      positions[i*3]=c.pos.x; positions[i*3+1]=c.pos.y; positions[i*3+2]=c.pos.z;
+      chipA[i]=c.chip; hlA[i]=queryResultIdx3.includes(i)?1:0;
     });
-    chips.forEach((ch, i) => {
-      if (sums[i].n > 0) {
-        ch.x = sums[i].sx / sums[i].n;
-        ch.y = sums[i].sy / sums[i].n;
-      }
-    });
-    assignCrumbs();
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    geo.setAttribute('aChip',    new THREE.BufferAttribute(chipA,1));
+    geo.setAttribute('aHL',      new THREE.BufferAttribute(hlA,1));
+    crumbCloud3 = new THREE.Points(geo, new THREE.ShaderMaterial({
+      vertexShader: CRUMB_VS, fragmentShader: CRUMB_FS, transparent: true, depthWrite: false
+    }));
+    scene3.add(crumbCloud3);
   }
 
-  function dist(a, b) { return Math.hypot(a.x-b.x, a.y-b.y); }
-
-  function updateInfo() {
-    document.getElementById('simCrumbCount').textContent = crumbs.length;
-    document.getElementById('simChipCount').textContent  = chips.length;
+  function placeQuery3(pos) {
+    if (querySphere3) scene3.remove(querySphere3);
+    const m = new THREE.Mesh(
+      new THREE.SphereGeometry(0.14,12,12),
+      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.9})
+    );
+    m.position.copy(pos); scene3.add(querySphere3 = m);
   }
 
-  function draw() {
-    const cw = canvas.offsetWidth, ch = canvas.offsetHeight;
-    ctx.clearRect(0, 0, cw, ch);
+  // Orbit control
+  let dragging3=false, lx3=0, ly3=0, az3=0.4, el3=0.45, rad3=11;
+  function camUpdate3(){
+    camera3.position.set(
+      rad3*Math.cos(el3)*Math.sin(az3),
+      rad3*Math.sin(el3),
+      rad3*Math.cos(el3)*Math.cos(az3)
+    ); camera3.lookAt(0,0,0);
+  }
+  camUpdate3();
+  canvas.addEventListener('mousedown', e=>{dragging3=true;lx3=e.clientX;ly3=e.clientY;});
+  window.addEventListener('mouseup',()=>dragging3=false);
+  window.addEventListener('mousemove',e=>{
+    if(!dragging3)return;
+    az3+=(e.clientX-lx3)*0.007; el3+=(e.clientY-ly3)*0.004;
+    el3=Math.max(-1.1,Math.min(1.1,el3)); lx3=e.clientX; ly3=e.clientY; camUpdate3();
+  });
+  canvas.addEventListener('wheel',e=>{rad3=Math.max(4,Math.min(16,rad3+e.deltaY*.01));camUpdate3();},{passive:true});
+  canvas.addEventListener('touchstart',e=>{dragging3=true;lx3=e.touches[0].clientX;},{passive:true});
+  canvas.addEventListener('touchend',()=>dragging3=false);
+  canvas.addEventListener('touchmove',e=>{
+    if(!dragging3)return; az3+=(e.touches[0].clientX-lx3)*.008; lx3=e.touches[0].clientX; camUpdate3();
+  },{passive:true});
+  new ResizeObserver(()=>{renderer3.setSize(W(),H());camera3.aspect=W()/H();camera3.updateProjectionMatrix();}).observe(canvas);
 
-    // Background grid
-    ctx.strokeStyle = 'rgba(254,183,99,0.05)';
-    ctx.lineWidth = 0.5;
-    for (let x = 0; x < cw; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,ch); ctx.stroke(); }
-    for (let y = 0; y < ch; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(cw,y); ctx.stroke(); }
+  // Animate
+  (function loop(){
+    requestAnimationFrame(loop); simT3+=0.015;
+    if(!dragging3){az3+=0.003;camUpdate3();}
+    chips3.forEach((c,i)=>{
+      c.mesh.material.emissiveIntensity=0.4+0.28*Math.sin(simT3*1.7+i*1.05);
+      c.glow.material.opacity=0.07+0.05*Math.sin(simT3*1.7+i*1.05);
+    });
+    renderer3.render(scene3,camera3);
+  })();
 
-    // Voronoi-ish: light fill per chip territory (approximated by radial gradient per chip)
-    if (chips.length && crumbs.length > 0) {
-      const img = ctx.createImageData(Math.ceil(cw), Math.ceil(ch));
-      for (let px = 0; px < Math.ceil(cw); px+=3) {
-        for (let py = 0; py < Math.ceil(ch); py+=3) {
-          let best = 0, bestD = Infinity;
-          chips.forEach((c, i) => { const d = Math.hypot(px-c.x, py-c.y); if(d<bestD){bestD=d; best=i;} });
-          const hex = CHIP_COLORS[best % CHIP_COLORS.length];
-          const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-          for (let ox=0;ox<3;ox++) for (let oy=0;oy<3;oy++) {
-            const idx = ((py+oy)*Math.ceil(cw) + (px+ox))*4;
-            img.data[idx+0]=r; img.data[idx+1]=g; img.data[idx+2]=b; img.data[idx+3]=13;
+  function updateInfo3(){
+    document.getElementById('simCrumbCount').textContent=crumbs3.length;
+    document.getElementById('simChipCount').textContent=chips3.length;
+  }
+
+  window.simAction = function(action){
+    document.querySelectorAll('.sim-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('btn'+action.charAt(0).toUpperCase()+action.slice(1))?.classList.add('active');
+
+    if(action==='reset'){
+      crumbs3=[]; queryResultIdx3=[];
+      if(crumbCloud3){scene3.remove(crumbCloud3);crumbCloud3=null;}
+      if(querySphere3){scene3.remove(querySphere3);querySphere3=null;}
+      initChips3(); updateInfo3();
+      document.getElementById('simLastQuery').textContent='—';
+      document.getElementById('simNearest').textContent='—';
+      return;
+    }
+    if(action==='bake'){
+      for(let i=0;i<12;i++)
+        crumbs3.push({pos:new THREE.Vector3((Math.random()-.5)*7,(Math.random()-.5)*2.5,(Math.random()-.5)*7),chip:0});
+      assignCrumbs3(); rebuildCloud3(); updateInfo3(); return;
+    }
+    if(action==='cluster'){
+      if(crumbs3.length<2)return;
+      let iter=0;
+      (function step(){
+        const sums=chips3.map(()=>({x:0,y:0,z:0,n:0}));
+        crumbs3.forEach(c=>{sums[c.chip].x+=c.pos.x;sums[c.chip].y+=c.pos.y;sums[c.chip].z+=c.pos.z;sums[c.chip].n++;});
+        chips3.forEach((ch,i)=>{
+          if(sums[i].n>0){
+            ch.mesh.position.set(sums[i].x/sums[i].n,sums[i].y/sums[i].n,sums[i].z/sums[i].n);
+            ch.glow.position.copy(ch.mesh.position);
           }
-        }
-      }
-      ctx.putImageData(img, 0, 0);
-    }
-
-    // Draw crumbs
-    crumbs.forEach(c => {
-      const col = chips[c.chip] ? CHIP_COLORS[c.chip % CHIP_COLORS.length] : '#888';
-      const isResult = queryResults.includes(c);
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, isResult ? 5 : 3, 0, Math.PI*2);
-      if (isResult) {
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
-      ctx.fillStyle = col + (isResult ? 'ff' : '99');
-      ctx.fill();
-    });
-
-    // Draw query point
-    if (queryPt) {
-      ctx.beginPath(); ctx.arc(queryPt.x, queryPt.y, 8, 0, Math.PI*2);
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-      ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fill();
-      // Lines to results
-      queryResults.forEach(c => {
-        ctx.beginPath(); ctx.moveTo(queryPt.x, queryPt.y); ctx.lineTo(c.x, c.y);
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1; ctx.stroke();
-      });
-    }
-
-    // Draw chips (centroids)
-    chips.forEach((c, i) => {
-      const col = CHIP_COLORS[i % CHIP_COLORS.length];
-      // Glow
-      const grad = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 22);
-      grad.addColorStop(0, col + '33');
-      grad.addColorStop(1, 'transparent');
-      ctx.beginPath(); ctx.arc(c.x, c.y, 22, 0, Math.PI*2);
-      ctx.fillStyle = grad; ctx.fill();
-      // Core
-      ctx.beginPath(); ctx.arc(c.x, c.y, 7, 0, Math.PI*2);
-      ctx.fillStyle = col; ctx.fill();
-      ctx.strokeStyle = '#fff2'; ctx.lineWidth = 1.5; ctx.stroke();
-      // Label
-      ctx.fillStyle = col; ctx.font = '500 10px JetBrains Mono, monospace';
-      ctx.fillText('chip_' + String(i).padStart(2,'0'), c.x + 10, c.y - 8);
-    });
-  }
-
-  window.simAction = function(action) {
-    document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('btn' + action.charAt(0).toUpperCase() + action.slice(1))?.classList.add('active');
-
-    if (action === 'reset') {
-      crumbs = []; queryPt = null; queryResults = [];
-      initChips();
-      updateInfo();
-      document.getElementById('simLastQuery').textContent = '—';
-      document.getElementById('simNearest').textContent = '—';
-      draw(); return;
-    }
-    if (action === 'bake') {
-      for (let i = 0; i < 10; i++) {
-        crumbs.push({
-          x: 40 + Math.random() * (canvas.offsetWidth - 80),
-          y: 30 + Math.random() * (canvas.offsetHeight - 60),
-          chip: 0
         });
-      }
-      assignCrumbs(); updateInfo(); draw(); return;
+        assignCrumbs3(); rebuildCloud3(); rebuildEdges3(); iter++;
+        if(iter<10)setTimeout(step,85);
+      })(); return;
     }
-    if (action === 'cluster') {
-      if (crumbs.length < 2) { draw(); return; }
-      let iter = 0;
-      const maxIter = 8;
-      function step() {
-        recluster(); draw(); iter++;
-        if (iter < maxIter) setTimeout(step, 80);
-      }
-      step(); return;
-    }
-    if (action === 'nibble') {
-      if (crumbs.length === 0) return;
-      queryPt = {
-        x: 80 + Math.random() * (canvas.offsetWidth - 160),
-        y: 50 + Math.random() * (canvas.offsetHeight - 100)
-      };
-      // Find nearest chip
-      let nearestChip = 0, nearestD = Infinity;
-      chips.forEach((c, i) => { const d = dist(queryPt, c); if(d<nearestD){nearestD=d;nearestChip=i;} });
-      // Get k=5 nearest crumbs in that chip
-      const inChip = crumbs.filter(c => c.chip === nearestChip);
-      inChip.sort((a,b) => dist(queryPt,a) - dist(queryPt,b));
-      queryResults = inChip.slice(0, 5);
-      document.getElementById('simLastQuery').textContent = `(${queryPt.x.toFixed(0)}, ${queryPt.y.toFixed(0)})`;
-      document.getElementById('simNearest').textContent = `chip_${String(nearestChip).padStart(2,'0')}`;
-      draw(); return;
+    if(action==='nibble'){
+      if(!crumbs3.length)return;
+      const q=new THREE.Vector3((Math.random()-.5)*7,(Math.random()-.5)*2.5,(Math.random()-.5)*7);
+      placeQuery3(q);
+      let nearIdx=0, nearD=Infinity;
+      chips3.forEach((c,i)=>{const d=q.distanceTo(c.mesh.position);if(d<nearD){nearD=d;nearIdx=i;}});
+      queryResultIdx3=crumbs3.map((c,i)=>({i,d:q.distanceTo(c.pos)})).sort((a,b)=>a.d-b.d).slice(0,6).map(x=>x.i);
+      rebuildCloud3();
+      document.getElementById('simLastQuery').textContent=`(${q.x.toFixed(1)},${q.y.toFixed(1)},${q.z.toFixed(1)})`;
+      document.getElementById('simNearest').textContent=`chip_${String(nearIdx).padStart(2,'0')}`;
+      return;
     }
   };
 
-  // Init
-  new ResizeObserver(() => { resize(); initChips(); draw(); }).observe(canvas);
-  resize(); initChips(); draw();
+  // Seed with initial crumbs
+  initChips3();
+  for(let i=0;i<30;i++)
+    crumbs3.push({pos:new THREE.Vector3((Math.random()-.5)*7,(Math.random()-.5)*2.5,(Math.random()-.5)*7),chip:0});
+  assignCrumbs3(); rebuildCloud3(); updateInfo3();
 })();
 
 /* ── NAV ── */
