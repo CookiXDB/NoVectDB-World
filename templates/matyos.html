@@ -642,47 +642,41 @@ el run src/hello_world.el</pre>
       <h3 class="section-sub">Hello World</h3>
       <div class="code-block-wrap">
         <span class="code-block-label">hello_world.el</span>
-        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> HelloWorld;
-
-<span class="kw">begin</span>
+        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> HelloWorld <span class="op">{</span>
   <span class="kw">show</span> <span class="str">"Hello, World!"</span>;
-<span class="kw">end</span></pre></div>
+<span class="op">}</span></pre></div>
       </div>
 
       <h3 class="section-sub">Variables and Output</h3>
       <div class="code-block-wrap">
         <span class="code-block-label">variables.el</span>
-        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> Variables;
+        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Variables <span class="op">{</span>
+  <span class="kw">var</span> name  : <span class="ty">string</span>  = <span class="str">"MatyOS"</span>;
+  <span class="kw">var</span> ver   : <span class="ty">real</span>    = <span class="num">1.0</span>;
+  <span class="kw">var</span> lines : <span class="ty">integer</span> = <span class="num">2800</span>;
 
-<span class="kw">var</span> name  : <span class="ty">string</span>  = <span class="str">"MatyOS"</span>;
-<span class="kw">var</span> ver   : <span class="ty">real</span>    = <span class="num">1.0</span>;
-<span class="kw">var</span> lines : <span class="ty">integer</span> = <span class="num">2800</span>;
-
-<span class="kw">begin</span>
   <span class="kw">show</span> name;
   <span class="kw">show</span> ver;
   <span class="kw">show</span> lines;
-<span class="kw">end</span></pre></div>
+<span class="op">}</span></pre></div>
       </div>
 
       <h3 class="section-sub">First Proof</h3>
       <div class="code-block-wrap">
         <span class="code-block-label">first_proof.el</span>
-        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> FirstProof;
+        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> FirstProof <span class="op">{</span>
+  <span class="pr">axiom</span> truth_holds : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
 
-<span class="pr">axiom</span> truth_holds : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+  <span class="pr">theorem</span> basic_truth : <span class="kw">true</span>;
 
-<span class="pr">theorem</span> basic_truth : <span class="kw">true</span>;
-
-<span class="pr">proof</span> basic_truth <span class="op">{</span>
+  <span class="pr">proof</span> basic_truth <span class="op">{</span>
     <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
     <span class="pr">test</span> verify  : h1 : <span class="kw">true</span>;
     <span class="pr">QED</span>;
-<span class="op">}</span>
+  <span class="op">}</span>
 
-<span class="kw">begin</span>
   <span class="kw">show</span> <span class="str">"Proof complete."</span>;
-<span class="kw">end</span></pre></div>
+<span class="op">}</span></pre></div>
       </div>
     </section>
 
@@ -695,20 +689,21 @@ el run src/hello_world.el</pre>
       <div class="section-body">
         <p>Variables are declared with <code>var</code>, constants with <code>const</code>. Constants are immutable after declaration — the semantic analyzer enforces this at compile time.</p>
       </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Variable declaration</span>
-<span class="kw">var</span> counter   : <span class="ty">integer</span> = <span class="num">0</span>;
-<span class="kw">var</span> pi        : <span class="ty">real</span>    = <span class="num">3.14159</span>;
-<span class="kw">var</span> greeting  : <span class="ty">string</span>  = <span class="str">"hello"</span>;
-<span class="kw">var</span> flag      : <span class="ty">boolean</span> = <span class="kw">true</span>;
-<span class="kw">var</span> uncertain : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Vars <span class="op">{</span>
+  <span class="cm">// Variable declaration (mutable)</span>
+  <span class="kw">var</span> counter   : <span class="ty">integer</span> = <span class="num">0</span>;
+  <span class="kw">var</span> pi        : <span class="ty">real</span>    = <span class="num">3.14159</span>;
+  <span class="kw">var</span> greeting  : <span class="ty">string</span>  = <span class="str">"hello"</span>;
+  <span class="kw">var</span> flag      : <span class="ty">boolean</span> = <span class="kw">true</span>;
+  <span class="kw">var</span> uncertain : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
 
-<span class="cm">// Constant declaration (immutable)</span>
-<span class="kw">const</span> MAX_SIZE : <span class="ty">integer</span> = <span class="num">100</span>;
-<span class="kw">const</span> APP_NAME : <span class="ty">string</span>  = <span class="str">"MatyOS"</span>;
+  <span class="cm">// Constant declaration (immutable)</span>
+  <span class="kw">const</span> MAX_SIZE : <span class="ty">integer</span> = <span class="num">100</span>;
 
-<span class="cm">// Assignment</span>
-counter = counter + <span class="num">1</span>;
-<span class="kw">show</span> counter;</pre></div>
+  <span class="cm">// Assignment and output</span>
+  counter = counter + <span class="num">1</span>;
+  <span class="kw">show</span> counter;
+<span class="op">}</span></pre></div>
     </section>
 
     <!-- ══ TYPES ══════════════════════════════════════════════════ -->
@@ -748,49 +743,51 @@ counter = counter + <span class="num">1</span>;
           </div>
           <p class="realistic-desc">The <code>realistic</code> value extends classical boolean logic with a third state representing uncertainty or incomplete knowledge. Useful for modeling real-world conditions where truth is not yet determined.</p>
         </div>
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> confirmed  : <span class="ty">boolean</span> = <span class="kw">true</span>;
-<span class="kw">var</span> rejected   : <span class="ty">boolean</span> = <span class="kw">false</span>;
-<span class="kw">var</span> confidence : <span class="ty">boolean</span> = <span class="kw">realistic</span>;  <span class="cm">// uncertain state</span>
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> BoolDemo <span class="op">{</span>
+  <span class="kw">var</span> confirmed  : <span class="ty">boolean</span> = <span class="kw">true</span>;
+  <span class="kw">var</span> confidence : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
 
-<span class="kw">if</span> confirmed <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"confirmed"</span>;
-<span class="op">}</span> <span class="kw">elif</span> confidence <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"uncertain"</span>;
-<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"rejected"</span>;
+  <span class="kw">if</span> confirmed <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"confirmed"</span>;
+  <span class="op">}</span> <span class="kw">elif</span> confidence <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"uncertain"</span>;
+  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"rejected"</span>;
+  <span class="op">}</span>
 <span class="op">}</span></pre></div>
       </div>
 
       <div id="types-strings" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> s1 : <span class="ty">string</span> = <span class="str">"double quoted"</span>;
-<span class="kw">var</span> s2 : <span class="ty">string</span> = <span class="str">'single quoted'</span>;
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Strings <span class="op">{</span>
+  <span class="kw">var</span> s1 : <span class="ty">string</span> = <span class="str">"double quoted"</span>;
+  <span class="kw">var</span> s2 : <span class="ty">string</span> = <span class="str">'single quoted'</span>;
 
-<span class="cm">// Show string value</span>
-<span class="kw">show</span> s1;
+  <span class="kw">show</span> s1;
+  <span class="kw">show</span> s2;
 
-<span class="cm">// String variable in function return</span>
-<span class="kw">function</span> <span class="fn">greet</span>() : <span class="ty">string</span> <span class="op">{</span>
-  <span class="kw">return</span> <span class="str">"Hello from MatyOS"</span>;
-<span class="op">}</span>
-
-<span class="kw">begin</span>
+  <span class="cm">// String function</span>
+  <span class="kw">function</span> <span class="fn">greet</span>() <span class="op">{</span>
+    <span class="kw">return</span> <span class="str">"Hello from MatyOS"</span>;
+  <span class="op">}</span>
   <span class="kw">show</span> <span class="fn">greet</span>();
-<span class="kw">end</span></pre></div>
+<span class="op">}</span></pre></div>
       </div>
 
       <div id="types-objects" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="cm">// Object declaration</span>
-<span class="kw">object</span> <span class="fn">Point</span> <span class="op">{</span>
-  x : <span class="ty">integer</span>;
-  y : <span class="ty">integer</span>;
-<span class="op">}</span>
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Objects <span class="op">{</span>
+  <span class="cm">// Object declaration</span>
+  <span class="kw">object</span> <span class="fn">Point</span> <span class="op">{</span>
+    x : <span class="ty">integer</span>;
+    y : <span class="ty">integer</span>;
+  <span class="op">}</span>
 
-<span class="kw">var</span> p : <span class="fn">Point</span>;
-p.x = <span class="num">10</span>;
-p.y = <span class="num">20</span>;
+  <span class="kw">var</span> p : <span class="fn">Point</span>;
+  p.x = <span class="num">10</span>;
+  p.y = <span class="num">20</span>;
 
-<span class="kw">show</span> p.x;
-<span class="kw">show</span> p.y;</pre></div>
+  <span class="kw">show</span> p.x;
+  <span class="kw">show</span> p.y;
+<span class="op">}</span></pre></div>
       </div>
     </section>
 
@@ -809,16 +806,18 @@ p.y = <span class="num">20</span>;
           <tr><td>Assignment</td><td><code>=</code></td><td>Only for mutable vars</td></tr>
         </tbody>
       </table>
-      <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> a : <span class="ty">integer</span> = <span class="num">10</span>;
-<span class="kw">var</span> b : <span class="ty">integer</span> = <span class="num">3</span>;
+      <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Ops <span class="op">{</span>
+  <span class="kw">var</span> a : <span class="ty">integer</span> = <span class="num">10</span>;
+  <span class="kw">var</span> b : <span class="ty">integer</span> = <span class="num">3</span>;
 
-<span class="kw">show</span> a + b;       <span class="cm">// 13</span>
-<span class="kw">show</span> a - b;       <span class="cm">// 7</span>
-<span class="kw">show</span> a * b;       <span class="cm">// 30</span>
-<span class="kw">show</span> a <span class="kw">div</span> b;    <span class="cm">// 3  (integer division)</span>
-<span class="kw">show</span> a / b;       <span class="cm">// 3.333...</span>
+  <span class="kw">show</span> a + b;       <span class="cm">// 13</span>
+  <span class="kw">show</span> a - b;       <span class="cm">// 7</span>
+  <span class="kw">show</span> a * b;       <span class="cm">// 30</span>
+  <span class="kw">show</span> a <span class="kw">div</span> b;    <span class="cm">// 3  (integer division)</span>
+  <span class="kw">show</span> a / b;       <span class="cm">// 3.333...</span>
 
-<span class="pr">axiom</span> ten_is_ten : a <span class="op">===</span> <span class="num">10</span>;</pre></div>
+  <span class="pr">axiom</span> ten_is_ten : a <span class="op">===</span> <span class="num">10</span>;
+<span class="op">}</span></pre></div>
     </section>
 
     <!-- ══ CONTROL FLOW ═══════════════════════════════════════════ -->
@@ -833,58 +832,54 @@ p.y = <span class="num">20</span>;
       </div>
 
       <div id="cf-if" class="tab-panel active">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> x : <span class="ty">integer</span> = <span class="num">42</span>;
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> IfDemo <span class="op">{</span>
+  <span class="kw">var</span> x : <span class="ty">integer</span> = <span class="num">42</span>;
 
-<span class="kw">if</span> x > <span class="num">100</span> <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"big"</span>;
-<span class="op">}</span> <span class="kw">elif</span> x > <span class="num">10</span> <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"medium"</span>;
-<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"small"</span>;
+  <span class="kw">if</span> x > <span class="num">100</span> <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"big"</span>;
+  <span class="op">}</span> <span class="kw">elif</span> x > <span class="num">10</span> <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"medium"</span>;
+  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"small"</span>;
+  <span class="op">}</span>
 <span class="op">}</span></pre></div>
       </div>
 
       <div id="cf-for" class="tab-panel">
-        <div class="info-box warn">
-          <strong>Syntax Note</strong>
-          The <code>for</code> loop initializer does NOT take a type annotation. Use <code>for i = 0;</code> not <code>for i: integer = 0;</code>
-        </div>
-        <div class="code-block-wrap"><pre class="code-block"><span class="cm">// Correct for-loop syntax</span>
-<span class="kw">for</span> i = <span class="num">0</span>; i < <span class="num">5</span>; i = i + <span class="num">1</span> <span class="op">{</span>
-  <span class="kw">show</span> i;
-<span class="op">}</span>
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> ForDemo <span class="op">{</span>
+  <span class="cm">// for loop — no type annotation on counter</span>
+  <span class="kw">for</span> i = <span class="num">0</span>; i < <span class="num">5</span>; i = i + <span class="num">1</span> <span class="op">{</span>
+    <span class="kw">show</span> i;
+  <span class="op">}</span>
 
-<span class="cm">// Count down</span>
-<span class="kw">for</span> n = <span class="num">10</span>; n > <span class="num">0</span>; n = n - <span class="num">1</span> <span class="op">{</span>
-  <span class="kw">show</span> n;
+  <span class="cm">// Count down</span>
+  <span class="kw">for</span> n = <span class="num">10</span>; n > <span class="num">0</span>; n = n - <span class="num">1</span> <span class="op">{</span>
+    <span class="kw">show</span> n;
+  <span class="op">}</span>
 <span class="op">}</span></pre></div>
       </div>
 
       <div id="cf-while" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> count : <span class="ty">integer</span> = <span class="num">0</span>;
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> WhileDemo <span class="op">{</span>
+  <span class="kw">var</span> count : <span class="ty">integer</span> = <span class="num">0</span>;
 
-<span class="kw">while</span> count < <span class="num">5</span> <span class="op">{</span>
-  <span class="kw">show</span> count;
-  count = count + <span class="num">1</span>;
-<span class="op">}</span>
-
-<span class="cm">// break is supported</span>
-<span class="kw">while</span> <span class="kw">true</span> <span class="op">{</span>
-  <span class="kw">if</span> count > <span class="num">10</span> <span class="op">{</span>
-    <span class="kw">break</span>;
+  <span class="kw">while</span> count < <span class="num">5</span> <span class="op">{</span>
+    <span class="kw">show</span> count;
+    count = count + <span class="num">1</span>;
   <span class="op">}</span>
-  count = count + <span class="num">1</span>;
 <span class="op">}</span></pre></div>
       </div>
 
       <div id="cf-switch" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">var</span> day : <span class="ty">integer</span> = <span class="num">3</span>;
+        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> SwitchDemo <span class="op">{</span>
+  <span class="kw">var</span> day : <span class="ty">integer</span> = <span class="num">3</span>;
 
-<span class="kw">switch</span> day <span class="op">{</span>
-  <span class="kw">case</span> <span class="num">1</span>: <span class="kw">show</span> <span class="str">"Monday"</span>;
-  <span class="kw">case</span> <span class="num">2</span>: <span class="kw">show</span> <span class="str">"Tuesday"</span>;
-  <span class="kw">case</span> <span class="num">3</span>: <span class="kw">show</span> <span class="str">"Wednesday"</span>;
-  <span class="kw">default</span>: <span class="kw">show</span> <span class="str">"Other"</span>;
+  <span class="kw">switch</span> day <span class="op">{</span>
+    <span class="kw">case</span> <span class="num">1</span>: <span class="kw">show</span> <span class="str">"Monday"</span>;
+    <span class="kw">case</span> <span class="num">2</span>: <span class="kw">show</span> <span class="str">"Tuesday"</span>;
+    <span class="kw">case</span> <span class="num">3</span>: <span class="kw">show</span> <span class="str">"Wednesday"</span>;
+    <span class="kw">default</span>: <span class="kw">show</span> <span class="str">"Other"</span>;
+  <span class="op">}</span>
 <span class="op">}</span></pre></div>
       </div>
     </section>
@@ -895,41 +890,42 @@ p.y = <span class="num">20</span>;
       <div class="section-body">
         <p>Functions are declared with the <code>function</code> keyword, optionally accepting typed parameters and returning typed values. Recursive functions are supported.</p>
       </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Basic function</span>
-<span class="kw">function</span> <span class="fn">add</span>(a : <span class="ty">integer</span>, b : <span class="ty">integer</span>) : <span class="ty">integer</span> <span class="op">{</span>
-  <span class="kw">return</span> a + b;
-<span class="op">}</span>
-
-<span class="cm">// Recursive function</span>
-<span class="kw">function</span> <span class="fn">factorial</span>(n : <span class="ty">integer</span>) : <span class="ty">integer</span> <span class="op">{</span>
-  <span class="kw">if</span> n <= <span class="num">1</span> <span class="op">{</span>
-    <span class="kw">return</span> <span class="num">1</span>;
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Functions <span class="op">{</span>
+  <span class="cm">// Function declaration — params grouped as (a, b: type)</span>
+  <span class="kw">function</span> <span class="fn">add</span>(a, b : <span class="ty">integer</span>) <span class="op">{</span>
+    <span class="kw">return</span> a + b;
   <span class="op">}</span>
-  <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>);
-<span class="op">}</span>
 
-<span class="kw">begin</span>
+  <span class="cm">// Recursive function</span>
+  <span class="kw">function</span> <span class="fn">factorial</span>(n : <span class="ty">integer</span>) <span class="op">{</span>
+    <span class="kw">if</span> n <= <span class="num">1</span> <span class="op">{</span>
+      <span class="kw">return</span> <span class="num">1</span>;
+    <span class="op">}</span>
+    <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>);
+  <span class="op">}</span>
+
   <span class="kw">show</span> <span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>);         <span class="cm">// 7</span>
   <span class="kw">show</span> <span class="fn">factorial</span>(<span class="num">5</span>);    <span class="cm">// 120</span>
-<span class="kw">end</span></pre></div>
+<span class="op">}</span></pre></div>
     </section>
 
     <!-- ══ OBJECTS ════════════════════════════════════════════════ -->
     <section class="doc-section reveal" id="objects">
       <h2 class="section-title">Objects &amp; Arrays</h2>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Object type definition</span>
-<span class="kw">object</span> <span class="fn">Vector</span> <span class="op">{</span>
-  x : <span class="ty">real</span>;
-  y : <span class="ty">real</span>;
-<span class="op">}</span>
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> ObjectDemo <span class="op">{</span>
+  <span class="cm">// Object type definition</span>
+  <span class="kw">object</span> <span class="fn">Vector</span> <span class="op">{</span>
+    x : <span class="ty">real</span>;
+    y : <span class="ty">real</span>;
+  <span class="op">}</span>
 
-<span class="kw">var</span> v : <span class="fn">Vector</span>;
-v.x = <span class="num">1.0</span>;
-v.y = <span class="num">2.5</span>;
+  <span class="kw">var</span> v : <span class="fn">Vector</span>;
+  v.x = <span class="num">1.0</span>;
+  v.y = <span class="num">2.5</span>;
 
-<span class="cm">// Array declaration</span>
-<span class="kw">var</span> nums : <span class="ty">integer</span>[] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
-<span class="kw">show</span> nums;</pre></div>
+  <span class="kw">show</span> v.x;
+  <span class="kw">show</span> v.y;
+<span class="op">}</span></pre></div>
     </section>
 
     <hr class="doc-divider"/>
@@ -983,17 +979,18 @@ v.y = <span class="num">2.5</span>;
       <div class="section-body">
         <p>Axioms are self-evident truths. They require no proof. Every axiomatic system begins with a set of axioms that serve as the foundation for all theorems.</p>
       </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Identity axiom</span>
-<span class="pr">axiom</span> identity : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Axioms <span class="op">{</span>
+  <span class="cm">// Identity axiom</span>
+  <span class="pr">axiom</span> identity : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
 
-<span class="cm">// Law of excluded middle</span>
-<span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
+  <span class="cm">// Law of excluded middle</span>
+  <span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
 
-<span class="cm">// Non-contradiction</span>
-<span class="pr">axiom</span> non_contradiction : !(<span class="kw">true</span> <span class="kw">and</span> <span class="kw">false</span>);
+  <span class="cm">// Named with definition for documentation</span>
+  <span class="pr">definition</span> truth_is_stable : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
 
-<span class="cm">// Named with definition for documentation</span>
-<span class="pr">definition</span> truth_is_stable : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;</pre></div>
+  <span class="kw">show</span> <span class="str">"axioms registered"</span>;
+<span class="op">}</span></pre></div>
     </section>
 
     <!-- THEOREMS -->
@@ -1002,8 +999,11 @@ v.y = <span class="num">2.5</span>;
       <div class="section-body">
         <p>A theorem declares a proposition. The semantic analyzer requires each theorem to be matched by a proof block of the same name. A theorem without a proof is a compile-time error.</p>
       </div>
-      <div class="code-block-wrap"><pre class="code-block"><span class="pr">theorem</span> truth_is_consistent : <span class="kw">true</span>;
-<span class="pr">theorem</span> conjunction_holds   : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;</pre></div>
+      <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Theorems <span class="op">{</span>
+  <span class="pr">theorem</span> truth_is_consistent : <span class="kw">true</span>;
+  <span class="pr">theorem</span> conjunction_holds   : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
+  <span class="kw">show</span> <span class="str">"theorems declared"</span>;
+<span class="op">}</span></pre></div>
     </section>
 
     <!-- PROOF BLOCKS -->
@@ -1012,20 +1012,20 @@ v.y = <span class="num">2.5</span>;
       <div class="section-body">
         <p>A proof block contains the structured argument for a theorem. It consists of hypotheses (assumed truths) and tests (verification steps), terminated with <code>QED</code>.</p>
       </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-<span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> ProofDemo <span class="op">{</span>
+  <span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+  <span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
 
-<span class="pr">theorem</span> simple_theorem : <span class="kw">true</span>;
+  <span class="pr">theorem</span> simple_theorem : <span class="kw">true</span>;
 
-<span class="pr">proof</span> simple_theorem <span class="op">{</span>
-    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;              <span class="cm">// assume h1 holds</span>
-    <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;        <span class="cm">// verify against axioms</span>
-    <span class="pr">QED</span>;                               <span class="cm">// ∎ proof complete</span>
-<span class="op">}</span>
+  <span class="pr">proof</span> simple_theorem <span class="op">{</span>
+    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;          <span class="cm">// assume h1 holds</span>
+    <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;    <span class="cm">// verify against axioms</span>
+    <span class="pr">QED</span>;                           <span class="cm">// ∎ proof complete</span>
+  <span class="op">}</span>
 
-<span class="kw">begin</span>
   <span class="kw">show</span> <span class="str">"Theorem proved."</span>;
-<span class="kw">end</span></pre></div>
+<span class="op">}</span></pre></div>
     </section>
 
     <!-- PROOF WORKFLOW ANIMATION -->
@@ -1089,18 +1089,17 @@ v.y = <span class="num">2.5</span>;
       <div class="section-body">
         <p>The <code>realistic</code> keyword introduces a third boolean state — uncertain. Classical logic operates on a closed world assumption; realistic logic acknowledges incomplete information.</p>
       </div>
-      <div class="code-block-wrap"><pre class="code-block"><span class="pr">axiom</span> known_true  : <span class="kw">true</span>;
-<span class="pr">axiom</span> known_false : <span class="kw">false</span>;
+      <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Realistic <span class="op">{</span>
+  <span class="kw">var</span> sensor_reading : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
 
-<span class="kw">var</span> sensor_reading : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
-
-<span class="cm">// Realistic-aware branching</span>
-<span class="kw">if</span> sensor_reading <span class="op">===</span> <span class="kw">true</span> <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"confirmed"</span>;
-<span class="op">}</span> <span class="kw">elif</span> sensor_reading <span class="op">===</span> <span class="kw">false</span> <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"denied"</span>;
-<span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"uncertain"</span>;
+  <span class="cm">// Three-way branching with realistic state</span>
+  <span class="kw">if</span> sensor_reading <span class="op">===</span> <span class="kw">true</span> <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"confirmed"</span>;
+  <span class="op">}</span> <span class="kw">elif</span> sensor_reading <span class="op">===</span> <span class="kw">false</span> <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"denied"</span>;
+  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
+    <span class="kw">show</span> <span class="str">"uncertain"</span>;
+  <span class="op">}</span>
 <span class="op">}</span></pre></div>
     </section>
 
@@ -1241,17 +1240,21 @@ author {
         <p>MatyOS uses the <code>bring</code> keyword for importing packages. Packages are resolved from the MatyOS package registry (Easier Hub) and cached locally. The <code>from</code> and <code>as</code> keywords enable named and aliased imports.</p>
       </div>
 
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm">// Import full package</span>
-<span class="kw">bring</span> math_utils;
+      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> PackageDemo <span class="op">{</span>
+  <span class="cm">// Import full package</span>
+  <span class="kw">bring</span> math_utils;
 
-<span class="cm">// Import with alias</span>
-<span class="kw">bring</span> neural_networks <span class="kw">as</span> nn;
+  <span class="cm">// Import with alias</span>
+  <span class="kw">bring</span> neural_networks <span class="kw">as</span> nn;
 
-<span class="cm">// Named imports from package</span>
-<span class="kw">bring</span> <span class="op">{</span> Vector, Matrix <span class="op">}</span> <span class="kw">from</span> math_package;
+  <span class="cm">// Named imports from package</span>
+  <span class="kw">bring</span> <span class="op">{</span> Vector, Matrix <span class="op">}</span> <span class="kw">from</span> math_package;
 
-<span class="cm">// Scoped import from registry</span>
-<span class="kw">bring</span> linear_algebra <span class="kw">from</span> scientific_hub;</pre></div>
+  <span class="cm">// Scoped import from registry</span>
+  <span class="kw">bring</span> linear_algebra <span class="kw">from</span> scientific_hub;
+
+  <span class="kw">show</span> <span class="str">"packages loaded"</span>;
+<span class="op">}</span></pre></div>
 
       <h3 class="section-sub">Package Manifest</h3>
       <div class="section-body">
@@ -1345,12 +1348,10 @@ neural_networks  = "^0.9.1"</pre></div>
         </div>
         <div class="playground-body">
           <div class="playground-editor-wrap">
-            <textarea class="playground-editor" id="elEditor" spellcheck="false" style="min-height:260px">program HelloWorld;
-
-begin
+            <textarea class="playground-editor" id="elEditor" spellcheck="false" style="min-height:260px">ALGORITHM HelloWorld {
   show "Hello, World!";
   show "MatyOS v1.0.9";
-end</textarea>
+}</textarea>
           </div>
           <div class="playground-output" id="elOutput">
             <span style="color:#546e7a">// output will appear here</span>
@@ -1379,11 +1380,10 @@ end</textarea>
             <span class="example-card-title">Hello World</span>
             <span class="example-card-tag">beginner</span>
           </div>
-          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> HelloWorld;
-
-<span class="kw">begin</span>
+          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> HelloWorld <span class="op">{</span>
   <span class="kw">show</span> <span class="str">"Hello, World!"</span>;
-<span class="kw">end</span></pre>
+  <span class="kw">show</span> <span class="str">"Welcome to El!"</span>;
+<span class="op">}</span></pre>
         </div>
 
         <div class="example-card">
@@ -1391,20 +1391,20 @@ end</textarea>
             <span class="example-card-title">Proof Demo</span>
             <span class="example-card-tag">proof system</span>
           </div>
-          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="pr">axiom</span> identity : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-<span class="pr">axiom</span> excl_mid  : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
+          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> ProofDemo <span class="op">{</span>
+  <span class="pr">axiom</span> identity : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+  <span class="pr">axiom</span> excl_mid  : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
 
-<span class="pr">theorem</span> basic_truth : <span class="kw">true</span>;
+  <span class="pr">theorem</span> basic_truth : <span class="kw">true</span>;
 
-<span class="pr">proof</span> basic_truth <span class="op">{</span>
-  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
-  <span class="pr">test</span> v1 : h1 : <span class="kw">true</span>;
-  <span class="pr">QED</span>;
-<span class="op">}</span>
+  <span class="pr">proof</span> basic_truth <span class="op">{</span>
+    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
+    <span class="pr">test</span> v1 : h1 : <span class="kw">true</span>;
+    <span class="pr">QED</span>;
+  <span class="op">}</span>
 
-<span class="kw">begin</span>
   <span class="kw">show</span> <span class="str">"theorem proved"</span>;
-<span class="kw">end</span></pre>
+<span class="op">}</span></pre>
         </div>
 
         <div class="example-card">
@@ -1412,23 +1412,22 @@ end</textarea>
             <span class="example-card-title">Axiomatic Method</span>
             <span class="example-card-tag">advanced proof</span>
           </div>
-          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="pr">axiom</span> A1 : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-<span class="pr">axiom</span> A2 : !<span class="kw">false</span>;
-<span class="pr">definition</span> D1 : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
+          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Axiomatic <span class="op">{</span>
+  <span class="pr">axiom</span> A1 : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+  <span class="pr">definition</span> D1 : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
 
-<span class="pr">theorem</span> compound : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
+  <span class="pr">theorem</span> compound : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
 
-<span class="pr">proof</span> compound <span class="op">{</span>
-  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
-  <span class="pr">hypothesis</span> h2 : <span class="kw">true</span>;
-  <span class="pr">test</span> t1 : h1 : <span class="kw">true</span>;
-  <span class="pr">test</span> t2 : h2 : <span class="kw">true</span>;
-  <span class="pr">QED</span>;
-<span class="op">}</span>
+  <span class="pr">proof</span> compound <span class="op">{</span>
+    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
+    <span class="pr">hypothesis</span> h2 : <span class="kw">true</span>;
+    <span class="pr">test</span> t1 : h1 : <span class="kw">true</span>;
+    <span class="pr">test</span> t2 : h2 : <span class="kw">true</span>;
+    <span class="pr">QED</span>;
+  <span class="op">}</span>
 
-<span class="kw">begin</span>
   <span class="kw">show</span> <span class="str">"compound proved"</span>;
-<span class="kw">end</span></pre>
+<span class="op">}</span></pre>
         </div>
 
         <div class="example-card">
@@ -1436,19 +1435,17 @@ end</textarea>
             <span class="example-card-title">Recursive Factorial</span>
             <span class="example-card-tag">functions</span>
           </div>
-          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">program</span> Factorial;
-
-<span class="kw">function</span> <span class="fn">fact</span>(n : <span class="ty">integer</span>) : <span class="ty">integer</span> <span class="op">{</span>
-  <span class="kw">if</span> n <= <span class="num">1</span> <span class="op">{</span>
-    <span class="kw">return</span> <span class="num">1</span>;
+          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Factorial <span class="op">{</span>
+  <span class="kw">function</span> <span class="fn">fact</span>(n : <span class="ty">integer</span>) <span class="op">{</span>
+    <span class="kw">if</span> n <= <span class="num">1</span> <span class="op">{</span>
+      <span class="kw">return</span> <span class="num">1</span>;
+    <span class="op">}</span>
+    <span class="kw">return</span> n * <span class="fn">fact</span>(n - <span class="num">1</span>);
   <span class="op">}</span>
-  <span class="kw">return</span> n * <span class="fn">fact</span>(n - <span class="num">1</span>);
-<span class="op">}</span>
 
-<span class="kw">begin</span>
   <span class="kw">show</span> <span class="fn">fact</span>(<span class="num">5</span>);
   <span class="kw">show</span> <span class="fn">fact</span>(<span class="num">10</span>);
-<span class="kw">end</span></pre>
+<span class="op">}</span></pre>
         </div>
       </div>
     </section>
@@ -1565,27 +1562,27 @@ function copyCode(btn){
 // ─── PROOF WORKFLOW ANIMATION ──────────────────────────────────
 const wfSteps = [
   {
-    code: '<span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;\n<span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;',
+    code: '<span class="kw">ALGORITHM</span> Proof <span class="op">{</span>\n  <span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;\n  <span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;',
     desc: '⊢ AXIOM — Self-evident truths registered into the proof context. No proof required; these are the foundation.'
   },
   {
-    code: '<span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;\n<span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;\n\n<span class="pr">theorem</span> simple_theorem : <span class="kw">true</span>;',
+    code: '<span class="kw">ALGORITHM</span> Proof <span class="op">{</span>\n  <span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;\n  <span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;\n\n  <span class="pr">theorem</span> simple_theorem : <span class="kw">true</span>;',
     desc: '∀ THEOREM — A proposition declared to be true. The semantic analyzer registers it and requires a matching proof block.'
   },
   {
-    code: '<span class="pr">proof</span> simple_theorem <span class="op">{</span>\n  <span class="cm">// proof context opened</span>\n  <span class="cm">// scope chain established</span>',
+    code: '  <span class="pr">proof</span> simple_theorem <span class="op">{</span>\n    <span class="cm">// proof context opened</span>\n    <span class="cm">// scope chain established</span>',
     desc: '{ } PROOF CONTEXT — The interpreter opens a scoped proof context. Hypotheses and tests are isolated here.'
   },
   {
-    code: '<span class="pr">proof</span> simple_theorem <span class="op">{</span>\n  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;  <span class="cm">// assume h1 holds</span>',
+    code: '  <span class="pr">proof</span> simple_theorem <span class="op">{</span>\n    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;  <span class="cm">// assume h1 holds</span>',
     desc: '∃ HYPOTHESIS — An assumed truth within the proof scope. The interpreter registers h1 as a named assumption.'
   },
   {
-    code: '<span class="pr">proof</span> simple_theorem <span class="op">{</span>\n  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;\n  <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;  <span class="cm">// [TEST ✓]</span>',
+    code: '  <span class="pr">proof</span> simple_theorem <span class="op">{</span>\n    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;\n    <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;  <span class="cm">// [TEST ✓]</span>',
     desc: '? TEST — The test step verifies h1 against the declared axioms. If it passes, [TEST ✓] is printed to the proof trace.'
   },
   {
-    code: '<span class="pr">proof</span> simple_theorem <span class="op">{</span>\n  <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;\n  <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;\n  <span class="pr">QED</span>;  <span class="cm">// ∎ proof complete</span>\n<span class="op">}</span>',
+    code: '  <span class="pr">proof</span> simple_theorem <span class="op">{</span>\n    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;\n    <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;\n    <span class="pr">QED</span>;  <span class="cm">// ∎ proof complete</span>\n  <span class="op">}</span>\n<span class="op">}</span>',
     desc: '∎ QED — Quod Erat Demonstrandum. The proof is sealed. The interpreter prints [QED ∎] and closes the proof context.'
   }
 ];
@@ -1637,10 +1634,10 @@ function wfReset(){
 
 // ─── EL PLAYGROUND ─────────────────────────────────────────────
 const elExamples = {
-  hello: `program HelloWorld;\n\nbegin\n  show "Hello, World!";\n  show "MatyOS v1.0.9";\nend`,
-  proof: `axiom identity        : true === true;\naxiom excluded_middle : true or !true;\n\ntheorem simple_theorem : true;\n\nproof simple_theorem {\n    hypothesis h1 : true;\n    test verify_h1 : h1 : true;\n    QED;\n}\n\nbegin\n  show "Theorem proved successfully.";\nend`,
-  axiomatic: `axiom A1 : true === true;\naxiom A2 : !false;\ndefinition D1 : true and true;\n\ntheorem compound : true and true;\n\nproof compound {\n  hypothesis h1 : true;\n  hypothesis h2 : true;\n  test t1 : h1 : true;\n  test t2 : h2 : true;\n  QED;\n}\n\nbegin\n  show "compound theorem proved";\nend`,
-  funcs: `program Functions;\n\nfunction add(a : integer, b : integer) : integer {\n  return a + b;\n}\n\nfunction square(n : integer) : integer {\n  return n * n;\n}\n\nbegin\n  show add(3, 4);\n  show square(7);\n  show add(square(3), square(4));\nend`
+  hello: `ALGORITHM HelloWorld {\n  show "Hello, World!";\n  show "MatyOS v1.0.9";\n}`,
+  proof: `ALGORITHM ProofDemo {\n  axiom identity        : true === true;\n  axiom excluded_middle : true or !true;\n\n  theorem simple_theorem : true;\n\n  proof simple_theorem {\n    hypothesis h1 : true;\n    test verify_h1 : h1 : true;\n    QED;\n  }\n\n  show "Theorem proved successfully.";\n}`,
+  axiomatic: `ALGORITHM Axiomatic {\n  axiom A1 : true === true;\n  definition D1 : true and true;\n\n  theorem compound : true and true;\n\n  proof compound {\n    hypothesis h1 : true;\n    hypothesis h2 : true;\n    test t1 : h1 : true;\n    test t2 : h2 : true;\n    QED;\n  }\n\n  show "compound theorem proved";\n}`,
+  funcs: `ALGORITHM Functions {\n  function add(a, b : integer) {\n    return a + b;\n  }\n\n  function square(n : integer) {\n    return n * n;\n  }\n\n  show add(3, 4);\n  show square(7);\n}`
 };
 function setElExample(name){
   document.getElementById('elEditor').value = elExamples[name] || '';

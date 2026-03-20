@@ -7,8 +7,19 @@ import subprocess
 
 app = Flask(__name__)
 
-MATYOS_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'matyos_repo')
-BRING_REPO  = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bring_repo')
+def _find_repo(name):
+    base = os.path.dirname(os.path.abspath(__file__))
+    for candidate in (
+        os.environ.get(name.upper().replace('-','_') + '_PATH', ''),
+        os.path.join(base, name),
+        os.path.join(base, '..', name),
+    ):
+        if candidate and os.path.isdir(candidate):
+            return os.path.abspath(candidate)
+    return os.path.abspath(os.path.join(base, name))
+
+MATYOS_REPO = _find_repo('matyos_repo')
+BRING_REPO  = _find_repo('bring_repo')
 
 ANSI_RE = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]')
 NOISE = ('urllib3', 'NotOpenSSLWarning', 'bring-parser not installed',
@@ -86,7 +97,9 @@ def run_el():
             [sys.executable, run_path],
             capture_output=True, text=True, timeout=10
         )
-        output = _strip(result.stdout).strip()
+        raw_out = _strip(result.stdout)
+        output = '\n'.join(l for l in raw_out.split('\n')
+                          if not any(n in l for n in NOISE)).strip()
         error  = _clean_stderr(_strip(result.stderr))
         return jsonify({"output": output, "error": error or None})
 
