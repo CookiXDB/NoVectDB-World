@@ -49,6 +49,10 @@ def matyos():
 def polyfdos_os():
     return render_template("polyfdos_os.html")
 
+@app.route("/bring")
+def bring():
+    return render_template("bring.html")
+
 @app.route("/papers/novectDB")
 def novectdb():
     return render_template("novectdb.html")

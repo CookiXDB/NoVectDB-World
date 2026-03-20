@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bring — Modern Config & Data Format</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --black: #0d0d0d;
+  --white: #ffffff;
+  --gray-50:  #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-400: #999;
+  --gray-600: #555;
+  --gray-700: #333;
+  --accent:   #3b5bdb;
+  --accent-l: #eef2ff;
+  --green:    #2f9e44;
+  --red:      #c92a2a;
+  --gold:     #e67700;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+  --nav-h: 52px;
+  --sidebar-w: 240px;
+  --editor-bg: #0f1117;
+  --editor-line: #1a1d27;
+  --editor-border: #2a2d3a;
+  --editor-text: #abb2bf;
+  --tok-key: #61afef;
+  --tok-str: #98c379;
+  --tok-num: #d19a66;
+  --tok-bool: #c678dd;
+  --tok-null: #c678dd;
+  --tok-comment: #5c6370;
+  --tok-attr: #e5c07b;
+  --tok-schema: #e06c75;
+  --tok-bracket: #c8c8c8;
+}
+body { font-family: var(--font-sans); background: var(--white); color: var(--black); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+/* ── NAV ───────────────────────────────────────────────────── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:200;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gray-200);
+  height: var(--nav-h);
+  display: flex; align-items: center;
+  padding: 0 2rem; gap: 0.75rem;
+}
+.nav-back { font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-600); text-decoration: none; transition: color .2s; white-space: nowrap; }
+.nav-back:hover { color: var(--black); }
+.nav-sep { color: var(--gray-300); }
+.nav-logo { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 500; letter-spacing: -0.02em; display: flex; align-items: center; gap: 0.45rem; }
+.nav-logo img { width: 22px; height: 22px; }
+.nav-links { display: flex; gap: 1.2rem; align-items: center; margin-left: auto; }
+.nav-links a { font-size: 0.75rem; color: var(--gray-400); text-decoration: none; transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+.nav-badge { font-family: var(--font-mono); font-size: 0.65rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 3px; }
+
+/* ── LAYOUT ────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  padding-top: var(--nav-h);
+  min-height: 100vh;
+}
+.sidebar {
+  position: sticky; top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  overflow-y: auto;
+  border-right: 1px solid var(--gray-200);
+  padding: 2rem 1.5rem;
+  background: var(--gray-50);
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+.sb-section { margin-bottom: 1.8rem; }
+.sb-label { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 0.6rem; }
+.sb-link { display: block; font-size: 0.8rem; color: var(--gray-600); text-decoration: none; padding: 0.28rem 0.5rem; border-radius: 3px; margin-bottom: 1px; transition: background 0.15s, color 0.15s; }
+.sb-link:hover { background: var(--gray-200); color: var(--black); }
+.sb-link.active { background: var(--accent-l); color: var(--accent); font-weight: 500; }
+
+/* ── MAIN CONTENT ──────────────────────────────────────────── */
+.main { padding: 3rem 3.5rem 6rem; max-width: 880px; }
+
+/* ── HERO ──────────────────────────────────────────────────── */
+.hero { margin-bottom: 4rem; }
+.hero-logo {
+  width: 72px; height: 72px; margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 1rem; }
+.hero-title { font-family: var(--font-serif); font-size: clamp(2.8rem,5vw,4.5rem); font-weight: 400; line-height: 1; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+.hero-tagline { font-size: 1.05rem; color: var(--gray-600); max-width: 520px; line-height: 1.7; margin-bottom: 2rem; }
+.hero-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+.badge { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-600); border: 1px solid var(--gray-300); padding: 0.25rem 0.7rem; border-radius: 2px; }
+.badge-accent { border-color: var(--accent); color: var(--accent); }
+.hero-install { background: var(--editor-bg); border-radius: 6px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; border: 1px solid var(--editor-border); }
+.hero-install pre { font-family: var(--font-mono); font-size: 0.78rem; color: #abb2bf; line-height: 1.8; }
+.hero-install .cm { color: var(--tok-comment); }
+.hero-link { font-size: 0.85rem; color: var(--gray-600); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; transition: color .2s; }
+.hero-link:hover { color: var(--black); }
+
+/* ── SECTIONS ──────────────────────────────────────────────── */
+.doc-section { margin-bottom: 4rem; scroll-margin-top: calc(var(--nav-h) + 20px); }
+.section-eyebrow { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 0.75rem; }
+.section-title { font-family: var(--font-serif); font-size: 1.9rem; font-weight: 400; margin-bottom: 1rem; }
+.section-title em { font-style: italic; }
+.doc-p { font-size: 0.93rem; color: var(--gray-700); line-height: 1.75; margin-bottom: 1rem; }
+.doc-divider { border: none; border-top: 1px solid var(--gray-200); margin: 3rem 0; }
+
+/* ── CODE BLOCKS ───────────────────────────────────────────── */
+.code-block {
+  background: var(--editor-bg);
+  border: 1px solid var(--editor-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 1.25rem 0;
+}
+.cb-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: var(--editor-line);
+  border-bottom: 1px solid var(--editor-border);
+}
+.cb-lang { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400); letter-spacing: 0.06em; text-transform: uppercase; }
+.cb-copy { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400); background: none; border: none; cursor: pointer; transition: color .2s; padding: 0; }
+.cb-copy:hover { color: var(--white); }
+.cb-body { padding: 1rem 1.2rem; overflow-x: auto; }
+.cb-body code { font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.8; color: var(--editor-text); white-space: pre; }
+/* Bring syntax tokens */
+.b-key    { color: var(--tok-key); }
+.b-str    { color: var(--tok-str); }
+.b-num    { color: var(--tok-num); }
+.b-bool   { color: var(--tok-bool); }
+.b-null   { color: var(--tok-null); }
+.b-cm     { color: var(--tok-comment); font-style: italic; }
+.b-attr   { color: var(--tok-attr); }
+.b-schema { color: var(--tok-schema); font-weight: 600; }
+.b-brack  { color: var(--tok-bracket); }
+.b-eq     { color: var(--gray-400); }
+
+/* ── COMPARISON TABLE ──────────────────────────────────────── */
+.compare-table {
+  width: 100%; border-collapse: collapse; font-size: 0.82rem;
+  margin: 1.25rem 0;
+}
+.compare-table th {
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--gray-400);
+  border-bottom: 2px solid var(--gray-200); padding: 0.6rem 1rem;
+  text-align: left; background: var(--gray-50);
+}
+.compare-table th:last-child { color: var(--accent); }
+.compare-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+.compare-table tr:hover td { background: var(--gray-50); }
+.check-yes { color: var(--green); font-size: 1rem; }
+.check-no  { color: var(--red);   font-size: 1rem; }
+.check-partial { color: var(--gold); font-size: 1rem; }
+
+/* ── FEATURE GRID ──────────────────────────────────────────── */
+.feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1.25rem 0; }
+.feature-card { padding: 1.5rem; border: 1px solid var(--gray-200); border-radius: 4px; transition: border-color .2s; }
+.feature-card:hover { border-color: var(--accent); }
+.fc-icon { font-size: 1.4rem; margin-bottom: 0.75rem; }
+.fc-title { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 500; margin-bottom: 0.4rem; }
+.fc-desc { font-size: 0.8rem; color: var(--gray-600); line-height: 1.6; }
+
+/* ── SYNTAX REFERENCE ──────────────────────────────────────── */
+.syntax-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
+
+/* ── ROADMAP ───────────────────────────────────────────────── */
+.roadmap { margin: 1.25rem 0; }
+.rm-item { display: flex; gap: 1.2rem; padding: 1.2rem 0; border-bottom: 1px solid var(--gray-200); align-items: flex-start; }
+.rm-v { font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-400); min-width: 48px; padding-top: 0.1rem; }
+.rm-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.25rem; }
+.rm-desc { font-size: 0.82rem; color: var(--gray-600); line-height: 1.5; }
+.rm-status { font-family: var(--font-mono); font-size: 0.62rem; padding: 2px 8px; border-radius: 10px; white-space: nowrap; margin-top: 0.5rem; display: inline-block; }
+.rm-status.done   { background: #d3f9d8; color: #2b8a3e; }
+.rm-status.active { background: #dbe4ff; color: #364fc7; }
+.rm-status.future { background: var(--gray-100); color: var(--gray-400); }
+
+/* ══════════════════════════════════════════════════════════════
+   BRING EDITOR — SWAGGER STYLE
+══════════════════════════════════════════════════════════════ */
+.editor-section {
+  background: var(--editor-bg);
+  border-top: 3px solid var(--accent);
+  margin: 0 -3.5rem;
+  padding: 0;
+}
+.editor-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 2rem;
+  background: #161820;
+  border-bottom: 1px solid var(--editor-border);
+  flex-wrap: wrap; gap: 0.75rem;
+}
+.editor-topbar-title {
+  font-family: var(--font-mono); font-size: 0.82rem;
+  color: #abb2bf; font-weight: 500;
+}
+.editor-topbar-title span { color: var(--accent); }
+.editor-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.preset-btn {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  background: #1e2030; color: #7c85a0;
+  border: 1px solid var(--editor-border);
+  padding: 0.3rem 0.75rem; border-radius: 3px;
+  cursor: pointer; transition: all .15s;
+}
+.preset-btn:hover { background: #252840; color: #abb2bf; border-color: #4a4f6a; }
+.preset-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.editor-actions { display: flex; gap: 0.5rem; }
+.action-btn {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  padding: 0.35rem 1rem; border-radius: 3px; cursor: pointer;
+  border: none; transition: all .15s;
+}
+.btn-parse { background: var(--accent); color: #fff; }
+.btn-parse:hover { background: #2f4cbf; }
+.btn-clear { background: #1e2030; color: #7c85a0; border: 1px solid var(--editor-border); }
+.btn-clear:hover { background: #252840; color: #abb2bf; }
+
+.editor-panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 520px;
+}
+.editor-pane {
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--editor-border);
+  overflow: hidden;
+}
+.editor-pane:last-child { border-right: none; }
+.pane-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: #161820;
+  border-bottom: 1px solid var(--editor-border);
+  flex-shrink: 0;
+}
+.pane-label { font-family: var(--font-mono); font-size: 0.65rem; color: #5c6370; letter-spacing: 0.08em; text-transform: uppercase; }
+.pane-status { font-family: var(--font-mono); font-size: 0.65rem; }
+.pane-status.ok    { color: #98c379; }
+.pane-status.error { color: #e06c75; }
+.pane-status.idle  { color: #5c6370; }
+
+.editor-input-wrapper {
+  display: flex; flex: 1; overflow: hidden; position: relative;
+}
+.line-numbers {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  line-height: 1.7; color: #4b5263;
+  padding: 1rem 0.75rem 1rem 1rem;
+  text-align: right;
+  background: var(--editor-bg);
+  border-right: 1px solid #1e2030;
+  user-select: none;
+  min-width: 42px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+#bringInput {
+  flex: 1;
+  font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.7;
+  background: var(--editor-bg);
+  color: #abb2bf;
+  border: none; outline: none; resize: none;
+  padding: 1rem;
+  tab-size: 2;
+  overflow-y: auto;
+  overflow-x: auto;
+  caret-color: var(--accent);
+}
+#bringInput::selection { background: #3b4a6b; }
+#bringInput::-webkit-scrollbar { width: 6px; height: 6px; }
+#bringInput::-webkit-scrollbar-track { background: var(--editor-bg); }
+#bringInput::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+
+.output-pane {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+  font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.7;
+  background: var(--editor-bg);
+  color: #abb2bf;
+  white-space: pre;
+}
+.output-pane::-webkit-scrollbar { width: 6px; height: 6px; }
+.output-pane::-webkit-scrollbar-track { background: var(--editor-bg); }
+.output-pane::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+
+/* JSON color tokens */
+.j-key   { color: #61afef; }
+.j-str   { color: #98c379; }
+.j-num   { color: #d19a66; }
+.j-bool  { color: #c678dd; }
+.j-null  { color: #c678dd; }
+.j-punct { color: #7c85a0; }
+
+.error-bar {
+  background: #3d1a1a;
+  border-top: 1px solid #6e2323;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: #e06c75;
+  flex-shrink: 0;
+  display: none;
+}
+.editor-footer {
+  padding: 0.5rem 2rem;
+  background: #0d0f14;
+  border-top: 1px solid var(--editor-border);
+  display: flex; align-items: center; gap: 1.5rem;
+  font-family: var(--font-mono); font-size: 0.65rem; color: #3d4252;
+}
+.ef-stat { display: flex; align-items: center; gap: 0.3rem; }
+.ef-stat span { color: #5c6370; }
+
+/* ── INSTALL SECTION ───────────────────────────────────────── */
+.install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
+.install-card { padding: 1.5rem; border: 1px solid var(--gray-200); border-radius: 4px; }
+.ic-title { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500; margin-bottom: 1rem; color: var(--gray-700); }
+.ic-code { background: var(--editor-bg); border-radius: 4px; padding: 0.75rem 1rem; margin-top: 0.75rem; }
+.ic-code code { font-family: var(--font-mono); font-size: 0.75rem; color: #abb2bf; white-space: pre; }
+
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main { padding: 2rem 1.5rem 4rem; max-width: 100%; }
+  .editor-section { margin: 0 -1.5rem; }
+  .editor-panes { grid-template-columns: 1fr; height: auto; }
+  .editor-pane { height: 300px; }
+  .editor-pane:first-child { border-right: none; border-bottom: 1px solid var(--editor-border); }
+  .feature-grid, .syntax-grid, .install-grid { grid-template-columns: 1fr; }
+  .compare-table { font-size: 0.72rem; }
+  .compare-table td, .compare-table th { padding: 0.5rem 0.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-sep">/</span>
+  <span class="nav-logo">
+    <!-- logo placeholder — will be replaced once user provides it -->
+    <svg width="22" height="22" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="16" fill="#3b5bdb"/>
+      <text x="50" y="68" font-family="JetBrains Mono, monospace" font-size="52" font-weight="700" fill="white" text-anchor="middle">B</text>
+    </svg>
+    <span>Bring</span>
+  </span>
+  <div class="nav-links">
+    <a href="#syntax">Syntax</a>
+    <a href="#editor">Editor</a>
+    <a href="https://github.com/Daftyon/Bring" target="_blank" rel="noopener">GitHub ↗</a>
+    <span class="nav-badge">v1.0</span>
+  </div>
+</nav>
+
+<!-- ── LAYOUT ───────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Overview</div>
+      <a class="sb-link active" href="#introduction">Introduction</a>
+      <a class="sb-link" href="#why-bring">Why Bring?</a>
+      <a class="sb-link" href="#install">Installation</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Syntax</div>
+      <a class="sb-link" href="#kv">Key-Value Pairs</a>
+      <a class="sb-link" href="#objects">Objects</a>
+      <a class="sb-link" href="#arrays">Arrays</a>
+      <a class="sb-link" href="#attributes">Attributes</a>
+      <a class="sb-link" href="#schemas">Schemas</a>
+      <a class="sb-link" href="#comments">Comments</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Live</div>
+      <a class="sb-link" href="#editor">▶ Try Editor</a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">More</div>
+      <a class="sb-link" href="#use-cases">Use Cases</a>
+      <a class="sb-link" href="#roadmap">Roadmap</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="hero" id="introduction">
+      <!-- logo placeholder — replace src once logo provided -->
+      <svg class="hero-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="20" fill="#3b5bdb"/>
+        <text x="50" y="70" font-family="JetBrains Mono, monospace" font-size="56" font-weight="700" fill="white" text-anchor="middle">B</text>
+      </svg>
+      <div class="hero-eyebrow">Data Format · Package Management · v1.0 · MIT</div>
+      <h1 class="hero-title">Bring</h1>
+      <p class="hero-tagline">A modern, human-readable file format for configuration and package management — combining the best of JSON, YAML, and XML while fixing their flaws.</p>
+      <div class="hero-badges">
+        <span class="badge">Human-Readable</span>
+        <span class="badge">Built-in Schemas</span>
+        <span class="badge">Inline Attributes</span>
+        <span class="badge">Comments</span>
+        <span class="badge">No Ambiguity</span>
+        <span class="badge badge-accent">Daftyon</span>
+      </div>
+      <div class="hero-install">
+        <pre><span class="cm"># Install the Python parser</span>
+pip install bring-parser
+
+<span class="cm"># Parse a file</span>
+from bring_parser import parse_bring_file
+data = parse_bring_file("config.bring")</pre>
+      </div>
+      <a class="hero-link" href="https://github.com/Daftyon/Bring" target="_blank" rel="noopener">→ github.com/Daftyon/Bring</a>
+    </div>
+
+    <hr class="doc-divider">
+
+    <!-- WHY BRING -->
+    <section class="doc-section" id="why-bring">
+      <div class="section-eyebrow">Motivation</div>
+      <h2 class="section-title">Why <em>Bring</em>?</h2>
+      <p class="doc-p">Modern configuration formats each have fundamental limitations. JSON lacks comments and schema validation. YAML introduces ambiguity and code-execution risks. XML is verbose and requires closing tags. Bring solves all of these in a single, secure format.</p>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th><th>JSON</th><th>YAML</th><th>XML</th><th>Bring</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Human-Readable</td><td><span class="check-partial">~</span></td><td><span class="check-yes">✓</span></td><td><span class="check-no">✗</span></td><td><span class="check-yes">✓</span></td></tr>
+          <tr><td>Supports Comments</td><td><span class="check-no">✗</span></td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td></tr>
+          <tr><td>Built-in Schema Validation</td><td><span class="check-no">✗</span></td><td><span class="check-no">✗</span></td><td><span class="check-partial">~ (XSD)</span></td><td><span class="check-yes">✓</span></td></tr>
+          <tr><td>Inline Attributes/Metadata</td><td><span class="check-no">✗</span></td><td><span class="check-no">✗</span></td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td></tr>
+          <tr><td>No Ambiguity</td><td><span class="check-yes">✓</span></td><td><span class="check-no">✗</span></td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td></tr>
+          <tr><td>Secure (no code exec)</td><td><span class="check-yes">✓</span></td><td><span class="check-no">✗</span></td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="fc-icon">🔒</div>
+          <div class="fc-title">Secure by Design</div>
+          <div class="fc-desc">No arbitrary code execution. No implicit type coercion. <code>true</code> is always true — not <code>yes</code>, <code>on</code>, or <code>TRUE</code>.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">📐</div>
+          <div class="fc-title">Built-in Schema</div>
+          <div class="fc-desc">Define validation rules inline with <code>schema</code> blocks. No external XSD or JSON Schema files needed.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">🏷️</div>
+          <div class="fc-title">Inline Attributes</div>
+          <div class="fc-desc">Attach metadata to any value with <code>@attr=value</code> syntax — like XML attributes but cleaner.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">📦</div>
+          <div class="fc-title">Package Management</div>
+          <div class="fc-desc">Native format for <strong>EasierLang</strong> package definitions on the Daftyon Hub.</div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="doc-divider">
+
+    <!-- SYNTAX -->
+    <section class="doc-section" id="syntax">
+      <div class="section-eyebrow">Language Reference</div>
+      <h2 class="section-title">Syntax</h2>
+    </section>
+
+    <!-- KV PAIRS -->
+    <section class="doc-section" id="kv">
+      <h3 class="section-title" style="font-size:1.3rem;">Key-Value Pairs</h3>
+      <p class="doc-p">The fundamental building block. Keys are bare identifiers or quoted strings. Values are separated by <code>=</code>.</p>
+      <div class="code-block">
+        <div class="cb-header"><span class="cb-lang">bring</span><button class="cb-copy" onclick="copyCode(this)">copy</button></div>
+        <div class="cb-body"><code><span class="b-cm"># Primitives</span>
+<span class="b-key">name</span>    <span class="b-eq">=</span> <span class="b-str">"Bring"</span>
+<span class="b-key">version</span> <span class="b-eq">=</span> <span class="b-num">1.0</span>
+<span class="b-key">enabled</span> <span class="b-eq">=</span> <span class="b-bool">true</span>
+<span class="b-key">timeout</span> <span class="b-eq">=</span> <span class="b-null">null</span>
+<span class="b-key">port</span>    <span class="b-eq">=</span> <span class="b-num">8080</span>
+<span class="b-key">ratio</span>   <span class="b-eq">=</span> <span class="b-num">3.14</span></code></div>
+      </div>
+    </section>
+
+    <!-- OBJECTS -->
+    <section class="doc-section" id="objects">
+      <h3 class="section-title" style="font-size:1.3rem;">Objects</h3>
+      <p class="doc-p">Nested key-value structures use curly braces. Objects can be nested to any depth. No commas required between entries.</p>
+      <div class="code-block">
+        <div class="cb-header"><span class="cb-lang">bring</span><button class="cb-copy" onclick="copyCode(this)">copy</button></div>
+        <div class="cb-body"><code><span class="b-key">server</span> <span class="b-eq">=</span> <span class="b-brack">{</span>
+    <span class="b-key">host</span> <span class="b-eq">=</span> <span class="b-str">"0.0.0.0"</span>
+    <span class="b-key">port</span> <span class="b-eq">=</span> <span class="b-num">8080</span>
+    <span class="b-key">ssl</span> <span class="b-eq">=</span> <span class="b-brack">{</span>
+        <span class="b-key">enabled</span>   <span class="b-eq">=</span> <span class="b-bool">true</span>
+        <span class="b-key">cert_path</span> <span class="b-eq">=</span> <span class="b-str">"/etc/ssl/cert.pem"</span>
+    <span class="b-brack">}</span>
+<span class="b-brack">}</span></code></div>
+      </div>
+    </section>
+
+    <!-- ARRAYS -->
+    <section class="doc-section" id="arrays">
+      <h3 class="section-title" style="font-size:1.3rem;">Arrays</h3>
+      <p class="doc-p">Ordered lists of any value type, including nested objects. Items are separated by commas.</p>
+      <div class="code-block">
+        <div class="cb-header"><span class="cb-lang">bring</span><button class="cb-copy" onclick="copyCode(this)">copy</button></div>
+        <div class="cb-body"><code><span class="b-key">allowed_ips</span> <span class="b-eq">=</span> <span class="b-brack">[</span><span class="b-str">"127.0.0.1"</span>, <span class="b-str">"192.168.1.0/24"</span><span class="b-brack">]</span>
+
+<span class="b-key">features</span> <span class="b-eq">=</span> <span class="b-brack">[</span>
+    <span class="b-brack">{</span>
+        <span class="b-key">name</span>    <span class="b-eq">=</span> <span class="b-str">"caching"</span>
+        <span class="b-key">enabled</span> <span class="b-eq">=</span> <span class="b-bool">true</span>
+        <span class="b-key">ttl</span>     <span class="b-eq">=</span> <span class="b-num">3600</span>
+    <span class="b-brack">}</span>,
+    <span class="b-brack">{</span>
+        <span class="b-key">name</span>    <span class="b-eq">=</span> <span class="b-str">"analytics"</span>
+        <span class="b-key">enabled</span> <span class="b-eq">=</span> <span class="b-bool">false</span>
+    <span class="b-brack">}</span>
+<span class="b-brack">]</span></code></div>
+      </div>
+    </section>
+
+    <!-- ATTRIBUTES -->
+    <section class="doc-section" id="attributes">
+      <h3 class="section-title" style="font-size:1.3rem;">Attributes <span style="font-size:0.7em;font-family:var(--font-mono);color:var(--gray-400)">@metadata</span></h3>
+      <p class="doc-p">Attach inline metadata to any key-value pair using <code>@attr=value</code> syntax. Similar to XML attributes but cleaner — no closing tags required.</p>
+      <div class="code-block">
+        <div class="cb-header"><span class="cb-lang">bring</span><button class="cb-copy" onclick="copyCode(this)">copy</button></div>
+        <div class="cb-body"><code><span class="b-cm"># Validation attributes</span>
+<span class="b-key">port</span>     <span class="b-eq">=</span> <span class="b-num">8080</span>    <span class="b-attr">@min</span>=<span class="b-num">1</span> <span class="b-attr">@max</span>=<span class="b-num">65535</span>
+<span class="b-key">username</span> <span class="b-eq">=</span> <span class="b-str">"alice"</span> <span class="b-attr">@required</span>=<span class="b-bool">true</span> <span class="b-attr">@maxLength</span>=<span class="b-num">32</span>
+<span class="b-key">email</span>    <span class="b-eq">=</span> <span class="b-str">"alice@example.com"</span> <span class="b-attr">@format</span>=<span class="b-str">"email"</span>
+<span class="b-key">amount</span>   <span class="b-eq">=</span> <span class="b-num">100.50</span> <span class="b-attr">@currency</span>=<span class="b-str">"USD"</span> <span class="b-attr">@min</span>=<span class="b-num">0</span></code></div>
+      </div>
+    </section>
+
+    <!-- SCHEMAS -->
+    <section class="doc-section" id="schemas">
+      <h3 class="section-title" style="font-size:1.3rem;">Schemas</h3>
+      <p class="doc-p">Define validation rules directly in the file using <code>schema</code> blocks. Built-in, no external tools needed.</p>
+      <div class="code-block">
+        <div class="cb-header"><span class="cb-lang">bring</span><button class="cb-copy" onclick="copyCode(this)">copy</button></div>
+        <div class="cb-body"><code><span class="b-schema">schema</span> <span class="b-key">Product</span> <span class="b-brack">{</span>
+    <span class="b-key">id</span>    <span class="b-eq">=</span> <span class="b-bool">number</span> <span class="b-attr">@min</span>=<span class="b-num">1</span>
+    <span class="b-key">name</span>  <span class="b-eq">=</span> <span class="b-bool">string</span> <span class="b-attr">@maxLength</span>=<span class="b-num">100</span>
+    <span class="b-key">price</span> <span class="b-eq">=</span> <span class="b-bool">float</span>  <span class="b-attr">@min</span>=<span class="b-num">0</span>
+    <span class="b-key">tags</span>  <span class="b-eq">=</span> <span class="b-bool">array</span>
+<span class="b-brack">}</span>
+
+<span class="b-schema">schema</span> <span class="b-key">User</span> <span class="b-brack">{</span>
+    <span class="b-key">id</span>       <span class="b-eq">=</span> <span class="b-bool">number</span>  <span class="b-attr">@required</span>=<span class="b-bool">true</span>
+    <span class="b-key">username</span> <span class="b-eq">=</span> <span class="b-bool">string</span>  <span class="b-attr">@minLength</span>=<span class="b-num">3</span>
+    <span class="b-key">email</span>    <span class="b-eq">=</span> <span class="b-bool">string</span>  <span class="b-attr">@format</span>=<span class="b-str">"email"</span>
+    <span class="b-key">active</span>   <span class="b-eq">=</span> <span class="b-bool">bool</span>
+<span class="b-brack">}</span></code></div>
+      </div>
+    </section>
+
+    <!-- COMMENTS -->
+    <section class="doc-section" id="comments">
+      <h3 class="section-title" style="font-size:1.3rem;">Comments</h3>
+      <p class="doc-p">Line comments start with <code>#</code>. They work anywhere — top-level, inside objects, inside arrays.</p>
+      <div class="code-block">
+        <div class="cb-header"><span class="cb-lang">bring</span><button class="cb-copy" onclick="copyCode(this)">copy</button></div>
+        <div class="cb-body"><code><span class="b-cm"># Top-level comment</span>
+<span class="b-key">database</span> <span class="b-eq">=</span> <span class="b-brack">{</span>
+    <span class="b-cm"># Primary database connection</span>
+    <span class="b-key">host</span> <span class="b-eq">=</span> <span class="b-str">"db.example.com"</span>
+    <span class="b-key">port</span> <span class="b-eq">=</span> <span class="b-num">5432</span>  <span class="b-cm"># Default PostgreSQL port</span>
+<span class="b-brack">}</span></code></div>
+      </div>
+    </section>
+
+    <hr class="doc-divider">
+
+    <!-- LIVE EDITOR -->
+    <section class="doc-section" id="editor" style="margin-bottom:0;">
+      <div class="section-eyebrow">Interactive</div>
+      <h2 class="section-title">Try the Editor</h2>
+      <p class="doc-p" style="margin-bottom:1.5rem;">Write Bring syntax on the left and see the parsed output on the right — live, with error highlighting.</p>
+    </section>
+
+    <!-- EDITOR WIDGET -->
+    <div class="editor-section">
+      <div class="editor-topbar">
+        <span class="editor-topbar-title">Bring <span>Live Editor</span></span>
+        <div class="editor-presets">
+          <button class="preset-btn active" onclick="loadPreset('config')">Server Config</button>
+          <button class="preset-btn" onclick="loadPreset('package')">Package</button>
+          <button class="preset-btn" onclick="loadPreset('schema')">Schema</button>
+          <button class="preset-btn" onclick="loadPreset('transaction')">Transaction</button>
+        </div>
+        <div class="editor-actions">
+          <button class="action-btn btn-clear" onclick="clearEditor()">Clear</button>
+          <button class="action-btn btn-parse" onclick="parseNow()">▶ Parse</button>
+        </div>
+      </div>
+
+      <div class="editor-panes">
+        <!-- INPUT PANE -->
+        <div class="editor-pane">
+          <div class="pane-header">
+            <span class="pane-label">● Input  .bring</span>
+            <span class="pane-status idle" id="inputStatus">ready</span>
+          </div>
+          <div class="editor-input-wrapper">
+            <div class="line-numbers" id="lineNumbers">1</div>
+            <textarea id="bringInput" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+          </div>
+          <div class="error-bar" id="errorBar">⚠ <span id="errorMsg"></span></div>
+        </div>
+
+        <!-- OUTPUT PANE -->
+        <div class="editor-pane">
+          <div class="pane-header">
+            <span class="pane-label">○ Output  JSON</span>
+            <span class="pane-status idle" id="outputStatus">waiting</span>
+          </div>
+          <div class="output-pane" id="outputPane"><span style="color:#3d4252">// Parsed output will appear here...</span></div>
+        </div>
+      </div>
+
+      <div class="editor-footer">
+        <div class="ef-stat">Lines: <span id="statLines">0</span></div>
+        <div class="ef-stat">Keys: <span id="statKeys">0</span></div>
+        <div class="ef-stat">Chars: <span id="statChars">0</span></div>
+        <div class="ef-stat" style="margin-left:auto;">Bring Parser v1.0 · JS</div>
+      </div>
+    </div>
+
+    <hr class="doc-divider">
+
+    <!-- INSTALL -->
+    <section class="doc-section" id="install">
+      <div class="section-eyebrow">Getting Started</div>
+      <h2 class="section-title">Installation</h2>
+      <div class="install-grid">
+        <div class="install-card">
+          <div class="ic-title">Python</div>
+          <div class="ic-code"><code>pip install bring-parser</code></div>
+          <div class="ic-code" style="margin-top:0.5rem;"><code>from bring_parser import parse_bring_file
+
+data = parse_bring_file("config.bring")
+print(data["server"]["host"])</code></div>
+        </div>
+        <div class="install-card">
+          <div class="ic-title">CLI</div>
+          <div class="ic-code"><code>bring parse config.bring --format=json
+bring validate config.bring --schema=schema.bring
+bring convert config.json config.bring</code></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- USE CASES -->
+    <section class="doc-section" id="use-cases">
+      <div class="section-eyebrow">Applications</div>
+      <h2 class="section-title">Use Cases</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="fc-icon">🖥️</div>
+          <div class="fc-title">Server Configuration</div>
+          <div class="fc-desc">Replace YAML/TOML config files with Bring's cleaner syntax, comments, and built-in validation attributes.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">📦</div>
+          <div class="fc-title">EasierLang Packages</div>
+          <div class="fc-desc">Define and import packages from the Daftyon Hub in the EasierLang programming language ecosystem.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">🔄</div>
+          <div class="fc-title">Data Exchange</div>
+          <div class="fc-desc">A universal structured data format for APIs and services — more readable than JSON, safer than YAML.</div>
+        </div>
+        <div class="feature-card">
+          <div class="fc-icon">💳</div>
+          <div class="fc-title">Payments (v2)</div>
+          <div class="fc-desc">Future support for payment processing and financial transactions with typed, validated fields.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="doc-section" id="roadmap">
+      <div class="section-eyebrow">Future</div>
+      <h2 class="section-title">Roadmap</h2>
+      <div class="roadmap">
+        <div class="rm-item">
+          <div class="rm-v">v1.0</div>
+          <div>
+            <div class="rm-title">Stable Core</div>
+            <div class="rm-desc">Key-value pairs, objects, arrays, attributes, schemas, comments. Python parser. CLI tooling. MIT.</div>
+            <div class="rm-status done">Released</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <div class="rm-v">v1.5</div>
+          <div>
+            <div class="rm-title">Schema Improvements</div>
+            <div class="rm-desc">Enhanced validation rules, cross-file schema imports, better error messages, more language parsers.</div>
+            <div class="rm-status active">In Progress</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <div class="rm-v">v2.0</div>
+          <div>
+            <div class="rm-title">Payments & Financial Transactions</div>
+            <div class="rm-desc">Typed transaction blocks, currency attributes, verified fields, and secure financial data exchange.</div>
+            <div class="rm-status future">Planned</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  BRING PARSER — JavaScript port of bring_parser/parser.py
+// ══════════════════════════════════════════════════════════════
+
+class BringParserJS {
+  constructor(text) {
+    this.text = text;
+    this.pos = 0;
+    this.line = 1;
+    this.col = 1;
+  }
+  parse() {
+    const result = {};
+    while (!this.isEof()) {
+      this.skipWS();
+      if (this.isEof()) break;
+      if (this.peek() === '#') { this.skipComment(); continue; }
+      if (this.matchStr('schema')) {
+        this.skipWS();
+        const s = this.parseSchema();
+        result['schema:' + s.name] = s;
+        continue;
+      }
+      const kv = this.parseKV();
+      result[kv.key] = kv.value;
+    }
+    return result;
+  }
+  parseKV() {
+    const key = this.parseKey();
+    this.skipWS();
+    this.expect('=');
+    this.skipWS();
+    const value = this.parseValue();
+    this.skipWS();
+    const annotations = {};
+    while (this.peek() === '@') {
+      this.advance();
+      const name = this.parseIdent();
+      this.skipWS();
+      this.expect('=');
+      this.skipWS();
+      annotations[name] = this.parsePrimitive();
+      this.skipWS();
+    }
+    return { key, value, annotations };
+  }
+  parseValue() {
+    const c = this.peek();
+    if (c === '{') return this.parseObject();
+    if (c === '[') return this.parseArray();
+    if (c === '"' || c === "'") return this.parseString();
+    if (c >= '0' && c <= '9' || c === '-') return this.parseNumber();
+    if (this.matchStr('true'))  return true;
+    if (this.matchStr('false')) return false;
+    if (this.matchStr('null'))  return null;
+    throw this.err(`Unexpected character: '${c}'`);
+  }
+  parseObject() {
+    this.expect('{');
+    this.skipWS();
+    const items = {};
+    while (!this.isEof() && this.peek() !== '}') {
+      if (this.peek() === '#') { this.skipComment(); this.skipWS(); continue; }
+      const kv = this.parseKV();
+      items[kv.key] = kv.value;
+      this.skipWS();
+      if (this.peek() === ',') { this.advance(); this.skipWS(); }
+    }
+    this.expect('}');
+    return items;
+  }
+  parseArray() {
+    this.expect('[');
+    this.skipWS();
+    const items = [];
+    while (!this.isEof() && this.peek() !== ']') {
+      if (this.peek() === '#') { this.skipComment(); this.skipWS(); continue; }
+      items.push(this.parseValue());
+      this.skipWS();
+      if (this.peek() === ',') { this.advance(); this.skipWS(); }
+    }
+    this.expect(']');
+    return items;
+  }
+  parseSchema() {
+    const name = this.parseIdent();
+    this.skipWS();
+    this.expect('{');
+    this.skipWS();
+    const rules = [];
+    while (!this.isEof() && this.peek() !== '}') {
+      if (this.peek() === '#') { this.skipComment(); this.skipWS(); continue; }
+      const key = this.parseKey();
+      this.skipWS();
+      this.expect('=');
+      this.skipWS();
+      const type = this.parseIdent();
+      this.skipWS();
+      const attrs = [];
+      while (this.peek() === '@') {
+        this.advance();
+        const an = this.parseIdent();
+        this.skipWS();
+        this.expect('=');
+        this.skipWS();
+        attrs.push({ name: an, value: this.parsePrimitive() });
+        this.skipWS();
+      }
+      rules.push({ key, type, attrs });
+      this.skipWS();
+    }
+    this.expect('}');
+    return { name, rules };
+  }
+  parseKey() {
+    if (this.peek() === '"' || this.peek() === "'") return this.parseString();
+    return this.parseIdent();
+  }
+  parsePrimitive() {
+    const c = this.peek();
+    if (c === '"' || c === "'") return this.parseString();
+    if (c >= '0' && c <= '9' || c === '-') return this.parseNumber();
+    if (this.matchStr('true'))  return true;
+    if (this.matchStr('false')) return false;
+    if (this.matchStr('null'))  return null;
+    throw this.err('Expected primitive value');
+  }
+  parseString() {
+    const q = this.advance();
+    const res = [];
+    while (!this.isEof() && this.peek() !== q) {
+      if (this.peek() === '\\') {
+        this.advance();
+        const e = this.advance();
+        if (e === 'n') res.push('\n');
+        else if (e === 't') res.push('\t');
+        else if (e === 'r') res.push('\r');
+        else res.push(e);
+      } else res.push(this.advance());
+    }
+    if (this.isEof()) throw this.err('Unterminated string');
+    this.advance();
+    return res.join('');
+  }
+  parseNumber() {
+    let s = '';
+    if (this.peek() === '-') s += this.advance();
+    while (!this.isEof() && this.peek() >= '0' && this.peek() <= '9') s += this.advance();
+    let isFloat = false;
+    if (!this.isEof() && this.peek() === '.') {
+      isFloat = true;
+      s += this.advance();
+      while (!this.isEof() && this.peek() >= '0' && this.peek() <= '9') s += this.advance();
+    }
+    return isFloat ? parseFloat(s) : parseInt(s, 10);
+  }
+  parseIdent() {
+    const c = this.peek();
+    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_'))
+      throw this.err(`Expected identifier, got '${c}'`);
+    let r = '';
+    while (!this.isEof()) {
+      const ch = this.peek();
+      if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch === '_')
+        r += this.advance();
+      else break;
+    }
+    return r;
+  }
+  skipWS() {
+    while (!this.isEof() && ' \t\r\n'.includes(this.peek())) {
+      if (this.peek() === '\n') { this.line++; this.col = 1; }
+      else this.col++;
+      this.advance();
+    }
+  }
+  skipComment() {
+    while (!this.isEof() && this.peek() !== '\n') this.advance();
+  }
+  matchStr(s) {
+    if (this.text.startsWith(s, this.pos)) {
+      const next = this.text[this.pos + s.length];
+      if (next && (next >= 'a' && next <= 'z' || next >= 'A' && next <= 'Z' || next >= '0' && next <= '9' || next === '_')) return false;
+      for (let i = 0; i < s.length; i++) this.advance();
+      return true;
+    }
+    return false;
+  }
+  expect(s) {
+    if (!this.matchStr(s)) throw this.err(`Expected '${s}', got '${this.peek()}'`);
+  }
+  peek() { return this.pos < this.text.length ? this.text[this.pos] : ''; }
+  advance() {
+    if (this.isEof()) return '';
+    const c = this.text[this.pos++];
+    if (c === '\n') { this.line++; this.col = 1; } else this.col++;
+    return c;
+  }
+  isEof() { return this.pos >= this.text.length; }
+  err(msg) { return new SyntaxError(`${msg} at line ${this.line}, col ${this.col}`); }
+}
+
+// ── PRESETS ─────────────────────────────────────────────────────
+const PRESETS = {
+  config: `# Server configuration
+server = {
+    name = "prod-server-01"
+    host = "0.0.0.0"
+    port = 8080
+    ssl = {
+        enabled = true
+        cert_path = "/etc/ssl/server.crt"
+        key_path  = "/etc/ssl/server.key"
+    }
+}
+
+database = {
+    host      = "db.example.com"
+    port      = 5432
+    name      = "myapp"
+    pool_size = 20
+}
+
+allowed_ips = ["127.0.0.1", "192.168.1.0/24", "10.0.0.0/8"]
+
+features = [
+    {
+        name    = "caching"
+        enabled = true
+        ttl     = 3600
+    },
+    {
+        name    = "analytics"
+        enabled = false
+    }
+]`,
+
+  package: `# EasierLang package definition
+package = {
+    name        = "http-server"
+    version     = "2.3.0"
+    description = "High-performance HTTP server for EasierLang"
+    author      = "Daftyon Team"
+    license     = "MIT"
+    dependencies = ["json-parser", "logger", "utils"]
+}
+
+build = {
+    entry  = "src/main.el"
+    output = "dist/"
+    target = "easierlang-1.0"
+}
+
+registry = {
+    hub = "hub.daftyon.com"
+    public = true
+}`,
+
+  schema: `# Schema definitions with validation
+schema Product {
+    id    = number @min=1
+    name  = string @maxLength=100
+    price = float  @min=0
+    tags  = array
+}
+
+schema User {
+    id       = number @required=true
+    username = string @minLength=3 @maxLength=32
+    email    = string @format="email"
+    active   = bool
+    role     = string
+}
+
+# Data using the schema
+product = {
+    id    = 1
+    name  = "Bring Parser"  @required=true
+    price = 0.0
+    tags  = ["parser", "config", "bring"]
+}
+
+user = {
+    id       = 42
+    username = "alice"      @required=true
+    email    = "alice@example.com"
+    active   = true
+    role     = "admin"
+}`,
+
+  transaction: `# Future: Payment transaction (v2)
+transaction = {
+    id        = "txn_20260101_001"  @unique=true
+    amount    = 100.50              @currency="USD" @min=0
+    receiver  = "merchant@example.com" @verified=true
+    timestamp = "2026-01-01T12:00:00Z" @format="ISO8601"
+    status    = "pending"
+}
+
+sender = {
+    id      = "usr_alice_001"
+    name    = "Alice Hafdi"
+    country = "MA"
+}
+
+metadata = {
+    platform   = "DaftyonPay"
+    ip_address = "192.168.1.1"   @private=true
+    risk_score = 0.02            @max=1.0
+}`
+};
+
+// ── EDITOR LOGIC ─────────────────────────────────────────────────
+const input   = document.getElementById('bringInput');
+const output  = document.getElementById('outputPane');
+const lineNums= document.getElementById('lineNumbers');
+const errorBar= document.getElementById('errorBar');
+const errorMsg= document.getElementById('errorMsg');
+const inStatus= document.getElementById('inputStatus');
+const outStatus=document.getElementById('outputStatus');
+
+function updateLineNumbers() {
+  const lines = input.value.split('\n').length;
+  lineNums.textContent = Array.from({length: lines}, (_, i) => i+1).join('\n');
+}
+
+function colorizeJSON(obj, indent=0) {
+  const pad = '  '.repeat(indent);
+  const pad1 = '  '.repeat(indent+1);
+  if (obj === null)   return `<span class="j-null">null</span>`;
+  if (obj === true)   return `<span class="j-bool">true</span>`;
+  if (obj === false)  return `<span class="j-bool">false</span>`;
+  if (typeof obj === 'number') return `<span class="j-num">${obj}</span>`;
+  if (typeof obj === 'string') return `<span class="j-str">${esc('"' + obj.replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"')}</span>`;
+
+  // Schema node
+  if (obj && obj.name && obj.rules) {
+    return `<span class="j-punct">{</span>\n${pad1}<span class="j-key">"$type"</span><span class="j-punct">:</span> <span class="j-str">"schema"</span><span class="j-punct">,</span>\n${pad1}<span class="j-key">"name"</span><span class="j-punct">:</span> <span class="j-str">"${obj.name}"</span><span class="j-punct">,</span>\n${pad1}<span class="j-key">"rules"</span><span class="j-punct">:</span> ${colorizeJSON(obj.rules, indent+1)}\n${pad}<span class="j-punct">}</span>`;
+  }
+
+  if (Array.isArray(obj)) {
+    if (obj.length === 0) return `<span class="j-punct">[]</span>`;
+    const items = obj.map(v => `${pad1}${colorizeJSON(v, indent+1)}`).join(`<span class="j-punct">,</span>\n`);
+    return `<span class="j-punct">[</span>\n${items}\n${pad}<span class="j-punct">]</span>`;
+  }
+
+  if (typeof obj === 'object') {
+    const keys = Object.keys(obj);
+    if (keys.length === 0) return `<span class="j-punct">{}</span>`;
+    const entries = keys.map(k => {
+      return `${pad1}<span class="j-key">${esc('"'+k+'"')}</span><span class="j-punct">:</span> ${colorizeJSON(obj[k], indent+1)}`;
+    }).join(`<span class="j-punct">,</span>\n`);
+    return `<span class="j-punct">{</span>\n${entries}\n${pad}<span class="j-punct">}</span>`;
+  }
+  return String(obj);
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function countKeys(obj) {
+  if (!obj || typeof obj !== 'object') return 0;
+  let n = 0;
+  for (const k of Object.keys(obj)) {
+    n++;
+    n += countKeys(obj[k]);
+  }
+  return n;
+}
+
+let parseTimer;
+function scheduleParse() {
+  clearTimeout(parseTimer);
+  parseTimer = setTimeout(parseNow, 300);
+  updateLineNumbers();
+  updateStats();
+}
+
+function parseNow() {
+  const text = input.value.trim();
+  if (!text) {
+    output.innerHTML = '<span style="color:#3d4252">// Parsed output will appear here...</span>';
+    setStatus('idle','idle','ready','waiting');
+    errorBar.style.display='none';
+    return;
+  }
+  try {
+    const parser = new BringParserJS(text);
+    const result = parser.parse();
+    output.innerHTML = colorizeJSON(result);
+    errorBar.style.display = 'none';
+    setStatus('ok','ok','✓ valid','parsed');
+    document.getElementById('statKeys').textContent = countKeys(result);
+  } catch(e) {
+    output.innerHTML = `<span style="color:#e06c75">// Parse error\n// ${esc(e.message)}</span>`;
+    errorMsg.textContent = e.message;
+    errorBar.style.display = 'block';
+    setStatus('error','error','⚠ error','error');
+  }
+}
+
+function setStatus(inC, outC, inT, outT) {
+  inStatus.className  = 'pane-status ' + inC;
+  outStatus.className = 'pane-status ' + outC;
+  inStatus.textContent  = inT;
+  outStatus.textContent = outT;
+}
+
+function updateStats() {
+  const text = input.value;
+  document.getElementById('statLines').textContent = text.split('\n').length;
+  document.getElementById('statChars').textContent = text.length;
+}
+
+function loadPreset(name) {
+  input.value = PRESETS[name] || '';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  updateLineNumbers();
+  parseNow();
+  updateStats();
+}
+
+function clearEditor() {
+  input.value = '';
+  output.innerHTML = '<span style="color:#3d4252">// Cleared.</span>';
+  errorBar.style.display='none';
+  updateLineNumbers();
+  updateStats();
+  setStatus('idle','idle','ready','waiting');
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+}
+
+// Tab key support in textarea
+input.addEventListener('keydown', e => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = input.selectionStart, end = input.selectionEnd;
+    input.value = input.value.substring(0, s) + '  ' + input.value.substring(end);
+    input.selectionStart = input.selectionEnd = s + 2;
+    scheduleParse();
+  }
+});
+input.addEventListener('input', scheduleParse);
+input.addEventListener('scroll', () => {
+  lineNums.style.marginTop = '-' + input.scrollTop + 'px';
+});
+
+// Sidebar scrollspy
+const sections = document.querySelectorAll('.doc-section[id]');
+const links    = document.querySelectorAll('.sb-link');
+function scrollspy() {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY + 80 >= s.offsetTop) current = s.id;
+  });
+  links.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', scrollspy, { passive: true });
+
+// Copy button
+function copyCode(btn) {
+  const code = btn.closest('.code-block').querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+
+// Init with config preset
+window.addEventListener('DOMContentLoaded', () => {
+  input.value = PRESETS.config;
+  updateLineNumbers();
+  parseNow();
+  updateStats();
+});
+</script>
+</body>
+</html>
