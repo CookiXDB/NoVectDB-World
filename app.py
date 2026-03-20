@@ -31,6 +31,10 @@ def context_os():
 def pizza_sugar():
     return render_template("pizzaSugar.html")
 
+@app.route("/papers/fromProbsToEcoSys")
+def from_probs_to_eco_sys():
+    return render_template("fromProbsToEcoSys.html")
+
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)

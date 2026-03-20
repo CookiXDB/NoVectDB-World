@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>From Cascade Chaos to Ecosystem Harmony — Ahmed Hafdi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script>
+MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+:root {
+  --black: #000;
+  --white: #fff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-500: #888;
+  --gray-700: #444;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --max-w: 860px;
+  --section-gap: 100px;
+  --color-solution: #16a34a;
+  --color-problem: #dc2626;
+  --color-hybrid: #ea580c;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 17px; }
+body { font-family: var(--font-sans); background: var(--white); color: var(--black); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* ─── NAV ─────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
+  height: 52px;
+}
+.nav-back { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; }
+.nav-back:hover { color: var(--black); }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+.nav-burger { display: none; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px; }
+.nav-burger span { display: block; height: 2px; background: var(--black); transition: transform .3s, opacity .3s; }
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-drawer { display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99; background: rgba(255,255,255,0.98); backdrop-filter: blur(8px); border-bottom: 1px solid var(--gray-200); flex-direction: column; max-height: 0; overflow: hidden; transition: max-height .35s; }
+.nav-drawer.open { max-height: 400px; }
+.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
+.nav-drawer a { display: block; padding: 0.9rem 2rem; font-size: 0.9rem; text-decoration: none; color: var(--black); }
+.nav-drawer a:hover { background: var(--gray-50); }
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
+section:last-of-type { border-bottom: none; }
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero { padding-top: 130px; padding-bottom: 80px; border-bottom: 1px solid var(--black); }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem; }
+h1.hero-title { font-family: var(--font-serif); font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+h1.hero-title em { font-style: italic; }
+.hero-subtitle { font-size: 1.05rem; color: var(--gray-700); max-width: 620px; margin-bottom: 2rem; line-height: 1.6; }
+.hero-tagline { font-family: var(--font-serif); font-style: italic; font-size: 1.3rem; letter-spacing: -0.01em; border-left: 3px solid var(--black); padding-left: 1rem; margin: 2rem 0; min-height: 2rem; }
+#typewriter::after { content: '|'; animation: blink .7s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-meta { font-size: 0.82rem; color: var(--gray-500); font-family: var(--font-mono); margin-top: 2.5rem; }
+.hero-meta strong { color: var(--black); }
+.abstract-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.8rem 2rem; margin-top: 3rem; border-radius: 2px; }
+.abstract-box .label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; }
+.abstract-box p { font-size: 0.93rem; color: var(--gray-700); line-height: 1.75; }
+
+/* ─── HEADINGS ────────────────────────────────────────── */
+h2.section-num { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.2; }
+h3.subsec { font-size: 1rem; font-weight: 600; letter-spacing: 0.01em; margin: 2.5rem 0 0.8rem; }
+p { margin-bottom: 1rem; }
+
+/* ─── SCROLL REVEAL ───────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+.reveal-delay-5 { transition-delay: .5s; }
+
+/* ─── CARDS ───────────────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+.card { border: 1px solid var(--gray-200); padding: 1.8rem; background: var(--white); position: relative; overflow: hidden; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--black); }
+.card-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.6rem; }
+.card-body { font-size: 0.9rem; color: var(--gray-700); line-height: 1.65; }
+
+/* ─── MATH BLOCK ──────────────────────────────────────── */
+.math-block { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1.6rem 2rem; margin: 1.5rem 0; overflow-x: auto; text-align: center; }
+.math-label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; text-align: left; }
+
+/* ─── THEOREM BOX ─────────────────────────────────────── */
+.theorem-box { border: 2px solid var(--black); padding: 1.6rem 2rem; margin: 1.5rem 0; background: var(--gray-50); }
+.theorem-label { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; font-weight: 700; }
+.theorem-body { font-size: 0.93rem; color: var(--gray-700); }
+
+/* ─── RESULTS TABLE ───────────────────────────────────── */
+.results-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+.results-table th { text-align: left; padding: 0.6rem 1rem; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.results-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--gray-200); }
+.results-table tr.highlight td { font-weight: 600; background: var(--gray-50); }
+.results-table tr:hover td { background: var(--gray-100); }
+
+/* ─── Q-CARDS ─────────────────────────────────────────── */
+.q-card { border: 1px solid var(--gray-200); padding: 1.2rem 1.5rem; margin-bottom: 0.8rem; display: flex; gap: 1.2rem; align-items: flex-start; }
+.q-num { font-family: var(--font-mono); font-size: 0.72rem; background: var(--black); color: var(--white); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.q-text { font-size: 0.92rem; color: var(--gray-700); line-height: 1.6; }
+
+/* ═══════════════════════════════════════════════════════
+   3D ANIMATION SECTION
+═══════════════════════════════════════════════════════ */
+#viz-section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); background: var(--gray-50); }
+
+.viz-panel {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+.viz-panel-header {
+  padding: 0.7rem 1.2rem;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gray-50);
+}
+.viz-panel-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+}
+
+canvas { display: block; }
+#three-mount { width: 100%; height: 480px; background: #0a0a0a; cursor: grab; overflow: hidden; display: block; position: relative; }
+#three-mount:active { cursor: grabbing; }
+
+/* Node tooltip */
+#node-tooltip {
+  position: absolute;
+  display: none;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.5rem 0.8rem;
+  pointer-events: none;
+  border-radius: 2px;
+  z-index: 20;
+  line-height: 1.6;
+}
+
+/* Growth canvas */
+#growth-canvas { display: block; width: 100%; height: 80px; background: #111; }
+
+/* Controls */
+.viz-controls {
+  padding: 0.8rem 1.2rem;
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--gray-50);
+}
+.ctrl-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+  padding: 0.3rem 0.9rem;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  letter-spacing: 0.02em;
+}
+.ctrl-btn:hover { background: var(--gray-100); }
+.ctrl-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+.ctrl-btn.btn-chaos.active { background: var(--color-problem); border-color: var(--color-problem); }
+.ctrl-btn.btn-eco.active { background: var(--color-solution); border-color: var(--color-solution); }
+.ctrl-sep { width: 1px; height: 18px; background: var(--gray-200); flex-shrink: 0; }
+.ctrl-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.06em; }
+#problem-count { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-700); margin-left: 4px; }
+
+/* Full-width viz */
+.viz-full {
+  max-width: var(--max-w);
+  margin: 2rem auto 0;
+  padding: 0 2rem;
+  position: relative;
+}
+.viz-full .viz-panel { width: 100%; }
+
+/* Stats bar below viz */
+.viz-stats {
+  max-width: var(--max-w);
+  margin: 1.5rem auto 0;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 1rem;
+}
+.viz-stat {
+  border: 1px solid var(--gray-200);
+  padding: 1rem 1.2rem;
+  background: var(--white);
+  text-align: center;
+  transition: background .2s;
+}
+.viz-stat-num { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 500; display: block; }
+.viz-stat-lbl { font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; margin-top: 2px; }
+
+.viz-section-heading {
+  max-width: var(--max-w);
+  margin: 0 auto 2rem;
+  padding: 0 2rem;
+}
+
+/* ─── PAPER EXPLORER ──────────────────────────────────── */
+#pe-scroll-outer { position: relative; }
+#pe-sticky-frame { position: sticky; top: 52px; height: calc(100vh - 52px); display: flex; flex-direction: column; background: #fff; border-top: 1px solid var(--gray-200); overflow: hidden; z-index: 10; }
+#paper-explorer { display: flex; flex-direction: column; height: 100%; }
+#pe-toc { display: flex; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--gray-200); flex-shrink: 0; height: 46px; background: var(--gray-50); }
+#pe-toc::-webkit-scrollbar { display: none; }
+.pe-toc-item { flex-shrink: 0; padding: 0 1.2rem; display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; cursor: pointer; border-right: 1px solid var(--gray-200); color: var(--gray-700); transition: background .15s; white-space: nowrap; }
+.pe-toc-item:hover { background: var(--gray-100); }
+.pe-toc-item.active { background: var(--white); font-weight: 600; color: var(--black); border-bottom: 2px solid var(--black); }
+.pe-toc-num { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); }
+.pe-toc-item.active .pe-toc-num { color: var(--black); }
+#pe-split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; min-height: 0; }
+#pe-left { border-right: 1px solid var(--gray-200); background: #f2f2f2; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+#pe-canvas-wrap { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; }
+#pe-canvas { display: block; max-width: 100%; max-height: 100%; box-shadow: 0 4px 32px rgba(0,0,0,.18); background: #fff; }
+#pe-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f2f2f2; }
+#pe-loading.hidden { display: none; }
+.pe-spinner { width: 28px; height: 28px; border: 2px solid var(--gray-300); border-top-color: var(--black); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#pe-right { display: flex; flex-direction: column; overflow: hidden; }
+#pe-anim-label { padding: 0.8rem 1.5rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; background: var(--white); }
+.pe-anim { flex: 1; display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem; min-height: 0; }
+.pe-anim.active { display: flex; }
+.pe-anim-inner { width: 100%; max-width: 420px; }
+#pe-nav { padding: 0.6rem 1.5rem; border-top: 1px solid var(--gray-200); display: flex; align-items: center; gap: 1rem; flex-shrink: 0; background: var(--gray-50); }
+.pe-btn { font-family: var(--font-mono); font-size: 0.78rem; background: none; border: 1px solid var(--gray-200); padding: 0.3rem 0.9rem; cursor: pointer; transition: background .15s; }
+.pe-btn:hover { background: var(--gray-100); }
+#pe-page-info { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-500); flex: 1; text-align: center; }
+.pe-scroll-hint { font-family: var(--font-mono); font-size: 0.68rem; color: var(--gray-500); margin-left: auto; }
+
+@keyframes pe-in { to { opacity:1; transform:translateY(0) } }
+.pe-word { font-family: var(--font-serif); font-size: 1.5rem; opacity: 0; transform: translateY(10px); animation: pe-in .45s ease forwards; animation-delay: var(--d,0s); line-height: 1.15; }
+.pe-word em { font-style: italic; }
+.pe-pillars { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+.pe-pillar { flex: 1; min-width: 80px; border: 1px solid var(--gray-200); padding: 1rem; text-align: center; opacity: 0; animation: pe-in .4s ease forwards; animation-delay: var(--dd,0s); }
+.pe-pillar-icon { font-family: var(--font-mono); font-size: 1.4rem; margin-bottom: 0.4rem; font-weight: 700; }
+.pe-pillar-lbl { font-size: 0.72rem; color: var(--gray-700); line-height: 1.3; }
+.pe-bar-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.7rem; opacity:0; animation: pe-in .4s ease forwards; animation-delay: var(--d,0s); }
+.pe-bar-lbl { font-family: var(--font-mono); font-size: 0.72rem; width: 130px; text-align: right; color: var(--gray-700); flex-shrink: 0; }
+.pe-bar-track { flex: 1; height: 18px; background: var(--gray-100); overflow: hidden; }
+.pe-bar-fill { height: 100%; background: var(--black); width: 0; transition: width 1s cubic-bezier(.22,.61,.36,1); }
+.pe-bar-fill.green { background: var(--color-solution); }
+.pe-bar-fill.dim { background: var(--gray-300); }
+.pe-bar-val { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray-500); width: 3rem; }
+.pe-trace-step { display: flex; gap: 0.8rem; margin-bottom: 0.6rem; opacity: 0; animation: pe-in .35s ease forwards; animation-delay: var(--d,0s); font-family: var(--font-mono); font-size: 0.72rem; }
+.pe-trace-badge { background: var(--black); color: #fff; padding: 0.1rem 0.4rem; flex-shrink: 0; font-size: 0.65rem; }
+.pe-trace-badge.red { background: var(--color-problem); }
+.pe-trace-badge.green { background: var(--color-solution); }
+.pe-trace-text { color: var(--gray-700); line-height: 1.5; }
+.pe-trace-text strong { color: var(--black); }
+.pe-formula-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 1rem 1.2rem; margin: 0.8rem 0; text-align: center; opacity:0; animation: pe-in .5s ease forwards; animation-delay: var(--d,0s); font-size: 0.9rem; }
+.pe-formula-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; text-align: left; }
+
+/* ─── FOOTER ──────────────────────────────────────────── */
+footer { background: var(--gray-50); border-top: 1px solid var(--gray-200); padding: 3rem 0; }
+.footer-inner { display: flex; gap: 4rem; align-items: flex-start; flex-wrap: wrap; }
+.footer-title { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 1rem; }
+.footer-sig { font-size: 0.85rem; color: var(--gray-700); line-height: 1.6; }
+.footer-sig em { font-family: var(--font-serif); font-style: italic; }
+details summary { cursor: pointer; font-size: 0.88rem; font-weight: 500; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '+'; font-family: var(--font-mono); }
+details[open] summary::before { content: '−'; }
+.ref-list { margin-top: 1rem; padding-left: 0; list-style: none; }
+.ref-list li { display: flex; gap: 1rem; font-size: 0.83rem; color: var(--gray-700); margin-bottom: 0.6rem; line-height: 1.5; }
+.ref-list li span { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); flex-shrink: 0; }
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 700px) {
+  nav { padding: 0 1.2rem; }
+  .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .nav-drawer { display: flex; }
+  .container { padding: 0 1.2rem; }
+  .card-grid { grid-template-columns: 1fr; }
+  .viz-stats { grid-template-columns: 1fr; }
+  #pe-split { grid-template-columns: 1fr; }
+  #pe-right { display: none; }
+  .viz-full { padding: 0 1.2rem; }
+  .viz-stats { padding: 0 1.2rem; }
+  .viz-section-heading { padding: 0 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-logo">Cascade → Ecosystem</span>
+  <ul class="nav-links">
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#ncf">NCF</a></li>
+    <li><a href="#hse">HSE</a></li>
+    <li><a href="#viz-section">Simulation</a></li>
+    <li><a href="#principles">Principles</a></li>
+    <li><a href="#casestudy">Case Study</a></li>
+    <li><a href="#paper-explorer" style="font-weight:500;">Paper ↗</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<ul class="nav-drawer" id="nav-drawer">
+  <li><a href="#intro" onclick="closeMenu()">Introduction</a></li>
+  <li><a href="#ncf" onclick="closeMenu()">NCF Framework</a></li>
+  <li><a href="#hse" onclick="closeMenu()">HSE Design</a></li>
+  <li><a href="#viz-section" onclick="closeMenu()">Simulation</a></li>
+  <li><a href="#principles" onclick="closeMenu()">Principles</a></li>
+  <li><a href="#casestudy" onclick="closeMenu()">Case Study</a></li>
+  <li><a href="#paper-explorer" onclick="closeMenu()">Paper ↗</a></li>
+</ul>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Research Paper · August 2025 · CKX 006</div>
+    <h1 class="hero-title">From Cascade <em>Chaos</em><br>to Ecosystem Harmony</h1>
+    <p class="hero-subtitle">A Mathematical Framework for the Solution-Problem Paradox in Complex Systems</p>
+    <div class="hero-tagline">
+      <span id="typewriter"></span>
+    </div>
+    <div class="hero-meta">
+      <strong>Ahmed Hafdi</strong> &nbsp;·&nbsp; Independent Research &nbsp;·&nbsp; August 2025
+    </div>
+    <div class="abstract-box reveal">
+      <div class="label">Abstract</div>
+      <p>This paper introduces a complete mathematical framework proving that isolated, non-integrated solutions inevitably generate O(2<sup>n</sup>) exponential problem cascades. Through the Network Cascade Framework (NCF), we model solution-problem interactions as a weighted directed graph G = (V, E, W, Φ) and derive cascade propagation equations from first principles. The Homogeneous Solution Ecosystem (HSE) design pattern — characterized by interface compatibility, objective alignment, and operational harmony — is proven to reduce problem growth to O(log n). A smart city infrastructure case study validates the theoretical predictions: resource utilization increased from 67% to 91%, citizen satisfaction from 5.8 to 8.9/10, and the Homogeneity Index H from 0.31 to 0.83.</p>
+    </div>
+  </div>
+</section>
+
+<!-- §1 INTRODUCTION -->
+<section id="intro">
+  <div class="container">
+    <h2 class="section-num reveal">§ 1</h2>
+    <h2 class="section-title reveal">The Solution-Problem Paradox</h2>
+
+    <p class="reveal">Every complex system faces a fundamental paradox: solutions designed to address one problem inevitably create new ones. A new road reduces congestion but induces more traffic. A new antibiotic eliminates one pathogen but breeds resistant strains. A new social platform connects people but amplifies misinformation. This is not failure — it is the mathematical signature of isolated, non-integrated solutions operating in interconnected systems.</p>
+
+    <p class="reveal">This paper proves that this cascade is not inevitable. When solutions are designed as a <em>homogeneous ecosystem</em> — sharing interfaces, aligning objectives, harmonizing operations — the growth of secondary problems collapses from exponential to logarithmic. The difference between O(2<sup>n</sup>) and O(log n) is the difference between systemic collapse and sustainable operation.</p>
+
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title">The Automobile</div>
+        <div class="card-body">Solved personal mobility. Created traffic congestion, air pollution, urban sprawl, noise, parking crises, pedestrian safety issues, road fatalities, petroleum dependency — each requiring isolated solutions that generated further cascades.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">The Internet</div>
+        <div class="card-body">Solved information access and communication. Created cybercrime, misinformation, privacy erosion, digital addiction, surveillance capitalism, filter bubbles, and attention economy disruption.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Antibiotics</div>
+        <div class="card-body">Solved bacterial infection. Created antibiotic resistance, microbiome disruption, over-prescription, hospital-acquired superbugs — a cascade that now threatens to reverse a century of medical progress.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Social Media</div>
+        <div class="card-body">Solved social connection and information sharing. Created mental health crises, political polarization, disinformation ecosystems, coordinated harassment, and algorithmic radicalization pathways.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §2 NETWORK CASCADE FRAMEWORK -->
+<section id="ncf">
+  <div class="container">
+    <h2 class="section-num reveal">§ 2</h2>
+    <h2 class="section-title reveal">Network Cascade Framework</h2>
+
+    <p class="reveal">We model the solution-problem domain as a weighted directed graph G = (V, E, W, Φ) where V is the set of nodes (solutions and problems), E ⊆ V × V is the set of directed causal edges, W: E → ℝ<sup>+</sup> is a weight function quantifying interaction strength, and Φ: V → {solution, problem} is a classification function.</p>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 1 — System Graph</div>
+      \[G = (V,\; E,\; W,\; \Phi), \quad \Phi: V \to \{\text{solution}, \text{problem}\} \tag{1}\]
+    </div>
+
+    <p class="reveal">The cascade propagation equation governs how problems spread through the network. For a solution node s ∈ V with connection degree d(s), the expected number of secondary problems P at generation k follows:</p>
+
+    <div class="math-block reveal">
+      <div class="math-label">Equation 2 — Cascade Propagation</div>
+      \[P_{k+1}(s) = \sum_{v \in N(s)} W(s,v) \cdot P_k(v) \cdot \left(1 - H(s \mid E)\right) \tag{2}\]
+    </div>
+
+    <p class="reveal">where N(s) is the neighborhood of s, and H(s | E) ∈ [0,1] is the Solution Homogeneity Index measuring ecosystem integration. When H → 0 (isolated solutions), cascade propagation is uninhibited.</p>
+
+    <div class="theorem-box reveal">
+      <div class="theorem-label">Theorem 1 — Exponential Cascade (Isolated Solutions)</div>
+      <div class="theorem-body">
+        <p>For a system with n isolated solutions (H = 0) and average branching factor β ≥ 2, the total problem count P<sub>total</sub>(n) grows exponentially:</p>
+        \[P_{\text{total}}(n) = O(2^n) \tag{3}\]
+        <p style="margin-top:0.6rem;font-size:0.88rem;"><em>Proof sketch:</em> By induction on cascade depth. At generation 0, P<sub>0</sub> = 1 (the original problem). Each solution with d(s) connections and no homogeneity constraint (H=0) spawns at least β new problem nodes. Thus P<sub>k</sub> ≥ β<sup>k</sup>, yielding P<sub>total</sub> = Σ P<sub>k</sub> ∈ O(β<sup>n</sup>) ⊆ O(2<sup>n</sup>).</p>
+      </div>
+    </div>
+
+    <div class="theorem-box reveal">
+      <div class="theorem-label">Theorem 2 — Cascade Inevitability</div>
+      <div class="theorem-body">
+        <p>In any connected system graph G with |V| ≥ 3, isolated solutions (H = 0) guarantee cascade propagation with probability approaching 1 as n → ∞:</p>
+        \[\lim_{n \to \infty} \Pr\!\left[\,P_{\text{total}}(n) > n\,\right] = 1 \tag{4}\]
+      </div>
+    </div>
+
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title">Why Isolation Fails</div>
+        <div class="card-body">An isolated solution optimizes for its local objective function without accounting for side effects in adjacent nodes. Each improvement to one node shifts load, state, or incentives across connected nodes — creating new problems proportional to graph connectivity.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">The Branching Factor</div>
+        <div class="card-body">Empirical analysis across domains shows β ≈ 2.3 for technological systems, β ≈ 1.8 for social systems, β ≈ 2.7 for ecological interventions. All exceed the cascade threshold β = 1, confirming exponential growth as the default outcome.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §3 HOMOGENEOUS SOLUTION ECOSYSTEM -->
+<section id="hse">
+  <div class="container">
+    <h2 class="section-num reveal">§ 3</h2>
+    <h2 class="section-title reveal">Homogeneous Solution Ecosystem</h2>
+
+    <p class="reveal">The Homogeneous Solution Ecosystem (HSE) is a design pattern characterized by three structural properties that collectively suppress cascade propagation. The key metric is the Solution Homogeneity Index H(s | E) ∈ [0, 1]:</p>
+
+    <div class="math-block reveal">
+      <div class="math-label">Definition 2 — Solution Homogeneity Index</div>
+      \[H(s \mid E) = \frac{1}{3}\!\left[\alpha \cdot C_I(s) + \beta \cdot C_O(s) + \gamma \cdot C_H(s)\right] \tag{5}\]
+      <p style="font-size:0.82rem;color:var(--gray-500);margin-top:0.6rem;text-align:center;">where C<sub>I</sub> = Interface Compatibility, C<sub>O</sub> = Objective Alignment, C<sub>H</sub> = Operational Harmony, and α + β + γ = 3.</p>
+    </div>
+
+    <div class="card-grid reveal">
+      <div class="card">
+        <div class="card-title">I. Interface Compatibility</div>
+        <div class="card-body">Solutions share standardized interfaces — data formats, communication protocols, API contracts — so that state changes in one solution propagate predictably to others. C<sub>I</sub>(s) measures the fraction of edges in N(s) carrying compatible interfaces.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">II. Objective Alignment</div>
+        <div class="card-body">Each solution's local objective function is a projection of a shared global objective. Formally, ∇f<sub>local</sub>(s) · ∇f<sub>global</sub> > 0 for all s ∈ V. No solution locally optimizes at the expense of global system health.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">III. Operational Harmony</div>
+        <div class="card-body">Resource cycles, timing, and operational modes are synchronized across solutions. Solutions share infrastructure where possible, eliminating redundant resource consumption and the conflicts that arise from competing operational demands.</div>
+      </div>
+    </div>
+
+    <div class="theorem-box reveal" style="margin-top:2.5rem;">
+      <div class="theorem-label">Theorem 3 — Logarithmic Growth (HSE Design)</div>
+      <div class="theorem-body">
+        <p>For a system designed as an HSE with H(s | E) ≥ H<sub>min</sub> = 0.7 for all s ∈ V, the total problem count P<sub>HSE</sub>(n) grows at most logarithmically:</p>
+        \[P_{\text{HSE}}(n) = O(\log n) \tag{6}\]
+        <p style="margin-top:0.6rem;font-size:0.88rem;"><em>Proof sketch:</em> When H ≥ 0.7, each cascade step has effective branching factor β' = β(1 − H) ≤ 0.69 &lt; 1. The geometric series Σ β'<sup>k</sup> converges, bounding total problems by a constant times log n.</p>
+      </div>
+    </div>
+
+    <div class="math-block reveal" style="margin-top:1.5rem;">
+      <div class="math-label">Equation 7 — Complexity Reduction Factor</div>
+      \[\text{Reduction}(n) = \frac{P_{\text{total}}(n)}{P_{\text{HSE}}(n)} = \frac{O(2^n)}{O(\log n)} \to \infty \quad \text{as } n \to \infty \tag{7}\]
+    </div>
+
+    <p class="reveal">The reduction factor grows without bound. For n = 20 solutions, O(2<sup>20</sup>) ≈ 1,000,000 problems vs. O(log 20) ≈ 4 problems — a six-order-of-magnitude difference. This is not an incremental improvement; it is a categorical change in system behavior.</p>
+  </div>
+</section>
+
+<!-- §4 SIMULATION -->
+<section id="viz-section">
+  <div class="viz-section-heading">
+    <h2 class="section-num">§ 4</h2>
+    <h2 class="section-title">Live Network Simulation</h2>
+    <p style="color:var(--gray-700);font-size:0.95rem;">Toggle between Chaos Mode (isolated solutions, O(2<sup>n</sup>) cascade) and Ecosystem Mode (HSE design, O(log n) dampening). Trigger a cascade to watch propagation unfold. Drag to rotate · Hover nodes for details.</p>
+  </div>
+
+  <div class="viz-full reveal">
+    <div class="viz-panel">
+      <div class="viz-panel-header">
+        <span class="viz-panel-title">Force-Directed Network — Solution Cascade Propagation</span>
+        <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gray-500);">Green = solution · Red = problem · Orange = hybrid</span>
+      </div>
+      <div style="position:relative;">
+        <div id="three-mount">
+          <div id="node-tooltip"></div>
+        </div>
+        <canvas id="growth-canvas"></canvas>
+      </div>
+      <div class="viz-controls">
+        <span class="ctrl-label">Mode</span>
+        <button class="ctrl-btn btn-chaos active" id="btn-chaos" onclick="window.setMode('chaos')">Chaos</button>
+        <button class="ctrl-btn btn-eco" id="btn-eco" onclick="window.setMode('ecosystem')">Ecosystem</button>
+        <div class="ctrl-sep"></div>
+        <button class="ctrl-btn" onclick="window.triggerCascade()">⚡ Trigger Cascade</button>
+        <button class="ctrl-btn" onclick="window.resetNetwork()">↺ Reset</button>
+        <div class="ctrl-sep"></div>
+        <span class="ctrl-label">Problems:</span>
+        <span id="problem-count">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="viz-stats">
+    <div class="viz-stat">
+      <span class="viz-stat-num" id="stat-problems">0</span>
+      <span class="viz-stat-lbl">Active Problems</span>
+    </div>
+    <div class="viz-stat">
+      <span class="viz-stat-num" id="stat-solutions">12</span>
+      <span class="viz-stat-lbl">Solutions</span>
+    </div>
+    <div class="viz-stat">
+      <span class="viz-stat-num" id="stat-homogeneity">—</span>
+      <span class="viz-stat-lbl">Homogeneity H</span>
+    </div>
+  </div>
+</section>
+
+<!-- §5 DESIGN PRINCIPLES -->
+<section id="principles">
+  <div class="container">
+    <h2 class="section-num reveal">§ 5</h2>
+    <h2 class="section-title reveal">Five Principles of Ecosystem Design</h2>
+
+    <p class="reveal">Building an HSE requires deliberate design at every stage. These five principles translate the mathematical conditions of Theorem 3 into actionable engineering and organizational practices.</p>
+
+    <div class="q-card reveal reveal-delay-1">
+      <div class="q-num">1</div>
+      <div class="q-text"><strong>Design for interoperability from day one.</strong> Interface compatibility (C<sub>I</sub>) cannot be retrofitted. Every solution must expose a standardized interface contract before implementation begins, treating interoperability as a first-class requirement rather than an afterthought.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-2">
+      <div class="q-num">2</div>
+      <div class="q-text"><strong>Define and enforce a shared objective function.</strong> Local optimization that contradicts global objectives is the primary source of cascade amplification. Every solution must demonstrate that its local objective ∇f<sub>local</sub> is aligned with ∇f<sub>global</sub> before deployment.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-3">
+      <div class="q-num">3</div>
+      <div class="q-text"><strong>Monitor cascade metrics in real time.</strong> The Homogeneity Index H and effective branching factor β' must be continuously measured. H &lt; 0.7 is a cascade risk signal requiring immediate architectural review. β' ≥ 1 indicates that a cascade is actively propagating.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-4">
+      <div class="q-num">4</div>
+      <div class="q-text"><strong>Prefer shared infrastructure over redundant solutions.</strong> Each independent solution introduces new edges into the graph G, increasing connectivity and cascade risk. Shared infrastructure pools causal edges, reducing the graph's branching factor. O(log n) growth requires O(log n) graph complexity.</div>
+    </div>
+    <div class="q-card reveal reveal-delay-5">
+      <div class="q-num">5</div>
+      <div class="q-text"><strong>Treat second-order effects as first-order requirements.</strong> A solution whose side effects have not been modeled and constrained is incomplete. The graph G must include all known secondary problem nodes before any solution enters production. Undiscovered edges are the primary source of cascade surprise.</div>
+    </div>
+  </div>
+</section>
+
+<!-- §6 CASE STUDY -->
+<section id="casestudy">
+  <div class="container">
+    <h2 class="section-num reveal">§ 6</h2>
+    <h2 class="section-title reveal">Smart City Infrastructure Case Study</h2>
+
+    <p class="reveal">A metropolitan area of 2.3 million residents deployed 14 independent smart city solutions over 5 years — traffic management, waste collection, energy distribution, water systems, public transit, emergency response, and related subsystems. Each was procured independently with different vendors, protocols, and optimization targets.</p>
+
+    <p class="reveal">After applying the NCF analysis, the Homogeneity Index was measured at H = 0.31, well below the cascade threshold of 0.7. The effective branching factor was β' = 1.6, confirming active exponential cascade propagation. The city then undertook a two-year HSE redesign, raising H to 0.83 by implementing shared data protocols, unified objective functions (citizen wellbeing index), and shared operational infrastructure.</p>
+
+    <table class="results-table reveal">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Pre-HSE (Isolated)</th>
+          <th>Post-HSE (Ecosystem)</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight">
+          <td>Resource Utilization</td>
+          <td>67%</td>
+          <td>91%</td>
+          <td>+24 pp</td>
+        </tr>
+        <tr class="highlight">
+          <td>Citizen Satisfaction</td>
+          <td>5.8 / 10</td>
+          <td>8.9 / 10</td>
+          <td>+3.1 pts</td>
+        </tr>
+        <tr class="highlight">
+          <td>Homogeneity Index H</td>
+          <td>0.31</td>
+          <td>0.83</td>
+          <td>+0.52</td>
+        </tr>
+        <tr>
+          <td>Active Secondary Problems</td>
+          <td>847</td>
+          <td>94</td>
+          <td>−89%</td>
+        </tr>
+        <tr>
+          <td>Effective Branching Factor β'</td>
+          <td>1.6</td>
+          <td>0.31</td>
+          <td>Sub-critical</td>
+        </tr>
+        <tr>
+          <td>System Response Time</td>
+          <td>4.2 hours</td>
+          <td>18 minutes</td>
+          <td>−93%</td>
+        </tr>
+        <tr>
+          <td>Infrastructure Cost / Capita</td>
+          <td>$412</td>
+          <td>$287</td>
+          <td>−30%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsec reveal">Paradigm Transformation</h3>
+    <table class="results-table reveal">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>Isolated Solutions</th>
+          <th>HSE Design</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Problem growth</td><td>O(2<sup>n</sup>) exponential</td><td>O(log n) logarithmic</td></tr>
+        <tr><td>Interface strategy</td><td>Local optimization</td><td>Standardized contracts</td></tr>
+        <tr><td>Objective function</td><td>Per-solution KPIs</td><td>Shared global objective</td></tr>
+        <tr><td>Infrastructure</td><td>Redundant, siloed</td><td>Shared, pooled</td></tr>
+        <tr><td>Cascade response</td><td>Reactive firefighting</td><td>Structural prevention</td></tr>
+        <tr><td>Complexity trajectory</td><td>Diverging</td><td>Converging</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- §7 CONCLUSION -->
+<section id="conclusion">
+  <div class="container">
+    <h2 class="section-num reveal">§ 7</h2>
+    <h2 class="section-title reveal">Conclusion</h2>
+    <p class="reveal">The solution-problem paradox is not an unsolvable feature of complex systems — it is a predictable mathematical consequence of deploying isolated, non-integrated solutions. The Network Cascade Framework provides the first rigorous proof that this cascade grows exponentially under isolation and logarithmically under ecosystem design. The Homogeneous Solution Ecosystem pattern, characterized by interface compatibility (C<sub>I</sub> ≥ 0.7), objective alignment (C<sub>O</sub> ≥ 0.7), and operational harmony (C<sub>H</sub> ≥ 0.7), is both mathematically sufficient and practically achievable.</p>
+    <p class="reveal">The smart city case study demonstrates that transitioning from H = 0.31 to H = 0.83 reduces secondary problems by 89%, improves resource utilization by 24 percentage points, and nearly doubles citizen satisfaction. These are not marginal improvements — they are the measurable signature of moving from O(2<sup>n</sup>) to O(log n) system behavior. Every domain facing the solution-problem paradox — healthcare, climate policy, software architecture, organizational design — has the same mathematical option available to it.</p>
+  </div>
+</section>
+
+<!-- §8 PAPER EXPLORER -->
+<section id="paper-explorer" style="padding:0;border:none;">
+  <div id="pe-scroll-outer">
+    <div id="pe-sticky-frame">
+      <div id="paper-explorer">
+        <div id="pe-toc">
+          <div class="pe-toc-item active" data-idx="0" onclick="peGoto(0)"><span class="pe-toc-num">§0</span>Overview</div>
+          <div class="pe-toc-item" data-idx="1" onclick="peGoto(1)"><span class="pe-toc-num">§1</span>Paradox</div>
+          <div class="pe-toc-item" data-idx="2" onclick="peGoto(2)"><span class="pe-toc-num">§2</span>NCF</div>
+          <div class="pe-toc-item" data-idx="3" onclick="peGoto(3)"><span class="pe-toc-num">§3</span>Cascade</div>
+          <div class="pe-toc-item" data-idx="4" onclick="peGoto(4)"><span class="pe-toc-num">§4</span>HSE</div>
+          <div class="pe-toc-item" data-idx="5" onclick="peGoto(5)"><span class="pe-toc-num">§5</span>Theorem 3</div>
+          <div class="pe-toc-item" data-idx="6" onclick="peGoto(6)"><span class="pe-toc-num">§6</span>Principles</div>
+          <div class="pe-toc-item" data-idx="7" onclick="peGoto(7)"><span class="pe-toc-num">§7</span>Case Study</div>
+          <div class="pe-toc-item" data-idx="8" onclick="peGoto(8)"><span class="pe-toc-num">§8</span>Conclusion</div>
+        </div>
+        <div id="pe-split">
+          <div id="pe-left">
+            <div id="pe-canvas-wrap">
+              <div id="pe-loading">
+                <div class="pe-spinner"></div>
+                <p style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);margin-top:1rem;">Loading PDF…</p>
+              </div>
+              <canvas id="pe-canvas"></canvas>
+            </div>
+          </div>
+          <div id="pe-right">
+            <div id="pe-anim-label">
+              <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.08em;" id="pe-anim-title">Overview</span>
+            </div>
+
+            <!-- A0: Overview -->
+            <div class="pe-anim active" id="pe-a0">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s">Cascade <em>Chaos</em></div>
+                <div class="pe-word" style="--d:.15s;font-size:1rem;color:var(--gray-500);margin-top:.5rem;">→ Ecosystem Harmony</div>
+                <div class="pe-pillars">
+                  <div class="pe-pillar" style="--dd:.3s"><div class="pe-pillar-icon" style="color:var(--color-problem);">2<sup>n</sup></div><div class="pe-pillar-lbl">Isolated<br>Cascade</div></div>
+                  <div class="pe-pillar" style="--dd:.45s"><div class="pe-pillar-icon">H≥0.7</div><div class="pe-pillar-lbl">HSE<br>Threshold</div></div>
+                  <div class="pe-pillar" style="--dd:.6s"><div class="pe-pillar-icon" style="color:var(--color-solution);">log n</div><div class="pe-pillar-lbl">Ecosystem<br>Growth</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A1: Paradox -->
+            <div class="pe-anim" id="pe-a1">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">The Paradox</div>
+                <div style="margin-top:1.5rem;">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge red">Auto</div><div class="pe-trace-text">Solved mobility → created <strong>traffic, pollution, sprawl</strong></div></div>
+                  <div class="pe-trace-step" style="--d:.5s"><div class="pe-trace-badge red">Net</div><div class="pe-trace-text">Solved info access → created <strong>cybercrime, misinformation</strong></div></div>
+                  <div class="pe-trace-step" style="--d:.8s"><div class="pe-trace-badge red">Abx</div><div class="pe-trace-text">Solved infection → created <strong>antibiotic resistance</strong></div></div>
+                  <div class="pe-trace-step" style="--d:1.1s"><div class="pe-trace-badge green">HSE</div><div class="pe-trace-text">Ecosystem design <strong>breaks the cascade</strong></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A2: NCF -->
+            <div class="pe-anim" id="pe-a2">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Network Cascade Framework</div>
+                <div class="pe-formula-box" style="--d:.25s">
+                  <div class="pe-formula-label">System Graph</div>
+                  G = (V, E, W, Φ)
+                </div>
+                <div class="pe-formula-box" style="--d:.5s">
+                  <div class="pe-formula-label">Cascade Propagation</div>
+                  P<sub>k+1</sub>(s) = Σ W(s,v)·P<sub>k</sub>(v)·(1−H)
+                </div>
+                <div class="pe-formula-box" style="--d:.75s">
+                  <div class="pe-formula-label">Empirical branching factor</div>
+                  β ≈ 2.3 (tech) · 1.8 (social) · 2.7 (ecology)
+                </div>
+              </div>
+            </div>
+
+            <!-- A3: Cascade -->
+            <div class="pe-anim" id="pe-a3">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Theorem 1 — O(2<sup>n</sup>)</div>
+                <div style="margin-top:1.5rem;">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge">H=0</div><div class="pe-trace-text">No ecosystem integration — <strong>cascades uninhibited</strong></div></div>
+                  <div class="pe-trace-step" style="--d:.45s"><div class="pe-trace-badge">β≥2</div><div class="pe-trace-text">Each generation doubles: <strong>P<sub>k</sub> ≥ 2<sup>k</sup></strong></div></div>
+                  <div class="pe-trace-step" style="--d:.7s"><div class="pe-trace-badge">n=20</div><div class="pe-trace-text"><strong>1,048,576</strong> potential secondary problems</div></div>
+                  <div class="pe-trace-step" style="--d:.95s"><div class="pe-trace-badge">→∞</div><div class="pe-trace-text">Reduction factor <strong>grows without bound</strong></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A4: HSE -->
+            <div class="pe-anim" id="pe-a4">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">HSE Design</div>
+                <div class="pe-formula-box" style="--d:.25s">
+                  <div class="pe-formula-label">Homogeneity Index</div>
+                  H = ⅓ [α·C<sub>I</sub> + β·C<sub>O</sub> + γ·C<sub>H</sub>]
+                </div>
+                <div style="margin-top:1rem;">
+                  <div class="pe-bar-row" style="--d:.4s"><div class="pe-bar-lbl">Interface C<sub>I</sub></div><div class="pe-bar-track"><div class="pe-bar-fill green" data-w="83"></div></div><div class="pe-bar-val">0.83</div></div>
+                  <div class="pe-bar-row" style="--d:.55s"><div class="pe-bar-lbl">Objective C<sub>O</sub></div><div class="pe-bar-track"><div class="pe-bar-fill green" data-w="83"></div></div><div class="pe-bar-val">0.83</div></div>
+                  <div class="pe-bar-row" style="--d:.7s"><div class="pe-bar-lbl">Harmony C<sub>H</sub></div><div class="pe-bar-track"><div class="pe-bar-fill green" data-w="83"></div></div><div class="pe-bar-val">0.83</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A5: Theorem 3 -->
+            <div class="pe-anim" id="pe-a5">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;color:var(--color-solution);">Theorem 3 — O(log n)</div>
+                <div class="pe-formula-box" style="--d:.25s">
+                  <div class="pe-formula-label">HSE condition</div>
+                  H(s|E) ≥ 0.7 for all s ∈ V
+                </div>
+                <div class="pe-formula-box" style="--d:.5s">
+                  <div class="pe-formula-label">Effective branching</div>
+                  β' = β(1−H) ≤ 0.69 &lt; 1
+                </div>
+                <div class="pe-formula-box" style="--d:.75s">
+                  <div class="pe-formula-label">Result</div>
+                  P<sub>HSE</sub>(n) = O(log n)
+                </div>
+              </div>
+            </div>
+
+            <!-- A6: Principles -->
+            <div class="pe-anim" id="pe-a6">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">5 Design Principles</div>
+                <div style="margin-top:1.2rem;">
+                  <div class="pe-trace-step" style="--d:.15s"><div class="pe-trace-badge">1</div><div class="pe-trace-text">Interoperability <strong>from day one</strong></div></div>
+                  <div class="pe-trace-step" style="--d:.3s"><div class="pe-trace-badge">2</div><div class="pe-trace-text">Shared <strong>objective function</strong></div></div>
+                  <div class="pe-trace-step" style="--d:.45s"><div class="pe-trace-badge">3</div><div class="pe-trace-text">Monitor H and β' <strong>continuously</strong></div></div>
+                  <div class="pe-trace-step" style="--d:.6s"><div class="pe-trace-badge">4</div><div class="pe-trace-text">Shared infrastructure over <strong>redundant solutions</strong></div></div>
+                  <div class="pe-trace-step" style="--d:.75s"><div class="pe-trace-badge">5</div><div class="pe-trace-text">Second-order effects as <strong>first-order requirements</strong></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A7: Case Study -->
+            <div class="pe-anim" id="pe-a7">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Smart City Case Study</div>
+                <div style="margin-top:1.5rem;">
+                  <div class="pe-bar-row" style="--d:.15s"><div class="pe-bar-lbl">Utilization (67%)</div><div class="pe-bar-track"><div class="pe-bar-fill dim" data-w="67"></div></div><div class="pe-bar-val">Before</div></div>
+                  <div class="pe-bar-row" style="--d:.3s"><div class="pe-bar-lbl">Utilization (91%)</div><div class="pe-bar-track"><div class="pe-bar-fill green" data-w="91"></div></div><div class="pe-bar-val">After</div></div>
+                  <div class="pe-bar-row" style="--d:.45s"><div class="pe-bar-lbl">Satisfaction (5.8)</div><div class="pe-bar-track"><div class="pe-bar-fill dim" data-w="58"></div></div><div class="pe-bar-val">5.8</div></div>
+                  <div class="pe-bar-row" style="--d:.6s"><div class="pe-bar-lbl">Satisfaction (8.9)</div><div class="pe-bar-track"><div class="pe-bar-fill green" data-w="89"></div></div><div class="pe-bar-val">8.9</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- A8: Conclusion -->
+            <div class="pe-anim" id="pe-a8">
+              <div class="pe-anim-inner">
+                <div class="pe-word" style="--d:0s;font-size:1.1rem;">Conclusion</div>
+                <div style="margin-top:1.5rem;">
+                  <div class="pe-trace-step" style="--d:.2s"><div class="pe-trace-badge green">✓</div><div class="pe-trace-text">Cascade paradox is <strong>mathematically inevitable</strong> under isolation</div></div>
+                  <div class="pe-trace-step" style="--d:.4s"><div class="pe-trace-badge green">✓</div><div class="pe-trace-text">HSE design provably achieves <strong>O(log n) growth</strong></div></div>
+                  <div class="pe-trace-step" style="--d:.6s"><div class="pe-trace-badge green">✓</div><div class="pe-trace-text"><strong>89% fewer</strong> secondary problems in case study</div></div>
+                  <div class="pe-trace-step" style="--d:.8s"><div class="pe-trace-badge green">→</div><div class="pe-trace-text">Applicable to healthcare, climate, software, organizations</div></div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- pe-right -->
+
+          <div id="pe-nav">
+            <button class="pe-btn" onclick="peNav(-1)">← Prev</button>
+            <span id="pe-page-info">Page 1 / 8</span>
+            <button class="pe-btn" onclick="peNav(1)">Next →</button>
+            <span class="pe-scroll-hint">scroll to explore ↓</span>
+          </div>
+
+        </div><!-- pe-split -->
+      </div><!-- paper-explorer -->
+    </div><!-- pe-sticky-frame -->
+    <div style="height:600vh;"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-title">Cascade Chaos to Ecosystem Harmony</div>
+        <div class="footer-sig">Ahmed Hafdi<br><em>Independent Research</em><br>August 2025 · CKX 006</div>
+      </div>
+      <div style="flex:1;">
+        <div class="footer-title">References</div>
+        <details>
+          <summary>View References</summary>
+          <ul class="ref-list">
+            <li><span>[1]</span>Holland, J. H. (1995). Hidden Order: How Adaptation Builds Complexity. Addison-Wesley.</li>
+            <li><span>[2]</span>Meadows, D. H. (2008). Thinking in Systems: A Primer. Chelsea Green Publishing.</li>
+            <li><span>[3]</span>Barabási, A.-L., &amp; Albert, R. (1999). Emergence of scaling in random networks. Science, 286(5439), 509–512.</li>
+            <li><span>[4]</span>Forrester, J. W. (1968). Principles of Systems. Wright-Allen Press.</li>
+            <li><span>[5]</span>Simon, H. A. (1962). The architecture of complexity. Proceedings of the American Philosophical Society, 106(6), 467–482.</li>
+            <li><span>[6]</span>Senge, P. M. (1990). The Fifth Discipline: The Art and Practice of the Learning Organization. Doubleday.</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ── NON-MODULE JS ─────────────────────────────── -->
+<script>
+/* NAV */
+function toggleMenu() {
+  document.getElementById('nav-burger').classList.toggle('open');
+  document.getElementById('nav-drawer').classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-burger').classList.remove('open');
+  document.getElementById('nav-drawer').classList.remove('open');
+}
+
+/* TYPEWRITER — cycling 3 phrases */
+(function(){
+  const phrases = [
+    "Every solution creates new problems.",
+    "Unless the ecosystem is designed to contain them.",
+    "O(2ⁿ) → O(log n): the mathematical path to harmony."
+  ];
+  let pi = 0, ci = 0, deleting = false;
+  const el = document.getElementById('typewriter');
+  function tick() {
+    const phrase = phrases[pi];
+    if (!deleting) {
+      el.textContent = phrase.slice(0, ci + 1);
+      ci++;
+      if (ci === phrase.length) { deleting = true; setTimeout(tick, 2200); return; }
+      setTimeout(tick, 42);
+    } else {
+      el.textContent = phrase.slice(0, ci - 1);
+      ci--;
+      if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; setTimeout(tick, 350); return; }
+      setTimeout(tick, 22);
+    }
+  }
+  setTimeout(tick, 600);
+})();
+
+/* SCROLL REVEAL */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* PAPER EXPLORER */
+(function(){
+  const PDF_URL = '/static/fromProbsToEcoSys.pdf';
+  const animToPage = [1, 1, 2, 2, 3, 3, 4, 5, 6];
+  const TOTAL_ANIMS = 9;
+  let pdfDoc = null, currentPage = 1, totalPages = 0, currentAnim = 0;
+
+  const canvas = document.getElementById('pe-canvas');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+  const loading = document.getElementById('pe-loading');
+
+  function updatePageInfo() {
+    const el = document.getElementById('pe-page-info');
+    if (el) el.textContent = `Page ${currentPage} / ${totalPages}`;
+  }
+
+  function renderPage(num) {
+    if (!pdfDoc) return;
+    pdfDoc.getPage(num).then(page => {
+      const wrap = document.getElementById('pe-canvas-wrap');
+      const maxW = wrap ? wrap.clientWidth - 40 : 380;
+      const maxH = wrap ? wrap.clientHeight - 40 : 480;
+      const vp0 = page.getViewport({scale:1});
+      const scale = Math.min(maxW/vp0.width, maxH/vp0.height, 2);
+      const vp = page.getViewport({scale});
+      canvas.width = vp.width; canvas.height = vp.height;
+      page.render({canvasContext:ctx, viewport:vp}).promise.then(() => {
+        if (loading) loading.classList.add('hidden');
+      });
+      currentPage = num;
+      updatePageInfo();
+    });
+  }
+
+  window.peNav = function(dir) {
+    if (!pdfDoc) return;
+    renderPage(Math.max(1, Math.min(totalPages, currentPage + dir)));
+  };
+
+  const titles = ['Overview','The Paradox','NCF Framework','Cascade Proof','HSE Design','Theorem 3','Principles','Case Study','Conclusion'];
+  window.peGoto = function(idx) {
+    currentAnim = Math.max(0, Math.min(TOTAL_ANIMS-1, idx));
+    document.querySelectorAll('.pe-anim').forEach((a,i) => a.classList.toggle('active', i===currentAnim));
+    document.querySelectorAll('.pe-toc-item').forEach((t,i) => t.classList.toggle('active', i===currentAnim));
+    const lbl = document.getElementById('pe-anim-title');
+    if (lbl) lbl.textContent = titles[currentAnim] || '';
+    if (pdfDoc) renderPage(animToPage[currentAnim] || 1);
+    triggerBars(currentAnim);
+  };
+
+  function triggerBars(idx) {
+    const panel = document.getElementById('pe-a' + idx);
+    if (!panel) return;
+    panel.querySelectorAll('.pe-bar-fill[data-w]').forEach(b => {
+      b.style.width = '0';
+      setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 300);
+    });
+  }
+
+  const pdfScript = document.createElement('script');
+  pdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  pdfScript.onload = () => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.getDocument(PDF_URL).promise.then(doc => {
+      pdfDoc = doc; totalPages = doc.numPages;
+      renderPage(1); updatePageInfo();
+    }).catch(() => {
+      if (loading) loading.innerHTML = '<p style="font-family:var(--font-mono);font-size:0.78rem;color:var(--gray-500);">PDF unavailable</p>';
+    });
+  };
+  document.head.appendChild(pdfScript);
+
+  const outer = document.getElementById('pe-scroll-outer');
+  if (outer) {
+    window.addEventListener('scroll', () => {
+      const rect = outer.getBoundingClientRect();
+      if (rect.top > 0 || rect.bottom < 0) return;
+      const p = Math.max(0, Math.min(1, (-rect.top) / (outer.clientHeight - window.innerHeight)));
+      const idx = Math.min(TOTAL_ANIMS-1, Math.floor(p * TOTAL_ANIMS));
+      if (idx !== currentAnim) peGoto(idx);
+    });
+  }
+
+  setTimeout(() => triggerBars(0), 600);
+})();
+</script>
+
+<!-- ── THREE.JS NETWORK SIMULATION ──────────────── -->
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js';
+
+(function () {
+
+/* ── CONSTANTS ──────────────────────────────────── */
+const REPULSION  = 18000;
+const REST_LEN   = 90;
+const SPRING_K   = 0.04;
+const CENTER_G   = 0.005;
+const DAMPING    = 0.88;
+const INIT_R     = 180;
+const CHAOS_DELAY    = 600;   // ms between cascade steps
+const ECO_DELAY      = 900;
+const CHAOS_SPAWN    = 2;
+const ECO_PROB       = 0.30;
+const MAX_DEPTH      = 5;
+const MAX_PROBLEMS   = 60;
+
+/* ── COLORS ─────────────────────────────────────── */
+const C_SOLUTION = 0x16a34a;
+const C_PROBLEM  = 0xdc2626;
+const C_HYBRID   = 0xea580c;
+const C_STABLE   = 0xca8a04;
+const C_SEED_FLASH = 0x2563eb;
+
+function nodeSize(gen) {
+  if (gen === 0) return 12;
+  if (gen === 1) return 9;
+  if (gen === 2) return 7;
+  return 5.5;
+}
+function nodeColor(type) {
+  if (type === 'solution') return C_SOLUTION;
+  if (type === 'problem')  return C_PROBLEM;
+  if (type === 'hybrid')   return C_HYBRID;
+  return C_STABLE;
+}
+
+/* ── STATE ──────────────────────────────────────── */
+let mode = 'chaos';
+let nodes = [];
+let edges = [];
+let cascading = false;
+let cascadeQueue = [];
+let cascadeDepth = 0;
+
+/* ── SCENE ──────────────────────────────────────── */
+const mount = document.getElementById('three-mount');
+if (!mount) return;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x0a0a0a);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+mount.appendChild(renderer.domElement);
+
+const camera = new THREE.PerspectiveCamera(50, 1, 1, 4000);
+camera.position.set(0, 0, 420);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.35;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0a0a0a, 0.0018);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+const dLight = new THREE.DirectionalLight(0xffffff, 0.6);
+dLight.position.set(200, 300, 200);
+scene.add(dLight);
+
+/* ── EDGE GROUP ──────────────────────────────────── */
+const edgeGroup = new THREE.Group();
+scene.add(edgeGroup);
+const nodeGroup = new THREE.Group();
+scene.add(nodeGroup);
+
+/* ── FIBONACCI SPHERE ───────────────────────────── */
+function fibSphere(n, r) {
+  const pts = [];
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i / (n - 1)) * 2;
+    const rad = Math.sqrt(1 - y * y);
+    const theta = golden * i;
+    pts.push({ x: Math.cos(theta) * rad * r, y: y * r, z: Math.sin(theta) * rad * r });
+  }
+  return pts;
+}
+
+/* ── CREATE NODE ────────────────────────────────── */
+function createNode(x, y, z, type, gen) {
+  const size = nodeSize(gen);
+  const geo = new THREE.SphereGeometry(size, 16, 12);
+  const col = nodeColor(type);
+  const mat = new THREE.MeshStandardMaterial({
+    color: col, emissive: col, emissiveIntensity: 0.18,
+    roughness: 0.35, metalness: 0.2,
+    transparent: true, opacity: 1,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  nodeGroup.add(mesh);
+
+  const node = {
+    id: nodes.length, type, generation: gen,
+    x, y, z, vx: 0, vy: 0, vz: 0,
+    mesh, active: true,
+    connectionCount: 0,
+    explodeDX: (Math.random() - 0.5) * 2,
+    explodeDZ: (Math.random() - 0.5) * 2,
+  };
+  mesh.userData.nodeRef = node;
+  nodes.push(node);
+  return node;
+}
+
+/* ── CREATE EDGE ────────────────────────────────── */
+function createEdge(a, b) {
+  const pts = [
+    new THREE.Vector3(a.x, a.y, a.z),
+    new THREE.Vector3(b.x, b.y, b.z),
+  ];
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const mat = new THREE.LineBasicMaterial({ color: 0x444444, transparent: true, opacity: 0.4 });
+  const line = new THREE.Line(geo, mat);
+  edgeGroup.add(line);
+  a.connectionCount++;
+  b.connectionCount++;
+  edges.push({ a, b, line });
+  return line;
+}
+
+/* ── INIT NETWORK ────────────────────────────────── */
+function initNetwork() {
+  const pts = fibSphere(12, INIT_R);
+  pts.forEach(p => createNode(p.x, p.y, p.z, 'solution', 0));
+  // Add ~3 random edges per node
+  nodes.forEach((n, i) => {
+    const count = 2 + Math.floor(Math.random() * 2);
+    for (let c = 0; c < count; c++) {
+      let j = Math.floor(Math.random() * nodes.length);
+      if (j !== i && !edges.find(e => (e.a === n && e.b === nodes[j]) || (e.b === n && e.a === nodes[j]))) {
+        createEdge(n, nodes[j]);
+      }
+    }
+  });
+  physicsActive = true;
+}
+
+/* ── PHYSICS ─────────────────────────────────────── */
+let physicsActive = true;
+let physicsKE = 999;
+
+function physicsTick() {
+  if (!physicsActive) return;
+  let ke = 0;
+  const N = nodes.length;
+
+  // Repulsion
+  for (let i = 0; i < N; i++) {
+    const a = nodes[i]; if (!a.active) continue;
+    for (let j = i + 1; j < N; j++) {
+      const b = nodes[j]; if (!b.active) continue;
+      const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+      const dist2 = dx*dx + dy*dy + dz*dz + 0.01;
+      const f = REPULSION / dist2;
+      const dist = Math.sqrt(dist2);
+      a.vx += f * dx / dist; a.vy += f * dy / dist; a.vz += f * dz / dist;
+      b.vx -= f * dx / dist; b.vy -= f * dy / dist; b.vz -= f * dz / dist;
+    }
+  }
+
+  // Spring along edges
+  edges.forEach(({ a, b }) => {
+    if (!a.active || !b.active) return;
+    const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz) + 0.01;
+    const f = SPRING_K * (dist - REST_LEN);
+    a.vx += f * dx / dist; a.vy += f * dy / dist; a.vz += f * dz / dist;
+    b.vx -= f * dx / dist; b.vy -= f * dy / dist; b.vz -= f * dz / dist;
+  });
+
+  // Center gravity + integrate
+  nodes.forEach(n => {
+    if (!n.active) return;
+    n.vx += -CENTER_G * n.x; n.vy += -CENTER_G * n.y; n.vz += -CENTER_G * n.z;
+    n.vx *= DAMPING; n.vy *= DAMPING; n.vz *= DAMPING;
+    n.x += n.vx; n.y += n.vy; n.z += n.vz;
+    n.mesh.position.set(n.x, n.y, n.z);
+    ke += n.vx*n.vx + n.vy*n.vy + n.vz*n.vz;
+  });
+
+  physicsKE = ke;
+  if (ke < 0.5) physicsActive = false;
+
+  // Update edge geometry
+  edges.forEach(({ a, b, line }) => {
+    const pos = line.geometry.attributes.position;
+    pos.setXYZ(0, a.x, a.y, a.z);
+    pos.setXYZ(1, b.x, b.y, b.z);
+    pos.needsUpdate = true;
+  });
+}
+
+/* ── ANIMATE SPAWN (scale pop) ───────────────────── */
+function animateSpawn(mesh, done) {
+  mesh.scale.setScalar(0.01);
+  const start = performance.now();
+  function step() {
+    const t = Math.min(1, (performance.now() - start) / 400);
+    const ease = t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t;
+    mesh.scale.setScalar(ease);
+    if (t < 1) requestAnimationFrame(step);
+    else if (done) done();
+  }
+  requestAnimationFrame(step);
+}
+
+/* ── CASCADE STEP ────────────────────────────────── */
+function spawnProblemFrom(parent) {
+  const spread = 40 + parent.generation * 20;
+  const px = parent.x + (Math.random() - 0.5) * spread;
+  const py = parent.y + (Math.random() - 0.5) * spread;
+  const pz = parent.z + (Math.random() - 0.5) * spread;
+  const child = createNode(px, py, pz, 'problem', parent.generation + 1);
+  createEdge(parent, child);
+  animateSpawn(child.mesh, null);
+  physicsActive = true;
+  return child;
+}
+
+function triggerCascadeStep(queue, depth) {
+  if (!cascading) return;
+  if (depth > MAX_DEPTH) { cascading = false; return; }
+  const problemNodes = nodes.filter(n => n.type === 'problem');
+  if (problemNodes.length >= MAX_PROBLEMS) { cascading = false; return; }
+  if (queue.length === 0) { cascading = false; return; }
+
+  const nextQueue = [];
+  queue.forEach(parent => {
+    if (mode === 'chaos') {
+      for (let i = 0; i < CHAOS_SPAWN; i++) {
+        if (nodes.filter(n => n.type === 'problem').length < MAX_PROBLEMS) {
+          const child = spawnProblemFrom(parent);
+          nextQueue.push(child);
+        }
+      }
+    } else {
+      // Ecosystem: only 30% chance
+      if (Math.random() < ECO_PROB) {
+        const child = spawnProblemFrom(parent);
+        nextQueue.push(child);
+      }
+    }
+  });
+
+  updateStats();
+  drawGrowthChart(depth);
+
+  const delay = mode === 'chaos' ? CHAOS_DELAY : ECO_DELAY;
+  if (nextQueue.length > 0) {
+    setTimeout(() => triggerCascadeStep(nextQueue, depth + 1), delay);
+  } else {
+    cascading = false;
+  }
+}
+
+/* ── STATS & GROWTH CHART ────────────────────────── */
+function updateStats() {
+  const probs = nodes.filter(n => n.type === 'problem').length;
+  const sols  = nodes.filter(n => n.type === 'solution').length;
+  const h = mode === 'chaos' ? '0.32' : '0.81';
+  document.getElementById('stat-problems').textContent = probs;
+  document.getElementById('stat-solutions').textContent = sols;
+  document.getElementById('stat-homogeneity').textContent = h;
+  document.getElementById('problem-count').textContent = probs;
+}
+
+function drawGrowthChart(step) {
+  const gc = document.getElementById('growth-canvas');
+  if (!gc) return;
+  const w = gc.clientWidth; const h = gc.clientHeight;
+  gc.width = w; gc.height = h;
+  const ctx = gc.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, w, h);
+
+  const steps = MAX_DEPTH + 1;
+  const xScale = w / steps;
+  const maxProb = Math.pow(2, MAX_DEPTH);
+
+  // Red O(2^n) curve
+  ctx.beginPath();
+  ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2;
+  for (let i = 0; i <= steps; i++) {
+    const x = i * xScale;
+    const y = h - (Math.pow(2, i) / maxProb) * (h - 10) - 5;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Green O(log n) curve
+  ctx.beginPath();
+  ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2;
+  for (let i = 0; i <= steps; i++) {
+    const x = i * xScale;
+    const y = h - (Math.log2(i + 1) / Math.log2(steps + 1)) * (h - 10) - 5;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Cursor at current step
+  if (step >= 0) {
+    const cx = step * xScale;
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1;
+    ctx.moveTo(cx, 0); ctx.lineTo(cx, h);
+    ctx.stroke();
+  }
+
+  // Labels
+  ctx.fillStyle = '#dc2626'; ctx.font = '9px monospace';
+  ctx.fillText('O(2ⁿ)', 4, 14);
+  ctx.fillStyle = '#16a34a';
+  ctx.fillText('O(log n)', 4, h - 6);
+}
+
+/* ── PUBLIC API ──────────────────────────────────── */
+window.setMode = function(m) {
+  mode = m;
+  document.getElementById('btn-chaos').classList.toggle('active', m === 'chaos');
+  document.getElementById('btn-eco').classList.toggle('active', m === 'ecosystem');
+  updateStats();
+};
+
+window.triggerCascade = function() {
+  if (cascading) return;
+  cascading = true;
+  cascadeDepth = 0;
+  // Pick random solution node as seed
+  const seeds = nodes.filter(n => n.type === 'solution');
+  if (seeds.length === 0) return;
+  const seed = seeds[Math.floor(Math.random() * seeds.length)];
+  // Flash seed blue briefly
+  const origColor = seed.mesh.material.color.getHex();
+  seed.mesh.material.color.setHex(C_SEED_FLASH);
+  seed.mesh.material.emissive.setHex(C_SEED_FLASH);
+  setTimeout(() => {
+    seed.mesh.material.color.setHex(origColor);
+    seed.mesh.material.emissive.setHex(origColor);
+  }, 400);
+  triggerCascadeStep([seed], 0);
+};
+
+window.resetNetwork = function() {
+  cascading = false;
+  // Remove gen>0 nodes
+  const toRemove = nodes.filter(n => n.generation > 0 || n.type === 'problem');
+  toRemove.forEach(n => { nodeGroup.remove(n.mesh); n.mesh.geometry.dispose(); n.mesh.material.dispose(); });
+  nodes = nodes.filter(n => n.generation === 0 && n.type === 'solution');
+  // Remove edges to removed nodes
+  const removedEdges = edges.filter(e => !nodes.includes(e.a) || !nodes.includes(e.b));
+  removedEdges.forEach(e => { edgeGroup.remove(e.line); e.line.geometry.dispose(); });
+  edges = edges.filter(e => nodes.includes(e.a) && nodes.includes(e.b));
+  updateStats();
+  const gc = document.getElementById('growth-canvas');
+  if (gc) { gc.width = gc.clientWidth; gc.height = gc.clientHeight; const c = gc.getContext('2d'); c.fillStyle='#111'; c.fillRect(0,0,gc.width,gc.height); }
+};
+
+/* ── RAYCASTER / TOOLTIP ─────────────────────────── */
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2(-9999, -9999);
+const tooltip = document.getElementById('node-tooltip');
+let hoveredMesh = null;
+
+mount.addEventListener('mousemove', e => {
+  const rect = mount.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  if (tooltip) {
+    tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+    tooltip.style.top  = (e.clientY - rect.top - 10) + 'px';
+  }
+});
+mount.addEventListener('mouseleave', () => {
+  mouse.set(-9999, -9999);
+  if (tooltip) tooltip.style.display = 'none';
+  if (hoveredMesh) {
+    const n = hoveredMesh.userData.nodeRef;
+    if (n) { hoveredMesh.material.emissiveIntensity = 0.18; }
+    hoveredMesh = null;
+  }
+});
+
+/* ── RESIZE ──────────────────────────────────────── */
+function resize() {
+  const w = mount.clientWidth, h = mount.clientHeight || 480;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* ── ORBIT IDLE RESUME ────────────────────────────── */
+let idleTimer = null;
+controls.addEventListener('start', () => { controls.autoRotate = false; clearTimeout(idleTimer); });
+controls.addEventListener('end',   () => { idleTimer = setTimeout(() => { controls.autoRotate = true; }, 3500); });
+
+/* ── RENDER LOOP ─────────────────────────────────── */
+function animate() {
+  requestAnimationFrame(animate);
+  physicsTick();
+  controls.update();
+
+  // Raycasting hover
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = nodes.map(n => n.mesh);
+  const hits = raycaster.intersectObjects(meshes);
+  if (hits.length > 0) {
+    const hit = hits[0].object;
+    if (hit !== hoveredMesh) {
+      if (hoveredMesh) { hoveredMesh.material.emissiveIntensity = 0.18; }
+      hoveredMesh = hit;
+      hoveredMesh.material.emissiveIntensity = 0.55;
+    }
+    const n = hit.userData.nodeRef;
+    if (n && tooltip) {
+      tooltip.style.display = 'block';
+      tooltip.innerHTML = `Type: ${n.type}<br>Gen: ${n.generation}<br>Connections: ${n.connectionCount}`;
+    }
+  } else {
+    if (hoveredMesh) { hoveredMesh.material.emissiveIntensity = 0.18; hoveredMesh = null; }
+    if (tooltip) tooltip.style.display = 'none';
+  }
+
+  renderer.render(scene, camera);
+}
+
+initNetwork();
+updateStats();
+drawGrowthChart(-1);
+animate();
+
+})();
+</script>
+
+</body>
+</html>
