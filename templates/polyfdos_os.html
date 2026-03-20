@@ -371,6 +371,91 @@ h4 { font-family: var(--font-sans); font-size: 0.9rem; font-weight: 600; margin:
   .boot-flow { flex-direction: column; align-items: flex-start; }
   .boot-arrow { transform: rotate(90deg); }
 }
+
+/* ── FLOATING SHELL ──────────────────────────────────────────── */
+.fs-toggle {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 1100;
+  background: #f78c6c; color: #fff;
+  border: none; border-radius: 50px;
+  padding: 0.65rem 1.2rem;
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+  box-shadow: 0 4px 24px rgba(247,140,108,0.45);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.fs-toggle:hover { transform: scale(1.05); box-shadow: 0 6px 30px rgba(247,140,108,0.6); }
+
+.fs-widget {
+  position: fixed; bottom: 5.5rem; right: 2rem; z-index: 1099;
+  width: 680px; height: 460px;
+  max-width: calc(100vw - 1.5rem);
+  max-height: calc(100vh - 7rem);
+  background: #0d1117;
+  border: 1px solid #30363d; border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: opacity 0.2s, transform 0.2s;
+  resize: both;
+}
+.fs-widget.fs-hidden { opacity: 0; pointer-events: none; transform: translateY(16px) scale(0.96); }
+.fs-widget.fs-minimized { height: 48px !important; resize: none; overflow: hidden; }
+.fs-widget.fs-minimized .fs-body,
+.fs-widget.fs-minimized .fs-input-row { display: none; }
+.fs-widget.fs-fullscreen {
+  position: fixed; top: 3.5rem; left: 0; right: 0; bottom: 0;
+  width: auto; height: auto; max-width: none; max-height: none;
+  resize: none; border-radius: 0; border-left: none; border-right: none; border-bottom: none;
+}
+
+.fs-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 1rem; height: 48px; min-height: 48px;
+  background: #161b22; border-bottom: 1px solid #30363d;
+  cursor: grab; user-select: none; flex-shrink: 0;
+}
+.fs-header:active { cursor: grabbing; }
+.fs-drag-hint { font-size: 0.75rem; color: #3a4455; margin-right: 0.2rem; }
+.fs-title { font-family: var(--font-mono); font-size: 0.72rem; color: #8892a4; flex: 1; }
+.fs-title strong { color: #f78c6c; }
+.fs-cwd-badge {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  color: #f78c6c; margin-right: 0.5rem;
+}
+.fs-controls { display: flex; gap: 0.3rem; }
+.fs-ctrl-btn {
+  width: 26px; height: 26px; border-radius: 5px;
+  border: 1px solid #30363d; background: transparent;
+  color: #8892a4; cursor: pointer; font-size: 0.8rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s; flex-shrink: 0;
+}
+.fs-ctrl-btn:hover { background: #2d333b; color: #e6edf3; border-color: #4a5568; }
+.fs-ctrl-btn.fs-close:hover { background: #da3633; color: #fff; border-color: #da3633; }
+
+.fs-body {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  font-family: var(--font-mono); font-size: 0.82rem;
+  color: #c9d1d9; padding: 0.75rem 1rem;
+  line-height: 1.6; white-space: pre-wrap;
+  min-height: 0;
+}
+.fs-input-row {
+  display: flex; align-items: center;
+  border-top: 1px solid #1e2535; padding: 0.55rem 1rem;
+  background: #0d1117; flex-shrink: 0;
+}
+.fs-prompt { font-family: var(--font-mono); font-size: 0.82rem; color: #f78c6c; flex-shrink: 0; }
+.fs-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: var(--font-mono); font-size: 0.82rem; color: #c9d1d9;
+  padding: 0 0.5rem; caret-color: #f78c6c;
+}
+
+@media (max-width: 700px) {
+  .fs-widget { width: calc(100vw - 1rem); right: 0.5rem; left: 0.5rem; bottom: 5rem; }
+  .fs-widget.fs-fullscreen { top: 3rem; left: 0; right: 0; }
+  .fs-toggle { bottom: 1.2rem; right: 1rem; }
+}
 </style>
 </head>
 <body>
@@ -1266,6 +1351,150 @@ document.getElementById('shellInput').addEventListener('keydown', e => {
     if (histIdx > 0) input.value = shellHistory[--histIdx]; else { histIdx = -1; input.value = ''; }
   }
 });
+
+// ─── FLOATING SHELL ───────────────────────────────────────────
+let _fsInitialized = false;
+let _fsOpen = false, _fsMin = false, _fsFs = false;
+let _fsDragging = false, _fsOX = 0, _fsOY = 0;
+const _fsW  = () => document.getElementById('fsWidget');
+const _fsTg = () => document.getElementById('fsToggle');
+
+function fsOpen() {
+  if (!_fsInitialized) { fsInitBanner(); _fsInitialized = true; }
+  _fsOpen = true;
+  _fsW().classList.remove('fs-hidden');
+  _fsTg().innerHTML = '<span>✕</span> Close';
+  _fsTg().onclick = fsClose;
+}
+function fsClose() {
+  _fsOpen = false; _fsMin = false; _fsFs = false;
+  const w = _fsW();
+  w.classList.add('fs-hidden');
+  w.classList.remove('fs-minimized','fs-fullscreen');
+  _fsTg().innerHTML = '<span>$</span> Shell';
+  _fsTg().onclick = fsOpen;
+}
+function fsMinimize() {
+  _fsMin = !_fsMin;
+  _fsW().classList.toggle('fs-minimized', _fsMin);
+  document.getElementById('fsMinBtn').textContent = _fsMin ? '▢' : '─';
+}
+function fsFullscreen() {
+  _fsFs = !_fsFs;
+  const w = _fsW();
+  w.classList.toggle('fs-fullscreen', _fsFs);
+  if (_fsFs && _fsMin) { _fsMin = false; w.classList.remove('fs-minimized'); }
+  document.getElementById('fsFsBtn').textContent = _fsFs ? '⊡' : '⛶';
+}
+
+// Drag
+(function() {
+  const hdr = document.getElementById('fsHeader');
+  function startDrag(cx, cy) {
+    if (_fsFs) return;
+    const w = _fsW(), r = w.getBoundingClientRect();
+    w.style.right = 'auto'; w.style.bottom = 'auto';
+    w.style.left = r.left + 'px'; w.style.top = r.top + 'px';
+    _fsDragging = true; _fsOX = cx - r.left; _fsOY = cy - r.top;
+  }
+  function moveDrag(cx, cy) {
+    if (!_fsDragging) return;
+    const w = _fsW();
+    const nx = Math.max(0, Math.min(cx - _fsOX, window.innerWidth - w.offsetWidth));
+    const ny = Math.max(0, Math.min(cy - _fsOY, window.innerHeight - 48));
+    w.style.left = nx + 'px'; w.style.top = ny + 'px';
+  }
+  hdr.addEventListener('mousedown', e => {
+    if (e.target.closest('.fs-ctrl-btn')) return;
+    startDrag(e.clientX, e.clientY);
+    const mm = e2 => moveDrag(e2.clientX, e2.clientY);
+    const mu = () => { _fsDragging = false; document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); };
+    document.addEventListener('mousemove', mm);
+    document.addEventListener('mouseup', mu);
+  });
+  hdr.addEventListener('touchstart', e => {
+    if (e.target.closest('.fs-ctrl-btn')) return;
+    startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  hdr.addEventListener('touchmove', e => {
+    moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  hdr.addEventListener('touchend', () => { _fsDragging = false; }, { passive: true });
+})();
+
+// Shared shell logic — floating shell uses the same shellExec, shellHistory, shellCwd
+function fsPrint(html) {
+  const body = document.getElementById('fsBody');
+  body.innerHTML += html + '\n';
+  body.scrollTop = body.scrollHeight;
+}
+function fsPrintPrompt(cmd) {
+  fsPrint(`<span style="color:#f78c6c">${escHtml(shellCwd)} &gt;&nbsp;</span><span style="color:#546e7a">${escHtml(cmd)}</span>`);
+}
+
+// Init floating shell banner — deferred so DOM is ready
+function fsInitBanner() {
+  const body = document.getElementById('fsBody');
+  if (!body) return;
+  body.innerHTML = `<span style="color:#f78c6c"> ____       _        __     _  ___  ____
+|  _ \\ ___ | |_   _ / _| __| |/ _ \\/ ___|
+| |_) / _ \\| | | | | |_ / _\` | | | \\___ \\
+|  __/ (_) | | |_| |  _| (_| | |_| |___) |
+|_|   \\___/|_|\\__, |_|  \\__,_|\\___/|____/
+              |___/                      </span>
+
+<span style="color:#82aaff">polyfdOS v1.4 — floating shell</span>
+Type <span style="color:#f78c6c">'help'</span> for commands.
+
+`;
+  // attach input listener once on first open
+  document.getElementById('fsInput').addEventListener('keydown', e => {
+    const input = document.getElementById('fsInput');
+    if (e.key === 'Enter') {
+      const cmd = input.value; input.value = '';
+      if (cmd.trim()) { shellHistory.unshift(cmd); histIdx = -1; }
+      fsPrintPrompt(cmd);
+      if (cmd.trim().toLowerCase() === 'clear') {
+        document.getElementById('fsBody').innerHTML = '';
+      } else {
+        const out = shellExec(cmd);
+        if (out !== null) fsPrint(out + '\n');
+      }
+      document.getElementById('fsCwdBadge').textContent = shellCwd + ' >';
+      document.getElementById('fsPromptLabel').textContent = shellCwd + ' >\u00a0';
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (histIdx < shellHistory.length - 1) input.value = shellHistory[++histIdx];
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (histIdx > 0) input.value = shellHistory[--histIdx]; else { histIdx = -1; input.value = ''; }
+    }
+  });
+}
 </script>
+
+<!-- ── FLOATING SHELL WIDGET ────────────────────────────────── -->
+<button class="fs-toggle" id="fsToggle" onclick="fsOpen()">
+  <span>$</span> Shell
+</button>
+
+<div class="fs-widget fs-hidden" id="fsWidget">
+  <div class="fs-header" id="fsHeader">
+    <span class="fs-drag-hint">⠿</span>
+    <span class="fs-title"><strong>polyfdOS</strong> shell — live</span>
+    <span class="fs-cwd-badge" id="fsCwdBadge">/ ></span>
+    <div class="fs-controls">
+      <button class="fs-ctrl-btn" id="fsMinBtn" title="Minimize" onclick="fsMinimize()">─</button>
+      <button class="fs-ctrl-btn" id="fsFsBtn"  title="Fullscreen" onclick="fsFullscreen()">⛶</button>
+      <button class="fs-ctrl-btn fs-close" title="Close" onclick="fsClose()">✕</button>
+    </div>
+  </div>
+  <div class="fs-body" id="fsBody"></div>
+  <div class="fs-input-row">
+    <span class="fs-prompt" id="fsPromptLabel">/ >&nbsp;</span>
+    <input class="fs-input" id="fsInput" type="text" spellcheck="false"
+      autocomplete="off" placeholder="type a command…"/>
+  </div>
+</div>
 </body>
 </html>
