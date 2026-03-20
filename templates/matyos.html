@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MatyOS — Proof Assistant Programming Language</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --black: #0a0a0a;
+  --white: #fff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e8e8e8;
+  --gray-300: #d0d0d0;
+  --gray-500: #888;
+  --gray-700: #444;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --max-w: 900px;
+  --section-gap: 96px;
+  /* syntax colors */
+  --c-kw:  #c792ea;
+  --c-ty:  #82aaff;
+  --c-fn:  #82cfff;
+  --c-str: #c3e88d;
+  --c-cm:  #546e7a;
+  --c-num: #f78c6c;
+  --c-pr:  #ffcb6b;
+  --c-op:  #89ddff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 17px; }
+body { font-family: var(--font-sans); background: var(--white); color: var(--black); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+/* ─── NAV ─────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
+  height: 52px; transition: border-color .3s;
+}
+nav.scrolled { border-bottom-color: var(--gray-300); }
+.nav-back { font-family: var(--font-mono); font-size: 0.78rem; color: var(--gray-700); text-decoration: none; letter-spacing: 0.02em; transition: color .2s; }
+.nav-back:hover { color: var(--black); }
+.nav-logo { font-family: var(--font-mono); font-weight: 500; font-size: 0.9rem; letter-spacing: -0.02em; }
+.nav-logo em { font-style: italic; font-family: var(--font-serif); }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--gray-700); transition: color .2s; }
+.nav-links a:hover { color: var(--black); }
+.nav-burger { display: none; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; width: 32px; height: 32px; }
+.nav-burger span { display: block; height: 2px; background: var(--black); transition: transform .3s, opacity .3s; }
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-drawer { display: none; position: fixed; top: 52px; left: 0; right: 0; z-index: 99; background: rgba(255,255,255,0.98); backdrop-filter: blur(8px); border-bottom: 1px solid var(--gray-200); flex-direction: column; max-height: 0; overflow: hidden; transition: max-height .35s; }
+.nav-drawer.open { max-height: 400px; }
+.nav-drawer li { list-style: none; border-bottom: 1px solid var(--gray-200); }
+.nav-drawer a { display: block; padding: 0.9rem 2rem; font-size: 0.9rem; text-decoration: none; color: var(--black); }
+.nav-drawer a:hover { background: var(--gray-50); }
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+section { padding: var(--section-gap) 0; border-bottom: 1px solid var(--gray-200); }
+section:last-of-type { border-bottom: none; }
+p { margin-bottom: 1rem; }
+
+/* ─── SCROLL REVEAL ───────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .08s; }
+.reveal-delay-2 { transition-delay: .16s; }
+.reveal-delay-3 { transition-delay: .24s; }
+.reveal-delay-4 { transition-delay: .32s; }
+.reveal-delay-5 { transition-delay: .40s; }
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero { padding-top: 130px; padding-bottom: 80px; border-bottom: 2px solid var(--black); }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 1.4rem; display: flex; align-items: center; gap: 1rem; }
+.hero-eyebrow::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--gray-300); }
+h1.hero-title { font-family: var(--font-serif); font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; margin-bottom: 1.2rem; }
+h1.hero-title em { font-style: italic; }
+.hero-tagline { font-family: var(--font-serif); font-style: italic; font-size: 1.35rem; color: var(--gray-700); border-left: 3px solid var(--black); padding-left: 1rem; margin: 1.8rem 0 2rem; }
+#typewriter::after { content: '|'; animation: blink .7s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-badges { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+.badge { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--gray-300); padding: 0.3rem 0.8rem; color: var(--gray-700); display: inline-flex; align-items: center; gap: 0.4rem; }
+.badge::before { content: ''; display: block; width: 5px; height: 5px; background: var(--black); border-radius: 50%; }
+.hero-install { background: #0d1117; border: 1px solid #30363d; padding: 1.5rem 1.8rem; margin-bottom: 2rem; position: relative; }
+.hero-install pre { font-family: var(--font-mono); font-size: 0.82rem; color: #e6edf3; line-height: 1.8; white-space: pre-wrap; }
+.hero-install .cm { color: var(--c-cm); }
+.hero-github { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray-700); text-decoration: none; border-bottom: 1px solid var(--gray-300); transition: color .2s, border-color .2s; }
+.hero-github:hover { color: var(--black); border-color: var(--black); }
+
+/* ─── SECTION HEADINGS ────────────────────────────────── */
+h2.section-num { font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+h2.section-title { font-family: var(--font-serif); font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 400; letter-spacing: -0.02em; margin-bottom: 1.5rem; line-height: 1.15; }
+h3.subsec { font-size: 0.95rem; font-weight: 600; letter-spacing: 0.01em; margin: 2.5rem 0 1rem; text-transform: uppercase; font-family: var(--font-mono); font-size: 0.75rem; color: var(--gray-500); letter-spacing: 0.1em; }
+
+/* ─── CODE BLOCKS ──────────────────────────────────────── */
+.code-block {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  padding: 1.5rem 1.8rem;
+  margin: 1.2rem 0;
+  position: relative;
+  overflow-x: auto;
+}
+.code-block pre { font-family: var(--font-mono); font-size: 0.82rem; color: #e6edf3; line-height: 1.9; white-space: pre; }
+.code-block .kw  { color: var(--c-kw); }
+.code-block .ty  { color: var(--c-ty); }
+.code-block .fn  { color: var(--c-fn); }
+.code-block .str { color: var(--c-str); }
+.code-block .cm  { color: var(--c-cm); font-style: italic; }
+.code-block .num { color: var(--c-num); }
+.code-block .pr  { color: var(--c-pr); font-weight: 500; }
+.code-block .op  { color: var(--c-op); }
+.code-block-label {
+  font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: #8b949e; margin-bottom: 0.8rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.copy-btn {
+  font-family: var(--font-mono); font-size: 0.65rem; background: none;
+  border: 1px solid #30363d; color: #8b949e; padding: 0.15rem 0.6rem;
+  cursor: pointer; transition: color .15s, border-color .15s; letter-spacing: 0.04em;
+}
+.copy-btn:hover { color: #e6edf3; border-color: #8b949e; }
+.copy-btn.copied { color: var(--c-str); border-color: var(--c-str); }
+
+/* ─── STEP CARDS ───────────────────────────────────────── */
+.step-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; margin-top: 2rem; }
+.step-card { border: 1px solid var(--gray-200); padding: 1.8rem; position: relative; }
+.step-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--black); }
+.step-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; }
+.step-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.8rem; }
+
+/* ─── LANG REFERENCE TABS ─────────────────────────────── */
+.ref-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--gray-200); margin-top: 2rem; overflow-x: auto; scrollbar-width: none; }
+.ref-tabs::-webkit-scrollbar { display: none; }
+.ref-tab { font-family: var(--font-mono); font-size: 0.75rem; padding: 0.6rem 1.2rem; cursor: pointer; border-bottom: 2px solid transparent; color: var(--gray-500); white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; transition: color .15s; }
+.ref-tab:hover { color: var(--black); }
+.ref-tab.active { color: var(--black); border-bottom-color: var(--black); }
+.ref-panel { display: none; padding-top: 1.5rem; }
+.ref-panel.active { display: block; }
+
+/* ─── TYPE TABLE ───────────────────────────────────────── */
+.type-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; margin-top: 1rem; }
+.type-table th { text-align: left; padding: 0.5rem 1rem; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--font-mono); }
+.type-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--gray-200); }
+.type-table td code { font-family: var(--font-mono); font-size: 0.82rem; color: var(--c-ty); background: #0d1117; padding: 0.1rem 0.4rem; }
+.type-table tr:hover td { background: var(--gray-50); }
+.type-highlight { font-family: var(--font-mono); font-size: 0.72rem; background: #1a1a2e; color: var(--c-pr); padding: 0.15rem 0.5rem; }
+
+/* ─── PROOF SECTION ─────────────────────────────────────── */
+#proofs { background: #0a0d13; border-top: 1px solid #21262d; border-bottom: 1px solid #21262d; }
+#proofs h2.section-num { color: #8b949e; }
+#proofs h2.section-title { color: #e6edf3; }
+#proofs p { color: #8b949e; }
+#proofs h3.subsec { color: #6e7681; }
+.proof-primitives { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+.proof-kw-card { border: 1px solid #21262d; padding: 1.4rem 1.6rem; background: #161b22; }
+.proof-kw { font-family: var(--font-mono); font-size: 1.1rem; color: var(--c-pr); font-weight: 500; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+.proof-kw-desc { font-size: 0.85rem; color: #8b949e; line-height: 1.6; }
+.proof-kw-card.full { grid-column: 1 / -1; }
+.annotated-block { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; align-items: start; }
+.annotation-list { list-style: none; padding: 0; }
+.annotation-list li { font-family: var(--font-mono); font-size: 0.75rem; color: #8b949e; padding: 0.4rem 0; border-bottom: 1px solid #21262d; display: flex; gap: 0.8rem; align-items: baseline; }
+.annotation-list li:last-child { border-bottom: none; }
+.ann-kw { color: var(--c-pr); flex-shrink: 0; min-width: 80px; }
+.realistic-card { border: 1px solid #21262d; padding: 1.4rem 1.6rem; background: #161b22; margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: center; }
+.realistic-states { display: flex; flex-direction: column; gap: 0.6rem; }
+.rs { font-family: var(--font-mono); font-size: 0.82rem; display: flex; align-items: center; gap: 0.8rem; }
+.rs-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.rs-true .rs-dot { background: #16a34a; }
+.rs-false .rs-dot { background: #dc2626; }
+.rs-realistic .rs-dot { background: var(--c-pr); }
+.rs-label { color: #8b949e; }
+
+/* ─── PACKAGE CARDS ─────────────────────────────────────── */
+.pkg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+.pkg-card { border: 1px solid var(--gray-200); padding: 1.4rem; }
+.pkg-card-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; }
+
+/* ─── CLI TABLE ─────────────────────────────────────────── */
+.cli-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.87rem; }
+.cli-table th { text-align: left; padding: 0.6rem 1.2rem; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--font-mono); }
+.cli-table td { padding: 0.65rem 1.2rem; border-bottom: 1px solid var(--gray-200); vertical-align: top; }
+.cli-table td:first-child { font-family: var(--font-mono); font-size: 0.8rem; color: var(--c-fn); background: #0d1117; white-space: nowrap; }
+.cli-table tr:hover td { background: var(--gray-50); }
+.cli-table tr:hover td:first-child { background: #161b22; }
+
+/* ─── PIPELINE ──────────────────────────────────────────── */
+.pipeline-flow { display: flex; align-items: center; gap: 0; margin: 2rem 0; overflow-x: auto; padding-bottom: 0.5rem; }
+.pipeline-stage { border: 2px solid var(--black); padding: 0.7rem 1.2rem; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+.pipeline-arrow { font-family: var(--font-mono); font-size: 1rem; color: var(--gray-500); padding: 0 0.5rem; flex-shrink: 0; }
+.pipeline-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem; }
+.pipeline-card { border: 1px solid var(--gray-200); padding: 1.4rem; }
+.pc-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+.pc-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.6rem; }
+.pc-desc { font-size: 0.82rem; color: var(--gray-700); line-height: 1.6; }
+
+/* ─── EXAMPLES GRID ─────────────────────────────────────── */
+.examples-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+.example-card { border: 1px solid var(--gray-200); overflow: hidden; }
+.example-card-header { padding: 0.8rem 1.2rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
+.example-card-title { font-weight: 600; font-size: 0.88rem; }
+.example-card-lang { font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.08em; }
+.example-card .code-block { margin: 0; border: none; border-radius: 0; }
+
+/* ─── FOOTER ──────────────────────────────────────────── */
+footer { background: var(--gray-50); border-top: 1px solid var(--gray-200); padding: 3rem 0; }
+.footer-inner { display: flex; gap: 4rem; align-items: flex-start; flex-wrap: wrap; }
+.footer-brand { font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 0.4rem; }
+.footer-brand em { font-style: italic; }
+.footer-meta { font-family: var(--font-mono); font-size: 0.72rem; color: var(--gray-500); line-height: 1.8; }
+.footer-links { display: flex; flex-direction: column; gap: 0.6rem; }
+.footer-links a { font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray-700); text-decoration: none; transition: color .2s; display: flex; align-items: center; gap: 0.5rem; }
+.footer-links a:hover { color: var(--black); }
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 700px) {
+  nav { padding: 0 1.2rem; }
+  .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .nav-drawer { display: flex; }
+  .container { padding: 0 1.2rem; }
+  .step-grid { grid-template-columns: 1fr; }
+  .proof-primitives { grid-template-columns: 1fr; }
+  .pkg-grid { grid-template-columns: 1fr; }
+  .pipeline-cards { grid-template-columns: 1fr 1fr; }
+  .examples-grid { grid-template-columns: 1fr; }
+  .annotated-block { grid-template-columns: 1fr; }
+  .realistic-card { grid-template-columns: 1fr; }
+}
+@media (max-width: 500px) {
+  .pipeline-cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-logo">Maty<em>OS</em></span>
+  <ul class="nav-links">
+    <li><a href="#quickstart">Quick Start</a></li>
+    <li><a href="#types">Language</a></li>
+    <li><a href="#proofs">Proof System</a></li>
+    <li><a href="#packages">Packages</a></li>
+    <li><a href="#cli">CLI</a></li>
+    <li><a href="#examples" style="font-weight:500;">Examples</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<ul class="nav-drawer" id="nav-drawer">
+  <li><a href="#quickstart" onclick="closeMenu()">Quick Start</a></li>
+  <li><a href="#types" onclick="closeMenu()">Language Reference</a></li>
+  <li><a href="#proofs" onclick="closeMenu()">Proof System</a></li>
+  <li><a href="#packages" onclick="closeMenu()">Packages</a></li>
+  <li><a href="#cli" onclick="closeMenu()">CLI</a></li>
+  <li><a href="#pipeline" onclick="closeMenu()">Pipeline</a></li>
+  <li><a href="#examples" onclick="closeMenu()">Examples</a></li>
+</ul>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Language · v1.0.9 · MIT License · .el extension</div>
+    <h1 class="hero-title">Maty<em>OS</em></h1>
+    <div class="hero-tagline">
+      <span id="typewriter"></span>
+    </div>
+    <div class="hero-badges reveal">
+      <span class="badge">12 proof keywords</span>
+      <span class="badge">3-valued boolean logic</span>
+      <span class="badge">recursive descent parser</span>
+      <span class="badge">bring package system</span>
+    </div>
+    <div class="hero-install reveal">
+      <pre><span class="cm"># Run a MatyOS program</span>
+el run your_program.el
+
+<span class="cm"># Run inline code</span>
+el run -c <span class="str">"ALGORITHM x { show \"hello\"; }"</span>
+
+<span class="cm"># Compile from Python</span>
+from compiler.main import El
+El.compile_file(<span class="str">'app'</span>)   <span class="cm"># reads src/app.el</span></pre>
+    </div>
+    <a class="hero-github reveal" href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener">
+      ↗ github.com/MatyOS-Project/MatyOS
+    </a>
+  </div>
+</section>
+
+<!-- §1 QUICK START -->
+<section id="quickstart">
+  <div class="container">
+    <h2 class="section-num reveal">§ 1</h2>
+    <h2 class="section-title reveal">Quick Start</h2>
+    <p class="reveal">MatyOS programs are written in the <strong>El</strong> (Elnamic) language with the <code style="font-family:var(--font-mono);font-size:0.9em;background:var(--gray-100);padding:0.1rem 0.4rem;">.el</code> file extension. Every program begins with an <code style="font-family:var(--font-mono);font-size:0.9em;background:var(--gray-100);padding:0.1rem 0.4rem;">ALGORITHM</code> block. Write a file, run it, then write your first formal proof — in three steps.</p>
+
+    <div class="step-grid">
+      <div class="step-card reveal reveal-delay-1">
+        <div class="step-num">Step 01 · Write</div>
+        <div class="step-title">Hello World</div>
+        <div class="code-block" style="margin-top:0.8rem;">
+          <div class="code-block-label">hello_world.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">ALGORITHM</span> hello_world {
+    <span class="fn">show</span> <span class="str">"Hello, MatyOS!"</span>;
+}</pre>
+        </div>
+      </div>
+      <div class="step-card reveal reveal-delay-2">
+        <div class="step-num">Step 02 · Run</div>
+        <div class="step-title">Execute</div>
+        <div class="code-block" style="margin-top:0.8rem;">
+          <div class="code-block-label">terminal <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre>el run hello_world.el
+
+<span class="cm"># Output:</span>
+<span class="str">Hello, MatyOS!</span></pre>
+        </div>
+      </div>
+      <div class="step-card reveal reveal-delay-3">
+        <div class="step-num">Step 03 · Prove</div>
+        <div class="step-title">First Formal Proof</div>
+        <div class="code-block" style="margin-top:0.8rem;">
+          <div class="code-block-label">proof.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="pr">axiom</span> id: <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+<span class="pr">theorem</span> t: <span class="kw">true</span>;
+<span class="pr">proof</span> t {
+    <span class="pr">hypothesis</span> h: <span class="kw">true</span>;
+    <span class="pr">test</span> v: h: <span class="kw">true</span>;
+    <span class="pr">QED</span>;
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §2 LANGUAGE REFERENCE -->
+<section id="types">
+  <div class="container">
+    <h2 class="section-num reveal">§ 2</h2>
+    <h2 class="section-title reveal">Language Reference</h2>
+    <p class="reveal">The El language is statically typed with explicit variable declarations and supports five primitive types including the unique <strong>realistic</strong> three-valued boolean. Keywords are case-insensitive.</p>
+
+    <div class="ref-tabs reveal">
+      <button class="ref-tab active" onclick="switchTab('variables')">Variables</button>
+      <button class="ref-tab" onclick="switchTab('types')">Types</button>
+      <button class="ref-tab" onclick="switchTab('control')">Control Flow</button>
+      <button class="ref-tab" onclick="switchTab('functions')">Functions</button>
+      <button class="ref-tab" onclick="switchTab('arrays')">Arrays</button>
+    </div>
+
+    <!-- Variables -->
+    <div class="ref-panel active" id="panel-variables">
+      <div class="code-block">
+        <div class="code-block-label">Variable & constant declarations <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm">// Declare with type</span>
+<span class="kw">var</span> x, y     : <span class="ty">integer</span>;
+<span class="kw">var</span> s        : <span class="ty">real</span>;
+<span class="kw">var</span> name     : <span class="ty">string</span> = <span class="str">"El"</span>;
+<span class="kw">var</span> flag     : <span class="ty">boolean</span> = <span class="kw">true</span>;
+<span class="kw">var</span> state    : <span class="ty">realistic</span>;
+
+<span class="cm">// Constants (immutable)</span>
+<span class="kw">const</span> PI     : <span class="ty">real</span>    = <span class="num">3.14159</span>;
+<span class="kw">const</span> MAX_N  : <span class="ty">integer</span> = <span class="num">1000</span>;
+
+<span class="cm">// Multiple same-type declarations</span>
+<span class="kw">var</span> a, b, c  : <span class="ty">string</span> = <span class="str">"same"</span>;
+
+<span class="cm">// Arithmetic assignment</span>
+x = <span class="num">1</span> * <span class="num">2</span> + <span class="num">3</span> - <span class="num">4</span> / <span class="num">5</span> * (<span class="num">1</span> + <span class="num">2</span>);
+
+<span class="cm">// Boolean expressions</span>
+flag = <span class="kw">true</span> <span class="op">and</span> <span class="kw">false</span> <span class="op">or</span> !<span class="kw">false</span>;
+flag = x &lt; <span class="num">5</span> <span class="op">and</span> y &gt; <span class="num">0</span>;</pre>
+      </div>
+    </div>
+
+    <!-- Types -->
+    <div class="ref-panel" id="panel-types">
+      <table class="type-table">
+        <thead>
+          <tr><th>Type</th><th>Description</th><th>Example literal</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>integer</code></td>
+            <td>Whole number (signed)</td>
+            <td><code>42</code>, <code>-7</code></td>
+            <td>Default numeric type</td>
+          </tr>
+          <tr>
+            <td><code>real</code></td>
+            <td>Floating-point number</td>
+            <td><code>3.14</code>, <code>-0.5</code></td>
+            <td>Also aliased as <code>float</code></td>
+          </tr>
+          <tr>
+            <td><code>string</code></td>
+            <td>Text, double-quoted</td>
+            <td><code>"hello"</code></td>
+            <td>Supports <code>trim()</code>, <code>upper()</code></td>
+          </tr>
+          <tr>
+            <td><code>boolean</code></td>
+            <td>Two-valued logic</td>
+            <td><code>true</code>, <code>false</code></td>
+            <td>Operators: <code>and</code>, <code>or</code>, <code>!</code></td>
+          </tr>
+          <tr>
+            <td><code>realistic</code></td>
+            <td>Three-valued Kleene logic</td>
+            <td><code>true</code> | <code>false</code> | <code>realistic</code></td>
+            <td><span class="type-highlight">★ unique to El</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.85rem;color:var(--gray-700);margin-top:1rem;">The <strong>realistic</strong> type extends boolean with a third truth value representing uncertainty or superposition — implementing Kleene's K3 three-valued logic natively in the type system.</p>
+    </div>
+
+    <!-- Control Flow -->
+    <div class="ref-panel" id="panel-control">
+      <div class="code-block">
+        <div class="code-block-label">if / elif / else, for, while, do-while, switch <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm">// Conditional</span>
+<span class="kw">if</span> x > <span class="num">5</span> {
+    <span class="fn">show</span> <span class="str">"greater"</span>;
+} <span class="kw">elif</span> x < <span class="num">5</span> {
+    <span class="fn">show</span> <span class="str">"less"</span>;
+} <span class="kw">else</span> {
+    <span class="fn">show</span> <span class="str">"equal"</span>;
+}
+
+<span class="cm">// For loop (C-style)</span>
+<span class="kw">for</span> i: <span class="ty">integer</span> = <span class="num">0</span>; i < <span class="num">10</span>; i = i + <span class="num">1</span> {
+    <span class="fn">show</span> i;
+}
+
+<span class="cm">// While loop</span>
+<span class="kw">while</span> counter <= <span class="num">10</span> <span class="kw">do</span> {
+    <span class="fn">show</span> counter;
+    counter = counter + <span class="num">1</span>;
+}
+
+<span class="cm">// Do-while loop</span>
+<span class="kw">do</span> {
+    <span class="fn">show</span> x;
+    x = x + <span class="num">1</span>;
+} <span class="kw">while</span> x < <span class="num">5</span>
+
+<span class="cm">// Switch statement</span>
+<span class="kw">switch</span>(value) {
+    <span class="kw">case</span> <span class="num">1</span>: <span class="fn">show</span> <span class="str">"one"</span>;
+    <span class="kw">case</span> <span class="num">2</span>: <span class="fn">show</span> <span class="str">"two"</span>;
+    <span class="kw">default</span>: <span class="fn">show</span> <span class="str">"other"</span>;
+}</pre>
+      </div>
+    </div>
+
+    <!-- Functions -->
+    <div class="ref-panel" id="panel-functions">
+      <div class="code-block">
+        <div class="code-block-label">Function declarations, nesting, recursion <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm">// Basic function</span>
+<span class="kw">function</span> <span class="fn">add</span>(a: <span class="ty">integer</span>, b: <span class="ty">integer</span>) {
+    <span class="kw">return</span> a + b;
+}
+
+<span class="cm">// Nested function</span>
+<span class="kw">function</span> <span class="fn">outer</span>(s: <span class="ty">string</span>) {
+    <span class="kw">var</span> c : <span class="ty">string</span>;
+    <span class="kw">function</span> <span class="fn">inner</span>() {
+        <span class="kw">return</span> <span class="num">42</span>;
+    }
+    <span class="kw">return</span> <span class="fn">inner</span>();
+}
+
+<span class="cm">// Recursive function</span>
+<span class="kw">function</span> <span class="fn">fibonacci</span>(n: <span class="ty">integer</span>) {
+    <span class="kw">if</span> n <= <span class="num">1</span> { <span class="kw">return</span> n; }
+    <span class="kw">return</span> <span class="fn">fibonacci</span>(n - <span class="num">1</span>) + <span class="fn">fibonacci</span>(n - <span class="num">2</span>);
+}
+
+<span class="cm">// Call it</span>
+<span class="fn">show</span> <span class="fn">fibonacci</span>(<span class="num">10</span>);   <span class="cm">// → 55</span>
+<span class="fn">show</span> <span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>);       <span class="cm">// → 7</span></pre>
+      </div>
+    </div>
+
+    <!-- Arrays -->
+    <div class="ref-panel" id="panel-arrays">
+      <div class="code-block">
+        <div class="code-block-label">Array declaration and iteration <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm">// Declare typed array</span>
+<span class="kw">var</span> numbers: <span class="ty">array</span>[<span class="ty">integer</span>] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
+<span class="kw">var</span> names:   <span class="ty">array</span>[<span class="ty">string</span>]  = [<span class="str">"El"</span>, <span class="str">"Lean"</span>, <span class="str">"Coq"</span>];
+
+<span class="cm">// Iterate with for-in</span>
+<span class="kw">var</span> total: <span class="ty">integer</span> = <span class="num">0</span>;
+<span class="kw">for</span> num <span class="kw">in</span> numbers {
+    total = total + num;
+}
+<span class="fn">show</span> total;   <span class="cm">// → 15</span>
+
+<span class="cm">// Index access</span>
+<span class="fn">show</span> numbers[<span class="num">0</span>];   <span class="cm">// → 1</span>
+<span class="fn">show</span> names[<span class="num">2</span>];    <span class="cm">// → Coq</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §3 PROOF SYSTEM -->
+<section id="proofs">
+  <div class="container">
+    <h2 class="section-num reveal">§ 3</h2>
+    <h2 class="section-title reveal">Proof System</h2>
+    <p class="reveal" style="max-width:640px;">The defining feature of the El language is formal verification built directly into the syntax. Proofs are not documentation — they are first-class language constructs verified by the semantic analyzer before any code runs.</p>
+
+    <h3 class="subsec reveal">Proof Primitives</h3>
+    <div class="proof-primitives reveal">
+      <div class="proof-kw-card">
+        <div class="proof-kw">axiom</div>
+        <div class="proof-kw-desc">Self-evident foundation. Declared true without proof — the bedrock on which theorems are built.</div>
+      </div>
+      <div class="proof-kw-card">
+        <div class="proof-kw">theorem</div>
+        <div class="proof-kw-desc">A proposition asserted to be provable. Must be matched by a <code style="color:var(--c-pr);font-family:var(--font-mono);">proof</code> block bearing its name.</div>
+      </div>
+      <div class="proof-kw-card">
+        <div class="proof-kw">hypothesis</div>
+        <div class="proof-kw-desc">An assumption declared within a proof scope. Held true for the duration of the proof, then discharged at QED.</div>
+      </div>
+      <div class="proof-kw-card">
+        <div class="proof-kw">test</div>
+        <div class="proof-kw-desc">An inline verification step. Checks that a hypothesis or expression holds against established axioms.</div>
+      </div>
+      <div class="proof-kw-card full">
+        <div class="proof-kw">QED &nbsp;<span style="color:var(--c-cm);font-size:0.85rem;font-weight:400;">Quod Erat Demonstrandum &nbsp; ∎</span></div>
+        <div class="proof-kw-desc">Seals and terminates the proof block. Causes the semantic analyzer to verify that all hypotheses have been tested and all required conditions satisfied.</div>
+      </div>
+    </div>
+
+    <h3 class="subsec reveal" style="margin-top:2.5rem;">Annotated Example</h3>
+    <div class="annotated-block reveal">
+      <div class="code-block" style="margin:0;">
+        <div class="code-block-label">axiomatic_method.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm">// Lay the axiomatic foundation</span>
+<span class="pr">axiom</span> identity:
+    <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+
+<span class="pr">axiom</span> excluded_middle:
+    <span class="kw">true</span> <span class="op">or</span> !<span class="kw">true</span>;
+
+<span class="cm">// Declare the theorem</span>
+<span class="pr">theorem</span> simple_theorem: <span class="kw">true</span>;
+
+<span class="cm">// Construct the proof</span>
+<span class="pr">proof</span> simple_theorem {
+    <span class="pr">hypothesis</span> h1: <span class="kw">true</span>;
+    <span class="pr">test</span> verify_h1: h1: <span class="kw">true</span>;
+    <span class="pr">QED</span>;   <span class="cm">// ∎</span>
+}</pre>
+      </div>
+      <ul class="annotation-list">
+        <li><span class="ann-kw">axiom</span>Self-evident truth — no proof required. Added to the axiom pool.</li>
+        <li><span class="ann-kw">axiom</span>Second axiom extends the logical foundation.</li>
+        <li><span class="ann-kw">theorem</span>Declares a claim. The semantic analyzer registers it as "unproven".</li>
+        <li><span class="ann-kw">proof</span>Opens a proof scope tied to <code style="font-family:var(--font-mono);color:var(--c-fn);">simple_theorem</code>.</li>
+        <li><span class="ann-kw">hypothesis</span>Assumes h1 = true within this scope.</li>
+        <li><span class="ann-kw">test</span>Verifies h1 holds. Fails with SemanticError if inconsistent.</li>
+        <li><span class="ann-kw">QED</span>Seals proof. Theorem marked "proven" in symbol table. ∎</li>
+      </ul>
+    </div>
+
+    <h3 class="subsec reveal" style="margin-top:2.5rem;">Realistic — Three-Valued Logic</h3>
+    <div class="realistic-card reveal">
+      <div>
+        <p style="color:#8b949e;font-size:0.88rem;margin-bottom:1rem;">The <code style="font-family:var(--font-mono);color:var(--c-pr);">realistic</code> type extends boolean with a third truth value — implementing Kleene's K3 logic for expressing uncertainty, superposition, or probabilistic states.</p>
+        <div class="realistic-states">
+          <div class="rs rs-true"><div class="rs-dot"></div><code style="font-family:var(--font-mono);font-size:0.8rem;color:var(--c-str);">true</code><span class="rs-label">— definite truth</span></div>
+          <div class="rs rs-false"><div class="rs-dot"></div><code style="font-family:var(--font-mono);font-size:0.8rem;color:#dc2626;">false</code><span class="rs-label">— definite falsity</span></div>
+          <div class="rs rs-realistic"><div class="rs-dot"></div><code style="font-family:var(--font-mono);font-size:0.8rem;color:var(--c-pr);">realistic</code><span class="rs-label">— indeterminate / uncertain</span></div>
+        </div>
+      </div>
+      <div class="code-block" style="margin:0;">
+        <div class="code-block-label">realistic_demo.el</div>
+        <pre><span class="kw">var</span> confidence: <span class="ty">realistic</span>;
+<span class="kw">var</span> certainty:  <span class="ty">realistic</span> = <span class="kw">true</span>;
+<span class="kw">var</span> doubt:      <span class="ty">realistic</span> = <span class="ty">realistic</span>;
+
+<span class="cm">// Kleene conjunction table:</span>
+<span class="cm">// true ∧ realistic  → realistic</span>
+<span class="cm">// false ∧ realistic → false</span>
+<span class="cm">// realistic ∧ realistic → realistic</span>
+
+<span class="kw">if</span> confidence {
+    <span class="fn">show</span> <span class="str">"definitively true"</span>;
+} <span class="kw">else</span> {
+    <span class="fn">show</span> <span class="str">"uncertain or false"</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §4 PACKAGE SYSTEM -->
+<section id="packages">
+  <div class="container">
+    <h2 class="section-num reveal">§ 4</h2>
+    <h2 class="section-title reveal">Package System</h2>
+    <p class="reveal">The <strong>Bring</strong> system is El's module import mechanism — analogous to Python's <code style="font-family:var(--font-mono);background:var(--gray-100);padding:0.1rem 0.4rem;font-size:0.88em;">import</code> or JavaScript's <code style="font-family:var(--font-mono);background:var(--gray-100);padding:0.1rem 0.4rem;font-size:0.88em;">import from</code>. Packages are resolved from the Easier Hub registry and cached locally.</p>
+
+    <div class="pkg-grid reveal">
+      <div class="pkg-card">
+        <div class="pkg-card-label">Full package import</div>
+        <div class="code-block" style="margin:0;">
+          <pre><span class="kw">bring</span> math_utils;</pre>
+        </div>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-card-label">Import with alias</div>
+        <div class="code-block" style="margin:0;">
+          <pre><span class="kw">bring</span> neural_networks <span class="kw">as</span> nn;</pre>
+        </div>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-card-label">Named imports (destructured)</div>
+        <div class="code-block" style="margin:0;">
+          <pre><span class="kw">bring</span> { Vector, Matrix }
+    <span class="kw">from</span> math_package;</pre>
+        </div>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-card-label">Scoped source</div>
+        <div class="code-block" style="margin:0;">
+          <pre><span class="kw">bring</span> linear_algebra
+    <span class="kw">from</span> scientific_hub;</pre>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsec reveal" style="margin-top:2rem;">Installing Packages</h3>
+    <div class="code-block reveal">
+      <div class="code-block-label">package.bring config + CLI install <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># Generate a sample package config</span>
+el download --sample
+
+<span class="cm"># Install all packages from config</span>
+el download package.bring
+
+<span class="cm"># Inspect local cache</span>
+el package cache list
+el package cache clear</pre>
+    </div>
+  </div>
+</section>
+
+<!-- §5 CLI REFERENCE -->
+<section id="cli">
+  <div class="container">
+    <h2 class="section-num reveal">§ 5</h2>
+    <h2 class="section-title reveal">CLI Reference</h2>
+    <p class="reveal">The <code style="font-family:var(--font-mono);background:var(--gray-100);padding:0.1rem 0.4rem;font-size:0.88em;">el</code> command-line tool (v1.0.9) is the primary interface for running El programs, managing packages, and inspecting the cache.</p>
+
+    <table class="cli-table reveal">
+      <thead>
+        <tr>
+          <th>Command</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>el run &lt;file.el&gt;</td>
+          <td>Execute an El source file through the full compiler pipeline</td>
+        </tr>
+        <tr>
+          <td>el run -c "code"</td>
+          <td>Compile and run inline El code directly from the shell</td>
+        </tr>
+        <tr>
+          <td>el download [config]</td>
+          <td>Install packages declared in a <code style="font-family:var(--font-mono);font-size:0.82em;">.bring</code> configuration file</td>
+        </tr>
+        <tr>
+          <td>el download --sample</td>
+          <td>Generate a sample <code style="font-family:var(--font-mono);font-size:0.82em;">package.bring</code> file in the current directory</td>
+        </tr>
+        <tr>
+          <td>el package cache list</td>
+          <td>List all packages currently stored in the local cache</td>
+        </tr>
+        <tr>
+          <td>el package cache clear</td>
+          <td>Remove all packages from the local cache</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- §6 COMPILER PIPELINE -->
+<section id="pipeline">
+  <div class="container">
+    <h2 class="section-num reveal">§ 6</h2>
+    <h2 class="section-title reveal">Compiler Pipeline</h2>
+    <p class="reveal">El is a fully compiled language with a four-stage pipeline implemented in Python. Each stage produces a well-defined artifact consumed by the next — source text → token stream → AST → validated AST → runtime output.</p>
+
+    <div class="pipeline-flow reveal">
+      <div class="pipeline-stage">Lexer</div>
+      <span class="pipeline-arrow">→</span>
+      <div class="pipeline-stage">Parser</div>
+      <span class="pipeline-arrow">→</span>
+      <div class="pipeline-stage">Semantic Analyzer</div>
+      <span class="pipeline-arrow">→</span>
+      <div class="pipeline-stage">Interpreter</div>
+    </div>
+
+    <div class="pipeline-cards reveal">
+      <div class="pipeline-card">
+        <div class="pc-num">Stage 01</div>
+        <div class="pc-name">Lexer</div>
+        <div class="pc-desc">Character-by-character tokenizer. Handles case-insensitive keywords, <code style="font-family:var(--font-mono);font-size:0.8em;">&#123;&#123; &#125;&#125;</code> multi-line comments, <code style="font-family:var(--font-mono);font-size:0.8em;">//</code> line comments, and multi-char operators (<code style="font-family:var(--font-mono);font-size:0.8em;">===</code>, <code style="font-family:var(--font-mono);font-size:0.8em;">!=</code>, <code style="font-family:var(--font-mono);font-size:0.8em;">>=</code>). Emits <code style="font-family:var(--font-mono);font-size:0.8em;">LexerError</code> on invalid tokens.</div>
+      </div>
+      <div class="pipeline-card">
+        <div class="pc-num">Stage 02</div>
+        <div class="pc-name">Parser</div>
+        <div class="pc-desc">1,152-line recursive descent parser. Builds a complete typed AST for all language constructs — including proof blocks, switch statements, bring declarations, and nested functions. Emits <code style="font-family:var(--font-mono);font-size:0.8em;">ParserError</code> on syntax violations.</div>
+      </div>
+      <div class="pipeline-card">
+        <div class="pc-num">Stage 03</div>
+        <div class="pc-name">Semantic Analyzer</div>
+        <div class="pc-desc">Traverses the AST for semantic validity: scope & symbol resolution, duplicate identifiers, constant immutability enforcement, theorem–proof linkage verification, and argument count checks. Emits <code style="font-family:var(--font-mono);font-size:0.8em;">SemanticError</code>.</div>
+      </div>
+      <div class="pipeline-card">
+        <div class="pc-num">Stage 04</div>
+        <div class="pc-name">Interpreter</div>
+        <div class="pc-desc">AST visitor-pattern executor. Runs proof blocks, resolves and executes package imports via the Easier Hub registry, evaluates all built-in functions, and handles runtime errors with structured <code style="font-family:var(--font-mono);font-size:0.8em;">InterpreterError</code> messages.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §7 EXAMPLES -->
+<section id="examples">
+  <div class="container">
+    <h2 class="section-num reveal">§ 7</h2>
+    <h2 class="section-title reveal">Examples</h2>
+    <p class="reveal">Four complete programs demonstrating the range of El — from classic algorithms to formal axiomatic proofs.</p>
+
+    <div class="examples-grid reveal">
+
+      <div class="example-card">
+        <div class="example-card-header">
+          <span class="example-card-title">Fibonacci</span>
+          <span class="example-card-lang">Recursion</span>
+        </div>
+        <div class="code-block">
+          <div class="code-block-label">fibonacci.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">ALGORITHM</span> fibonacci_demo {
+
+    <span class="kw">function</span> <span class="fn">fib</span>(n: <span class="ty">integer</span>) {
+        <span class="kw">if</span> n <= <span class="num">1</span> { <span class="kw">return</span> n; }
+        <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="num">1</span>) + <span class="fn">fib</span>(n-<span class="num">2</span>);
+    }
+
+    <span class="kw">for</span> i: <span class="ty">integer</span> = <span class="num">0</span>; i < <span class="num">10</span>; i = i+<span class="num">1</span> {
+        <span class="fn">show</span> <span class="fn">fib</span>(i);
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-card-header">
+          <span class="example-card-title">Calculator</span>
+          <span class="example-card-lang">Variables & Arithmetic</span>
+        </div>
+        <div class="code-block">
+          <div class="code-block-label">calculator.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">ALGORITHM</span> calculator {
+
+    <span class="kw">var</span> a: <span class="ty">real</span> = <span class="num">10.5</span>;
+    <span class="kw">var</span> b: <span class="ty">real</span> = <span class="num">3.2</span>;
+
+    <span class="fn">show</span> <span class="str">"Sum:    "</span>; <span class="fn">show</span> a + b;
+    <span class="fn">show</span> <span class="str">"Diff:   "</span>; <span class="fn">show</span> a - b;
+    <span class="fn">show</span> <span class="str">"Product:"</span>; <span class="fn">show</span> a * b;
+    <span class="fn">show</span> <span class="str">"Quotient:"</span>;<span class="fn">show</span> a / b;
+
+    <span class="kw">const</span> PI: <span class="ty">real</span> = <span class="num">3.14159</span>;
+    <span class="fn">show</span> <span class="str">"Circle:"</span>;
+    <span class="fn">show</span> PI * a * a;
+}</pre>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-card-header">
+          <span class="example-card-title">Axiomatic Method</span>
+          <span class="example-card-lang">Formal Proofs</span>
+        </div>
+        <div class="code-block">
+          <div class="code-block-label">axiomatic_method.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="pr">axiom</span> identity:
+    <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
+<span class="pr">axiom</span> excluded_middle:
+    <span class="kw">true</span> <span class="op">or</span> !<span class="kw">true</span>;
+
+<span class="pr">theorem</span> t1: <span class="kw">true</span>;
+<span class="pr">proof</span> t1 {
+    <span class="pr">hypothesis</span> h1: <span class="kw">true</span>;
+    <span class="pr">test</span> v1: h1: <span class="kw">true</span>;
+    <span class="pr">QED</span>;
+}
+
+<span class="kw">ALGORITHM</span> main {
+    <span class="fn">show</span> <span class="str">"All theorems verified."</span>;
+}</pre>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-card-header">
+          <span class="example-card-title">Advanced Proof</span>
+          <span class="example-card-lang">Multi-hypothesis</span>
+        </div>
+        <div class="code-block">
+          <div class="code-block-label">proof_demo.el <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="pr">axiom</span> p_true: <span class="kw">true</span>;
+<span class="pr">axiom</span> q_true: <span class="kw">true</span>;
+
+<span class="pr">theorem</span> conjunction: <span class="kw">true</span>;
+<span class="pr">proof</span> conjunction {
+    <span class="pr">hypothesis</span> hp: <span class="kw">true</span>;
+    <span class="pr">hypothesis</span> hq: <span class="kw">true</span>;
+    <span class="pr">test</span> check_p: hp: <span class="kw">true</span>;
+    <span class="pr">test</span> check_q: hq: <span class="kw">true</span>;
+    <span class="pr">test</span> both: hp <span class="op">and</span> hq: <span class="kw">true</span>;
+    <span class="pr">QED</span>;   <span class="cm">// ∎</span>
+}</pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Maty<em>OS</em></div>
+        <div class="footer-meta">
+          El Language &nbsp;·&nbsp; v1.0.9 &nbsp;·&nbsp; MIT License<br>
+          A world inside PolyfdoS
+        </div>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="footer-links">
+        <a href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener">↗ GitHub — MatyOS-Project/MatyOS</a>
+        <a href="/">← Back to PolyfdoS</a>
+        <a href="/polyfdor">PolyfdoR — The creator</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ── JS ───────────────────────────────────────── -->
+<script>
+/* NAV */
+function toggleMenu() {
+  document.getElementById('nav-burger').classList.toggle('open');
+  document.getElementById('nav-drawer').classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-burger').classList.remove('open');
+  document.getElementById('nav-drawer').classList.remove('open');
+}
+window.addEventListener('scroll', () => {
+  document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+/* TYPEWRITER — single phrase, typed once */
+(function(){
+  const phrase = "Where proof is syntax, not ceremony.";
+  let i = 0;
+  const el = document.getElementById('typewriter');
+  function tick() {
+    if (i < phrase.length) { el.textContent += phrase[i++]; setTimeout(tick, 38); }
+  }
+  setTimeout(tick, 500);
+})();
+
+/* SCROLL REVEAL */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.07 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* LANGUAGE REFERENCE TABS */
+function switchTab(name) {
+  document.querySelectorAll('.ref-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ref-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[onclick="switchTab(\'' + name + '\')"]').classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+/* COPY BUTTONS */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre ? pre.innerText : '';
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  }).catch(() => {});
+}
+</script>
+
+</body>
+</html>

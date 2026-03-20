@@ -11,6 +11,10 @@ def home():
 def polyfdor():
     return render_template("polyfdor.html")
 
+@app.route("/matyos")
+def matyos():
+    return render_template("matyos.html")
+
 @app.route("/papers/novectDB")
 def novectdb():
     return render_template("novectdb.html")
