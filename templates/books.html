@@ -12,20 +12,18 @@ html { scroll-behavior: smooth; }
 :root {
   --black:    #0a0a0a;
   --white:    #ffffff;
-  --cream:    #f5f4f0;
-  --gray-200: #e5e5e5;
-  --gray-400: #999;
-  --amber:    #b8860b;
+  --gray-100: #f5f5f5;
+  --gray-300: #cccccc;
+  --gray-500: #888888;
   --font-serif: 'EB Garamond', Georgia, serif;
   --font-sans:  'Inter', system-ui, sans-serif;
   --font-mono:  'JetBrains Mono', monospace;
 }
 body {
   font-family: var(--font-sans);
-  background: var(--cream);
-  color: var(--black);
+  background: var(--black);
+  color: var(--white);
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
 }
 
 /* ── NAV ─────────────────────────────────────────── */
@@ -34,291 +32,498 @@ nav {
   height: 48px;
   display: flex; align-items: center; gap: 1.6rem;
   padding: 0 2rem;
-  background: rgba(245,244,240,0.88);
+  background: rgba(5,5,5,0.85);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0,0,0,0.07);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .nav-back {
   font-family: var(--font-mono);
   font-size: 0.72rem; letter-spacing: 0.04em;
-  color: rgba(0,0,0,0.4);
+  color: rgba(255,255,255,0.35);
   text-decoration: none;
   transition: color .2s;
 }
-.nav-back:hover { color: var(--black); }
+.nav-back:hover { color: rgba(255,255,255,0.85); }
 .nav-title {
   font-family: var(--font-mono);
   font-size: 0.72rem; letter-spacing: 0.06em;
-  color: rgba(0,0,0,0.25);
+  color: rgba(255,255,255,0.18);
 }
 
-/* ── PAGE WRAPPER ─────────────────────────────────── */
-.page {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 96px 2rem 80px;
-}
-
-/* ── HERO ─────────────────────────────────────────── */
-.hero {
-  margin-bottom: 3.5rem;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
-  padding-bottom: 2.5rem;
-}
-.hero-label {
-  font-family: var(--font-mono);
-  font-size: 0.62rem; letter-spacing: 0.1em;
-  color: var(--amber);
-  text-transform: uppercase;
-  margin-bottom: 0.9rem;
-}
-.hero-title {
-  font-family: var(--font-serif);
-  font-size: clamp(2.6rem, 6vw, 4rem);
-  font-weight: 400;
-  line-height: 1.08;
-  letter-spacing: -0.01em;
-  margin-bottom: 0.7rem;
-}
-.hero-sub {
-  font-family: var(--font-mono);
-  font-size: 0.7rem; letter-spacing: 0.05em;
-  color: rgba(0,0,0,0.35);
-}
-
-/* ── BOOK CARD ────────────────────────────────────── */
-.book-card {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 2.4rem;
-  background: var(--white);
-  border: 1px solid rgba(0,0,0,0.09);
-  border-radius: 2px;
-  overflow: hidden;
-  transition: box-shadow .25s;
-}
-.book-card:hover {
-  box-shadow: 0 6px 32px rgba(0,0,0,0.08);
-}
-
-/* ── BOOK COVER ───────────────────────────────────── */
-.book-cover {
-  background: var(--black);
+/* ── 3D SCENE ─────────────────────────────────────── */
+#scene-wrap {
   position: relative;
-  min-height: 280px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1.4rem 1.1rem;
+  width: 100%;
+  height: 65vh;
+  min-height: 340px;
+  background: #050505;
   overflow: hidden;
+  margin-top: 48px;
 }
-/* Subtle ambient line texture */
-.book-cover::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 18px,
-    rgba(255,255,255,0.022) 18px,
-    rgba(255,255,255,0.022) 19px
-  );
-  pointer-events: none;
+#libCanvas {
+  display: block;
+  width: 100%; height: 100%;
+  cursor: grab;
+  touch-action: none;
 }
-/* Amber spine accent line */
-.book-cover::after {
-  content: '';
+#libCanvas:active { cursor: grabbing; }
+
+/* Drag hint */
+#drag-hint {
   position: absolute;
-  top: 0; left: 0; bottom: 0;
-  width: 3px;
-  background: linear-gradient(to bottom, #c8a060, #8a6020);
-}
-.cover-top {
+  bottom: 1.4rem; left: 50%;
+  transform: translateX(-50%);
   font-family: var(--font-mono);
-  font-size: 0.55rem; letter-spacing: 0.12em;
-  color: rgba(255,255,255,0.25);
-  text-transform: uppercase;
-  position: relative; z-index: 1;
+  font-size: 0.6rem; letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.22);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: hintFade 5s ease-out 1s forwards;
 }
-.cover-title {
-  font-family: var(--font-serif);
-  font-size: 0.92rem;
-  font-style: italic;
-  line-height: 1.35;
-  color: rgba(255,255,255,0.82);
-  position: relative; z-index: 1;
-}
-.cover-author {
-  font-family: var(--font-mono);
-  font-size: 0.58rem; letter-spacing: 0.08em;
-  color: rgba(200,160,96,0.75);
-  position: relative; z-index: 1;
+@keyframes hintFade {
+  0%   { opacity: 1; }
+  65%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
-/* ── BOOK INFO ────────────────────────────────────── */
-.book-info {
-  padding: 1.8rem 1.8rem 1.8rem 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+/* ── BOOK INFO SECTION ────────────────────────────── */
+.info-section {
+  background: var(--white);
+  color: var(--black);
+  padding: 4rem 2rem 3rem;
 }
-.book-meta-row {
+.info-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.info-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem; letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.28);
   margin-bottom: 1.2rem;
 }
-.book-title {
+.info-title {
   font-family: var(--font-serif);
-  font-size: 1.35rem;
-  font-weight: 500;
-  line-height: 1.25;
-  margin-bottom: 0.35rem;
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
 }
-.book-title em { font-style: italic; }
-.book-author {
-  font-family: var(--font-sans);
-  font-size: 0.82rem;
-  color: rgba(0,0,0,0.45);
-  margin-bottom: 0.9rem;
-}
-.book-tags {
-  display: flex; flex-wrap: wrap; gap: 0.4rem;
-}
-.book-tag {
+.info-title em { font-style: italic; }
+.info-author {
   font-family: var(--font-mono);
-  font-size: 0.58rem; letter-spacing: 0.07em;
+  font-size: 0.7rem; letter-spacing: 0.05em;
   color: rgba(0,0,0,0.38);
-  border: 1px solid rgba(0,0,0,0.14);
+  margin-bottom: 1.2rem;
+}
+.info-tags {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  margin-bottom: 2.2rem;
+}
+.info-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem; letter-spacing: 0.06em;
+  color: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0,0,0,0.15);
   border-radius: 2px;
-  padding: 0.18rem 0.5rem;
+  padding: 0.2rem 0.55rem;
 }
-.book-divider {
+.info-divider {
   border: none;
-  border-top: 1px solid rgba(0,0,0,0.08);
-  margin: 1.1rem 0;
+  border-top: 1px solid rgba(0,0,0,0.09);
+  margin-bottom: 2rem;
 }
-.book-summary {
+.info-summary {
   font-family: var(--font-serif);
-  font-size: 1.02rem;
+  font-size: 1.08rem;
   font-style: italic;
-  line-height: 1.65;
-  color: rgba(0,0,0,0.68);
-  margin-bottom: 1.4rem;
+  line-height: 1.7;
+  color: rgba(0,0,0,0.65);
+  margin-bottom: 2rem;
 }
-.book-footer {
-  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+.info-footer-row {
+  display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
+  margin-bottom: 2.5rem;
 }
-.coming-soon-badge {
+.badge-soon {
   display: inline-flex; align-items: center; gap: 0.45rem;
   font-family: var(--font-mono);
   font-size: 0.62rem; letter-spacing: 0.1em;
   text-transform: uppercase;
   background: var(--black);
   color: var(--white);
-  padding: 0.4rem 0.85rem;
+  padding: 0.42rem 0.9rem;
   border-radius: 2px;
 }
-.coming-soon-badge::before {
+.badge-soon::before {
   content: '';
   width: 5px; height: 5px;
-  background: #c8a060;
+  background: #aaaaaa;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.book-year {
+.info-year {
   font-family: var(--font-mono);
   font-size: 0.62rem; letter-spacing: 0.06em;
-  color: rgba(0,0,0,0.28);
+  color: rgba(0,0,0,0.25);
 }
-
-/* ── FOOTER NOTE ──────────────────────────────────── */
-.library-footer {
-  margin-top: 3rem;
+.library-note {
   padding-top: 2rem;
   border-top: 1px solid rgba(0,0,0,0.08);
   font-family: var(--font-mono);
-  font-size: 0.62rem; letter-spacing: 0.07em;
-  color: rgba(0,0,0,0.28);
+  font-size: 0.6rem; letter-spacing: 0.08em;
+  color: rgba(0,0,0,0.22);
   text-align: center;
 }
 
 /* ── RESPONSIVE ───────────────────────────────────── */
-@media (max-width: 640px) {
-  .page { padding: 80px 1.2rem 60px; }
-  .book-card {
-    grid-template-columns: 1fr;
-  }
-  .book-cover {
-    min-height: 180px;
-    flex-direction: row;
-    align-items: flex-end;
-    gap: 1rem;
-  }
-  .cover-top { display: none; }
-  .cover-title { font-size: 0.82rem; }
-  .book-info { padding: 1.4rem; }
+@media (max-width: 600px) {
   nav { padding: 0 1.2rem; }
+  #scene-wrap { height: 55vh; }
+  .info-section { padding: 2.5rem 1.2rem 2.5rem; }
 }
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
   <a class="nav-back" href="/">← PolyfdoS</a>
   <span class="nav-title">Library</span>
 </nav>
 
-<div class="page">
-
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-label">PolyfdoS · Written Works</div>
-    <h1 class="hero-title">Library</h1>
-    <p class="hero-sub">by Ahmed Hafdi &middot; PolyfdoR</p>
-  </div>
-
-  <!-- BOOK CARD -->
-  <div class="book-card">
-
-    <!-- Cover -->
-    <div class="book-cover">
-      <div class="cover-top">PolyfdoS Press</div>
-      <div class="cover-title">The Mind and the Machine: How I Built Matyos to Think in Mathematics</div>
-      <div class="cover-author">Ahmed Hafdi</div>
-    </div>
-
-    <!-- Info -->
-    <div class="book-info">
-      <div class="book-meta-row">
-        <div class="book-title"><em>The Mind and the Machine</em><br>How I Built Matyos to Think in Mathematics</div>
-        <div class="book-author">Ahmed Hafdi &nbsp;·&nbsp; PolyfdoR</div>
-        <div class="book-tags">
-          <span class="book-tag">proof-assistant</span>
-          <span class="book-tag">mathematics</span>
-          <span class="book-tag">language design</span>
-          <span class="book-tag">MatyOS</span>
-          <span class="book-tag">logic</span>
-        </div>
-      </div>
-
-      <div>
-        <hr class="book-divider">
-        <p class="book-summary">
-          A first-person account of building MatyOS — a proof-assistant language where programs are proofs and types are theorems. Hafdi traces the journey from classical logic to a three-valued truth system, and the engineering decisions that shaped the El interpreter. Part memoir, part technical manifesto: how one mind taught a machine to reason.
-        </p>
-        <div class="book-footer">
-          <span class="coming-soon-badge">Coming Soon</span>
-          <span class="book-year">2025</span>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- FOOTER NOTE -->
-  <div class="library-footer">
-    More works in progress. This library grows.
-  </div>
-
+<!-- 3D SCENE -->
+<div id="scene-wrap">
+  <canvas id="libCanvas"></canvas>
+  <div id="drag-hint">Drag to explore</div>
 </div>
 
+<!-- BOOK INFO -->
+<div class="info-section">
+  <div class="info-inner">
+    <div class="info-label">PolyfdoS · Written Works</div>
+    <h1 class="info-title"><em>The Mind and the Machine</em><br>How I Built Matyos to Think in Mathematics</h1>
+    <div class="info-author">Ahmed Hafdi &nbsp;·&nbsp; PolyfdoR</div>
+    <div class="info-tags">
+      <span class="info-tag">proof-assistant</span>
+      <span class="info-tag">mathematics</span>
+      <span class="info-tag">language design</span>
+      <span class="info-tag">MatyOS</span>
+      <span class="info-tag">logic</span>
+    </div>
+    <hr class="info-divider">
+    <p class="info-summary">
+      A first-person account of building MatyOS — a proof-assistant language where programs are proofs and types are theorems. Hafdi traces the journey from classical logic to a three-valued truth system, and the engineering decisions that shaped the El interpreter. Part memoir, part technical manifesto: how one mind taught a machine to reason.
+    </p>
+    <div class="info-footer-row">
+      <span class="badge-soon">Coming Soon</span>
+      <span class="info-year">2025</span>
+    </div>
+    <div class="library-note">More works in progress. This library grows.</div>
+  </div>
+</div>
+
+<!-- THREE.JS -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════
+   LIBRARY 3D SCENE — Three.js
+   Black & white bookshelf, realistic PBR materials
+   ═══════════════════════════════════════════════════ */
+
+const wrap   = document.getElementById('scene-wrap');
+const canvas = document.getElementById('libCanvas');
+const W = () => wrap.clientWidth;
+const H = () => wrap.clientHeight;
+
+// ── Renderer ─────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(W(), H());
+renderer.setClearColor(0x050505, 1);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+// ── Scene & Camera ────────────────────────────────────
+const scene  = new THREE.Scene();
+scene.fog    = new THREE.FogExp2(0x050505, 0.16);
+
+const camera = new THREE.PerspectiveCamera(42, W() / H(), 0.1, 50);
+camera.position.set(0, 0.85, 3.8);
+camera.lookAt(0, 0.35, 0);
+
+// ── Lights ────────────────────────────────────────────
+// Minimal ambient
+scene.add(new THREE.AmbientLight(0xffffff, 0.10));
+
+// Key light — hard white, casts shadows
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
+keyLight.position.set(3, 6, 3);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(1024, 1024);
+keyLight.shadow.camera.near = 0.5;
+keyLight.shadow.camera.far = 20;
+keyLight.shadow.camera.left = keyLight.shadow.camera.bottom = -4;
+keyLight.shadow.camera.right = keyLight.shadow.camera.top = 4;
+keyLight.shadow.bias = -0.0005;
+scene.add(keyLight);
+
+// Rim light — cool fill from behind
+const rimLight = new THREE.DirectionalLight(0xaaaacc, 0.35);
+rimLight.position.set(-4, 2, -3);
+scene.add(rimLight);
+
+// ── Floor ─────────────────────────────────────────────
+const floorGeo = new THREE.PlaneGeometry(12, 12);
+const floorMat = new THREE.MeshStandardMaterial({
+  color: 0x080808, roughness: 1.0, metalness: 0.0
+});
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.05;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// ── Shelf Plank ───────────────────────────────────────
+const shelfMat = new THREE.MeshStandardMaterial({
+  color: 0x0e0e0e, roughness: 0.88, metalness: 0.04
+});
+const plank = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.10, 0.90), shelfMat);
+plank.position.set(0, 0, 0);
+plank.castShadow = true;
+plank.receiveShadow = true;
+scene.add(plank);
+
+// Shelf back wall
+const backWall = new THREE.Mesh(new THREE.BoxGeometry(4.8, 2.4, 0.06), shelfMat);
+backWall.position.set(0, 1.15, -0.46);
+backWall.receiveShadow = true;
+scene.add(backWall);
+
+// Shelf side walls
+[-2.41, 2.41].forEach(x => {
+  const side = new THREE.Mesh(new THREE.BoxGeometry(0.06, 2.4, 0.90), shelfMat);
+  side.position.set(x, 1.15, 0);
+  side.receiveShadow = true;
+  scene.add(side);
+});
+
+// ── Spine Texture ─────────────────────────────────────
+function makeSpineTexture(lines, bg, fg) {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 320;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, 64, 320);
+  // Subtle page-edge lines at top and bottom
+  ctx.fillStyle = fg === '#fff' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  ctx.fillRect(0, 0, 64, 3);
+  ctx.fillRect(0, 317, 64, 3);
+  // Vertical text
+  ctx.save();
+  ctx.translate(32, 310);
+  ctx.rotate(-Math.PI / 2);
+  lines.forEach((line, i) => {
+    ctx.font = i === 0
+      ? 'bold 12px Georgia, serif'
+      : '9px "Courier New", monospace';
+    ctx.fillStyle = fg;
+    ctx.globalAlpha = i === 0 ? 0.9 : 0.55;
+    ctx.fillText(line, 0, i * 14);
+  });
+  ctx.restore();
+  return new THREE.CanvasTexture(c);
+}
+
+// ── Book Configs ──────────────────────────────────────
+// B&W palette (lighter = more prominent)
+const PALETTE = [0x1a1a1a, 0x2e2e2e, 0x444444, 0x666666, 0x888888, 0xbbbbbb, 0xdddddd];
+
+const BOOK_DEFS = [
+  { w: 0.22, h: 1.28, color: 0x222222, lean:  0.02, label: ['—', ''] },
+  { w: 0.19, h: 1.48, color: 0x3a3a3a, lean: -0.03, label: ['—', ''] },
+  { w: 0.26, h: 1.18, color: 0x555555, lean:  0.01, label: ['—', ''] },
+  // Main book — center, pulled forward, near-white
+  { w: 0.28, h: 1.52, color: 0xe0e0e0, lean: 0,
+    label: ['The Mind & the Machine', 'Hafdi'],
+    main: true, zOffset: 0.28
+  },
+  { w: 0.20, h: 1.32, color: 0x444444, lean: -0.02, label: ['—', ''] },
+  { w: 0.24, h: 1.44, color: 0x2a2a2a, lean:  0.03, label: ['—', ''] },
+  { w: 0.18, h: 1.22, color: 0x181818, lean: -0.01, label: ['—', ''] },
+];
+
+// Layout books along the shelf, centered
+const totalW = BOOK_DEFS.reduce((s, b) => s + b.w + 0.045, 0) - 0.045;
+let cursor = -totalW / 2;
+const bookMeshes = [];
+
+BOOK_DEFS.forEach((def, i) => {
+  const cx = cursor + def.w / 2;
+  cursor += def.w + 0.045;
+
+  // Main cover material (with spine texture for main book)
+  let mat;
+  if (def.main) {
+    const spineTex = makeSpineTexture(def.label, '#e0e0e0', '#111');
+    // Multi-material: [right, left, top, bottom, front=spine, back]
+    const coverMat = new THREE.MeshStandardMaterial({ color: def.color, roughness: 0.55, metalness: 0.03 });
+    const spineMat = new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.6, metalness: 0.02 });
+    mat = [
+      coverMat, // right (+x)
+      coverMat, // left  (-x)
+      new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 0.4 }), // top
+      new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.7 }), // bottom
+      spineMat, // front (spine face)
+      coverMat, // back
+    ];
+  } else {
+    const shade = def.color;
+    mat = new THREE.MeshStandardMaterial({ color: shade, roughness: 0.62, metalness: 0.03 });
+  }
+
+  const geo  = new THREE.BoxGeometry(def.w, def.h, 0.62);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(cx, def.h / 2 + 0.10, def.zOffset || 0);
+  mesh.rotation.z = def.lean;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.userData.isMain = !!def.main;
+  scene.add(mesh);
+  bookMeshes.push(mesh);
+
+  // Small accent light on main book
+  if (def.main) {
+    const spot = new THREE.PointLight(0xffffff, 0.5, 2.2);
+    spot.position.set(cx, def.h + 0.10, 0.7);
+    scene.add(spot);
+  }
+});
+
+// ── Floating dust particles ────────────────────────────
+(function buildDust() {
+  const N = 120;
+  const pos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    pos[i*3]   = (Math.random() - 0.5) * 5;
+    pos[i*3+1] = Math.random() * 2.2;
+    pos[i*3+2] = (Math.random() - 0.5) * 1.8;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({
+    color: 0xffffff, size: 0.008, transparent: true, opacity: 0.28, depthWrite: false
+  });
+  scene.add(new THREE.Points(geo, mat));
+})();
+
+// ── Orbit Controls ────────────────────────────────────
+let az = 0, el = 0.22, rad = 3.8;
+const AZ_LIMIT = 0.7;
+let isDragging = false, lastX = 0;
+
+function updateCamera() {
+  az = Math.max(-AZ_LIMIT, Math.min(AZ_LIMIT, az));
+  camera.position.set(
+    rad * Math.sin(az),
+    el,
+    rad * Math.cos(az)
+  );
+  camera.lookAt(0, 0.35, 0);
+}
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true; lastX = e.clientX;
+  canvas.style.cursor = 'grabbing';
+});
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  canvas.style.cursor = 'grab';
+});
+window.addEventListener('mousemove', e => {
+  if (isDragging) {
+    az -= (e.clientX - lastX) * 0.006;
+    lastX = e.clientX;
+    updateCamera();
+  }
+});
+
+// Touch
+let lastTouchX = 0;
+canvas.addEventListener('touchstart', e => {
+  isDragging = true;
+  lastTouchX = e.touches[0].clientX;
+}, { passive: true });
+canvas.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  az -= (e.touches[0].clientX - lastTouchX) * 0.007;
+  lastTouchX = e.touches[0].clientX;
+  updateCamera();
+}, { passive: true });
+
+// Scroll wheel zoom
+canvas.addEventListener('wheel', e => {
+  rad = Math.max(2.2, Math.min(6.0, rad + e.deltaY * 0.004));
+  updateCamera();
+}, { passive: true });
+
+// ── Raycasting (hover) ────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2(-10, -10);
+canvas.addEventListener('mousemove', e => {
+  if (isDragging) return;
+  const rect = canvas.getBoundingClientRect();
+  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(bookMeshes);
+  canvas.style.cursor = hits.length && hits[0].object.userData.isMain ? 'pointer' : 'grab';
+});
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(bookMeshes);
+  if (hits.length && hits[0].object.userData.isMain) {
+    document.querySelector('.info-section').scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
+// ── Resize ────────────────────────────────────────────
+new ResizeObserver(() => {
+  renderer.setSize(W(), H());
+  camera.aspect = W() / H();
+  camera.updateProjectionMatrix();
+}).observe(wrap);
+
+// ── Animation Loop ────────────────────────────────────
+let t = 0;
+// Find main book mesh for subtle float
+const mainMesh = bookMeshes.find(m => m.userData.isMain);
+const mainBaseY = mainMesh ? mainMesh.position.y : 0;
+
+(function loop() {
+  requestAnimationFrame(loop);
+  t += 0.008;
+
+  // Slow auto-drift when idle
+  if (!isDragging) {
+    az += 0.0002;
+    updateCamera();
+  }
+
+  // Subtle main book float
+  if (mainMesh) {
+    mainMesh.position.y = mainBaseY + Math.sin(t * 0.7) * 0.012;
+  }
+
+  renderer.render(scene, camera);
+})();
+</script>
 </body>
 </html>
