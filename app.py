@@ -203,6 +203,27 @@ def parse_bring():
         return jsonify({"result": None, "error": str(e)})
 
 
+@app.route("/robots.txt")
+def robots_txt():
+    txt = "User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n"
+    return txt, 200, {'Content-Type': 'text/plain'}
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    pages = [
+        '/', '/polyfdor', '/matyos', '/polyfdos', '/bring', '/rockets',
+        '/lynos', '/lynostore', '/books', '/books/mind-and-the-machine',
+        '/cookixdb', '/papers/novectDB', '/papers/hafdiConjecture',
+        '/papers/realistic', '/papers/contextOS', '/papers/pizzaSugar',
+        '/papers/fromProbsToEcoSys'
+    ]
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for p in pages:
+        xml += f'  <url><loc>{p}</loc></url>\n'
+    xml += '</urlset>'
+    return xml, 200, {'Content-Type': 'application/xml'}
+
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)
