@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LynOS — 3D Cultural Heritage AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --black:     #0a0a0a;
+  --white:     #ffffff;
+  --gray-100:  #f5f5f5;
+  --gray-200:  #e8e8e8;
+  --gray-400:  #999;
+  --gray-600:  #555;
+  --brand:     #C1175A;
+  --brand-light: #f5e0ea;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--white);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--brand);
+}
+.nav-wordmark {
+  height: 22px; width: auto;
+  display: block;
+  text-decoration: none;
+}
+.nav-back {
+  font-family: var(--font-mono);
+  font-size: 0.78rem; color: var(--gray-400);
+  text-decoration: none; letter-spacing: 0.03em;
+  transition: color .2s;
+}
+.nav-back:hover { color: var(--brand); }
+
+/* ── HERO ── */
+.hero {
+  padding: 80px 2rem 70px;
+  max-width: 860px;
+  margin: 0 auto;
+  border-bottom: 2px solid var(--brand-light);
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 2rem;
+}
+.hero-text { width: 100%; }
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--brand); margin-bottom: 1.4rem;
+}
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 400; line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--black);
+  margin-bottom: 1.4rem;
+}
+.hero-title em { font-style: italic; }
+.hero-sub {
+  font-size: 1.05rem; line-height: 1.75; color: var(--gray-600);
+  max-width: 580px; margin: 0 auto 1.8rem;
+}
+.hero-meta {
+  font-family: var(--font-mono);
+  font-size: 0.73rem; color: var(--gray-400); letter-spacing: 0.04em;
+}
+
+/* ── BODY CONTENT ── */
+.content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+}
+
+.section {
+  padding: 4rem 0 0;
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--brand); margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--brand-light);
+}
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 1.9rem; font-weight: 400;
+  line-height: 1.25; margin-bottom: 1.2rem;
+  color: var(--black);
+}
+.section-body {
+  font-size: 1rem; line-height: 1.8; color: var(--gray-600);
+}
+.section-body p + p { margin-top: 1em; }
+.section-body strong { color: var(--brand); font-weight: 600; }
+
+/* ── FEATURE GRID ── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.feature-card {
+  border: 1px solid var(--brand-light);
+  border-top: 3px solid var(--brand);
+  border-radius: 8px;
+  padding: 1.6rem;
+  background: var(--gray-100);
+}
+.feature-card .fc-num {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; color: var(--brand);
+  letter-spacing: 0.1em; margin-bottom: 0.8rem;
+}
+.feature-card .fc-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem; margin-bottom: 0.6rem;
+  color: var(--black);
+}
+.feature-card .fc-body {
+  font-size: 0.88rem; line-height: 1.65; color: var(--gray-600);
+}
+
+/* ── DEMO BLOCK ── */
+.demo-block {
+  margin-top: 2rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.demo-header {
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: center; gap: 0.7rem;
+}
+.demo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-200); }
+.demo-dot:first-child { background: var(--brand); }
+.demo-filename {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; color: var(--gray-400); letter-spacing: 0.04em;
+}
+.demo-body {
+  padding: 1.6rem;
+  background: var(--gray-100);
+  font-family: var(--font-mono);
+  font-size: 0.82rem; line-height: 1.9; color: var(--gray-600);
+}
+.demo-body .key { color: var(--brand); font-weight: 500; }
+
+/* ── QUOTE ── */
+.pull-quote {
+  margin: 3rem 0;
+  padding: 2rem 2rem 2rem 2.4rem;
+  border-left: 4px solid var(--brand);
+  background: var(--brand-light);
+  border-radius: 0 8px 8px 0;
+}
+.pull-quote p {
+  font-family: var(--font-serif);
+  font-size: 1.5rem; font-style: italic;
+  line-height: 1.5; color: var(--black);
+}
+.pull-quote cite {
+  display: block; margin-top: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem; color: var(--brand);
+  font-style: normal; letter-spacing: 0.06em;
+}
+
+/* ── CREDITS ── */
+.credits {
+  margin-top: 4rem;
+  padding: 2rem;
+  border: 1px solid var(--brand-light);
+  border-left: 4px solid var(--brand);
+  border-radius: 0 8px 8px 0;
+  display: flex; align-items: flex-start; gap: 1.2rem;
+}
+.credits-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem; color: var(--white);
+  letter-spacing: 0.05em;
+}
+.credits-name {
+  font-size: 0.9rem; font-weight: 600; color: var(--black);
+  margin-bottom: 0.2rem;
+}
+.credits-role {
+  font-size: 0.82rem; color: var(--gray-400); line-height: 1.5;
+}
+
+/* ── TAGS ── */
+.tags {
+  margin-top: 3rem;
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.06em;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--brand-light);
+  border-radius: 4px;
+  color: var(--brand);
+  background: var(--brand-light);
+  transition: background .15s, color .15s;
+}
+.tag:hover { background: var(--brand); color: var(--white); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/lynos" style="display:flex;align-items:center;text-decoration:none;">
+    <video src="/static/img/lynos_logo.mp4" autoplay loop muted playsinline
+      style="height:34px;width:auto;display:block;pointer-events:none;"></video>
+  </a>
+  <a class="nav-back" href="/">← Universe</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <video src="/static/img/lynos_logo.mp4" autoplay loop muted playsinline
+    style="width:min(520px,80vw);height:auto;object-fit:contain;display:block;"></video>
+  <div class="hero-text">
+    <div class="hero-eyebrow">Moroccan AI &nbsp;·&nbsp; 3D Cultural Preservation &nbsp;·&nbsp; Made in Morocco</div>
+    <h1 class="hero-title">
+      Bringing <em>Moroccan Artisanat</em><br>to Life in 3D
+    </h1>
+    <p class="hero-sub">
+      LynOS is a 100% Moroccan-developed AI model that transforms product images into fully interactive 3D models — preserving traditional craftsmanship for AR, VR, and the global digital economy.
+    </p>
+    <div class="hero-meta">Ahmed HAFDI &nbsp;&nbsp;·&nbsp;&nbsp; September 5–6, 2025 &nbsp;&nbsp;·&nbsp;&nbsp; Senior R&D Software Engineer</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- WHAT IS LYNS -->
+  <div class="section">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">Static images fail Moroccan artisanat</h2>
+    <div class="section-body">
+      <p>Morocco is home to centuries-old artisanal traditions — intricately designed ceramics, handwoven carpets, masterful metalwork, and woodcarving. Yet on e-commerce platforms, these masterpieces are reduced to flat photographs that fail to convey depth, texture, and cultural essence.</p>
+      <p>Artisans struggle to showcase the true value of their work. Customers miss the immersive experience of exploring Moroccan craftsmanship. Traditional knowledge, passed down through generations, faces extinction as master artisans age and younger generations migrate to cities.</p>
+    </div>
+  </div>
+
+  <div class="pull-quote">
+    <p>"What if every artisan could upload a few photos and instantly generate a professional 3D model of their product?"</p>
+    <cite>— Ahmed HAFDI</cite>
+  </div>
+
+  <!-- WHAT IT DOES -->
+  <div class="section">
+    <div class="section-label">The Solution</div>
+    <h2 class="section-title">LynOS: AI-Powered 3D Reconstruction</h2>
+    <div class="section-body">
+      <p>LynOS — an intelligent system that's easy to remember, easy to use, and designed to empower artisans. Built by Ahmed HAFDI through countless hours of experimentation, coding, and refinement.</p>
+      <p>A simple set of product images is all it takes to generate a highly detailed, fully interactive 3D model.</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="fc-num">01</div>
+        <div class="fc-title">Augmented Reality</div>
+        <div class="fc-body">Customers virtually place artisanat products in their homes before purchasing.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-num">02</div>
+        <div class="fc-title">Virtual Reality</div>
+        <div class="fc-body">Museums, galleries, and cultural hubs create immersive exhibitions of Moroccan heritage.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-num">03</div>
+        <div class="fc-title">E-Commerce Innovation</div>
+        <div class="fc-body">Online stores finally do justice to handcrafted items, improving engagement and trust.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-num">04</div>
+        <div class="fc-title">Digital Preservation</div>
+        <div class="fc-body">Traditional techniques are documented, licensed, and protected for future generations.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- .lynoX FORMAT -->
+  <div class="section">
+    <div class="section-label">Security &amp; IP Protection</div>
+    <h2 class="section-title">The .lynoX File Format</h2>
+    <div class="section-body">
+      <p>The proprietary <strong>.lynoX</strong> extension represents a revolutionary approach to intellectual property protection in the digital heritage space. Unlike standard 3D formats that can be easily copied or modified, .lynoX files incorporate multiple security layers.</p>
+    </div>
+
+    <div class="demo-block">
+      <div class="demo-header">
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <span class="demo-filename">kas_tine.lynoX</span>
+      </div>
+      <div class="demo-body">
+        <span class="key">encryption</span>: AES-256, viewer-locked<br>
+        <span class="key">artifact</span>: "كاس طين" (Kas Tine — clay cup)<br>
+        <span class="key">artisan</span>: &lt;attributed&gt;<br>
+        <span class="key">region</span>: Morocco<br>
+        <span class="key">technique</span>: Hand-thrown, kiln-fired earthenware<br>
+        <span class="key">dimensions</span>: { height: 9.2cm, diameter: 7.8cm }<br>
+        <span class="key">scripts</span>: [ "ar", "ber" ]<br>
+        <span class="key">license</span>: educational + commercial (authorized)<br>
+        <span class="key">drm</span>: enabled
+      </div>
+    </div>
+  </div>
+
+  <!-- LYNOSTORE -->
+  <div class="section">
+    <div class="section-label">Marketplace</div>
+    <h2 class="section-title">LynoStore</h2>
+    <div class="section-body">
+      <p>LynoStore is the digital marketplace where Moroccan artisans sell secure <strong>.lynoX</strong> files of their work — reaching global collectors, museums, and cultural institutions. Every artifact is presented through the <strong>LynOV Viewer</strong>, with its cultural context, Arabic name, artisan credit, and real-world dimensions preserved.</p>
+    </div>
+
+    <div style="margin-top:2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+      <div style="border:1px solid var(--gray-200);border-radius:8px;padding:1.4rem;background:var(--gray-100);">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--brand);margin-bottom:0.6rem;">For Artisans</div>
+        <div style="font-size:0.9rem;font-weight:600;color:var(--black);margin-bottom:0.4rem;">Monetize your craft</div>
+        <div style="font-size:0.83rem;line-height:1.6;color:var(--gray-600);">Upload a few photos → LynOS generates the 3D model → list it on LynoStore in minutes.</div>
+      </div>
+      <div style="border:1px solid var(--gray-200);border-radius:8px;padding:1.4rem;background:var(--gray-100);">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--brand);margin-bottom:0.6rem;">For Buyers</div>
+        <div style="font-size:0.9rem;font-weight:600;color:var(--black);margin-bottom:0.4rem;">Explore in 3D</div>
+        <div style="font-size:0.83rem;line-height:1.6;color:var(--gray-600);">Browse authenticated Moroccan artifacts. Preview in AR, inspect every detail, buy with full cultural context.</div>
+      </div>
+      <div style="border:1px solid var(--gray-200);border-radius:8px;padding:1.4rem;background:var(--gray-100);">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--brand);margin-bottom:0.6rem;">For Institutions</div>
+        <div style="font-size:0.9rem;font-weight:600;color:var(--black);margin-bottom:0.4rem;">License heritage</div>
+        <div style="font-size:0.83rem;line-height:1.6;color:var(--gray-600);">Museums and universities access authentic .lynoX files for research, education, and virtual exhibitions.</div>
+      </div>
+      <div style="border:1px solid var(--gray-200);border-radius:8px;padding:1.4rem;background:var(--gray-100);">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--brand);margin-bottom:0.6rem;">LynOV Viewer</div>
+        <div style="font-size:0.9rem;font-weight:600;color:var(--black);margin-bottom:0.4rem;">Context-first display</div>
+        <div style="font-size:0.83rem;line-height:1.6;color:var(--gray-600);">Arabic &amp; Berber scripts, artisan attribution, historical context, and interactive 3D exploration — all in one secure viewer.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem;border-radius:12px;overflow:hidden;border:1px solid var(--gray-200);background:#000;position:relative;">
+      <video src="/static/img/lynos_lynostore.mp4" controls autoplay loop muted playsinline
+        style="width:100%;display:block;max-height:520px;object-fit:contain;"></video>
+      <div style="position:absolute;top:14px;left:14px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="background:rgba(193,23,90,0.8);backdrop-filter:blur(6px);border-radius:4px;
+          padding:4px 10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.08em;
+          color:#fff;text-transform:uppercase;">LynoStore</span>
+        <span style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);border-radius:4px;
+          padding:4px 10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.08em;
+          color:#fff;text-transform:uppercase;">LynOV Viewer</span>
+        <span style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);border-radius:4px;
+          padding:4px 10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.08em;
+          color:#fff;text-transform:uppercase;">كاس طين</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMOS -->
+  <div class="section">
+    <div class="section-label">Demos</div>
+    <h2 class="section-title">Kas Tine &amp; Qulla</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:1.8rem;">
+
+      <!-- Kas Tine -->
+      <div style="border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;">
+        <div style="background:#000;position:relative;min-height:220px;display:flex;align-items:center;justify-content:center;">
+          <video src="/static/img/lynos_kastine_demo.mp4" autoplay loop muted playsinline
+            style="width:100%;max-height:280px;object-fit:cover;display:block;"></video>
+          <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);
+            border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:0.65rem;
+            letter-spacing:0.08em;color:#fff;text-transform:uppercase;">3D Demo</div>
+        </div>
+        <div style="padding:1.4rem;">
+          <div style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--brand);margin-bottom:0.5rem;">Demo 01</div>
+          <div style="font-size:1.15rem;font-weight:600;color:var(--black);margin-bottom:0.3rem;">كاس طين <span style="font-weight:400;color:var(--gray-400);font-size:0.9rem;">Kas Tine</span></div>
+          <div style="font-size:0.88rem;line-height:1.65;color:var(--gray-600);">Clay cup used for tea, coffee, or traditional drinks. Also called "Fanjan Tine" (فنجان طين) — the first LynOS 3D reconstruction demo.</div>
+        </div>
+      </div>
+
+      <!-- Qulla -->
+      <div style="border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;">
+        <div style="background:#000;position:relative;min-height:220px;display:flex;align-items:center;justify-content:center;">
+          <video src="/static/img/lynos_qulla_demo.mp4" autoplay loop muted playsinline
+            style="width:100%;max-height:280px;object-fit:cover;display:block;"></video>
+          <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);
+            border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:0.65rem;
+            letter-spacing:0.08em;color:#fff;text-transform:uppercase;">3D Demo</div>
+        </div>
+        <div style="padding:1.4rem;">
+          <div style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--brand);margin-bottom:0.5rem;">Demo 02</div>
+          <div style="font-size:1.15rem;font-weight:600;color:var(--black);margin-bottom:0.3rem;">قُلّة <span style="font-weight:400;color:var(--gray-400);font-size:0.9rem;">Qulla / Jarra</span></div>
+          <div style="font-size:0.88rem;line-height:1.65;color:var(--gray-600);">Traditional Moroccan jar for water storage. Regional names vary: "جرّة" (jarr'a) or "قُلّة" depending on the area. Showcases LynOS accuracy on complex vessel forms.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AR Demo -->
+    <div style="margin-top:1.5rem;border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;">
+      <div style="background:#000;position:relative;display:flex;justify-content:center;align-items:center;">
+        <video src="/static/img/lynos_kastine_ar.mp4" controls autoplay loop muted playsinline
+          style="width:100%;max-height:600px;object-fit:contain;display:block;"></video>
+        <div style="position:absolute;top:14px;left:14px;display:flex;gap:8px;">
+          <span style="background:rgba(193,23,90,0.85);backdrop-filter:blur(6px);border-radius:4px;
+            padding:4px 10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.08em;
+            color:#fff;text-transform:uppercase;">AR</span>
+          <span style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);border-radius:4px;
+            padding:4px 10px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.08em;
+            color:#fff;text-transform:uppercase;">كاس طين · Mobile App</span>
+        </div>
+      </div>
+      <div style="padding:1.4rem;">
+        <div style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--brand);margin-bottom:0.5rem;">Augmented Reality</div>
+        <div style="font-size:1.05rem;font-weight:600;color:var(--black);margin-bottom:0.3rem;">كاس طين in your space</div>
+        <div style="font-size:0.88rem;line-height:1.65;color:var(--gray-600);">LynOS 3D model of Kas Tine placed in a real environment via the mobile AR app — customers can see the artifact at true scale before purchasing.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- IMPACT -->
+  <div class="section">
+    <div class="section-label">Vision</div>
+    <h2 class="section-title">The Future of Moroccan Artisanat</h2>
+    <div class="section-body">
+      <p>A global virtual marketplace for Moroccan artisanat. AR-enabled cultural experiences that allow people worldwide to walk through Moroccan souks from their living rooms. A new era where artisans are empowered to showcase their craft globally — not limited by traditional marketing.</p>
+      <p>While LynOS begins with Moroccan artisanat, the platform's architecture allows expansion to other cultural traditions. The combination of AI-powered generation, secure file formats, and cultural-context preservation creates a replicable model for heritage preservation worldwide.</p>
+      <p><strong>LynOS demonstrates that the most powerful applications of AI aren't about replacing human capabilities, but about amplifying and preserving the irreplaceable value of human cultural expression.</strong></p>
+    </div>
+  </div>
+
+  <!-- CREDITS -->
+  <div class="section">
+    <div class="section-label">Creator</div>
+    <div class="credits">
+      <div class="credits-avatar">AH</div>
+      <div>
+        <div class="credits-name">Ahmed HAFDI</div>
+        <div class="credits-role">Senior R&D Software Engineer · Problem Solver<br>Creator of LynOS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAGS -->
+  <div class="tags">
+    <span class="tag">#AI</span>
+    <span class="tag">#3DModeling</span>
+    <span class="tag">#Morocco</span>
+    <span class="tag">#MadeInMorocco</span>
+    <span class="tag">#Artisanat</span>
+    <span class="tag">#Innovation</span>
+    <span class="tag">#AugmentedReality</span>
+    <span class="tag">#VirtualReality</span>
+    <span class="tag">#CulturalHeritage</span>
+    <span class="tag">#DigitalPreservation</span>
+    <span class="tag">#TraditionalCrafts</span>
+  </div>
+
+</div><!-- /content -->
+
+</body>
+</html>

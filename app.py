@@ -61,6 +61,10 @@ def bring_editor():
 def rockets():
     return render_template("rockets.html")
 
+@app.route("/lynos")
+def lynos():
+    return render_template("lynos.html")
+
 @app.route("/cookixdb")
 def cookixdb():
     return render_template("cookixdb.html")
