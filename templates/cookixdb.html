@@ -1320,6 +1320,87 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
     m.position.copy(pos); scene3.add(querySphere3 = m);
   }
 
+  // ── Knowledge Object factory K=(G,T,V,S) ─────────────────────
+  const VR_EPS3 = [1.0, 2.0, 3.5];
+  const SPLIT_THRESH3 = 0.15 * 6.0 * 6.0;
+  const CHIP_HEX3 = [0xFEB763, 0xff8c42, 0x82cfff, 0xc3e88d, 0xc792ea, 0xff6b6b];
+
+  function makeCrumb3(pos) {
+    const V = Array.from({length:8}, ()=>Math.random()*2-1);
+    const vn = Math.sqrt(V.reduce((s,x)=>s+x*x,0)) || 1;
+    const sx=Math.random()*2-1, sy=Math.random()*2-1, sz=Math.random()*2-1;
+    const sn = Math.sqrt(sx*sx+sy*sy+sz*sz) || 1;
+    return { pos, chip:0, V:V.map(x=>x/vn), S:[sx/sn,sy/sn,sz/sn], T:new Array(6).fill(0) };
+  }
+
+  function computeTopoSigs3() {
+    const n = crumbs3.length;
+    if (!n) return;
+    crumbs3.forEach((a,i) => {
+      const t = [];
+      VR_EPS3.forEach(eps => {
+        let nb=0;
+        crumbs3.forEach((b,j)=>{ if(j!==i&&a.pos.distanceTo(b.pos)<=eps)nb++; });
+        let tri=0;
+        for(let j=i+1;j<n;j++){
+          if(a.pos.distanceTo(crumbs3[j].pos)>eps)continue;
+          for(let k=j+1;k<n;k++){
+            if(a.pos.distanceTo(crumbs3[k].pos)<=eps&&crumbs3[j].pos.distanceTo(crumbs3[k].pos)<=eps)tri++;
+          }
+        }
+        t.push(1/(1+nb), tri/Math.max(n,1));
+      });
+      a.T = t;
+    });
+  }
+
+  function noVectDist3(a, b) {
+    const dGeo = a.pos.distanceTo(b.pos) / 12;
+    let tds=0; for(let k=0;k<6;k++){const d=(a.T[k]||0)-(b.T[k]||0);tds+=d*d;}
+    const tvs = Math.exp(-2.5*Math.sqrt(tds));
+    const dot = a.S[0]*b.S[0]+a.S[1]*b.S[1]+a.S[2]*b.S[2];
+    return 0.60*dGeo + 0.25*(1-tvs) + 0.15*(1-Math.abs(dot));
+  }
+
+  function autoSplit3() {
+    chips3.forEach((ch, chipIdx) => {
+      const members = crumbs3.filter(c=>c.chip===chipIdx);
+      if (members.length < 4) return;
+      const varC = members.reduce((s,c)=>s+c.pos.distanceTo(ch.mesh.position)**2,0)/members.length;
+      if (varC <= SPLIT_THRESH3) return;
+      // Flash red
+      ch.mesh.material.emissive = new THREE.Color(0xff2222);
+      ch.mesh.material.emissiveIntensity = 1.2;
+      setTimeout(()=>{
+        ch.mesh.material.emissive = new THREE.Color(CHIP_HEX3[ch.id%CHIP_HEX3.length]);
+        ch.mesh.material.emissiveIntensity = 0.55;
+      }, 1400);
+      // Bisecting seed
+      let maxD=0, seedB=members[0];
+      members.forEach((a,i)=>members.forEach((b,j)=>{
+        if(j<=i)return; const d=a.pos.distanceTo(b.pos); if(d>maxD){maxD=d;seedB=b;}
+      }));
+      const ni = chips3.length;
+      if (ni >= CHIP_HEX3.length) return;
+      const col = CHIP_HEX3[ni];
+      const mat = new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.55,roughness:0.25,metalness:0.15});
+      const mesh = new THREE.Mesh(chipGeo3, mat);
+      mesh.position.copy(seedB.pos);
+      const glow = new THREE.Mesh(new THREE.SphereGeometry(0.42,16,16),
+        new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.10,side:THREE.BackSide}));
+      glow.position.copy(seedB.pos);
+      scene3.add(mesh); scene3.add(glow);
+      chips3.push({mesh, glow, id:ni});
+      for(let it=0;it<3;it++){
+        assignCrumbs3();
+        const sums=chips3.map(()=>({x:0,y:0,z:0,n:0}));
+        crumbs3.forEach(c=>{sums[c.chip].x+=c.pos.x;sums[c.chip].y+=c.pos.y;sums[c.chip].z+=c.pos.z;sums[c.chip].n++;});
+        chips3.forEach((c2,i)=>{if(sums[i].n>0){c2.mesh.position.set(sums[i].x/sums[i].n,sums[i].y/sums[i].n,sums[i].z/sums[i].n);c2.glow.position.copy(c2.mesh.position);}});
+      }
+      assignCrumbs3(); rebuildCloud3(); rebuildEdges3(); updateInfo3();
+    });
+  }
+
   // Orbit control
   let dragging3=false, lx3=0, ly3=0, az3=0.4, el3=0.45, rad3=11;
   function camUpdate3(){
@@ -1376,8 +1457,10 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
     }
     if(action==='bake'){
       for(let i=0;i<12;i++)
-        crumbs3.push({pos:new THREE.Vector3((Math.random()-.5)*7,(Math.random()-.5)*2.5,(Math.random()-.5)*7),chip:0});
-      assignCrumbs3(); rebuildCloud3(); updateInfo3(); return;
+        crumbs3.push(makeCrumb3(
+          new THREE.Vector3((Math.random()-.5)*7,(Math.random()-.5)*2.5,(Math.random()-.5)*7)
+        ));
+      assignCrumbs3(); computeTopoSigs3(); rebuildCloud3(); updateInfo3(); return;
     }
     if(action==='cluster'){
       if(crumbs3.length<2)return;
@@ -1392,16 +1475,31 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
           }
         });
         assignCrumbs3(); rebuildCloud3(); rebuildEdges3(); iter++;
-        if(iter<10)setTimeout(step,85);
+        if(iter<10) setTimeout(step,85);
+        else { autoSplit3(); computeTopoSigs3(); }
       })(); return;
     }
     if(action==='nibble'){
       if(!crumbs3.length)return;
       const q=new THREE.Vector3((Math.random()-.5)*7,(Math.random()-.5)*2.5,(Math.random()-.5)*7);
       placeQuery3(q);
+      // Stage 1: nearest chip (Voronoi, d_geo)
       let nearIdx=0, nearD=Infinity;
       chips3.forEach((c,i)=>{const d=q.distanceTo(c.mesh.position);if(d<nearD){nearD=d;nearIdx=i;}});
-      queryResultIdx3=crumbs3.map((c,i)=>({i,d:q.distanceTo(c.pos)})).sort((a,b)=>a.d-b.d).slice(0,6).map(x=>x.i);
+      // Stage 2+3: rank by composite distance d_NoVectDB
+      const qKO3 = makeCrumb3(q);
+      if(crumbs3.length){ let bt=0,bd=Infinity; crumbs3.forEach((c,i)=>{const d=q.distanceTo(c.pos);if(d<bd){bd=d;bt=i;}}); qKO3.T=[...crumbs3[bt].T]; }
+      let cands3 = crumbs3.map((c,i)=>({i,d:noVectDist3(qKO3,c)}))
+        .filter(x=>crumbs3[x.i].chip===nearIdx).sort((a,b)=>a.d-b.d);
+      if(cands3.length<6){
+        chips3.forEach((_,ci)=>{
+          if(ci===nearIdx)return;
+          crumbs3.map((c,i)=>({i,d:noVectDist3(qKO3,c)}))
+            .filter(x=>crumbs3[x.i].chip===ci).forEach(x=>cands3.push(x));
+        });
+        cands3.sort((a,b)=>a.d-b.d);
+      }
+      queryResultIdx3=cands3.slice(0,6).map(x=>x.i);
       rebuildCloud3();
       document.getElementById('simLastQuery').textContent=`(${q.x.toFixed(1)},${q.y.toFixed(1)},${q.z.toFixed(1)})`;
       document.getElementById('simNearest').textContent=`chip_${String(nearIdx).padStart(2,'0')}`;
@@ -1409,11 +1507,13 @@ jar.<span class="ck">cool_down</span>()              <span class="cm"># alias: .
     }
   };
 
-  // Seed with initial crumbs
+  // Seed with initial crumbs (K=(G,T,V,S))
   initChips3();
   for(let i=0;i<30;i++)
-    crumbs3.push({pos:new THREE.Vector3((Math.random()-.5)*7,(Math.random()-.5)*2.5,(Math.random()-.5)*7),chip:0});
-  assignCrumbs3(); rebuildCloud3(); updateInfo3();
+    crumbs3.push(makeCrumb3(
+      new THREE.Vector3((Math.random()-.5)*7,(Math.random()-.5)*2.5,(Math.random()-.5)*7)
+    ));
+  assignCrumbs3(); computeTopoSigs3(); rebuildCloud3(); updateInfo3();
 })();
 
 /* ── NAV ── */
