@@ -4,6 +4,16 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MatyOS — Proof Assistant Programming Language</title>
+<meta name="description" content="MatyOS — a proof assistant programming language by Ahmed Hafdi for formal verification and mathematical reasoning.">
+<meta name="keywords" content="MatyOS, proof assistant, programming language, formal verification, Ahmed Hafdi, PolyfdoR">
+<meta name="author" content="Ahmed Hafdi">
+<link rel="canonical" href="/matyos">
+<meta property="og:title" content="MatyOS — Proof Assistant Programming Language">
+<meta property="og:description" content="MatyOS — a proof assistant programming language by Ahmed Hafdi for formal verification and mathematical reasoning.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MatyOS — Proof Assistant Programming Language">
+<meta name="twitter:description" content="MatyOS — a proof assistant programming language by Ahmed Hafdi for formal verification and mathematical reasoning.">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
 <style>
@@ -627,6 +637,7 @@ code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-
       <a class="sidebar-link" href="#operators">Operators</a>
       <a class="sidebar-link" href="#control-flow">Control Flow</a>
       <a class="sidebar-link" href="#functions">Functions</a>
+      <a class="sidebar-link" href="#builtins">Builtin Functions</a>
       <a class="sidebar-link" href="#objects">Objects &amp; Arrays</a>
     </div>
     <div class="sidebar-group">
@@ -729,19 +740,30 @@ cd MatyOS</pre>
         <div class="step-card">
           <div class="step-num">2</div>
           <div class="step-body">
-            <h4>Install optional dependencies</h4>
+            <h4>Install (Mac / Linux — one-liner)</h4>
             <div class="code-block-wrap">
-              <pre class="code-block">pip install -r requirements.txt</pre>
+              <pre class="code-block">chmod +x install.sh &amp;&amp; ./install.sh
+<span class="cm"># adds `el` to ~/.local/bin — restart shell after</span></pre>
             </div>
           </div>
         </div>
         <div class="step-card">
           <div class="step-num">3</div>
           <div class="step-body">
+            <h4>Or install via pip (editable)</h4>
+            <div class="code-block-wrap">
+              <pre class="code-block">pip install -e .
+<span class="cm"># pip install -r requirements.txt  (optional extras)</span></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
             <h4>Run a program</h4>
             <div class="code-block-wrap">
-              <pre class="code-block">python -m compiler.main  <span class="cm">// or use el CLI</span>
-el run src/hello_world.el</pre>
+              <pre class="code-block">el run hello_world.el
+<span class="cm"># or: python -m compiler.main</span></pre>
             </div>
           </div>
         </div>
@@ -1019,6 +1041,33 @@ el run src/hello_world.el</pre>
   <span class="kw">show</span> <span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>);         <span class="cm">// 7</span>
   <span class="kw">show</span> <span class="fn">factorial</span>(<span class="num">5</span>);    <span class="cm">// 120</span>
 <span class="op">}</span></pre></div>
+    </section>
+
+    <!-- ══ BUILTIN FUNCTIONS ══════════════════════════════════════ -->
+    <section class="doc-section reveal" id="builtins">
+      <h2 class="section-title">Builtin Functions</h2>
+      <div class="section-body">
+        <p>These functions are available in every El program without any import. They are called like user-defined functions.</p>
+      </div>
+      <table class="cli-table">
+        <thead><tr><th>Call</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>len(s)</td><td>Length of string</td><td>len("hello") → 5</td></tr>
+          <tr><td>upper(s)</td><td>Uppercase string</td><td>upper("hi") → "HI"</td></tr>
+          <tr><td>lower(s)</td><td>Lowercase string</td><td>lower("HI") → "hi"</td></tr>
+          <tr><td>trim(s)</td><td>Strip whitespace</td><td>trim("  hi  ") → "hi"</td></tr>
+          <tr><td>abs(n)</td><td>Absolute value</td><td>abs(-5) → 5</td></tr>
+          <tr><td>sqrt(n)</td><td>Square root</td><td>sqrt(144.0) → 12.0</td></tr>
+          <tr><td>pow(base, exp)</td><td>Power</td><td>pow(2, 10) → 1024</td></tr>
+          <tr><td>mod(a, b)</td><td>Modulo</td><td>mod(17, 5) → 2</td></tr>
+          <tr><td>max(a, b)</td><td>Maximum of two values</td><td>max(3, 7) → 7</td></tr>
+          <tr><td>min(a, b)</td><td>Minimum of two values</td><td>min(3, 7) → 3</td></tr>
+          <tr><td>type_of(v)</td><td>Type name as string</td><td>type_of(42) → "int"</td></tr>
+          <tr><td>is_integer(v)</td><td>Boolean type check</td><td>is_integer(5) → TRUE</td></tr>
+          <tr><td>is_string(v)</td><td>Boolean type check</td><td>is_string("x") → TRUE</td></tr>
+          <tr><td>input(prompt)</td><td>Read user input</td><td>input("Enter: ")</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <!-- ══ OBJECTS ════════════════════════════════════════════════ -->
@@ -1463,6 +1512,8 @@ neural_networks  = "^0.9.1"</pre></div>
               <button class="playground-example-btn" onclick="setElExample('proof')">Proof Demo</button>
               <button class="playground-example-btn" onclick="setElExample('axiomatic')">Axiomatic</button>
               <button class="playground-example-btn" onclick="setElExample('funcs')">Functions</button>
+              <button class="playground-example-btn" onclick="setElExample('builtins')">Builtins</button>
+              <button class="playground-example-btn" onclick="setElExample('fibonacci')">Fibonacci</button>
             </div>
           </div>
         </div>
@@ -1757,7 +1808,9 @@ const elExamples = {
   hello: `ALGORITHM HelloWorld {\n  show "Hello, World!";\n  show "MatyOS v1.0.9";\n}`,
   proof: `ALGORITHM ProofDemo {\n  axiom identity        : true === true;\n  axiom excluded_middle : true or !true;\n\n  theorem simple_theorem : true;\n\n  proof simple_theorem {\n    hypothesis h1 : true;\n    test verify_h1 : h1 : true;\n    QED;\n  }\n\n  show "Theorem proved successfully.";\n}`,
   axiomatic: `ALGORITHM Axiomatic {\n  axiom A1 : true === true;\n  definition D1 : true and true;\n\n  theorem compound : true and true;\n\n  proof compound {\n    hypothesis h1 : true;\n    hypothesis h2 : true;\n    test t1 : h1 : true;\n    test t2 : h2 : true;\n    QED;\n  }\n\n  show "compound theorem proved";\n}`,
-  funcs: `ALGORITHM Functions {\n  function add(a, b : integer) {\n    return a + b;\n  }\n\n  function square(n : integer) {\n    return n * n;\n  }\n\n  show add(3, 4);\n  show square(7);\n}`
+  funcs: `ALGORITHM Functions {\n  function add(a, b : integer) {\n    return a + b;\n  }\n\n  function square(n : integer) {\n    return n * n;\n  }\n\n  show add(3, 4);\n  show square(7);\n}`,
+  builtins: `ALGORITHM Builtins {\n  var msg : string = "  Hello El Language  ";\n  show len(msg);\n  show upper(msg);\n  show lower(msg);\n  show trim(msg);\n  show abs(-42);\n  show sqrt(144.0);\n  show pow(2, 10);\n  show mod(17, 5);\n  show max(3, 7);\n  show min(3, 7);\n  show type_of(msg);\n}`,
+  fibonacci: `ALGORITHM Fibonacci {\n  function fib(n : integer) {\n    if n <= 1 {\n      return n;\n    }\n    return fib(n - 1) + fib(n - 2);\n  }\n\n  var i : integer = 0;\n  while i < 10 do {\n    var f : integer = fib(i);\n    show f;\n    i = i + 1;\n  }\n}`
 };
 function setElExample(name){
   document.getElementById('elEditor').value = elExamples[name] || '';
@@ -2033,6 +2086,8 @@ async function runFp() {
     <button class="playground-example-btn" onclick="fpSetExample('proof')">Proof Demo</button>
     <button class="playground-example-btn" onclick="fpSetExample('axiomatic')">Axiomatic</button>
     <button class="playground-example-btn" onclick="fpSetExample('funcs')">Functions</button>
+    <button class="playground-example-btn" onclick="fpSetExample('builtins')">Builtins</button>
+    <button class="playground-example-btn" onclick="fpSetExample('fibonacci')">Fibonacci</button>
   </div>
   <div class="fp-body">
     <div class="fp-editor-wrap">
