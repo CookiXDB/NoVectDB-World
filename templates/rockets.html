@@ -1,47 +1,1778 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rockets — PolyfdoS</title>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rockets — PolyfdoS Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
+/* ── RESET & ROOT ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: #f5f4f0; color: #111;
-  font-family: 'JetBrains Mono', monospace;
-  height: 100vh; display: flex; flex-direction: column;
+:root {
+  --bg:        #0b0b0f;
+  --panel:     #13131a;
+  --panel2:    #0e0e14;
+  --border:    #232330;
+  --accent:    #3d8eff;
+  --accent2:   #1a4488;
+  --muted:     #4a4a60;
+  --muted2:    #6a6a88;
+  --text:      #c8c8d8;
+  --text2:     #8888a8;
+  --bright:    #e8e8f0;
+  --green:     #3dff8f;
+  --orange:    #ff943d;
+  --red:       #ff4d4d;
+  --yellow:    #ffd93d;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Inter', system-ui, sans-serif;
+  --topbar-h:  46px;
+  --left-w:    255px;
+  --right-w:   275px;
+  --bottom-h:  110px;
+}
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
+body { font-family: var(--sans); color: var(--text); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; }
+
+/* ── SCROLLBARS ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a38; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a50; }
+
+/* ── TOPBAR ─────────────────────────────────────────────────── */
+#topbar {
+  flex: 0 0 var(--topbar-h);
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0; gap: 0; z-index: 100;
+  user-select: none;
+}
+.tb-brand {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 1.2rem; border-right: 1px solid var(--border);
+  height: 100%; text-decoration: none; cursor: pointer;
+  transition: background .15s;
+}
+.tb-brand:hover { background: rgba(61,142,255,0.06); }
+.tb-logo {
+  font-family: var(--mono); font-size: 1rem; color: var(--accent);
+  font-weight: 600; letter-spacing: -0.02em;
+}
+.tb-sub {
+  font-family: var(--mono); font-size: 0.68rem; color: var(--muted2);
+  letter-spacing: 0.06em;
+}
+.tb-sep { width: 1px; height: 100%; background: var(--border); }
+.tb-section { display: flex; align-items: center; gap: 0.35rem; padding: 0 0.9rem; height: 100%; }
+.tb-label {
+  font-family: var(--mono); font-size: 0.58rem; color: var(--muted);
+  letter-spacing: 0.12em; text-transform: uppercase; margin-right: 0.2rem;
+}
+.tb-spacer { flex: 1; }
+.tb-status {
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em;
+  padding: 0 1.2rem; color: var(--green);
+}
+.tb-status.warn { color: var(--orange); }
+.tb-status.bad  { color: var(--red); }
+
+/* Buttons */
+.btn {
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 500;
+  border: 1px solid var(--border); border-radius: 3px;
+  background: #1c1c26; color: var(--text2);
+  padding: 0.28rem 0.7rem; cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+  white-space: nowrap;
+}
+.btn:hover { background: #252535; border-color: #3a3a50; color: var(--text); }
+.btn.active { background: rgba(61,142,255,0.14); border-color: var(--accent); color: var(--accent); }
+.btn.accent {
+  background: rgba(61,142,255,0.18); border-color: var(--accent);
+  color: var(--accent); font-weight: 600;
+}
+.btn.accent:hover { background: rgba(61,142,255,0.28); }
+.btn.launch {
+  background: linear-gradient(135deg, #1a3a6a 0%, #0e2244 100%);
+  border-color: #3d8eff; color: #8ab8ff; font-weight: 600;
+  padding: 0.28rem 1rem;
+}
+.btn.launch:hover { background: linear-gradient(135deg, #2a4a7a 0%, #1a3254 100%); color: #aaccff; }
+.btn.launch.active { background: linear-gradient(135deg, #3d6a24 0%, #244014 100%); border-color: #4dff80; color: #80ff80; }
+.btn.danger { border-color: #552222; color: #ff6666; }
+.btn.danger:hover { background: rgba(255,60,60,0.12); border-color: #ff4444; }
+.btn.sm { font-size: 0.62rem; padding: 0.18rem 0.5rem; }
+.btn.preset { border-color: #3a3248; color: #a888cc; }
+.btn.preset:hover { background: rgba(168,136,204,0.1); border-color: #7a5a9a; color: #c8a8ef; }
+
+/* ── WORKSPACE ──────────────────────────────────────────────── */
+#workspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ── LEFT PANEL ─────────────────────────────────────────────── */
+#left-panel {
+  flex: 0 0 var(--left-w);
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.panel-hdr {
+  padding: 0.55rem 0.9rem 0.4rem;
+  font-family: var(--mono); font-size: 0.56rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-hdr span { color: var(--muted2); }
+
+/* Category tabs */
+#cat-tabs {
+  display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.cat-tab {
+  flex: 1; min-width: 0;
+  font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted2);
+  padding: 0.4rem 0.2rem; text-align: center; cursor: pointer;
+  border-right: 1px solid var(--border);
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cat-tab:last-child { border-right: none; }
+.cat-tab:hover { background: rgba(61,142,255,0.06); color: var(--text); }
+.cat-tab.active { background: rgba(61,142,255,0.1); color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+/* Parts list */
+#parts-list {
+  flex: 1; overflow-y: auto; padding: 0.4rem 0;
+}
+.part-item {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.45rem 0.8rem; cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background .12s, border-color .12s;
+}
+.part-item:hover { background: rgba(61,142,255,0.06); border-left-color: var(--accent); }
+.part-icon {
+  width: 28px; height: 28px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.part-icon svg { width: 22px; height: 22px; }
+.part-info { min-width: 0; flex: 1; }
+.part-name {
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 500;
+  color: var(--bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.part-spec {
+  font-family: var(--mono); font-size: 0.57rem; color: var(--muted2);
+  margin-top: 0.1rem;
+}
+.part-add-btn {
+  width: 18px; height: 18px; border-radius: 2px;
+  background: rgba(61,142,255,0.1); border: 1px solid rgba(61,142,255,0.3);
+  color: var(--accent); font-size: 0.85rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background .12s;
+}
+.part-add-btn:hover { background: rgba(61,142,255,0.25); }
+
+/* Assembly list */
+#assembly-section { flex-shrink: 0; border-top: 1px solid var(--border); }
+.assembly-list {
+  max-height: 180px; overflow-y: auto; padding: 0.3rem 0;
+}
+.asm-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.32rem 0.8rem; cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background .12s, border-color .12s;
+}
+.asm-item:hover { background: rgba(61,142,255,0.06); }
+.asm-item.selected { background: rgba(61,142,255,0.12); border-left-color: var(--accent); }
+.asm-idx {
+  font-family: var(--mono); font-size: 0.56rem; color: var(--muted);
+  width: 14px; flex-shrink: 0; text-align: right;
+}
+.asm-name {
+  font-family: var(--mono); font-size: 0.66rem; color: var(--text);
+  flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.asm-mass {
+  font-family: var(--mono); font-size: 0.58rem; color: var(--muted2);
+}
+
+/* ── CENTER VIEWPORT ────────────────────────────────────────── */
+#viewport-wrap {
+  flex: 1; position: relative; background: var(--bg); overflow: hidden;
+  min-width: 0;
+}
+#three-canvas {
+  position: absolute; inset: 0;
+  width: 100% !important; height: 100% !important;
+  display: block; cursor: grab;
+}
+#three-canvas:active { cursor: grabbing; }
+
+/* View buttons overlay */
+#view-btns {
+  position: absolute; top: 10px; left: 10px;
+  display: flex; gap: 4px; z-index: 10;
+}
+
+/* Scale reference */
+#scale-ref {
+  position: absolute; bottom: 12px; right: 12px;
+  font-family: var(--mono); font-size: 0.6rem; color: var(--muted2);
+  display: flex; align-items: center; gap: 5px; z-index: 10;
+}
+#scale-ref .scale-bar {
+  width: 40px; height: 2px; background: var(--muted);
+  display: inline-block; vertical-align: middle;
+}
+
+/* Axis indicator */
+#axis-indicator {
+  position: absolute; bottom: 12px; left: 12px;
+  width: 60px; height: 60px; z-index: 10;
+}
+#axis-canvas { width: 60px; height: 60px; }
+
+/* ── RIGHT PANEL ────────────────────────────────────────────── */
+#right-panel {
+  flex: 0 0 var(--right-w);
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+#inspector { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#insp-placeholder {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 0.6rem;
+  color: var(--muted); font-family: var(--mono); font-size: 0.65rem;
+  text-align: center; padding: 1.5rem;
+}
+#insp-placeholder .ph-icon { font-size: 2rem; opacity: 0.3; }
+#insp-detail { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+.insp-name {
+  font-family: var(--mono); font-size: 0.95rem; font-weight: 600;
+  color: var(--bright); padding: 0.7rem 0.9rem 0.2rem;
+}
+.insp-desc {
+  font-family: var(--sans); font-size: 0.7rem; color: var(--muted2);
+  padding: 0 0.9rem 0.6rem; line-height: 1.5;
+}
+.insp-sep { height: 1px; background: var(--border); margin: 0 0.9rem; }
+.insp-props { padding: 0.5rem 0.9rem; overflow-y: auto; flex: 1; }
+.prop-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.28rem 0; border-bottom: 1px solid rgba(35,35,48,0.5);
+}
+.prop-label { font-family: var(--mono); font-size: 0.6rem; color: var(--muted2); letter-spacing: 0.06em; }
+.prop-value { font-family: var(--mono); font-size: 0.72rem; color: var(--text); font-weight: 500; }
+.prop-value.accent { color: var(--accent); }
+.prop-value.green { color: var(--green); }
+.insp-actions {
+  display: flex; gap: 0.4rem; padding: 0.7rem 0.9rem;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+
+/* Telemetry panel */
+#telemetry { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+.tele-hdr {
+  padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent);
+}
+.tele-row {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding: 0.5rem 0.9rem; border-bottom: 1px solid rgba(35,35,48,0.5);
+}
+.tele-key { font-family: var(--mono); font-size: 0.6rem; color: var(--muted2); }
+.tele-val {
+  font-family: var(--mono); font-size: 1.0rem; font-weight: 600; color: var(--bright);
+}
+.tele-unit { font-family: var(--mono); font-size: 0.58rem; color: var(--muted2); margin-left: 3px; }
+.event-log { flex: 1; overflow-y: auto; padding: 0.5rem; }
+.event-card {
+  background: var(--panel2); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent); border-radius: 2px;
+  padding: 0.4rem 0.6rem; margin-bottom: 0.4rem;
+}
+.event-card.warn { border-left-color: var(--orange); }
+.event-card.ok { border-left-color: var(--green); }
+.event-card.bad { border-left-color: var(--red); }
+.event-title { font-family: var(--mono); font-size: 0.68rem; font-weight: 600; color: var(--bright); }
+.event-sub { font-family: var(--mono); font-size: 0.58rem; color: var(--muted2); margin-top: 0.1rem; }
+.mission-end {
+  text-align: center; padding: 1rem;
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 700;
+  border-radius: 3px; margin: 0.5rem;
+}
+.mission-end.success { background: rgba(61,255,143,0.08); border: 1px solid rgba(61,255,143,0.3); color: var(--green); }
+.mission-end.fail { background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.3); color: var(--red); }
+
+/* ── BOTTOM STATS BAR ───────────────────────────────────────── */
+#stats-bar {
+  flex: 0 0 var(--bottom-h);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: stretch;
+  user-select: none;
+}
+.stat-cell {
+  flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  -webkit-font-smoothing: antialiased;
+  border-right: 1px solid var(--border);
+  padding: 0.6rem 0.4rem; gap: 0.25rem;
+  min-width: 0;
 }
-.back {
-  position: fixed; top: 1.5rem; left: 2rem;
-  font-size: 0.75rem; color: rgba(0,0,0,0.35);
-  text-decoration: none; letter-spacing: 0.04em;
-  transition: color .2s;
+.stat-cell:last-child { border-right: none; }
+.stat-label {
+  font-family: var(--mono); font-size: 0.54rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); text-align: center;
 }
-.back:hover { color: #111; }
-.label {
-  font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: rgba(0,0,0,0.3); margin-bottom: 2rem;
+.stat-value {
+  font-family: var(--mono); font-size: 1.05rem; font-weight: 600;
+  color: var(--bright); text-align: center; line-height: 1;
 }
-h1 {
-  font-family: 'EB Garamond', serif;
-  font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: 400; font-style: italic;
-  letter-spacing: -0.02em; line-height: 1;
-  margin-bottom: 1.5rem;
-}
-p {
-  font-size: 0.72rem; color: rgba(0,0,0,0.35);
-  letter-spacing: 0.06em; text-align: center;
+.stat-value.green { color: var(--green); }
+.stat-value.orange { color: var(--orange); }
+.stat-value.red { color: var(--red); }
+.stat-unit { font-family: var(--mono); font-size: 0.56rem; color: var(--muted2); text-align: center; }
+.stat-bar-wrap { width: 90%; height: 4px; background: #1a1a24; border-radius: 2px; position: relative; margin-top: 3px; }
+.stat-bar-com { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); top: -2px; transform: translateX(-50%); }
+.stat-bar-cop { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); top: -2px; transform: translateX(-50%); }
+.stat-sep { font-family: var(--mono); font-size: 0.54rem; color: var(--muted); text-align: center; margin-top: 2px; }
+
+/* No-part placeholder */
+.no-asm {
+  font-family: var(--mono); font-size: 0.6rem; color: var(--muted);
+  text-align: center; padding: 0.6rem 0.4rem;
 }
 </style>
 </head>
 <body>
-<a class="back" href="/">← PolyfdoS</a>
-<div class="label">Coming soon</div>
-<h1>Rockets.</h1>
-<p>The simulator is being built.</p>
+
+<!-- ── TOPBAR ───────────────────────────────────────────────── -->
+<div id="topbar">
+  <a href="/" class="tb-brand" title="Back to PolyfdoS">
+    <span class="tb-logo">◈ ROCKETS</span>
+    <span class="tb-sub">/ PolyfdoS</span>
+  </a>
+  <div class="tb-section">
+    <span class="tb-label">Preset</span>
+    <button class="btn preset" id="btn-preset-f9" onclick="loadPreset('falcon9')">Falcon 9</button>
+    <button class="btn sm" id="btn-new" onclick="clearAssembly()">New</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-section">
+    <span class="tb-label">View</span>
+    <button class="btn sm active" id="vbtn-3d"    onclick="setView('3d')">3D pers.</button>
+    <button class="btn sm"        id="vbtn-front" onclick="setView('front')">Front</button>
+    <button class="btn sm"        id="vbtn-side"  onclick="setView('side')">Side</button>
+    <button class="btn sm"        id="vbtn-top"   onclick="setView('top')">Top</button>
+  </div>
+  <div class="tb-spacer"></div>
+  <div id="status-text" class="tb-status">READY TO BUILD</div>
+  <div class="tb-section" style="gap:0.5rem;">
+    <button class="btn accent" id="btn-simulate" onclick="runSimulate()">▶ SIMULATE</button>
+    <button class="btn launch" id="btn-launch"   onclick="startLaunch()">🚀 LAUNCH</button>
+    <button class="btn danger sm" id="btn-stop" style="display:none" onclick="stopSimulation()">⏹ END SIM</button>
+  </div>
+</div>
+
+<!-- ── WORKSPACE ─────────────────────────────────────────────── -->
+<div id="workspace">
+
+  <!-- LEFT PANEL -->
+  <div id="left-panel">
+    <div class="panel-hdr">Parts Library <span>— click to add</span></div>
+    <div id="cat-tabs">
+      <div class="cat-tab active" data-cat="all"          onclick="filterCat(this,'all')">All</div>
+      <div class="cat-tab"        data-cat="aero"         onclick="filterCat(this,'aero')">Aero</div>
+      <div class="cat-tab"        data-cat="structure"    onclick="filterCat(this,'structure')">Struct</div>
+      <div class="cat-tab"        data-cat="propulsion"   onclick="filterCat(this,'propulsion')">Prop</div>
+      <div class="cat-tab"        data-cat="control"      onclick="filterCat(this,'control')">Ctrl</div>
+      <div class="cat-tab"        data-cat="payload"      onclick="filterCat(this,'payload')">Load</div>
+    </div>
+    <div id="parts-list"></div>
+    <div id="assembly-section">
+      <div class="panel-hdr">Assembly Stack <span id="asm-count">— 0 parts</span></div>
+      <div class="assembly-list" id="assembly-list"></div>
+    </div>
+  </div>
+
+  <!-- CENTER VIEWPORT -->
+  <div id="viewport-wrap">
+    <canvas id="three-canvas"></canvas>
+    <div id="view-btns">
+      <button class="btn sm active" id="ovbtn-3d"    onclick="setView('3d')">3D</button>
+      <button class="btn sm"        id="ovbtn-front" onclick="setView('front')">Front</button>
+      <button class="btn sm"        id="ovbtn-side"  onclick="setView('side')">Side</button>
+      <button class="btn sm"        id="ovbtn-top"   onclick="setView('top')">Top</button>
+    </div>
+    <canvas id="axis-canvas" width="60" height="60"></canvas>
+    <div id="scale-ref">
+      <span class="scale-bar"></span>
+      <span id="scale-label">10m</span>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel">
+    <div id="inspector">
+      <div class="panel-hdr">Inspector</div>
+      <div id="insp-placeholder">
+        <div class="ph-icon">⬡</div>
+        <div>Click a part in the<br/>viewport or assembly list</div>
+      </div>
+      <div id="insp-detail">
+        <div class="insp-name" id="id-name">—</div>
+        <div class="insp-desc" id="id-desc">—</div>
+        <div class="insp-sep"></div>
+        <div class="insp-props" id="id-props"></div>
+        <div class="insp-actions">
+          <button class="btn sm" onclick="moveSelected(-1)">↑ Up</button>
+          <button class="btn sm" onclick="moveSelected(1)">↓ Down</button>
+          <div style="flex:1"></div>
+          <button class="btn sm danger" onclick="removeSelected()">✕ Remove</button>
+        </div>
+      </div>
+    </div>
+    <div id="telemetry">
+      <div class="tele-hdr">⬛ TELEMETRY — LIVE</div>
+      <div class="tele-row"><span class="tele-key">ALTITUDE</span><span><span class="tele-val" id="tele-alt">0</span><span class="tele-unit">m</span></span></div>
+      <div class="tele-row"><span class="tele-key">VELOCITY</span><span><span class="tele-val" id="tele-vel">0</span><span class="tele-unit">m/s</span></span></div>
+      <div class="tele-row"><span class="tele-key">ACCEL.</span><span><span class="tele-val" id="tele-acc">0</span><span class="tele-unit">m/s²</span></span></div>
+      <div class="tele-row"><span class="tele-key">ELAPSED</span><span><span class="tele-val" id="tele-time">0</span><span class="tele-unit">s</span></span></div>
+      <div class="tele-row"><span class="tele-key">PROPELLANT</span><span><span class="tele-val" id="tele-mass">—</span><span class="tele-unit">kg</span></span></div>
+      <div class="panel-hdr" style="margin-top:0.3rem">Flight Events</div>
+      <div class="event-log" id="event-log"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── STATS BAR ──────────────────────────────────────────────── -->
+<div id="stats-bar">
+  <div class="stat-cell">
+    <div class="stat-label">Total Mass</div>
+    <div class="stat-value" id="st-total">—</div>
+    <div class="stat-unit">kg</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-label">Dry Mass</div>
+    <div class="stat-value" id="st-dry">—</div>
+    <div class="stat-unit">kg</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-label">Height</div>
+    <div class="stat-value" id="st-height">—</div>
+    <div class="stat-unit">m</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-label">TWR</div>
+    <div class="stat-value" id="st-twr">—</div>
+    <div class="stat-unit">thrust/weight</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-label">ΔV</div>
+    <div class="stat-value" id="st-dv">—</div>
+    <div class="stat-unit">m/s</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-label">Max-Q Alt</div>
+    <div class="stat-value" id="st-maxq">—</div>
+    <div class="stat-unit">km</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-label">Stability</div>
+    <div class="stat-value" id="st-stab">—</div>
+    <div class="stat-unit" id="st-stab-sub">CoM vs CoP</div>
+    <div class="stat-bar-wrap" id="stab-bar">
+      <div class="stat-bar-com" id="stab-com" style="left:50%"></div>
+      <div class="stat-bar-cop" id="stab-cop" style="left:50%"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   PARTS DATABASE
+═══════════════════════════════════════════════════════════════ */
+const PARTS = [
+  {
+    id: 'ogive-nose', name: 'Ogive Nosecone', cat: 'aero',
+    desc: 'Aerodynamic ogive-profile nosecone for supersonic flight.',
+    length: 13.1, diameter: 3.7, mass: 1900, fuelMass: 0,
+    thrust: 0, isp: 0,
+    specLabel: 'L=13.1m  D=3.7m',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><path d="M11 2 Q14 10 14 18 Q11 20 8 18 Q8 10 11 2Z" stroke="#3d8eff" stroke-width="1.3" fill="none"/><line x1="11" y1="18" x2="11" y2="21" stroke="#3d8eff" stroke-width="1.3"/></svg>`
+  },
+  {
+    id: 'fairing', name: 'Payload Fairing', cat: 'aero',
+    desc: 'Bisectable aerodynamic fairing for payload protection.',
+    length: 13.1, diameter: 5.2, mass: 1900, fuelMass: 0,
+    thrust: 0, isp: 0,
+    specLabel: 'L=13.1m  D=5.2m',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><path d="M7 3 Q11 2 15 3 L15 16 Q11 18 7 16 Z" stroke="#3d8eff" stroke-width="1.3" fill="none"/><line x1="11" y1="2" x2="11" y2="18" stroke="#3d8eff" stroke-width="0.8" stroke-dasharray="2,2"/></svg>`
+  },
+  {
+    id: 'dragon', name: 'Dragon Capsule', cat: 'payload',
+    desc: 'Crew/cargo spacecraft capable of propulsive abort and ocean landing.',
+    length: 6.1, diameter: 3.7, mass: 12055, fuelMass: 0,
+    thrust: 0, isp: 0,
+    specLabel: 'L=6.1m  M=12055kg',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><path d="M8 5 L14 5 L15 14 Q11 16 7 14 Z" stroke="#aaa" stroke-width="1.3" fill="none"/><rect x="9.5" y="2" width="3" height="4" stroke="#aaa" stroke-width="1"/></svg>`
+  },
+  {
+    id: 'satellite', name: 'Satellite', cat: 'payload',
+    desc: 'Generic LEO/GEO satellite with deployable solar panels.',
+    length: 3.0, diameter: 2.5, mass: 5000, fuelMass: 0,
+    thrust: 0, isp: 0,
+    specLabel: 'L=3.0m  M=5000kg',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><rect x="8" y="7" width="6" height="8" stroke="#c8a8ef" stroke-width="1.3" fill="none"/><rect x="1" y="9" width="6" height="4" stroke="#c8a8ef" stroke-width="1" fill="none"/><rect x="15" y="9" width="6" height="4" stroke="#c8a8ef" stroke-width="1" fill="none"/></svg>`
+  },
+  {
+    id: 'merlin-vac', name: 'Merlin Vacuum', cat: 'propulsion',
+    desc: 'Vacuum-optimised Merlin engine with large expansion nozzle.',
+    length: 3.0, diameter: 2.4, mass: 490, fuelMass: 0,
+    thrust: 934, isp: 348,
+    specLabel: '934kN  Isp=348s',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><path d="M9 2 L13 2 L16 18 L6 18 Z" stroke="#ff943d" stroke-width="1.3" fill="none"/></svg>`
+  },
+  {
+    id: 'interstage', name: 'Interstage', cat: 'structure',
+    desc: 'Structural adapter connecting first and second stage.',
+    length: 3.5, diameter: 3.7, mass: 1000, fuelMass: 0,
+    thrust: 0, isp: 0,
+    specLabel: 'L=3.5m  D=3.7m',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><rect x="6" y="7" width="10" height="8" stroke="#666" stroke-width="1.3" fill="none"/><line x1="6" y1="7" x2="4" y2="3" stroke="#666" stroke-width="1"/><line x1="16" y1="7" x2="18" y2="3" stroke="#666" stroke-width="1"/></svg>`
+  },
+  {
+    id: 'second-stage', name: 'Second Stage', cat: 'structure',
+    desc: 'Upper stage with LOX/RP-1 propellant tanks.',
+    length: 12.6, diameter: 3.7, mass: 4000, fuelMass: 92670,
+    thrust: 0, isp: 0,
+    specLabel: 'L=12.6m  Fuel=92.7t',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><rect x="7" y="3" width="8" height="16" rx="1" stroke="#3d8eff" stroke-width="1.3" fill="none"/><line x1="7" y1="8" x2="15" y2="8" stroke="#3d8eff" stroke-width="0.8"/></svg>`
+  },
+  {
+    id: 'first-stage', name: 'First Stage', cat: 'structure',
+    desc: 'Large propellant stage with LOX/RP-1, reusable.',
+    length: 42.6, diameter: 3.7, mass: 22200, fuelMass: 395700,
+    thrust: 0, isp: 0,
+    specLabel: 'L=42.6m  Fuel=395.7t',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><rect x="7" y="2" width="8" height="18" rx="1" stroke="#3d8eff" stroke-width="1.3" fill="none"/><line x1="7" y1="7" x2="15" y2="7" stroke="#3d8eff" stroke-width="0.8"/><line x1="7" y1="15" x2="15" y2="15" stroke="#3d8eff" stroke-width="0.8"/></svg>`
+  },
+  {
+    id: 'octaweb', name: 'Octaweb (9× Merlin 1D)', cat: 'propulsion',
+    desc: '9-engine cluster on octagonal mount. 1 center + 8 in ring.',
+    length: 3.5, diameter: 4.5, mass: 4700, fuelMass: 0,
+    thrust: 7607, isp: 282,
+    specLabel: '7607kN  Isp=282s',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="2" stroke="#ff943d" stroke-width="1.2"/><circle cx="11" cy="5"  r="1.2" stroke="#ff943d" stroke-width="1.1"/><circle cx="11" cy="17" r="1.2" stroke="#ff943d" stroke-width="1.1"/><circle cx="5"  cy="11" r="1.2" stroke="#ff943d" stroke-width="1.1"/><circle cx="17" cy="11" r="1.2" stroke="#ff943d" stroke-width="1.1"/><circle cx="6.5" cy="6.5"  r="1.2" stroke="#ff943d" stroke-width="1.1"/><circle cx="15.5" cy="6.5"  r="1.2" stroke="#ff943d" stroke-width="1.1"/><circle cx="6.5" cy="15.5" r="1.2" stroke="#ff943d" stroke-width="1.1"/><circle cx="15.5" cy="15.5" r="1.2" stroke="#ff943d" stroke-width="1.1"/></svg>`
+  },
+  {
+    id: 'grid-fins', name: 'Grid Fins (×4)', cat: 'control',
+    desc: 'Four titanium grid fins for aerodynamic control during reentry.',
+    length: 1.0, diameter: 4.5, mass: 2000, fuelMass: 0,
+    thrust: 0, isp: 0,
+    specLabel: 'L=1.0m  span=4.5m',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><rect x="2" y="8" width="5" height="6" stroke="#888" stroke-width="1.2" fill="none"/><line x1="4" y1="8" x2="4" y2="14" stroke="#888" stroke-width="0.8"/><line x1="2" y1="11" x2="7" y2="11" stroke="#888" stroke-width="0.8"/><rect x="15" y="8" width="5" height="6" stroke="#888" stroke-width="1.2" fill="none"/><line x1="17" y1="8" x2="17" y2="14" stroke="#888" stroke-width="0.8"/><line x1="15" y1="11" x2="20" y2="11" stroke="#888" stroke-width="0.8"/></svg>`
+  },
+  {
+    id: 'landing-legs', name: 'Landing Legs (×4)', cat: 'control',
+    desc: 'Four deployable carbon-fibre landing legs for propulsive touchdown.',
+    length: 2.0, diameter: 4.8, mass: 2100, fuelMass: 0,
+    thrust: 0, isp: 0,
+    specLabel: 'L=2.0m  span=4.8m',
+    icon: `<svg viewBox="0 0 22 22" fill="none"><line x1="11" y1="4" x2="5"  y2="18" stroke="#88aaff" stroke-width="1.3"/><line x1="11" y1="4" x2="17" y2="18" stroke="#88aaff" stroke-width="1.3"/><line x1="11" y1="4" x2="3"  y2="16" stroke="#88aaff" stroke-width="1.3"/><line x1="11" y1="4" x2="19" y2="16" stroke="#88aaff" stroke-width="1.3"/></svg>`
+  }
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL STATE
+═══════════════════════════════════════════════════════════════ */
+let assembly = [];       // array of part IDs (bottom to top)
+let selectedAsmIdx = -1; // which assembly slot is selected
+let trajectory = [];
+let simRunning = false;
+let animFrameId = null;
+let launchMode = false;
+let currentView = '3d';
+
+/* ═══════════════════════════════════════════════════════════════
+   THREE.JS SETUP
+═══════════════════════════════════════════════════════════════ */
+const canvas = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setClearColor(0x0b0b0f, 1);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100000);
+camera.position.set(60, 40, 120);
+camera.lookAt(0, 30, 0);
+
+// Lights
+const ambientLight = new THREE.AmbientLight(0x223355, 0.6);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xddeeff, 1.2);
+dirLight.position.set(80, 120, 60);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+const rimLight = new THREE.DirectionalLight(0x334466, 0.4);
+rimLight.position.set(-80, 40, -60);
+scene.add(rimLight);
+
+// Engine glow (launch only)
+const engineLight = new THREE.PointLight(0xff6622, 0, 30);
+engineLight.position.set(0, -5, 0);
+scene.add(engineLight);
+
+// Grid floor
+const gridHelper = new THREE.GridHelper(500, 100, 0x1a2a44, 0x121a2a);
+gridHelper.position.y = 0;
+scene.add(gridHelper);
+
+// Rocket group
+const rocketGroup = new THREE.Group();
+scene.add(rocketGroup);
+
+/* ── MATERIALS ──────────────────────────────────────────────── */
+const MAT = {
+  white: new THREE.MeshStandardMaterial({ color: 0xe8e8ea, metalness: 0.55, roughness: 0.35 }),
+  interstage: new THREE.MeshStandardMaterial({ color: 0x181820, metalness: 0.7, roughness: 0.3 }),
+  engine: new THREE.MeshStandardMaterial({ color: 0x8a8a98, metalness: 0.88, roughness: 0.15 }),
+  gridFin: new THREE.MeshStandardMaterial({ color: 0x151518, metalness: 0.72, roughness: 0.28 }),
+  dark: new THREE.MeshStandardMaterial({ color: 0x202028, metalness: 0.6, roughness: 0.4 }),
+  dragon: new THREE.MeshStandardMaterial({ color: 0xccccdd, metalness: 0.5, roughness: 0.4 }),
+  solar: new THREE.MeshStandardMaterial({ color: 0x1a2a5a, metalness: 0.3, roughness: 0.6, side: THREE.DoubleSide }),
+  leg: new THREE.MeshStandardMaterial({ color: 0x8898b8, metalness: 0.7, roughness: 0.3 })
+};
+
+function selectedMat(base) {
+  const m = base.clone();
+  m.emissive = new THREE.Color(0x1a4488);
+  m.emissiveIntensity = 0.35;
+  return m;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GEOMETRY BUILDERS
+═══════════════════════════════════════════════════════════════ */
+
+// Ogive nosecone
+function buildNosecone(length, radius) {
+  const pts = [];
+  const segs = 32;
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs;
+    // ogive curve: r = R * sqrt(1 - (y/L)^2) scaled
+    const y = t * length;
+    const r = radius * Math.sqrt(1 - Math.pow((y - length) / length, 2));
+    pts.push(new THREE.Vector2(r, y));
+  }
+  const geo = new THREE.LatheGeometry(pts, 48);
+  return geo;
+}
+
+// Body cylinder — base at y=0, top at y=length
+function buildBody(length, radius) {
+  const geo = new THREE.CylinderGeometry(radius, radius, length, 48, 1);
+  const mesh = new THREE.Mesh(geo, MAT.white);
+  mesh.position.y = length / 2;
+  return mesh;
+}
+
+// Nozzle bell for single Merlin
+function buildNozzle(throatR, exitR, length) {
+  const pts = [];
+  const segs = 20;
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs;
+    // bell profile: throat at top, exit at bottom
+    const y = (1 - t) * length;
+    const r = throatR + (exitR - throatR) * (t * t);
+    pts.push(new THREE.Vector2(r, y));
+  }
+  return new THREE.LatheGeometry(pts, 24);
+}
+
+// Octaweb cluster (9 engines)
+function buildOctaweb(totalLength, outerR) {
+  const group = new THREE.Group();
+
+  // Mount plate
+  const plateGeo = new THREE.CylinderGeometry(outerR * 0.98, outerR * 0.98, 0.4, 48);
+  const plate = new THREE.Mesh(plateGeo, MAT.engine);
+  plate.position.y = totalLength - 0.2;
+  group.add(plate);
+
+  // Engine nozzle geometry
+  const nozzleGeo = buildNozzle(0.28, 0.88, totalLength * 0.75);
+
+  const addEngine = (x, z) => {
+    const m = new THREE.Mesh(nozzleGeo, MAT.engine);
+    m.position.set(x, 0, z);
+    group.add(m);
+  };
+
+  // 1 center
+  addEngine(0, 0);
+  // 8 ring at r=1.2m
+  const ringR = 1.2;
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    addEngine(Math.cos(angle) * ringR, Math.sin(angle) * ringR);
+  }
+
+  return group;
+}
+
+// Merlin vacuum (single large nozzle)
+function buildMerlinVac(length, radius) {
+  const group = new THREE.Group();
+  const nozzleGeo = buildNozzle(0.22, radius * 0.92, length);
+  const nozzle = new THREE.Mesh(nozzleGeo, MAT.engine);
+  group.add(nozzle);
+  return group;
+}
+
+// Grid fin (one fin as frame with inner grid)
+function buildGridFin() {
+  const group = new THREE.Group();
+  const w = 1.2, h = 1.0, d = 0.06;
+  // outer frame
+  const frameMat = MAT.gridFin;
+  const top   = new THREE.Mesh(new THREE.BoxGeometry(w, d, d), frameMat);
+  top.position.set(0, h/2, 0); group.add(top);
+  const bot   = new THREE.Mesh(new THREE.BoxGeometry(w, d, d), frameMat);
+  bot.position.set(0, -h/2, 0); group.add(bot);
+  const lft   = new THREE.Mesh(new THREE.BoxGeometry(d, h, d), frameMat);
+  lft.position.set(-w/2, 0, 0); group.add(lft);
+  const rgt   = new THREE.Mesh(new THREE.BoxGeometry(d, h, d), frameMat);
+  rgt.position.set(w/2, 0, 0); group.add(rgt);
+  // inner grid
+  const cols = 3, rows = 2;
+  for (let c = 1; c < cols; c++) {
+    const x = -w/2 + c * (w/cols);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(d*0.7, h, d*0.7), frameMat);
+    m.position.set(x, 0, 0); group.add(m);
+  }
+  for (let r = 1; r < rows; r++) {
+    const y = -h/2 + r * (h/rows);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, d*0.7, d*0.7), frameMat);
+    m.position.set(0, y, 0); group.add(m);
+  }
+  return group;
+}
+
+// 4x grid fins arranged around body
+function buildGridFins(mountY, bodyR) {
+  const group = new THREE.Group();
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
+    const fin = buildGridFin();
+    fin.position.set(
+      Math.cos(angle) * (bodyR + 0.65),
+      0,
+      Math.sin(angle) * (bodyR + 0.65)
+    );
+    fin.rotation.y = angle;
+    group.add(fin);
+  }
+  group.position.y = mountY;
+  return group;
+}
+
+// Landing leg (one leg as strut)
+function buildLandingLeg() {
+  const group = new THREE.Group();
+  // Main strut
+  const strutLen = 5.5;
+  const strutGeo = new THREE.CylinderGeometry(0.07, 0.07, strutLen, 8);
+  const strut = new THREE.Mesh(strutGeo, MAT.leg);
+  strut.rotation.z = Math.PI / 5;
+  strut.position.set(1.6, -strutLen * Math.cos(Math.PI/5) / 2, 0);
+  group.add(strut);
+  // Support brace
+  const braceGeo = new THREE.CylinderGeometry(0.05, 0.05, 3.5, 8);
+  const brace = new THREE.Mesh(braceGeo, MAT.leg);
+  brace.rotation.z = Math.PI / 3;
+  brace.position.set(0.9, -1.4, 0);
+  group.add(brace);
+  // Foot pad
+  const padGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.12, 12);
+  const pad = new THREE.Mesh(padGeo, MAT.leg);
+  pad.position.set(3.1, -strutLen * Math.cos(Math.PI/5) + 0.1, 0);
+  group.add(pad);
+  return group;
+}
+
+// 4x landing legs
+function buildLandingLegs(mountY, bodyR) {
+  const group = new THREE.Group();
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2;
+    const leg = buildLandingLeg();
+    leg.rotation.y = angle;
+    group.add(leg);
+  }
+  group.position.y = mountY;
+  return group;
+}
+
+// Dragon capsule
+function buildDragon(length, radius) {
+  const group = new THREE.Group();
+  // Main truncated cone
+  const coneGeo = new THREE.CylinderGeometry(radius * 0.75, radius, length * 0.8, 40);
+  const cone = new THREE.Mesh(coneGeo, MAT.dragon);
+  cone.position.y = length * 0.4;
+  group.add(cone);
+  // Nose cylinder
+  const noseGeo = new THREE.CylinderGeometry(radius * 0.4, radius * 0.75, length * 0.25, 32);
+  const nose = new THREE.Mesh(noseGeo, MAT.dragon);
+  nose.position.y = length * 0.875;
+  group.add(nose);
+  // Escape tower
+  const towerGeo = new THREE.CylinderGeometry(0.05, 0.05, length * 0.35, 8);
+  const tower = new THREE.Mesh(towerGeo, MAT.engine);
+  tower.position.y = length + length * 0.175;
+  group.add(tower);
+  // Top cap
+  const capGeo = new THREE.SphereGeometry(0.3, 12, 8, 0, Math.PI*2, 0, Math.PI/2);
+  const cap = new THREE.Mesh(capGeo, MAT.engine);
+  cap.position.y = length + length * 0.35;
+  group.add(cap);
+  return group;
+}
+
+// Satellite
+function buildSatellite(length, radius) {
+  const group = new THREE.Group();
+  // Main body
+  const bodyGeo = new THREE.BoxGeometry(radius * 1.2, length, radius * 1.2);
+  const body = new THREE.Mesh(bodyGeo, MAT.white);
+  body.position.y = length / 2;
+  group.add(body);
+  // Solar panels
+  const panelW = 3.5, panelH = 1.2, panelD = 0.04;
+  const panelGeo = new THREE.BoxGeometry(panelW, panelH, panelD);
+  const panelL = new THREE.Mesh(panelGeo, MAT.solar);
+  panelL.position.set(-radius * 0.6 - panelW / 2, length / 2, 0);
+  group.add(panelL);
+  const panelR = new THREE.Mesh(panelGeo, MAT.solar);
+  panelR.position.set(radius * 0.6 + panelW / 2, length / 2, 0);
+  group.add(panelR);
+  return group;
+}
+
+// Payload fairing
+function buildFairing(length, radius) {
+  const pts = [];
+  const segs = 28;
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs;
+    const y = t * length;
+    const r = radius * Math.sqrt(1 - Math.pow((y - length) / length, 2));
+    pts.push(new THREE.Vector2(r, y));
+  }
+  const geo = new THREE.LatheGeometry(pts, 48);
+  const mesh = new THREE.Mesh(geo, MAT.white);
+  // seam line
+  const seamPts = [];
+  for (let i = 0; i <= 20; i++) {
+    const t = i / 20;
+    seamPts.push(new THREE.Vector3(radius * 0.01, t * length, 0));
+  }
+  const seamGeo = new THREE.BufferGeometry().setFromPoints(seamPts);
+  const seam = new THREE.Line(seamGeo, new THREE.LineBasicMaterial({ color: 0x444455 }));
+  const group = new THREE.Group();
+  group.add(mesh, seam);
+  return group;
+}
+
+// Interstage adapter
+function buildInterstage(length, radius) {
+  const group = new THREE.Group();
+  const geo = new THREE.CylinderGeometry(radius, radius, length, 48);
+  const mesh = new THREE.Mesh(geo, MAT.interstage);
+  mesh.position.y = length / 2;
+  group.add(mesh);
+  // ring details
+  const ringGeo = new THREE.TorusGeometry(radius + 0.05, 0.05, 8, 48);
+  const ring1 = new THREE.Mesh(ringGeo, MAT.engine);
+  ring1.rotation.x = Math.PI / 2;
+  ring1.position.y = 0.15;
+  group.add(ring1);
+  const ring2 = ring1.clone();
+  ring2.position.y = length - 0.15;
+  group.add(ring2);
+  return group;
+}
+
+// Generic body tube (first stage, second stage)
+function buildBodyTube(length, radius, mat) {
+  const group = new THREE.Group();
+  const geo = new THREE.CylinderGeometry(radius, radius, length, 48, 1);
+  const mesh = new THREE.Mesh(geo, mat || MAT.white);
+  mesh.position.y = length / 2;
+  group.add(mesh);
+  // decorative ring
+  const ringGeo = new THREE.TorusGeometry(radius + 0.04, 0.04, 6, 48);
+  const ring = new THREE.Mesh(ringGeo, MAT.engine);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = length * 0.15;
+  group.add(ring);
+  const ring2 = ring.clone();
+  ring2.position.y = length * 0.85;
+  group.add(ring2);
+  return group;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PART → THREE.JS MESH BUILDER
+═══════════════════════════════════════════════════════════════ */
+function buildPartMesh(part) {
+  const L = part.length;
+  const R = part.diameter / 2;
+  let mesh;
+
+  switch (part.id) {
+    case 'ogive-nose': {
+      const geo = buildNosecone(L, R);
+      mesh = new THREE.Mesh(geo, MAT.white);
+      break;
+    }
+    case 'fairing': {
+      mesh = buildFairing(L, R);
+      break;
+    }
+    case 'dragon': {
+      mesh = buildDragon(L, R);
+      break;
+    }
+    case 'satellite': {
+      mesh = buildSatellite(L, R);
+      break;
+    }
+    case 'merlin-vac': {
+      mesh = buildMerlinVac(L, R);
+      break;
+    }
+    case 'interstage': {
+      mesh = buildInterstage(L, R);
+      break;
+    }
+    case 'second-stage': {
+      mesh = buildBodyTube(L, R, MAT.white);
+      break;
+    }
+    case 'first-stage': {
+      mesh = buildBodyTube(L, R, MAT.white);
+      break;
+    }
+    case 'octaweb': {
+      mesh = buildOctaweb(L, R);
+      break;
+    }
+    case 'grid-fins': {
+      // Zero-height reference group; fins added at mount
+      mesh = new THREE.Group();
+      const fins = buildGridFins(0.5, 1.85);
+      mesh.add(fins);
+      break;
+    }
+    case 'landing-legs': {
+      mesh = new THREE.Group();
+      const legs = buildLandingLegs(1.5, 1.85);
+      mesh.add(legs);
+      break;
+    }
+    default: {
+      const geo = new THREE.CylinderGeometry(R, R, L, 32);
+      mesh = new THREE.Mesh(geo, MAT.white);
+      mesh.position.y = L / 2;
+    }
+  }
+
+  mesh.userData.partId = part.id;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  if (mesh.children) mesh.children.forEach(c => { c.castShadow = true; });
+  return mesh;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ASSEMBLY SYSTEM
+═══════════════════════════════════════════════════════════════ */
+let meshes = []; // parallel array to assembly
+
+function getPartById(id) { return PARTS.find(p => p.id === id); }
+
+function rebuildRocket() {
+  // Clear
+  while (rocketGroup.children.length > 0) rocketGroup.remove(rocketGroup.children[0]);
+  meshes = [];
+
+  let y = 0;
+  for (let i = 0; i < assembly.length; i++) {
+    const part = getPartById(assembly[i]);
+    if (!part) continue;
+    const mesh = buildPartMesh(part);
+    mesh.position.y = y;
+    rocketGroup.add(mesh);
+    meshes.push(mesh);
+    y += part.length;
+  }
+
+  // Highlight selected
+  if (selectedAsmIdx >= 0 && selectedAsmIdx < meshes.length) {
+    applySelectionHighlight(meshes[selectedAsmIdx], true);
+  }
+
+  updateStats();
+  renderAssemblyList();
+}
+
+function applySelectionHighlight(obj, on) {
+  obj.traverse(child => {
+    if (child.isMesh) {
+      if (on) {
+        if (!child.userData._origMat) child.userData._origMat = child.material;
+        child.material = selectedMat(child.material);
+      } else {
+        if (child.userData._origMat) {
+          child.material = child.userData._origMat;
+          child.userData._origMat = null;
+        }
+      }
+    }
+  });
+}
+
+function addPart(id) {
+  assembly.push(id);
+  rebuildRocket();
+  selectedAsmIdx = assembly.length - 1;
+  showInspector(selectedAsmIdx);
+  renderAssemblyList();
+}
+
+function selectAssembly(idx) {
+  if (selectedAsmIdx >= 0 && selectedAsmIdx < meshes.length) {
+    applySelectionHighlight(meshes[selectedAsmIdx], false);
+  }
+  selectedAsmIdx = idx;
+  if (idx >= 0 && idx < meshes.length) {
+    applySelectionHighlight(meshes[idx], true);
+    showInspector(idx);
+  } else {
+    showInspector(-1);
+  }
+  renderAssemblyList();
+}
+
+function moveSelected(dir) {
+  const i = selectedAsmIdx;
+  const j = i + dir;
+  if (j < 0 || j >= assembly.length) return;
+  [assembly[i], assembly[j]] = [assembly[j], assembly[i]];
+  selectedAsmIdx = j;
+  rebuildRocket();
+  showInspector(j);
+}
+
+function removeSelected() {
+  if (selectedAsmIdx < 0 || selectedAsmIdx >= assembly.length) return;
+  assembly.splice(selectedAsmIdx, 1);
+  selectedAsmIdx = Math.min(selectedAsmIdx, assembly.length - 1);
+  rebuildRocket();
+  showInspector(selectedAsmIdx);
+}
+
+function clearAssembly() {
+  assembly = [];
+  selectedAsmIdx = -1;
+  rebuildRocket();
+  showInspector(-1);
+  setStatus('READY TO BUILD', '');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FALCON 9 PRESET
+═══════════════════════════════════════════════════════════════ */
+function loadPreset(name) {
+  if (name === 'falcon9') {
+    assembly = [
+      'landing-legs',
+      'octaweb',
+      'grid-fins',
+      'first-stage',
+      'interstage',
+      'second-stage',
+      'merlin-vac',
+      'ogive-nose'
+    ];
+    selectedAsmIdx = -1;
+    rebuildRocket();
+    showInspector(-1);
+
+    // Frame the rocket
+    const totalH = assembly.reduce((s, id) => s + (getPartById(id)?.length || 0), 0);
+    const target = new THREE.Vector3(0, totalH / 2, 0);
+    animCameraTo(new THREE.Vector3(60, totalH * 0.5, 130), target, 1.0);
+    setStatus('FALCON 9 LOADED', '');
+    setView('3d');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INSPECTOR PANEL
+═══════════════════════════════════════════════════════════════ */
+function showInspector(idx) {
+  const placeholder = document.getElementById('insp-placeholder');
+  const detail = document.getElementById('insp-detail');
+  if (idx < 0 || idx >= assembly.length) {
+    placeholder.style.display = 'flex';
+    detail.style.display = 'none';
+    return;
+  }
+  const part = getPartById(assembly[idx]);
+  if (!part) return;
+  placeholder.style.display = 'none';
+  detail.style.display = 'flex';
+  document.getElementById('id-name').textContent = part.name;
+  document.getElementById('id-desc').textContent = part.desc;
+  const props = document.getElementById('id-props');
+  const rows = [
+    ['Length', `${part.length} m`],
+    ['Diameter', `${part.diameter} m`],
+    ['Dry Mass', `${part.mass.toLocaleString()} kg`],
+    ...(part.fuelMass > 0 ? [['Fuel Mass', `${part.fuelMass.toLocaleString()} kg`]] : []),
+    ...(part.thrust > 0 ? [['Thrust', `${part.thrust.toLocaleString()} kN`]] : []),
+    ...(part.isp > 0 ? [['Isp (vac)', `${part.isp} s`]] : []),
+    ['Category', part.cat],
+    ['Stack Pos', `${idx + 1} / ${assembly.length}`]
+  ];
+  props.innerHTML = rows.map(([k, v]) =>
+    `<div class="prop-row"><span class="prop-label">${k}</span><span class="prop-value">${v}</span></div>`
+  ).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ASSEMBLY LIST RENDER
+═══════════════════════════════════════════════════════════════ */
+function renderAssemblyList() {
+  const el = document.getElementById('assembly-list');
+  document.getElementById('asm-count').textContent = `— ${assembly.length} parts`;
+  if (assembly.length === 0) {
+    el.innerHTML = '<div class="no-asm">No parts added yet</div>';
+    return;
+  }
+  // Show top-to-bottom (reverse display)
+  el.innerHTML = [...assembly].reverse().map((id, ri) => {
+    const i = assembly.length - 1 - ri;
+    const part = getPartById(id);
+    if (!part) return '';
+    const sel = i === selectedAsmIdx ? 'selected' : '';
+    return `<div class="asm-item ${sel}" onclick="selectAssembly(${i})">
+      <span class="asm-idx">${i+1}</span>
+      <span class="asm-name">${part.name}</span>
+      <span class="asm-mass">${(part.mass/1000).toFixed(1)}t</span>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PARTS LIBRARY RENDER
+═══════════════════════════════════════════════════════════════ */
+function filterCat(tab, cat) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  renderPartsList(cat);
+}
+
+function renderPartsList(cat = 'all') {
+  const list = document.getElementById('parts-list');
+  const filtered = cat === 'all' ? PARTS : PARTS.filter(p => p.cat === cat);
+  list.innerHTML = filtered.map(p => `
+    <div class="part-item" onclick="addPart('${p.id}')">
+      <div class="part-icon">${p.icon}</div>
+      <div class="part-info">
+        <div class="part-name">${p.name}</div>
+        <div class="part-spec">${p.specLabel}</div>
+      </div>
+      <div class="part-add-btn">+</div>
+    </div>
+  `).join('');
+}
+
+renderPartsList('all');
+
+/* ═══════════════════════════════════════════════════════════════
+   STATS COMPUTATION
+═══════════════════════════════════════════════════════════════ */
+function computeStats() {
+  if (assembly.length === 0) return null;
+  const parts = assembly.map(id => getPartById(id));
+  const dryMass   = parts.reduce((s, p) => s + p.mass, 0);
+  const fuelMass  = parts.reduce((s, p) => s + p.fuelMass, 0);
+  const totalMass = dryMass + fuelMass;
+  const height    = parts.reduce((s, p) => s + p.length, 0);
+
+  // Effective ISP from engine parts
+  const engines = parts.filter(p => p.thrust > 0);
+  const totalThrust = engines.reduce((s, p) => s + p.thrust, 0); // kN
+  const weightedIsp = engines.length > 0
+    ? engines.reduce((s, p) => s + p.thrust * p.isp, 0) / Math.max(totalThrust, 1)
+    : 0;
+
+  const TWR = (totalThrust * 1000) / (totalMass * 9.81);
+  const dv  = weightedIsp > 0 && fuelMass > 0
+    ? weightedIsp * 9.81 * Math.log(totalMass / dryMass)
+    : 0;
+
+  // CoM: mass-weighted center along Y
+  let com = 0;
+  let yBottom = 0;
+  for (const p of parts) {
+    com += (yBottom + p.length / 2) * (p.mass + p.fuelMass);
+    yBottom += p.length;
+  }
+  com /= totalMass;
+
+  // CoP: area-weighted center (approximate — use cross-section area × length)
+  let cop = 0;
+  let totalArea = 0;
+  yBottom = 0;
+  for (const p of parts) {
+    const area = Math.PI * Math.pow(p.diameter / 2, 2);
+    cop += (yBottom + p.length / 2) * area;
+    totalArea += area;
+    yBottom += p.length;
+  }
+  cop /= totalArea;
+
+  const stability = com - cop; // positive = stable (CoP below CoM)
+  const comFrac = Math.min(Math.max(com / height, 0), 1);
+  const copFrac = Math.min(Math.max(cop / height, 0), 1);
+
+  return { dryMass, fuelMass, totalMass, height, TWR, totalThrust, weightedIsp, dv, com, cop, stability, comFrac, copFrac };
+}
+
+function updateStats() {
+  const st = computeStats();
+  if (!st) {
+    ['st-total','st-dry','st-height','st-twr','st-dv','st-maxq','st-stab'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
+    return;
+  }
+  document.getElementById('st-total').textContent  = Math.round(st.totalMass).toLocaleString();
+  document.getElementById('st-dry').textContent    = Math.round(st.dryMass).toLocaleString();
+  document.getElementById('st-height').textContent = st.height.toFixed(1);
+  const twrEl = document.getElementById('st-twr');
+  twrEl.textContent = st.TWR.toFixed(2);
+  twrEl.className = 'stat-value ' + (st.TWR >= 1.3 ? 'green' : st.TWR >= 0.8 ? 'orange' : 'red');
+  document.getElementById('st-dv').textContent = st.dv > 0 ? Math.round(st.dv).toLocaleString() : '—';
+  document.getElementById('st-maxq').textContent = '—';
+  document.getElementById('st-stab').textContent = Math.abs(st.stability).toFixed(1) + 'm';
+
+  // CoM/CoP indicator
+  document.getElementById('stab-com').style.left = (st.comFrac * 100).toFixed(1) + '%';
+  document.getElementById('stab-cop').style.left = (st.copFrac * 100).toFixed(1) + '%';
+  const stabEl = document.getElementById('st-stab-sub');
+  stabEl.textContent = st.stability > 0 ? 'stable ↑' : 'UNSTABLE ↓';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PHYSICS SIMULATION
+═══════════════════════════════════════════════════════════════ */
+function computeTrajectory() {
+  const st = computeStats();
+  if (!st || st.totalThrust <= 0) return null;
+
+  const dt = 0.1;
+  let t = 0, h = 0, v = 0, mass = st.totalMass;
+  const burnMass = st.fuelMass;
+  let burnRemaining = burnMass;
+  const thrust_N = st.totalThrust * 1000;
+  const mdot = thrust_N / (st.weightedIsp * 9.81);
+  const D = 3.7; // reference diameter (first stage)
+  const Cd = 0.3;
+  const A = Math.PI * Math.pow(D / 2, 2);
+  const records = [];
+  let maxQ = 0, maxQAlt = 0;
+  let meco = false, mecoT = 0, mecoH = 0;
+
+  while (t < 1200 && h >= 0) {
+    const rho = 1.225 * Math.exp(-h / 8500);
+    const q = 0.5 * rho * v * v;
+    const drag = q * Cd * A;
+    if (q > maxQ) { maxQ = q; maxQAlt = h; }
+    const g = 9.81 * Math.pow(6371000 / (6371000 + h), 2);
+    const burning = burnRemaining > 0;
+    const F = burning ? thrust_N : 0;
+    if (burning) {
+      const dm = mdot * dt;
+      if (dm >= burnRemaining) {
+        mass -= burnRemaining;
+        burnRemaining = 0;
+        if (!meco) { meco = true; mecoT = t; mecoH = h; }
+      } else {
+        mass -= dm;
+        burnRemaining -= dm;
+      }
+    }
+    const a = (F - drag * Math.sign(v) - mass * g) / mass;
+    v += a * dt;
+    h += v * dt;
+    if (h < 0) h = 0;
+    records.push({ t: Math.round(t * 10) / 10, h, v, a, mass, burning });
+    t += dt;
+    if (h <= 0 && t > 5) break;
+  }
+
+  return { records, maxQAlt, maxQ, mecoT, mecoH };
+}
+
+function runSimulate() {
+  if (assembly.length === 0) { alert('Add parts first!'); return; }
+  const st = computeStats();
+  if (!st) return;
+  if (st.TWR < 1.0) {
+    setStatus('TWR < 1.0 — CANNOT LAUNCH', 'bad');
+    return;
+  }
+  const sim = computeTrajectory();
+  if (!sim) { setStatus('NO ENGINES — SIMULATION FAILED', 'bad'); return; }
+  trajectory = sim.records;
+
+  const maxH = Math.max(...trajectory.map(r => r.h));
+  const maxV = Math.max(...trajectory.map(r => r.v));
+  const maxQkm = (sim.maxQAlt / 1000).toFixed(1);
+  document.getElementById('st-maxq').textContent = maxQkm;
+  setStatus(`SIM DONE — MaxH: ${(maxH/1000).toFixed(1)}km  MaxV: ${Math.round(maxV)}m/s`, 'ok');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LAUNCH ANIMATION
+═══════════════════════════════════════════════════════════════ */
+let launchIdx = 0;
+let launchFrameId = null;
+let lastFrameTime = 0;
+const SIM_SPEED = 8; // sim-seconds per real-second
+let cameraTarget = new THREE.Vector3(0, 30, 0);
+let cameraPos = camera.position.clone();
+
+function startLaunch() {
+  if (assembly.length === 0) { alert('Assemble a rocket first!'); return; }
+  const st = computeStats();
+  if (!st || st.TWR < 1.0) {
+    setStatus('LAUNCH ABORT — TWR < 1.0', 'bad');
+    addEventCard('LAUNCH ABORT', `TWR = ${st?.TWR.toFixed(2) || '—'} < 1.0`, 'bad');
+    showTelemetry(true);
+    return;
+  }
+  const sim = computeTrajectory();
+  if (!sim || sim.records.length === 0) {
+    setStatus('NO TRAJECTORY — ADD ENGINES', 'bad');
+    return;
+  }
+  trajectory = sim.records;
+
+  launchMode = true;
+  launchIdx = 0;
+  document.getElementById('btn-launch').style.display = 'none';
+  document.getElementById('btn-simulate').style.display = 'none';
+  document.getElementById('btn-stop').style.display = 'inline-block';
+  showTelemetry(true);
+  clearEventLog();
+  addEventCard('T+0:00', 'IGNITION — All engines go', 'ok');
+
+  // Move camera to side view for launch
+  const totalH = assembly.reduce((s, id) => s + (getPartById(id)?.length || 0), 0);
+  animCameraTo(new THREE.Vector3(0, 35, 110), new THREE.Vector3(0, 35, 0), 1.5);
+
+  engineLight.intensity = 6;
+  setStatus('🚀 LAUNCH IN PROGRESS', 'ok');
+  lastFrameTime = performance.now();
+
+  let mecoFired = false, maxqFired = false, stageFired = false, maxH = 0;
+  const maxQkm = (sim.maxQAlt / 1000).toFixed(1);
+
+  function launchTick(now) {
+    const dt_real = (now - lastFrameTime) / 1000;
+    lastFrameTime = now;
+
+    // Advance idx by SIM_SPEED * dt_real / dt_sim(0.1)
+    const steps = Math.max(1, Math.round(SIM_SPEED * dt_real / 0.1));
+    launchIdx = Math.min(launchIdx + steps, trajectory.length - 1);
+
+    const rec = trajectory[launchIdx];
+    if (rec.h > maxH) maxH = rec.h;
+
+    // Move rocket
+    rocketGroup.position.y = rec.h / 10; // 1 scene unit = 10m
+
+    // Camera follows
+    const targetY = 35 + rec.h / 12;
+    cameraTarget.lerp(new THREE.Vector3(0, targetY, 0), 0.05);
+    camera.position.lerp(new THREE.Vector3(0, targetY, 110 + rec.h / 20), 0.04);
+    camera.lookAt(cameraTarget);
+
+    // Engine glow
+    if (rec.burning) {
+      engineLight.position.set(0, rocketGroup.position.y - 2, 0);
+      engineLight.intensity = 4 + Math.sin(now * 0.03) * 1.5;
+      engineLight.color.setHex(0xff6622);
+    } else {
+      engineLight.intensity = Math.max(0, engineLight.intensity - 0.1);
+    }
+
+    // Telemetry
+    document.getElementById('tele-alt').textContent  = Math.round(rec.h).toLocaleString();
+    document.getElementById('tele-vel').textContent  = Math.round(rec.v).toLocaleString();
+    document.getElementById('tele-acc').textContent  = rec.a.toFixed(1);
+    document.getElementById('tele-time').textContent = rec.t.toFixed(1);
+    const fuelKg = Math.max(0, Math.round(rec.mass - (computeStats()?.dryMass || 0)));
+    document.getElementById('tele-mass').textContent = fuelKg.toLocaleString();
+
+    // Stats bar live
+    document.getElementById('st-total').textContent  = Math.round(rec.mass).toLocaleString();
+    document.getElementById('st-height').textContent = (rec.h / 1000).toFixed(2) + 'km';
+
+    // Events
+    if (!maxqFired && rec.h >= sim.maxQAlt) {
+      maxqFired = true;
+      addEventCard(`T+${rec.t.toFixed(0)}s MAX-Q`, `${maxQkm}km — max dynamic pressure`, 'warn');
+    }
+    if (!mecoFired && !rec.burning && launchIdx > 5) {
+      mecoFired = true;
+      addEventCard(`T+${rec.t.toFixed(0)}s MECO`, `Main Engine Cut-Off at ${(rec.h/1000).toFixed(1)}km`, 'ok');
+    }
+    if (!stageFired && mecoFired && rec.t > sim.mecoT + 3) {
+      stageFired = true;
+      addEventCard(`T+${rec.t.toFixed(0)}s STAGE SEP`, 'First stage separation', 'ok');
+    }
+
+    if (launchIdx >= trajectory.length - 1) {
+      // End
+      engineLight.intensity = 0;
+      const success = maxH > 1000;
+      addEventCard(
+        success ? 'MISSION COMPLETE' : 'LAUNCH FAILED',
+        success ? `Max altitude: ${(maxH/1000).toFixed(1)}km` : 'Insufficient performance',
+        success ? 'ok' : 'bad'
+      );
+      const endDiv = document.createElement('div');
+      endDiv.className = 'mission-end ' + (success ? 'success' : 'fail');
+      endDiv.textContent = success ? '✓ MISSION COMPLETE' : '✗ LAUNCH FAILED';
+      document.getElementById('event-log').appendChild(endDiv);
+      setStatus(success ? 'MISSION COMPLETE' : 'LAUNCH FAILED', success ? '' : 'bad');
+      document.getElementById('btn-stop').style.display = 'inline-block';
+      return; // stop loop
+    }
+
+    launchFrameId = requestAnimationFrame(launchTick);
+  }
+
+  launchFrameId = requestAnimationFrame(launchTick);
+}
+
+function stopSimulation() {
+  if (launchFrameId) { cancelAnimationFrame(launchFrameId); launchFrameId = null; }
+  launchMode = false;
+  engineLight.intensity = 0;
+  rocketGroup.position.y = 0;
+  document.getElementById('btn-launch').style.display = 'inline-block';
+  document.getElementById('btn-simulate').style.display = 'inline-block';
+  document.getElementById('btn-stop').style.display = 'none';
+  showTelemetry(false);
+  setStatus('SIMULATION ENDED', '');
+
+  // Return camera
+  const totalH = assembly.reduce((s, id) => s + (getPartById(id)?.length || 0), 0);
+  animCameraTo(new THREE.Vector3(60, totalH * 0.5, 130), new THREE.Vector3(0, totalH / 2, 0), 1.0);
+}
+
+function showTelemetry(on) {
+  document.getElementById('inspector').style.display = on ? 'none' : 'flex';
+  document.getElementById('telemetry').style.display = on ? 'flex' : 'none';
+}
+
+function clearEventLog() {
+  document.getElementById('event-log').innerHTML = '';
+}
+
+function addEventCard(title, sub, type) {
+  const log = document.getElementById('event-log');
+  const card = document.createElement('div');
+  card.className = 'event-card ' + (type || '');
+  card.innerHTML = `<div class="event-title">${title}</div><div class="event-sub">${sub}</div>`;
+  log.appendChild(card);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setStatus(text, cls) {
+  const el = document.getElementById('status-text');
+  el.textContent = text;
+  el.className = 'tb-status ' + (cls || '');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CAMERA CONTROLS (manual orbit)
+═══════════════════════════════════════════════════════════════ */
+let orbitState = {
+  active: false,
+  startX: 0, startY: 0,
+  theta: 0.5, phi: 0.6,
+  radius: 150,
+  targetRadius: 150,
+  targetY: 30,
+  animating: false
+};
+
+function sphericalToCart(theta, phi, r, targetY) {
+  return new THREE.Vector3(
+    r * Math.sin(phi) * Math.sin(theta),
+    targetY + r * Math.cos(phi),
+    r * Math.sin(phi) * Math.cos(theta)
+  );
+}
+
+function applyCameraOrbit() {
+  orbitState.phi = Math.max(0.05, Math.min(Math.PI * 0.49, orbitState.phi));
+  const pos = sphericalToCart(orbitState.theta, orbitState.phi, orbitState.radius, orbitState.targetY);
+  camera.position.copy(pos);
+  camera.lookAt(0, orbitState.targetY, 0);
+}
+
+canvas.addEventListener('mousedown', e => {
+  if (launchMode) return;
+  orbitState.active = true;
+  orbitState.startX = e.clientX;
+  orbitState.startY = e.clientY;
+});
+window.addEventListener('mousemove', e => {
+  if (!orbitState.active) return;
+  const dx = e.clientX - orbitState.startX;
+  const dy = e.clientY - orbitState.startY;
+  orbitState.startX = e.clientX;
+  orbitState.startY = e.clientY;
+  orbitState.theta -= dx * 0.005;
+  orbitState.phi   += dy * 0.005;
+  applyCameraOrbit();
+});
+window.addEventListener('mouseup', () => { orbitState.active = false; });
+canvas.addEventListener('wheel', e => {
+  if (launchMode) return;
+  e.preventDefault();
+  const delta = e.deltaY * orbitState.targetRadius * 0.001;
+  orbitState.targetRadius = Math.max(15, Math.min(400, orbitState.targetRadius + delta));
+}, { passive: false });
+
+let _pinchDist = null;
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 2) {
+    _pinchDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+  }
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length === 2 && _pinchDist !== null) {
+    const d = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    orbitState.targetRadius = Math.max(15, Math.min(400, orbitState.targetRadius * (_pinchDist / d)));
+    _pinchDist = d;
+  }
+}, { passive: true });
+canvas.addEventListener('touchend', () => { _pinchDist = null; }, { passive: true });
+
+// Init orbit from camera
+orbitState.theta = Math.atan2(camera.position.x, camera.position.z);
+orbitState.radius = camera.position.length();
+orbitState.targetRadius = orbitState.radius;
+orbitState.phi = Math.acos(camera.position.y / orbitState.radius);
+orbitState.targetY = 30;
+
+/* ═══════════════════════════════════════════════════════════════
+   VIEW PRESETS
+═══════════════════════════════════════════════════════════════ */
+let camAnimTarget = null, camAnimOrigin = null, camAnimT = 0, camAnimDur = 0;
+let camLookTarget = new THREE.Vector3(0, 30, 0), camLookOrigin = new THREE.Vector3(0, 30, 0);
+
+function animCameraTo(pos, lookAt, dur) {
+  camAnimOrigin = camera.position.clone();
+  camAnimTarget = pos.clone();
+  camLookOrigin = camLookTarget.clone();
+  camLookTarget = lookAt.clone();
+  camAnimT = 0;
+  camAnimDur = dur;
+}
+
+function setView(v) {
+  currentView = v;
+  ['3d','front','side','top'].forEach(k => {
+    const el = document.getElementById('vbtn-'+k);
+    const el2 = document.getElementById('ovbtn-'+k);
+    if (el) el.classList.toggle('active', k===v);
+    if (el2) el2.classList.toggle('active', k===v);
+  });
+
+  const totalH = assembly.reduce((s, id) => s + (getPartById(id)?.length || 0), 0);
+  const cy = totalH / 2 || 30;
+  const dist = Math.max(totalH * 1.8, 100);
+
+  if (v === '3d')    animCameraTo(new THREE.Vector3(dist*0.5, cy + dist*0.3, dist*0.85), new THREE.Vector3(0, cy, 0), 0.8);
+  if (v === 'front') animCameraTo(new THREE.Vector3(0, cy, dist), new THREE.Vector3(0, cy, 0), 0.8);
+  if (v === 'side')  animCameraTo(new THREE.Vector3(dist, cy, 0), new THREE.Vector3(0, cy, 0), 0.8);
+  if (v === 'top')   animCameraTo(new THREE.Vector3(0, cy + dist * 1.2, 0.01), new THREE.Vector3(0, cy, 0), 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AXIS INDICATOR (mini canvas)
+═══════════════════════════════════════════════════════════════ */
+const axisCanvas = document.getElementById('axis-canvas');
+const axisCtx = axisCanvas.getContext('2d');
+
+function drawAxisIndicator() {
+  const w = 60, h = 60, cx = 30, cy = 30, len = 20;
+  axisCtx.clearRect(0, 0, w, h);
+  const m = camera.matrixWorldInverse;
+  const axes = [
+    { dir: new THREE.Vector3(1,0,0), color: '#ff4444', label: 'X' },
+    { dir: new THREE.Vector3(0,1,0), color: '#44ff88', label: 'Y' },
+    { dir: new THREE.Vector3(0,0,1), color: '#4488ff', label: 'Z' }
+  ];
+  const projected = axes.map(ax => {
+    const d = ax.dir.clone().applyMatrix4(camera.matrixWorldInverse).normalize();
+    return { x: cx + d.x * len, y: cy - d.y * len, color: ax.color, label: ax.label };
+  });
+  axisCtx.lineWidth = 1.5;
+  projected.forEach(p => {
+    axisCtx.strokeStyle = p.color;
+    axisCtx.beginPath(); axisCtx.moveTo(cx, cy); axisCtx.lineTo(p.x, p.y); axisCtx.stroke();
+    axisCtx.fillStyle = p.color;
+    axisCtx.font = '8px JetBrains Mono, monospace';
+    axisCtx.fillText(p.label, p.x + 2, p.y + 3);
+  });
+  // center dot
+  axisCtx.fillStyle = '#666';
+  axisCtx.beginPath(); axisCtx.arc(cx, cy, 2, 0, Math.PI*2); axisCtx.fill();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER LOOP
+═══════════════════════════════════════════════════════════════ */
+function resizeRenderer() {
+  const wrap = document.getElementById('viewport-wrap');
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resizeRenderer();
+window.addEventListener('resize', resizeRenderer);
+
+// Scale reference
+function updateScaleRef() {
+  const worldWidth = orbitState.radius * 2 * Math.tan((camera.fov/2) * Math.PI/180) * camera.aspect;
+  const barFrac = 40 / canvas.clientWidth;
+  const barWorld = worldWidth * barFrac;
+  const nice = [1,2,5,10,20,50,100,200,500].reverse().find(v => v < barWorld) || 1;
+  document.getElementById('scale-label').textContent = nice >= 1000 ? (nice/1000)+'km' : nice+'m';
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  // Camera animation
+  if (camAnimTarget && camAnimDur > 0) {
+    camAnimT += 1/60;
+    const t = Math.min(camAnimT / camAnimDur, 1);
+    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    camera.position.lerpVectors(camAnimOrigin, camAnimTarget, ease);
+    const lk = new THREE.Vector3().lerpVectors(camLookOrigin, camLookTarget, ease);
+    camera.lookAt(lk);
+    if (t >= 1) { camAnimTarget = null; }
+  }
+
+  // smooth zoom lerp
+  if (!launchMode) {
+    orbitState.radius += (orbitState.targetRadius - orbitState.radius) * 0.12;
+    applyCameraOrbit();
+  }
+
+  drawAxisIndicator();
+  updateScaleRef();
+  renderer.render(scene, camera);
+}
+animate();
+
+/* ═══════════════════════════════════════════════════════════════
+   CLICK SELECTION IN VIEWPORT
+═══════════════════════════════════════════════════════════════ */
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let mouseDownPos = { x: 0, y: 0 };
+
+canvas.addEventListener('mousedown', e => {
+  mouseDownPos = { x: e.clientX, y: e.clientY };
+});
+canvas.addEventListener('mouseup', e => {
+  const dx = Math.abs(e.clientX - mouseDownPos.x);
+  const dy = Math.abs(e.clientY - mouseDownPos.y);
+  if (dx > 4 || dy > 4) return; // was a drag
+
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(rocketGroup.children, true);
+  if (hits.length > 0) {
+    // Find which assembly mesh was hit
+    let obj = hits[0].object;
+    while (obj.parent && obj.parent !== rocketGroup) obj = obj.parent;
+    const idx = rocketGroup.children.indexOf(obj);
+    if (idx >= 0) selectAssembly(idx);
+  } else {
+    selectAssembly(-1);
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════ */
+updateStats();
+renderAssemblyList();
+applyCameraOrbit();
+</script>
 </body>
 </html>
