@@ -5,238 +5,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Library — PolyfdoS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-:root {
-  --black:    #0a0a0a;
-  --white:    #ffffff;
-  --gray-100: #f5f5f5;
-  --gray-300: #cccccc;
-  --gray-500: #888888;
-  --font-serif: 'EB Garamond', Georgia, serif;
-  --font-sans:  'Inter', system-ui, sans-serif;
-  --font-mono:  'JetBrains Mono', monospace;
-}
-body {
-  font-family: var(--font-sans);
-  background: var(--black);
-  color: var(--white);
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #050505;
+  font-family: 'JetBrains Mono', monospace;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── NAV ─────────────────────────────────────────── */
+/* ── NAV ──────────────────────────────────────────── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   height: 48px;
-  display: flex; align-items: center; gap: 1.6rem;
-  padding: 0 2rem;
-  background: rgba(5,5,5,0.85);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 1.4rem;
+  padding: 0 1.8rem;
+  background: rgba(5,5,5,0.70);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .nav-back {
-  font-family: var(--font-mono);
-  font-size: 0.72rem; letter-spacing: 0.04em;
-  color: rgba(255,255,255,0.35);
+  font-size: 0.70rem; letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.32);
   text-decoration: none;
   transition: color .2s;
 }
-.nav-back:hover { color: rgba(255,255,255,0.85); }
+.nav-back:hover { color: rgba(255,255,255,0.78); }
 .nav-title {
-  font-family: var(--font-mono);
-  font-size: 0.72rem; letter-spacing: 0.06em;
-  color: rgba(255,255,255,0.18);
+  font-size: 0.70rem; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.14);
 }
 
-/* ── 3D SCENE ─────────────────────────────────────── */
-#scene-wrap {
-  position: relative;
-  width: 100%;
-  height: 65vh;
-  min-height: 340px;
-  background: #050505;
-  overflow: hidden;
-  margin-top: 48px;
-}
+/* ── CANVAS ───────────────────────────────────────── */
 #libCanvas {
-  display: block;
+  position: fixed;
+  inset: 0;
   width: 100%; height: 100%;
-  cursor: grab;
+  display: block;
+  cursor: default;
   touch-action: none;
 }
-#libCanvas:active { cursor: grabbing; }
 
-/* Drag hint */
-#drag-hint {
-  position: absolute;
-  bottom: 1.4rem; left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: 0.6rem; letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.22);
+/* ── TOOLTIP ──────────────────────────────────────── */
+#book-tooltip {
+  position: fixed;
+  bottom: 2rem; left: 2rem;
+  z-index: 200;
+  padding: 0.65rem 1rem;
+  background: rgba(10,10,10,0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 2px;
+  display: none;
+  flex-direction: column; gap: 0.2rem;
   pointer-events: none;
-  white-space: nowrap;
-  animation: hintFade 5s ease-out 1s forwards;
+  max-width: 280px;
+}
+#tooltip-title {
+  font-size: 0.68rem; letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.4;
+}
+#tooltip-action {
+  font-size: 0.58rem; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.32);
+}
+
+/* ── HINT ─────────────────────────────────────────── */
+#hint {
+  position: fixed;
+  bottom: 2rem; right: 2rem;
+  font-size: 0.58rem; letter-spacing: 0.09em;
+  color: rgba(255,255,255,0.18);
+  pointer-events: none;
+  animation: hintFade 5s ease-out 1.5s forwards;
+  opacity: 1;
 }
 @keyframes hintFade {
   0%   { opacity: 1; }
-  65%  { opacity: 1; }
+  60%  { opacity: 1; }
   100% { opacity: 0; }
 }
 
-/* ── BOOK INFO SECTION ────────────────────────────── */
-.info-section {
-  background: var(--white);
-  color: var(--black);
-  padding: 4rem 2rem 3rem;
-}
-.info-inner {
-  max-width: 720px;
-  margin: 0 auto;
-}
-.info-label {
-  font-family: var(--font-mono);
-  font-size: 0.6rem; letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(0,0,0,0.28);
-  margin-bottom: 1.2rem;
-}
-.info-title {
-  font-family: var(--font-serif);
-  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
-  font-weight: 400;
-  line-height: 1.12;
-  letter-spacing: -0.01em;
-  margin-bottom: 0.5rem;
-}
-.info-title em { font-style: italic; }
-.info-author {
-  font-family: var(--font-mono);
-  font-size: 0.7rem; letter-spacing: 0.05em;
-  color: rgba(0,0,0,0.38);
-  margin-bottom: 1.2rem;
-}
-.info-tags {
-  display: flex; flex-wrap: wrap; gap: 0.4rem;
-  margin-bottom: 2.2rem;
-}
-.info-tag {
-  font-family: var(--font-mono);
-  font-size: 0.58rem; letter-spacing: 0.06em;
-  color: rgba(0,0,0,0.4);
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 2px;
-  padding: 0.2rem 0.55rem;
-}
-.info-divider {
-  border: none;
-  border-top: 1px solid rgba(0,0,0,0.09);
-  margin-bottom: 2rem;
-}
-.info-summary {
-  font-family: var(--font-serif);
-  font-size: 1.08rem;
-  font-style: italic;
-  line-height: 1.7;
-  color: rgba(0,0,0,0.65);
-  margin-bottom: 2rem;
-}
-.info-footer-row {
-  display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
-  margin-bottom: 2.5rem;
-}
-.badge-soon {
-  display: inline-flex; align-items: center; gap: 0.45rem;
-  font-family: var(--font-mono);
-  font-size: 0.62rem; letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: var(--black);
-  color: var(--white);
-  padding: 0.42rem 0.9rem;
-  border-radius: 2px;
-}
-.badge-soon::before {
-  content: '';
-  width: 5px; height: 5px;
-  background: #aaaaaa;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.info-year {
-  font-family: var(--font-mono);
-  font-size: 0.62rem; letter-spacing: 0.06em;
-  color: rgba(0,0,0,0.25);
-}
-.library-note {
-  padding-top: 2rem;
-  border-top: 1px solid rgba(0,0,0,0.08);
-  font-family: var(--font-mono);
-  font-size: 0.6rem; letter-spacing: 0.08em;
-  color: rgba(0,0,0,0.22);
-  text-align: center;
-}
-
-/* ── RESPONSIVE ───────────────────────────────────── */
-@media (max-width: 600px) {
-  nav { padding: 0 1.2rem; }
-  #scene-wrap { height: 55vh; }
-  .info-section { padding: 2.5rem 1.2rem 2.5rem; }
+/* ── MOBILE TOUCH HINT ────────────────────────────── */
+@media (max-width: 700px) {
+  #book-tooltip { bottom: 1.2rem; left: 1.2rem; right: 1.2rem; max-width: none; }
+  #hint { display: none; }
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a class="nav-back" href="/">← PolyfdoS</a>
   <span class="nav-title">Library</span>
 </nav>
 
-<!-- 3D SCENE -->
-<div id="scene-wrap">
-  <canvas id="libCanvas"></canvas>
-  <div id="drag-hint">Drag to explore</div>
+<canvas id="libCanvas"></canvas>
+
+<div id="book-tooltip">
+  <span id="tooltip-title"></span>
+  <span id="tooltip-action"></span>
 </div>
 
-<!-- BOOK INFO -->
-<div class="info-section">
-  <div class="info-inner">
-    <div class="info-label">PolyfdoS · Written Works</div>
-    <h1 class="info-title"><em>The Mind and the Machine</em><br>How I Built Matyos to Think in Mathematics</h1>
-    <div class="info-author">Ahmed Hafdi &nbsp;·&nbsp; PolyfdoR</div>
-    <div class="info-tags">
-      <span class="info-tag">proof-assistant</span>
-      <span class="info-tag">mathematics</span>
-      <span class="info-tag">language design</span>
-      <span class="info-tag">MatyOS</span>
-      <span class="info-tag">logic</span>
-    </div>
-    <hr class="info-divider">
-    <p class="info-summary">
-      A first-person account of building MatyOS — a proof-assistant language where programs are proofs and types are theorems. Hafdi traces the journey from classical logic to a three-valued truth system, and the engineering decisions that shaped the El interpreter. Part memoir, part technical manifesto: how one mind taught a machine to reason.
-    </p>
-    <div class="info-footer-row">
-      <span class="badge-soon">Coming Soon</span>
-      <span class="info-year">2025</span>
-    </div>
-    <div class="library-note">More works in progress. This library grows.</div>
-  </div>
-</div>
+<div id="hint">Hover a book · Click to open</div>
 
-<!-- THREE.JS -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-/* ═══════════════════════════════════════════════════
-   LIBRARY 3D SCENE — Three.js
-   Black & white bookshelf, realistic PBR materials
-   ═══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   LIBRARY 3D — Immersive bookcase, interactive books
+   B&W aesthetic, eye-level camera, mouse parallax
+   ══════════════════════════════════════════════════════ */
 
-const wrap   = document.getElementById('scene-wrap');
-const canvas = document.getElementById('libCanvas');
-const W = () => wrap.clientWidth;
-const H = () => wrap.clientHeight;
+const canvas  = document.getElementById('libCanvas');
+const tooltip = document.getElementById('book-tooltip');
+const ttTitle = document.getElementById('tooltip-title');
+const ttAction= document.getElementById('tooltip-action');
+
+const W = () => window.innerWidth;
+const H = () => window.innerHeight;
 
 // ── Renderer ─────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -247,280 +136,331 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-// ── Scene & Camera ────────────────────────────────────
-const scene  = new THREE.Scene();
-scene.fog    = new THREE.FogExp2(0x050505, 0.16);
+// ── Scene ────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.fog   = new THREE.FogExp2(0x050505, 0.10);
 
-const camera = new THREE.PerspectiveCamera(42, W() / H(), 0.1, 50);
-camera.position.set(0, 0.85, 3.8);
-camera.lookAt(0, 0.35, 0);
+// ── Camera ───────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(52, W() / H(), 0.05, 40);
+camera.position.set(0, 0.92, 2.9);
+camera.lookAt(0, 0.92, 0);
 
-// ── Lights ────────────────────────────────────────────
-// Minimal ambient
-scene.add(new THREE.AmbientLight(0xffffff, 0.10));
+// ── Lights ───────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.07));
 
-// Key light — hard white, casts shadows
-const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
-keyLight.position.set(3, 6, 3);
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+keyLight.position.set(1.5, 8, 5);
 keyLight.castShadow = true;
-keyLight.shadow.mapSize.set(1024, 1024);
+keyLight.shadow.mapSize.set(2048, 2048);
 keyLight.shadow.camera.near = 0.5;
-keyLight.shadow.camera.far = 20;
-keyLight.shadow.camera.left = keyLight.shadow.camera.bottom = -4;
-keyLight.shadow.camera.right = keyLight.shadow.camera.top = 4;
-keyLight.shadow.bias = -0.0005;
+keyLight.shadow.camera.far  = 18;
+keyLight.shadow.camera.left = keyLight.shadow.camera.bottom = -3.5;
+keyLight.shadow.camera.right= keyLight.shadow.camera.top   = 3.5;
+keyLight.shadow.bias = -0.0004;
 scene.add(keyLight);
 
-// Rim light — cool fill from behind
-const rimLight = new THREE.DirectionalLight(0xaaaacc, 0.35);
-rimLight.position.set(-4, 2, -3);
-scene.add(rimLight);
+const fillLight = new THREE.DirectionalLight(0x888888, 0.28);
+fillLight.position.set(-5, 2, 3);
+scene.add(fillLight);
+
+// ── Shared materials ─────────────────────────────────
+const shelfMat = new THREE.MeshStandardMaterial({
+  color: 0x0d0d0d, roughness: 0.92, metalness: 0.04
+});
+const wallMat = new THREE.MeshStandardMaterial({
+  color: 0x080808, roughness: 0.96, metalness: 0.0
+});
+const floorMat = new THREE.MeshStandardMaterial({
+  color: 0x060606, roughness: 1.0, metalness: 0.0
+});
 
 // ── Floor ─────────────────────────────────────────────
-const floorGeo = new THREE.PlaneGeometry(12, 12);
-const floorMat = new THREE.MeshStandardMaterial({
-  color: 0x080808, roughness: 1.0, metalness: 0.0
-});
-const floor = new THREE.Mesh(floorGeo, floorMat);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.position.y = -0.05;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// ── Shelf Plank ───────────────────────────────────────
-const shelfMat = new THREE.MeshStandardMaterial({
-  color: 0x0e0e0e, roughness: 0.88, metalness: 0.04
-});
-const plank = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.10, 0.90), shelfMat);
-plank.position.set(0, 0, 0);
-plank.castShadow = true;
-plank.receiveShadow = true;
-scene.add(plank);
+// ── Bookcase shell ────────────────────────────────────
+// Back wall
+const backW = new THREE.Mesh(new THREE.BoxGeometry(5.0, 3.2, 0.06), wallMat);
+backW.position.set(0, 1.55, -0.47);
+backW.receiveShadow = true;
+scene.add(backW);
 
-// Shelf back wall
-const backWall = new THREE.Mesh(new THREE.BoxGeometry(4.8, 2.4, 0.06), shelfMat);
-backWall.position.set(0, 1.15, -0.46);
-backWall.receiveShadow = true;
-scene.add(backWall);
-
-// Shelf side walls
-[-2.41, 2.41].forEach(x => {
-  const side = new THREE.Mesh(new THREE.BoxGeometry(0.06, 2.4, 0.90), shelfMat);
-  side.position.set(x, 1.15, 0);
+// Side walls (partial)
+[-2.53, 2.53].forEach(x => {
+  const side = new THREE.Mesh(new THREE.BoxGeometry(0.07, 3.2, 0.95), wallMat);
+  side.position.set(x, 1.55, 0);
   side.receiveShadow = true;
   scene.add(side);
 });
 
-// ── Spine Texture ─────────────────────────────────────
-function makeSpineTexture(lines, bg, fg) {
+// Shelf planks: bottom, middle, top
+[0.08, 1.22, 2.36].forEach(y => {
+  const plank = new THREE.Mesh(new THREE.BoxGeometry(5.06, 0.10, 0.90), shelfMat);
+  plank.position.set(0, y, 0);
+  plank.castShadow = true;
+  plank.receiveShadow = true;
+  scene.add(plank);
+});
+
+// ── Spine texture factory ─────────────────────────────
+function makeSpineTex(lines, bgHex, fgHex) {
   const c = document.createElement('canvas');
-  c.width = 64; c.height = 320;
+  c.width = 80; c.height = 400;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, 64, 320);
-  // Subtle page-edge lines at top and bottom
-  ctx.fillStyle = fg === '#fff' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
-  ctx.fillRect(0, 0, 64, 3);
-  ctx.fillRect(0, 317, 64, 3);
+  ctx.fillStyle = bgHex;
+  ctx.fillRect(0, 0, 80, 400);
+  // Thin top/bottom edge lines
+  ctx.fillStyle = fgHex === '#111' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.12)';
+  ctx.fillRect(0, 0, 80, 4);
+  ctx.fillRect(0, 396, 80, 4);
   // Vertical text
   ctx.save();
-  ctx.translate(32, 310);
+  ctx.translate(40, 390);
   ctx.rotate(-Math.PI / 2);
-  lines.forEach((line, i) => {
+  ctx.textBaseline = 'middle';
+  lines.forEach((txt, i) => {
     ctx.font = i === 0
-      ? 'bold 12px Georgia, serif'
-      : '9px "Courier New", monospace';
-    ctx.fillStyle = fg;
-    ctx.globalAlpha = i === 0 ? 0.9 : 0.55;
-    ctx.fillText(line, 0, i * 14);
+      ? 'bold 15px "Georgia", serif'
+      : '10px "Courier New", monospace';
+    ctx.fillStyle = fgHex;
+    ctx.globalAlpha = i === 0 ? 0.92 : 0.52;
+    ctx.fillText(txt, 0, i * 17);
   });
   ctx.restore();
   return new THREE.CanvasTexture(c);
 }
 
-// ── Book Configs ──────────────────────────────────────
-// B&W palette (lighter = more prominent)
-const PALETTE = [0x1a1a1a, 0x2e2e2e, 0x444444, 0x666666, 0x888888, 0xbbbbbb, 0xdddddd];
-
-const BOOK_DEFS = [
-  { w: 0.22, h: 1.28, color: 0x222222, lean:  0.02, label: ['—', ''] },
-  { w: 0.19, h: 1.48, color: 0x3a3a3a, lean: -0.03, label: ['—', ''] },
-  { w: 0.26, h: 1.18, color: 0x555555, lean:  0.01, label: ['—', ''] },
-  // Main book — center, pulled forward, near-white
-  { w: 0.28, h: 1.52, color: 0xe0e0e0, lean: 0,
-    label: ['The Mind & the Machine', 'Hafdi'],
-    main: true, zOffset: 0.28
-  },
-  { w: 0.20, h: 1.32, color: 0x444444, lean: -0.02, label: ['—', ''] },
-  { w: 0.24, h: 1.44, color: 0x2a2a2a, lean:  0.03, label: ['—', ''] },
-  { w: 0.18, h: 1.22, color: 0x181818, lean: -0.01, label: ['—', ''] },
+// ── Book definitions ──────────────────────────────────
+// Row 0 (bottom shelf) — 7 books
+const ROW0 = [
+  { w:0.21, h:1.02, color:0x1e1e1e, label:'—' },
+  { w:0.18, h:1.12, color:0x2a2a2a, label:'—' },
+  { w:0.25, h:0.96, color:0x383838, label:'—' },
+  // ★ MAIN BOOK — center
+  { w:0.29, h:1.10, color:0xe0e0e0, real:true,
+    label:'The Mind and the Machine', author:'Hafdi',
+    url:'/books/mind-and-the-machine' },
+  { w:0.22, h:1.04, color:0x2e2e2e, label:'—' },
+  { w:0.19, h:1.08, color:0x1a1a1a, label:'—' },
+  { w:0.23, h:0.98, color:0x323232, label:'—' },
 ];
 
-// Layout books along the shelf, centered
-const totalW = BOOK_DEFS.reduce((s, b) => s + b.w + 0.045, 0) - 0.045;
-let cursor = -totalW / 2;
-const bookMeshes = [];
+// Row 1 (middle shelf) — 7 books (all placeholders)
+const ROW1 = [
+  { w:0.20, h:0.94, color:0x151515, label:'—' },
+  { w:0.24, h:1.06, color:0x242424, label:'—' },
+  { w:0.18, h:0.98, color:0x1c1c1c, label:'—' },
+  { w:0.22, h:1.00, color:0x2c2c2c, label:'—' },
+  { w:0.26, h:0.92, color:0x181818, label:'—' },
+  { w:0.20, h:1.04, color:0x222222, label:'—' },
+  { w:0.19, h:0.96, color:0x141414, label:'—' },
+];
 
-BOOK_DEFS.forEach((def, i) => {
-  const cx = cursor + def.w / 2;
-  cursor += def.w + 0.045;
+// Build a row of books and return mesh objects
+function buildRow(defs, shelfY) {
+  const GAP   = 0.038;
+  const DEPTH = 0.65;
+  const totalW = defs.reduce((s, d) => s + d.w + GAP, 0) - GAP;
+  let cursor = -totalW / 2;
+  const meshes = [];
 
-  // Main cover material (with spine texture for main book)
-  let mat;
-  if (def.main) {
-    const spineTex = makeSpineTexture(def.label, '#e0e0e0', '#111');
-    // Multi-material: [right, left, top, bottom, front=spine, back]
-    const coverMat = new THREE.MeshStandardMaterial({ color: def.color, roughness: 0.55, metalness: 0.03 });
-    const spineMat = new THREE.MeshStandardMaterial({ map: spineTex, roughness: 0.6, metalness: 0.02 });
-    mat = [
-      coverMat, // right (+x)
-      coverMat, // left  (-x)
-      new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 0.4 }), // top
-      new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.7 }), // bottom
-      spineMat, // front (spine face)
-      coverMat, // back
-    ];
-  } else {
-    const shade = def.color;
-    mat = new THREE.MeshStandardMaterial({ color: shade, roughness: 0.62, metalness: 0.03 });
-  }
+  defs.forEach(def => {
+    const cx = cursor + def.w / 2;
+    cursor += def.w + GAP;
 
-  const geo  = new THREE.BoxGeometry(def.w, def.h, 0.62);
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.set(cx, def.h / 2 + 0.10, def.zOffset || 0);
-  mesh.rotation.z = def.lean;
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  mesh.userData.isMain = !!def.main;
-  scene.add(mesh);
-  bookMeshes.push(mesh);
+    // Material(s)
+    let mat;
+    if (def.real) {
+      const spineTex = makeSpineTex(
+        [def.label, def.author || ''], '#e0e0e0', '#111'
+      );
+      const cover = new THREE.MeshStandardMaterial({
+        color: def.color, roughness: 0.55, metalness: 0.03
+      });
+      const spine = new THREE.MeshStandardMaterial({
+        map: spineTex, roughness: 0.60, metalness: 0.02
+      });
+      const top   = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.45 });
+      const bot   = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.70 });
+      // BoxGeometry face order: +x, -x, +y, -y, +z (spine/front), -z (back)
+      mat = [cover, cover, top, bot, spine, cover];
+    } else {
+      mat = new THREE.MeshStandardMaterial({
+        color: def.color, roughness: 0.70, metalness: 0.04
+      });
+    }
 
-  // Small accent light on main book
-  if (def.main) {
-    const spot = new THREE.PointLight(0xffffff, 0.5, 2.2);
-    spot.position.set(cx, def.h + 0.10, 0.7);
-    scene.add(spot);
-  }
-});
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(def.w, def.h, DEPTH), mat);
+    mesh.position.set(cx, shelfY + def.h / 2 + 0.10, 0);
+    // slight random lean
+    mesh.rotation.z = (Math.random() - 0.5) * 0.025;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
 
-// ── Floating dust particles ────────────────────────────
-(function buildDust() {
-  const N = 120;
-  const pos = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) {
-    pos[i*3]   = (Math.random() - 0.5) * 5;
-    pos[i*3+1] = Math.random() * 2.2;
-    pos[i*3+2] = (Math.random() - 0.5) * 1.8;
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const mat = new THREE.PointsMaterial({
-    color: 0xffffff, size: 0.008, transparent: true, opacity: 0.28, depthWrite: false
+    mesh.userData = {
+      baseZ:  mesh.position.z,
+      targetZ: mesh.position.z,
+      real:   !!def.real,
+      label:  def.real ? def.label : null,
+      url:    def.url || null,
+    };
+
+    scene.add(mesh);
+    meshes.push(mesh);
+
+    // Spot above main book
+    if (def.real) {
+      const spot = new THREE.PointLight(0xffffff, 0.55, 2.4);
+      spot.position.set(cx, shelfY + def.h + 0.35, 0.55);
+      scene.add(spot);
+    }
   });
-  scene.add(new THREE.Points(geo, mat));
-})();
 
-// ── Orbit Controls ────────────────────────────────────
-let az = 0, el = 0.22, rad = 3.8;
-const AZ_LIMIT = 0.7;
-let isDragging = false, lastX = 0;
-
-function updateCamera() {
-  az = Math.max(-AZ_LIMIT, Math.min(AZ_LIMIT, az));
-  camera.position.set(
-    rad * Math.sin(az),
-    el,
-    rad * Math.cos(az)
-  );
-  camera.lookAt(0, 0.35, 0);
+  return meshes;
 }
 
-canvas.addEventListener('mousedown', e => {
-  isDragging = true; lastX = e.clientX;
-  canvas.style.cursor = 'grabbing';
+const bookMeshes = [
+  ...buildRow(ROW0, 0.08),
+  ...buildRow(ROW1, 1.22),
+];
+
+// ── Dust particles ────────────────────────────────────
+const dustPos  = new Float32Array(90 * 3);
+const dustVel  = new Float32Array(90);
+for (let i = 0; i < 90; i++) {
+  dustPos[i*3]   = (Math.random() - 0.5) * 5.0;
+  dustPos[i*3+1] = Math.random() * 2.8;
+  dustPos[i*3+2] = (Math.random() - 0.5) * 1.5;
+  dustVel[i]     = 0.0003 + Math.random() * 0.0005;
+}
+const dustGeo = new THREE.BufferGeometry();
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+const dustMat = new THREE.PointsMaterial({
+  color: 0xffffff, size: 0.007, transparent: true, opacity: 0.22, depthWrite: false
 });
-window.addEventListener('mouseup', () => {
-  isDragging = false;
-  canvas.style.cursor = 'grab';
-});
+scene.add(new THREE.Points(dustGeo, dustMat));
+
+// ── Mouse state ───────────────────────────────────────
+let mouseNDC = new THREE.Vector2(0, 0); // -1..1 normalized
+let mousePX  = { x: 0, y: 0 };
+
 window.addEventListener('mousemove', e => {
-  if (isDragging) {
-    az -= (e.clientX - lastX) * 0.006;
-    lastX = e.clientX;
-    updateCamera();
-  }
+  mouseNDC.x = (e.clientX / W()) * 2 - 1;
+  mouseNDC.y = -((e.clientY / H()) * 2 - 1);
+  mousePX = { x: e.clientX, y: e.clientY };
+  doRaycast(e.clientX, e.clientY);
 });
 
-// Touch
-let lastTouchX = 0;
-canvas.addEventListener('touchstart', e => {
-  isDragging = true;
-  lastTouchX = e.touches[0].clientX;
-}, { passive: true });
-canvas.addEventListener('touchend', () => { isDragging = false; }, { passive: true });
-canvas.addEventListener('touchmove', e => {
-  if (!isDragging) return;
-  az -= (e.touches[0].clientX - lastTouchX) * 0.007;
-  lastTouchX = e.touches[0].clientX;
-  updateCamera();
-}, { passive: true });
-
-// Scroll wheel zoom
-canvas.addEventListener('wheel', e => {
-  rad = Math.max(2.2, Math.min(6.0, rad + e.deltaY * 0.004));
-  updateCamera();
-}, { passive: true });
-
-// ── Raycasting (hover) ────────────────────────────────
+// ── Raycasting ────────────────────────────────────────
 const raycaster = new THREE.Raycaster();
-const mouse     = new THREE.Vector2(-10, -10);
-canvas.addEventListener('mousemove', e => {
-  if (isDragging) return;
+let hoveredMesh = null;
+
+function doRaycast(cx, cy) {
   const rect = canvas.getBoundingClientRect();
-  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
+  raycaster.setFromCamera(
+    new THREE.Vector2(
+      ((cx - rect.left) / rect.width)  * 2 - 1,
+      -((cy - rect.top) / rect.height) * 2 + 1
+    ),
+    camera
+  );
   const hits = raycaster.intersectObjects(bookMeshes);
-  canvas.style.cursor = hits.length && hits[0].object.userData.isMain ? 'pointer' : 'grab';
-});
+
+  if (hits.length > 0) {
+    const m = hits[0].object;
+    if (hoveredMesh !== m) {
+      if (hoveredMesh) hoveredMesh.userData.targetZ = hoveredMesh.userData.baseZ;
+      hoveredMesh = m;
+      hoveredMesh.userData.targetZ = hoveredMesh.userData.baseZ + 0.14;
+    }
+    canvas.style.cursor = 'pointer';
+    // Tooltip
+    if (m.userData.real) {
+      ttTitle.textContent  = m.userData.label;
+      ttAction.textContent = 'Click to open →';
+    } else {
+      ttTitle.textContent  = 'Coming soon';
+      ttAction.textContent = 'More books on the way';
+    }
+    tooltip.style.display = 'flex';
+  } else {
+    if (hoveredMesh) {
+      hoveredMesh.userData.targetZ = hoveredMesh.userData.baseZ;
+      hoveredMesh = null;
+    }
+    canvas.style.cursor = 'default';
+    tooltip.style.display = 'none';
+  }
+}
+
+// ── Click ─────────────────────────────────────────────
 canvas.addEventListener('click', e => {
-  const rect = canvas.getBoundingClientRect();
-  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
-  const hits = raycaster.intersectObjects(bookMeshes);
-  if (hits.length && hits[0].object.userData.isMain) {
-    document.querySelector('.info-section').scrollIntoView({ behavior: 'smooth' });
+  doRaycast(e.clientX, e.clientY);
+  if (hoveredMesh && hoveredMesh.userData.real && hoveredMesh.userData.url) {
+    window.location.href = hoveredMesh.userData.url;
   }
 });
+
+// ── Touch (mobile) ────────────────────────────────────
+let lastTap = null;
+canvas.addEventListener('touchend', e => {
+  const t = e.changedTouches[0];
+  doRaycast(t.clientX, t.clientY);
+  // Double-tap to navigate on mobile
+  if (hoveredMesh && hoveredMesh.userData.real) {
+    const now = Date.now();
+    if (lastTap && now - lastTap < 500) {
+      window.location.href = hoveredMesh.userData.url;
+    }
+    lastTap = now;
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchmove', e => {
+  const t = e.touches[0];
+  mouseNDC.x = (t.clientX / W()) * 2 - 1;
+  mouseNDC.y = -((t.clientY / H()) * 2 - 1);
+  doRaycast(t.clientX, t.clientY);
+}, { passive: true });
 
 // ── Resize ────────────────────────────────────────────
-new ResizeObserver(() => {
+window.addEventListener('resize', () => {
   renderer.setSize(W(), H());
   camera.aspect = W() / H();
   camera.updateProjectionMatrix();
-}).observe(wrap);
+});
 
-// ── Animation Loop ────────────────────────────────────
+// ── Render loop ───────────────────────────────────────
 let t = 0;
-// Find main book mesh for subtle float
-const mainMesh = bookMeshes.find(m => m.userData.isMain);
-const mainBaseY = mainMesh ? mainMesh.position.y : 0;
+const camTarget = new THREE.Vector3();
 
 (function loop() {
   requestAnimationFrame(loop);
   t += 0.008;
 
-  // Slow auto-drift when idle
-  if (!isDragging) {
-    az += 0.0002;
-    updateCamera();
-  }
+  // Smooth camera parallax (eye stays at z=2.9, head tilts)
+  const targetX =  mouseNDC.x * 0.16;
+  const targetY =  0.92 + mouseNDC.y * 0.07;
+  camera.position.x += (targetX - camera.position.x) * 0.04;
+  camera.position.y += (targetY - camera.position.y) * 0.04;
+  camTarget.set(camera.position.x * 0.3, camera.position.y, 0);
+  camera.lookAt(camTarget);
 
-  // Subtle main book float
-  if (mainMesh) {
-    mainMesh.position.y = mainBaseY + Math.sin(t * 0.7) * 0.012;
+  // Book hover lerp (spring forward/back)
+  bookMeshes.forEach(m => {
+    m.position.z += (m.userData.targetZ - m.position.z) * 0.10;
+  });
+
+  // Dust drift upward, wrap around
+  const pos = dustGeo.attributes.position;
+  for (let i = 0; i < 90; i++) {
+    pos.array[i*3+1] += dustVel[i];
+    if (pos.array[i*3+1] > 2.9) pos.array[i*3+1] = 0;
   }
+  pos.needsUpdate = true;
 
   renderer.render(scene, camera);
 })();

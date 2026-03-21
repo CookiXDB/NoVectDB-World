@@ -73,6 +73,10 @@ def lynostore():
 def books():
     return render_template("books.html")
 
+@app.route("/books/mind-and-the-machine")
+def book_mind_machine():
+    return render_template("book_mind_machine.html")
+
 @app.route("/cookixdb")
 def cookixdb():
     return render_template("cookixdb.html")

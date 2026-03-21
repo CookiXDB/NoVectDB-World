@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Mind and the Machine — Library · PolyfdoS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --black:  #0a0a0a;
+  --white:  #ffffff;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--white);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ── NAV ──────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 48px;
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0 2rem;
+  background: rgba(255,255,255,0.90);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+.nav-back {
+  font-family: var(--font-mono);
+  font-size: 0.70rem; letter-spacing: 0.04em;
+  color: rgba(0,0,0,0.38);
+  text-decoration: none;
+  transition: color .2s;
+  white-space: nowrap;
+}
+.nav-back:hover { color: var(--black); }
+.nav-sep {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  color: rgba(0,0,0,0.15);
+}
+.nav-here {
+  font-family: var(--font-mono);
+  font-size: 0.70rem; letter-spacing: 0.04em;
+  color: rgba(0,0,0,0.28);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── PAGE ─────────────────────────────────────────── */
+.page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 100px 2rem 80px;
+}
+
+/* ── EYEBROW ──────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.60rem; letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.24);
+  margin-bottom: 1.4rem;
+}
+
+/* ── TITLE BLOCK ──────────────────────────────────── */
+.book-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.10;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.55rem;
+}
+.book-subtitle {
+  font-family: var(--font-serif);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: rgba(0,0,0,0.62);
+  margin-bottom: 1.2rem;
+}
+.book-author {
+  font-family: var(--font-mono);
+  font-size: 0.70rem; letter-spacing: 0.06em;
+  color: rgba(0,0,0,0.36);
+  margin-bottom: 1.4rem;
+}
+
+/* ── TAGS ─────────────────────────────────────────── */
+.tags {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  margin-bottom: 2.8rem;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.57rem; letter-spacing: 0.07em;
+  color: rgba(0,0,0,0.36);
+  border: 1px solid rgba(0,0,0,0.13);
+  border-radius: 2px;
+  padding: 0.20rem 0.55rem;
+}
+
+/* ── DIVIDER ──────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 2.4rem;
+}
+
+/* ── SUMMARY ──────────────────────────────────────── */
+.summary {
+  font-family: var(--font-serif);
+  font-size: 1.18rem;
+  font-style: italic;
+  line-height: 1.72;
+  color: rgba(0,0,0,0.62);
+  margin-bottom: 2.4rem;
+}
+
+/* ── BADGE ROW ────────────────────────────────────── */
+.badge-row {
+  display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
+  margin-bottom: 3.5rem;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.10em;
+  text-transform: uppercase;
+  background: var(--black);
+  color: var(--white);
+  padding: 0.45rem 0.92rem;
+  border-radius: 2px;
+}
+.badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: #aaa;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.year {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.07em;
+  color: rgba(0,0,0,0.22);
+}
+
+/* ── FOOTER ───────────────────────────────────────── */
+.page-footer {
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding-top: 2rem;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.footer-note {
+  font-family: var(--font-mono);
+  font-size: 0.58rem; letter-spacing: 0.08em;
+  color: rgba(0,0,0,0.20);
+}
+.back-lib {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.05em;
+  color: rgba(0,0,0,0.38);
+  text-decoration: none;
+  transition: color .2s;
+}
+.back-lib:hover { color: var(--black); }
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 600px) {
+  .page { padding: 80px 1.2rem 60px; }
+  nav   { padding: 0 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" href="/books">← Library</a>
+  <span class="nav-sep">/</span>
+  <span class="nav-here">The Mind and the Machine</span>
+</nav>
+
+<div class="page">
+
+  <div class="eyebrow">PolyfdoS · Written Works · 2025</div>
+
+  <h1 class="book-title">The Mind and the Machine</h1>
+  <p class="book-subtitle">How I Built Matyos to Think in Mathematics</p>
+  <p class="book-author">Ahmed Hafdi &nbsp;·&nbsp; PolyfdoR</p>
+
+  <div class="tags">
+    <span class="tag">proof-assistant</span>
+    <span class="tag">mathematics</span>
+    <span class="tag">language design</span>
+    <span class="tag">MatyOS</span>
+    <span class="tag">logic</span>
+    <span class="tag">three-valued truth</span>
+  </div>
+
+  <hr class="divider">
+
+  <p class="summary">
+    A first-person account of building MatyOS — a proof-assistant language where programs are proofs and types are theorems. Hafdi traces the journey from classical logic to a three-valued truth system, and the engineering decisions that shaped the El interpreter. Part memoir, part technical manifesto: how one mind taught a machine to reason.
+  </p>
+
+  <div class="badge-row">
+    <span class="badge">Coming Soon</span>
+    <span class="year">2025</span>
+  </div>
+
+  <div class="page-footer">
+    <span class="footer-note">More works in progress. This library grows.</span>
+    <a class="back-lib" href="/books">← Back to Library</a>
+  </div>
+
+</div>
+
+</body>
+</html>
