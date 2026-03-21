@@ -57,6 +57,10 @@ def bring():
 def bring_editor():
     return render_template("bring_editor.html")
 
+@app.route("/rockets")
+def rockets():
+    return render_template("rockets.html")
+
 @app.route("/cookixdb")
 def cookixdb():
     return render_template("cookixdb.html")

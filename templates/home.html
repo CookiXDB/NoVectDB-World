@@ -99,6 +99,52 @@ nav {
 }
 
 
+/* ── SPACESHIP ────────────────────────────────────────────────── */
+#rocket {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 198;
+  text-decoration: none;
+  cursor: pointer;
+  animation: rocketOrbit 48s linear infinite;
+  will-change: transform;
+}
+.rocket-svg {
+  width: 28px; height: 50px;
+  display: block;
+  filter: drop-shadow(0 1px 6px rgba(0,0,0,0.10));
+  transition: filter .3s;
+}
+#rocket:hover .rocket-svg {
+  filter: drop-shadow(0 2px 14px rgba(0,0,0,0.22));
+}
+.rocket-thruster {
+  position: absolute;
+  bottom: -10px; left: 50%;
+  transform: translateX(-50%);
+  width: 7px; height: 16px;
+  border-radius: 0 0 50% 50%;
+  background: radial-gradient(ellipse at top, rgba(200,150,60,0.75) 0%, transparent 80%);
+  animation: thrust 0.35s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes thrust {
+  from { transform: translateX(-50%) scaleY(0.65); opacity: 0.5; }
+  to   { transform: translateX(-50%) scaleY(1.2);  opacity: 0.95; }
+}
+/* Smooth CCW orbit — rotation always matches direction of travel */
+@keyframes rocketOrbit {
+  0%   { transform: translate(82vw, 50vh) rotate(0deg);    }
+  12%  { transform: translate(66vw, 20vh) rotate(-52deg);  }
+  25%  { transform: translate(46vw, 13vh) rotate(-90deg);  }
+  37%  { transform: translate(20vw, 21vh) rotate(-132deg); }
+  50%  { transform: translate(9vw,  50vh) rotate(-180deg); }
+  62%  { transform: translate(18vw, 76vh) rotate(-228deg); }
+  75%  { transform: translate(46vw, 84vh) rotate(-270deg); }
+  87%  { transform: translate(72vw, 72vh) rotate(-318deg); }
+  100% { transform: translate(82vw, 50vh) rotate(-360deg); }
+}
+
 /* ── CREATOR ──────────────────────────────────────────────────── */
 #creator {
   position: fixed;
@@ -150,6 +196,23 @@ nav {
   <a class="nav-brand" href="/">Polyfd<span>o</span>S</a>
   <div class="nav-links-right"></div>
 </nav>
+
+<!-- SPACESHIP — orbits the solar system, links to /rockets -->
+<a id="rocket" href="/rockets" aria-label="Rockets">
+  <svg class="rocket-svg" viewBox="0 0 24 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body -->
+    <path d="M12 1 C8.5 7, 7 15, 7 24 L12 29 L17 24 C17 15, 15.5 7, 12 1Z" fill="#0d0d0d"/>
+    <!-- Left fin -->
+    <path d="M7 23 L2 35 L8 31Z" fill="#1c1c1c"/>
+    <!-- Right fin -->
+    <path d="M17 23 L22 35 L16 31Z" fill="#1c1c1c"/>
+    <!-- Window -->
+    <circle cx="12" cy="14" r="2.5" fill="none" stroke="#e8e6e0" stroke-width="0.9" opacity="0.5"/>
+    <!-- Engine -->
+    <rect x="9.5" y="27" width="5" height="3" rx="0.8" fill="#2a2a2a"/>
+  </svg>
+  <div class="rocket-thruster"></div>
+</a>
 
 <!-- CREATOR -->
 <a id="creator" href="/polyfdor">
