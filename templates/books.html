@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Library — PolyfdoS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --black:    #0a0a0a;
+  --white:    #ffffff;
+  --cream:    #f5f4f0;
+  --gray-200: #e5e5e5;
+  --gray-400: #999;
+  --amber:    #b8860b;
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--cream);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ── NAV ─────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 48px;
+  display: flex; align-items: center; gap: 1.6rem;
+  padding: 0 2rem;
+  background: rgba(245,244,240,0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+.nav-back {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.04em;
+  color: rgba(0,0,0,0.4);
+  text-decoration: none;
+  transition: color .2s;
+}
+.nav-back:hover { color: var(--black); }
+.nav-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.06em;
+  color: rgba(0,0,0,0.25);
+}
+
+/* ── PAGE WRAPPER ─────────────────────────────────── */
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 96px 2rem 80px;
+}
+
+/* ── HERO ─────────────────────────────────────────── */
+.hero {
+  margin-bottom: 3.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 2.5rem;
+}
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.1em;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
+}
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.7rem;
+}
+.hero-sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem; letter-spacing: 0.05em;
+  color: rgba(0,0,0,0.35);
+}
+
+/* ── BOOK CARD ────────────────────────────────────── */
+.book-card {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2.4rem;
+  background: var(--white);
+  border: 1px solid rgba(0,0,0,0.09);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: box-shadow .25s;
+}
+.book-card:hover {
+  box-shadow: 0 6px 32px rgba(0,0,0,0.08);
+}
+
+/* ── BOOK COVER ───────────────────────────────────── */
+.book-cover {
+  background: var(--black);
+  position: relative;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.4rem 1.1rem;
+  overflow: hidden;
+}
+/* Subtle ambient line texture */
+.book-cover::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 18px,
+    rgba(255,255,255,0.022) 18px,
+    rgba(255,255,255,0.022) 19px
+  );
+  pointer-events: none;
+}
+/* Amber spine accent line */
+.book-cover::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #c8a060, #8a6020);
+}
+.cover-top {
+  font-family: var(--font-mono);
+  font-size: 0.55rem; letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  position: relative; z-index: 1;
+}
+.cover-title {
+  font-family: var(--font-serif);
+  font-size: 0.92rem;
+  font-style: italic;
+  line-height: 1.35;
+  color: rgba(255,255,255,0.82);
+  position: relative; z-index: 1;
+}
+.cover-author {
+  font-family: var(--font-mono);
+  font-size: 0.58rem; letter-spacing: 0.08em;
+  color: rgba(200,160,96,0.75);
+  position: relative; z-index: 1;
+}
+
+/* ── BOOK INFO ────────────────────────────────────── */
+.book-info {
+  padding: 1.8rem 1.8rem 1.8rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.book-meta-row {
+  margin-bottom: 1.2rem;
+}
+.book-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
+}
+.book-title em { font-style: italic; }
+.book-author {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: rgba(0,0,0,0.45);
+  margin-bottom: 0.9rem;
+}
+.book-tags {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+}
+.book-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem; letter-spacing: 0.07em;
+  color: rgba(0,0,0,0.38);
+  border: 1px solid rgba(0,0,0,0.14);
+  border-radius: 2px;
+  padding: 0.18rem 0.5rem;
+}
+.book-divider {
+  border: none;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  margin: 1.1rem 0;
+}
+.book-summary {
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  font-style: italic;
+  line-height: 1.65;
+  color: rgba(0,0,0,0.68);
+  margin-bottom: 1.4rem;
+}
+.book-footer {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.coming-soon-badge {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--black);
+  color: var(--white);
+  padding: 0.4rem 0.85rem;
+  border-radius: 2px;
+}
+.coming-soon-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: #c8a060;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.book-year {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.06em;
+  color: rgba(0,0,0,0.28);
+}
+
+/* ── FOOTER NOTE ──────────────────────────────────── */
+.library-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.07em;
+  color: rgba(0,0,0,0.28);
+  text-align: center;
+}
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 640px) {
+  .page { padding: 80px 1.2rem 60px; }
+  .book-card {
+    grid-template-columns: 1fr;
+  }
+  .book-cover {
+    min-height: 180px;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+  .cover-top { display: none; }
+  .cover-title { font-size: 0.82rem; }
+  .book-info { padding: 1.4rem; }
+  nav { padding: 0 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" href="/">← PolyfdoS</a>
+  <span class="nav-title">Library</span>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-label">PolyfdoS · Written Works</div>
+    <h1 class="hero-title">Library</h1>
+    <p class="hero-sub">by Ahmed Hafdi &middot; PolyfdoR</p>
+  </div>
+
+  <!-- BOOK CARD -->
+  <div class="book-card">
+
+    <!-- Cover -->
+    <div class="book-cover">
+      <div class="cover-top">PolyfdoS Press</div>
+      <div class="cover-title">The Mind and the Machine: How I Built Matyos to Think in Mathematics</div>
+      <div class="cover-author">Ahmed Hafdi</div>
+    </div>
+
+    <!-- Info -->
+    <div class="book-info">
+      <div class="book-meta-row">
+        <div class="book-title"><em>The Mind and the Machine</em><br>How I Built Matyos to Think in Mathematics</div>
+        <div class="book-author">Ahmed Hafdi &nbsp;·&nbsp; PolyfdoR</div>
+        <div class="book-tags">
+          <span class="book-tag">proof-assistant</span>
+          <span class="book-tag">mathematics</span>
+          <span class="book-tag">language design</span>
+          <span class="book-tag">MatyOS</span>
+          <span class="book-tag">logic</span>
+        </div>
+      </div>
+
+      <div>
+        <hr class="book-divider">
+        <p class="book-summary">
+          A first-person account of building MatyOS — a proof-assistant language where programs are proofs and types are theorems. Hafdi traces the journey from classical logic to a three-valued truth system, and the engineering decisions that shaped the El interpreter. Part memoir, part technical manifesto: how one mind taught a machine to reason.
+        </p>
+        <div class="book-footer">
+          <span class="coming-soon-badge">Coming Soon</span>
+          <span class="book-year">2025</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER NOTE -->
+  <div class="library-footer">
+    More works in progress. This library grows.
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -69,6 +69,10 @@ def lynos():
 def lynostore():
     return render_template("lynostore.html")
 
+@app.route("/books")
+def books():
+    return render_template("books.html")
+
 @app.route("/cookixdb")
 def cookixdb():
     return render_template("cookixdb.html")
