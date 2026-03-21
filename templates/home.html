@@ -22,10 +22,11 @@ html { scroll-behavior: smooth; }
 }
 body {
   font-family: var(--font-sans);
-  background: #000005;
-  color: var(--white);
+  background: #f5f4f0;
+  color: var(--black);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow: hidden;
+  height: 100vh;
 }
 
 /* ── NAV ──────────────────────────────────────────────────────── */
@@ -35,28 +36,29 @@ nav {
   display: flex; align-items: center;
   padding: 0 2.5rem;
   justify-content: space-between;
-  background: rgba(0,0,5,0.7);
+  background: rgba(245,244,240,0.85);
   backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(0,0,20,0.08);
 }
 .nav-brand {
   font-family: var(--font-mono);
   font-size: 0.9rem; font-weight: 500; letter-spacing: -0.03em;
-  text-decoration: none; color: #fff;
+  text-decoration: none; color: #111;
 }
 .nav-brand span { opacity: 0.38; }
 .nav-links-right { display: flex; gap: 2rem; align-items: center; }
 .nav-links-right a {
-  font-size: 0.8rem; color: rgba(255,255,255,0.5);
+  font-size: 0.8rem; color: rgba(0,0,20,0.45);
   text-decoration: none; transition: color .2s; letter-spacing: 0.01em;
 }
-.nav-links-right a:hover { color: #fff; }
+.nav-links-right a:hover { color: #111; }
 
 /* ── GALAXY SECTION ──────────────────────────────────────────── */
 #galaxy {
   position: relative;
   width: 100%; height: 100vh;
   overflow: hidden;
+  background: #f5f4f0;
 }
 #solarCanvas {
   position: absolute; inset: 0;
@@ -70,62 +72,44 @@ nav {
   width: 40%; min-width: 320px;
   padding: 7.5rem 2.5rem 3rem;
   z-index: 10; pointer-events: none;
-  background: linear-gradient(90deg, rgba(0,0,5,0.88) 60%, transparent 100%);
+  background: linear-gradient(90deg, rgba(245,244,240,0.92) 55%, transparent 100%);
 }
 .hero-eyebrow {
   font-family: var(--font-mono);
   font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
+  color: rgba(0,0,20,0.4);
   margin-bottom: 1.8rem;
   display: flex; align-items: center; gap: 0.8rem;
 }
 .hero-eyebrow::after {
   content: ''; display: block; width: 30px; height: 1px;
-  background: rgba(255,255,255,0.3);
+  background: rgba(0,0,20,0.2);
 }
 .hero-headline {
   font-family: var(--font-serif);
   font-size: clamp(2.5rem, 5.5vw, 4.8rem);
   font-weight: 400; line-height: 1.05;
   letter-spacing: -0.02em; margin-bottom: 1.4rem;
-  color: #fff;
+  color: #111;
 }
-.hero-headline em { font-style: italic; opacity: 0.75; }
+.hero-headline em { font-style: italic; opacity: 0.6; }
 .hero-tagline {
   font-family: var(--font-serif); font-style: italic;
-  font-size: 1.05rem; color: rgba(255,255,255,0.45);
+  font-size: 1.05rem; color: rgba(0,0,20,0.5);
   margin-bottom: 2.5rem; line-height: 1.6;
 }
 .hero-acronym {
-  border-left: 1px solid rgba(255,255,255,0.2);
+  border-left: 1px solid rgba(0,0,20,0.18);
   padding-left: 1rem; margin-bottom: 2.5rem;
   display: flex; flex-direction: column; gap: 0.3rem;
 }
 .acronym-row {
   font-family: var(--font-mono);
-  font-size: 0.72rem; color: rgba(255,255,255,0.4);
+  font-size: 0.72rem; color: rgba(0,0,20,0.4);
   display: flex; gap: 0.6rem;
 }
-.acronym-key { color: rgba(255,255,255,0.8); min-width: 38px; }
+.acronym-key { color: rgba(0,0,20,0.75); min-width: 38px; }
 
-/* ── SCROLL HINT ──────────────────────────────────────────────── */
-#scrollHint {
-  position: absolute; bottom: 2.2rem; left: 50%;
-  transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-  z-index: 10; pointer-events: auto; text-decoration: none;
-  animation: floatHint 2.2s ease-in-out infinite;
-}
-@keyframes floatHint {
-  0%,100%{ transform: translateX(-50%) translateY(0); }
-  50%    { transform: translateX(-50%) translateY(6px); }
-}
-.sh-label {
-  font-family: var(--font-mono); font-size: 0.62rem;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
-}
-.sh-arrow { font-size: 0.9rem; color: rgba(255,255,255,0.3); }
 
 /* ── PLANET LABELS ────────────────────────────────────────────── */
 .planet-label {
@@ -140,33 +124,33 @@ nav {
 }
 .planet-label .pl-dot {
   width: 4px; height: 4px; border-radius: 50%;
-  background: rgba(255,255,255,0.6);
+  background: rgba(0,0,20,0.45);
   margin: 0 auto 0.5rem;
 }
 .planet-label .pl-name {
   font-family: var(--font-mono);
   font-size: 0.75rem; font-weight: 500;
-  color: #fff; text-align: center; letter-spacing: 0.04em;
-  text-shadow: 0 0 12px rgba(0,0,0,0.9);
+  color: #111; text-align: center; letter-spacing: 0.04em;
+  text-shadow: 0 1px 4px rgba(245,244,240,0.9);
 }
-.planet-label .pl-name em { font-style: normal; opacity: 0.6; }
+.planet-label .pl-name em { font-style: normal; opacity: 0.55; }
 .planet-label .pl-sub {
   font-family: var(--font-mono); font-size: 0.58rem;
-  color: rgba(255,255,255,0.38); text-align: center;
+  color: rgba(0,0,20,0.4); text-align: center;
   margin-top: 0.18rem; letter-spacing: 0.06em;
 }
 .planet-label .pl-tag {
   display: none; /* shown on hover */
   margin-top: 0.5rem;
-  background: rgba(5,5,20,0.85);
-  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(245,244,240,0.92);
+  border: 1px solid rgba(0,0,20,0.12);
   border-radius: 3px; padding: 0.35rem 0.8rem;
   backdrop-filter: blur(10px);
 }
 .planet-label:hover .pl-tag { display: block; }
 .pl-tag-inner {
   font-family: var(--font-mono); font-size: 0.65rem;
-  color: rgba(255,255,255,0.8);
+  color: rgba(0,0,20,0.7);
 }
 
 /* ── SUN LABEL ────────────────────────────────────────────────── */
@@ -188,77 +172,12 @@ nav {
   text-transform: uppercase; margin-top: 0.15rem;
 }
 
-/* ── PAPERS (white section below) ────────────────────────────── */
-.papers-wrap {
-  background: var(--white);
-  color: var(--black);
-}
-.papers {
-  padding: 8rem 2.5rem;
-  max-width: 1100px; margin: 0 auto;
-}
-.section-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--gray-400); margin-bottom: 3rem;
-  display: flex; align-items: center; gap: 1rem;
-}
-.section-eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
-.paper-row {
-  display: grid;
-  grid-template-columns: 80px 1fr auto;
-  gap: 2rem; align-items: start;
-  padding: 2.5rem 0;
-  border-bottom: 1px solid var(--gray-200);
-  text-decoration: none; color: inherit;
-  transition: background .15s; cursor: pointer;
-}
-.paper-row:hover .pr-title { text-decoration: underline; text-decoration-thickness: 1px; }
-.paper-row:hover .pr-arrow { transform: translateX(5px); }
-.pr-index {
-  font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400);
-  padding-top: 0.25rem; letter-spacing: 0.06em;
-}
-.pr-title {
-  font-family: var(--font-serif); font-size: 1.7rem; font-weight: 400;
-  letter-spacing: -0.01em; line-height: 1.15; margin-bottom: 0.6rem;
-}
-.pr-title em { font-style: italic; }
-.pr-meta { font-size: 0.78rem; color: var(--gray-600); margin-bottom: 0.5rem; }
-.pr-abstract { font-size: 0.85rem; color: var(--gray-600); line-height: 1.65; max-width: 580px; }
-.pr-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
-.pr-tag { font-family: var(--font-mono); font-size: 0.62rem; color: var(--gray-400); letter-spacing: 0.04em; }
-.pr-tag::before { content: '#'; }
-.pr-arrow { font-size: 1.2rem; padding-top: 0.25rem; transition: transform .2s; }
-.pr-badge {
-  display: inline-block; font-family: var(--font-mono);
-  font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 0.15rem 0.5rem; border: 1px solid var(--black);
-  margin-right: 0.5rem; vertical-align: middle;
-}
-
-/* ── FOOTER ───────────────────────────────────────────────────── */
-footer {
-  background: var(--white); color: var(--black);
-  border-top: 1px solid var(--gray-200);
-  padding: 2rem 2.5rem;
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 1100px; margin: 0 auto;
-}
-.footer-brand { font-family: var(--font-mono); font-size: 0.78rem; }
-.footer-brand span { opacity: 0.4; }
-.footer-note { font-size: 0.72rem; color: var(--gray-400); }
-.footer-note a { color: inherit; }
 
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 700px) {
   nav { padding: 0 1.2rem; }
-  #heroOverlay { width: 100%; min-width: 0; padding: 5.5rem 1.2rem 2rem; background: linear-gradient(180deg, rgba(0,0,5,0.85) 60%, transparent 100%); }
+  #heroOverlay { width: 100%; min-width: 0; padding: 5.5rem 1.2rem 2rem; background: linear-gradient(180deg, rgba(245,244,240,0.92) 60%, transparent 100%); }
   .hero-headline { font-size: 2.4rem; }
-  .papers { padding: 4rem 1.2rem; }
-  .paper-row { grid-template-columns: 50px 1fr; }
-  .pr-arrow { display: none; }
-  footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem 1.2rem; }
   .nav-links-right a:not(:last-child) { display: none; }
 }
 </style>
@@ -269,7 +188,6 @@ footer {
 <nav>
   <a class="nav-brand" href="/">Polyfd<span>o</span>S</a>
   <div class="nav-links-right">
-    <a href="#papers">Research</a>
     <a href="/polyfdor">PolyfdoR</a>
   </div>
 </nav>
@@ -325,99 +243,14 @@ footer {
     <div class="pl-sub">File Format</div>
     <div class="pl-tag"><div class="pl-tag-inner">v1.0 · Daftyon →</div></div>
   </a>
-  <a class="planet-label" href="#papers" id="lbl-research">
+  <a class="planet-label" href="/polyfdor" id="lbl-research">
     <div class="pl-dot"></div>
     <div class="pl-name">Research</div>
     <div class="pl-sub">Papers &amp; Theory</div>
-    <div class="pl-tag"><div class="pl-tag-inner">6 papers · scroll →</div></div>
-  </a>
-
-  <!-- Scroll hint -->
-  <a href="#papers" id="scrollHint">
-    <span class="sh-label">Explore Research</span>
-    <span class="sh-arrow">↓</span>
+    <div class="pl-tag"><div class="pl-tag-inner">6 papers · explore →</div></div>
   </a>
 </section>
 
-<!-- PAPERS -->
-<div class="papers-wrap">
-<section class="papers" id="papers">
-  <div class="section-eyebrow">Published Research</div>
-
-  <a class="paper-row" href="/papers/novectDB">
-    <div class="pr-index">CKX<br>001</div>
-    <div class="pr-body">
-      <div class="pr-title"><span class="pr-badge">New</span>NoVect<em>DB</em></div>
-      <div class="pr-meta">Ahmed Hafdi · CookiX Project · February 2026</div>
-      <p class="pr-abstract">A topological–relational paradigm for post-vector data management. Replaces embedding similarity with sheaf-theoretic composition on dynamic graph manifolds — exact retrieval, no approximation.</p>
-      <div class="pr-tags"><span class="pr-tag">topology</span><span class="pr-tag">sheaf-theory</span><span class="pr-tag">knowledge-graphs</span><span class="pr-tag">persistent-homology</span></div>
-    </div>
-    <div class="pr-arrow">→</div>
-  </a>
-
-  <a class="paper-row" href="/papers/realistic">
-    <div class="pr-index">CKX<br>003</div>
-    <div class="pr-body">
-      <div class="pr-title"><span class="pr-badge">New</span>The <em>Realistic</em> Type</div>
-      <div class="pr-meta">Ahmed Hafdi · Matyos Language Project · January 2025</div>
-      <p class="pr-abstract">Introducing <em>realistic</em>, a native type in the Matyos language implementing Kleene's three-valued logic. Extends Boolean logic with a third truth value ⊙ for uncertainty — with formal semantics, benchmarks, and applications in AI, quantum simulation, and paradox resolution.</p>
-      <div class="pr-tags"><span class="pr-tag">three-valued-logic</span><span class="pr-tag">programming-languages</span><span class="pr-tag">kleene-k3</span><span class="pr-tag">type-systems</span></div>
-    </div>
-    <div class="pr-arrow">→</div>
-  </a>
-
-  <a class="paper-row" href="/papers/hafdiConjecture">
-    <div class="pr-index">CKX<br>002</div>
-    <div class="pr-body">
-      <div class="pr-title"><span class="pr-badge">New</span>Hafdi<em> Conjecture</em></div>
-      <div class="pr-meta">Ahmed Hafdi · Independent Research · October 2025</div>
-      <p class="pr-abstract">A conjecture on the asymptotic bounds of half-prime gaps. Introduces the normalized half-gap sequence {rₙ} and proposes an exponential upper bound connecting gap growth to prime index — refining classical bounds on prime gaps.</p>
-      <div class="pr-tags"><span class="pr-tag">number-theory</span><span class="pr-tag">prime-gaps</span><span class="pr-tag">analytic-number-theory</span><span class="pr-tag">conjecture</span></div>
-    </div>
-    <div class="pr-arrow">→</div>
-  </a>
-
-  <a class="paper-row" href="/papers/contextOS">
-    <div class="pr-index">CKX<br>004</div>
-    <div class="pr-body">
-      <div class="pr-title"><span class="pr-badge">New</span>Context<em>OS</em></div>
-      <div class="pr-meta">Ahmed Hafdi · System Design Proposal · September 2025</div>
-      <p class="pr-abstract">A hierarchical architecture for managing context in Large Language Models. Proposes a three-tier caching system (L1/L2/L3) inspired by CPU cache design, with <em>context capsules</em> — multi-format containers that self-organize based on access patterns to reduce retrieval latency by 67–80%.</p>
-      <div class="pr-tags"><span class="pr-tag">LLM</span><span class="pr-tag">context-management</span><span class="pr-tag">caching</span><span class="pr-tag">system-design</span><span class="pr-tag">RAG</span></div>
-    </div>
-    <div class="pr-arrow">→</div>
-  </a>
-
-  <a class="paper-row" href="/papers/pizzaSugar">
-    <div class="pr-index">CKX<br>005</div>
-    <div class="pr-body">
-      <div class="pr-title"><span class="pr-badge">New</span>Monohedral <em>Disc Tiling</em></div>
-      <div class="pr-meta">Mathematical Processing Research Group · September 2025</div>
-      <p class="pr-abstract">Adapting monohedral disc tiling from pizza cutting theory to frustum-shaped sugar loaves. Curved polygonal patterns scaled layer-by-layer across the truncated cone achieve 92–98% cutting efficiency — surpassing traditional sectorial and cubic decomposition methods.</p>
-      <div class="pr-tags"><span class="pr-tag">geometry</span><span class="pr-tag">tiling-theory</span><span class="pr-tag">food-processing</span><span class="pr-tag">frustum</span><span class="pr-tag">optimization</span></div>
-    </div>
-    <div class="pr-arrow">→</div>
-  </a>
-
-  <a class="paper-row" href="/papers/fromProbsToEcoSys">
-    <div class="pr-index">CKX<br>006</div>
-    <div class="pr-body">
-      <div class="pr-title"><span class="pr-badge">New</span>From Cascade <em>Chaos</em> to Ecosystem Harmony</div>
-      <div class="pr-meta">Ahmed Hafdi · Independent Research · August 2025</div>
-      <p class="pr-abstract">A complete mathematical framework for the solution-problem paradox. Proves isolated solutions generate O(2<sup>n</sup>) exponential problem cascades, and introduces the Homogeneous Solution Ecosystem (HSE) design achieving O(log&nbsp;n) growth — validated by a smart city case study showing 67%&nbsp;→&nbsp;91% resource utilization and 5.8&nbsp;→&nbsp;8.9/10 satisfaction.</p>
-      <div class="pr-tags"><span class="pr-tag">systems-theory</span><span class="pr-tag">network-cascades</span><span class="pr-tag">complexity</span><span class="pr-tag">ecosystem-design</span><span class="pr-tag">graph-theory</span></div>
-    </div>
-    <div class="pr-arrow">→</div>
-  </a>
-
-</section>
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <span class="footer-brand">Polyfd<span>o</span>S</span>
-  <span class="footer-note">A universe built by <a href="/polyfdor">PolyfdoR</a> · 2026</span>
-</footer>
 
 <!-- THREE.JS -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -437,7 +270,7 @@ const H = () => canvas.clientHeight;
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(W(), H());
-renderer.setClearColor(0x000005, 1);
+renderer.setClearColor(0xf5f4f0, 1);
 
 // ── Scene + Camera ────────────────────────────────────────────
 const scene  = new THREE.Scene();
@@ -447,13 +280,13 @@ camera.position.set(0, 22, 26);
 camera.lookAt(0, 0, 0);
 
 // ── Fog ───────────────────────────────────────────────────────
-scene.fog = new THREE.FogExp2(0x000005, 0.008);
+scene.fog = new THREE.FogExp2(0xf5f4f0, 0.006);
 
 // ── Lights ───────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0x111122, 0.8));
-const sunLight = new THREE.PointLight(0xfff0cc, 3.5, 80, 1.5);
+scene.add(new THREE.AmbientLight(0x9999bb, 1.4));
+const sunLight = new THREE.PointLight(0xfff0cc, 4.0, 80, 1.5);
 scene.add(sunLight);
-const rimLight = new THREE.DirectionalLight(0x334466, 0.3);
+const rimLight = new THREE.DirectionalLight(0x8899bb, 0.5);
 rimLight.position.set(-10, 15, -10); scene.add(rimLight);
 
 // ── SHARED PLANET SHADERS ─────────────────────────────────────
@@ -610,7 +443,7 @@ const CORONA_VS = `
       void main(){ vB=aBrightness; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize=aSize*(300.0/(-mv.z)); gl_Position=projectionMatrix*mv; }`,
     fragmentShader: `
       varying float vB;
-      void main(){ vec2 uv=gl_PointCoord-0.5; float r=length(uv); if(r>.5)discard; float a=smoothstep(.5,.0,r); gl_FragColor=vec4(vec3(0.85+vB*0.15,0.88+vB*0.1,1.0)*vB, a); }`,
+      void main(){ vec2 uv=gl_PointCoord-0.5; float r=length(uv); if(r>.5)discard; float a=smoothstep(.5,.0,r)*vB*0.7; gl_FragColor=vec4(vec3(0.12,0.10+vB*0.05,0.22+vB*0.08), a); }`,
     transparent: true, depthWrite: false
   });
   scene.add(new THREE.Points(geo, mat));
@@ -671,7 +504,7 @@ const CONFIGS = [
 // ── BUILD PLANETS ─────────────────────────────────────────────
 const planets = [];
 const ORBIT_MAT = new THREE.MeshBasicMaterial({
-  color: 0xffffff, transparent: true, opacity: 0.06, side: THREE.DoubleSide
+  color: 0x223355, transparent: true, opacity: 0.15, side: THREE.DoubleSide
 });
 
 CONFIGS.forEach(cfg => {
@@ -762,12 +595,9 @@ canvas.addEventListener('click', e => {
   if (hits.length) {
     const idx = meshes.indexOf(hits[0].object);
     if (idx !== -1) {
-      const url = CONFIGS[idx].id === 'research'
-        ? '#papers' : '/' + CONFIGS[idx].id.replace('-', '');
-      // Special: polyfdos-os has route /polyfdos
       if (CONFIGS[idx].id === 'polyfdos-os') window.location.href = '/polyfdos';
-      else if (CONFIGS[idx].id === 'research') document.getElementById('papers').scrollIntoView({behavior:'smooth'});
-      else window.location.href = url;
+      else if (CONFIGS[idx].id === 'research') window.location.href = '/polyfdor';
+      else window.location.href = '/' + CONFIGS[idx].id.replace('-', '');
     }
   }
 });
