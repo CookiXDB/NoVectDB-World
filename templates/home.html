@@ -99,10 +99,46 @@ nav {
 }
 
 
+/* ── CREATOR ──────────────────────────────────────────────────── */
+#creator {
+  position: fixed;
+  bottom: 2rem; right: 2rem;
+  z-index: 200;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.65rem 1rem;
+  background: rgba(245,244,240,0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 2px;
+  transition: border-color .2s, background .2s;
+}
+#creator:hover {
+  background: rgba(245,244,240,0.97);
+  border-color: rgba(0,0,0,0.18);
+}
+#creator img {
+  width: 28px; height: 28px;
+  opacity: 0.75;
+}
+.creator-text { display: flex; flex-direction: column; gap: 0.05rem; }
+.creator-name {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; font-weight: 500;
+  color: rgba(0,0,0,0.65); letter-spacing: 0.03em;
+}
+.creator-role {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: rgba(0,0,0,0.32); letter-spacing: 0.05em;
+}
+
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 700px) {
   nav { padding: 0 1.2rem; }
   #sunLabel { transform: translate(-50%, -260%); }
+  #creator { bottom: 1.2rem; right: 1.2rem; padding: 0.5rem 0.75rem; }
+  #creator img { width: 22px; height: 22px; }
 }
 </style>
 </head>
@@ -111,10 +147,17 @@ nav {
 <!-- NAV -->
 <nav>
   <a class="nav-brand" href="/">Polyfd<span>o</span>S</a>
-  <div class="nav-links-right">
-    <a href="/polyfdor">PolyfdoR</a>
-  </div>
+  <div class="nav-links-right"></div>
 </nav>
+
+<!-- CREATOR -->
+<a id="creator" href="/polyfdor">
+  <img src="/static/img/crow.svg" alt="PolyfdoR">
+  <div class="creator-text">
+    <span class="creator-name">PolyfdoR</span>
+    <span class="creator-role">Creator of the universe</span>
+  </div>
+</a>
 
 <!-- GALAXY -->
 <section id="galaxy">
