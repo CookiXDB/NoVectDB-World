@@ -32,26 +32,19 @@ body {
 /* ── NAV ──────────────────────────────────────────────────────── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  height: 52px;
+  height: 48px;
   display: flex; align-items: center;
-  padding: 0 2.5rem;
-  justify-content: space-between;
-  background: rgba(245,244,240,0.85);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(0,0,20,0.08);
+  padding: 0 2rem;
+  background: transparent;
 }
 .nav-brand {
   font-family: var(--font-mono);
-  font-size: 0.9rem; font-weight: 500; letter-spacing: -0.03em;
-  text-decoration: none; color: #111;
+  font-size: 0.82rem; font-weight: 500; letter-spacing: 0.04em;
+  text-decoration: none; color: rgba(0,0,0,0.35);
+  transition: color .2s;
 }
-.nav-brand span { opacity: 0.38; }
-.nav-links-right { display: flex; gap: 2rem; align-items: center; }
-.nav-links-right a {
-  font-size: 0.8rem; color: rgba(0,0,20,0.45);
-  text-decoration: none; transition: color .2s; letter-spacing: 0.01em;
-}
-.nav-links-right a:hover { color: #111; }
+.nav-brand:hover { color: rgba(0,0,0,0.7); }
+.nav-links-right { display: none; }
 
 /* ── GALAXY SECTION ──────────────────────────────────────────── */
 #galaxy {
@@ -71,29 +64,32 @@ nav {
 /* ── PLANET LABELS ────────────────────────────────────────────── */
 .planet-label {
   position: absolute;
-  transform: translate(-50%, -140%);
+  transform: translate(-50%, -145%);
   z-index: 50;
   cursor: pointer;
   pointer-events: auto;
   text-decoration: none;
   white-space: nowrap;
+  transition: opacity .2s;
 }
+.planet-label:hover { opacity: 0.75; }
 .planet-label .pl-name {
   font-family: var(--font-mono);
-  font-size: 0.7rem; font-weight: 400;
-  color: rgba(0,0,10,0.55); text-align: center; letter-spacing: 0.05em;
+  font-size: 0.65rem; font-weight: 400;
+  color: rgba(0,0,10,0.42); text-align: center; letter-spacing: 0.06em;
 }
 
 /* ── SUN LABEL ────────────────────────────────────────────────── */
 #sunLabel {
   position: absolute; z-index: 50;
-  transform: translate(-50%, -220%);
+  transform: translate(-50%, -240%);
   text-align: center; pointer-events: none;
 }
 .sun-name {
-  font-family: var(--font-mono);
-  font-size: 0.72rem; letter-spacing: 0.1em;
-  color: rgba(180,120,20,0.7);
+  font-family: var(--font-serif);
+  font-size: 0.95rem; font-style: italic;
+  letter-spacing: 0.01em;
+  color: rgba(160,100,10,0.65);
 }
 
 
@@ -318,8 +314,8 @@ const CORONA_VS = `
     pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
     pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
     pos[i*3+2] = r * Math.cos(phi);
-    siz[i] = 0.3 + Math.random() * 1.4;
-    bri[i] = 0.4 + Math.random() * 0.6;
+    siz[i] = 0.5 + Math.random() * 1.8;
+    bri[i] = 0.5 + Math.random() * 0.5;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position',  new THREE.BufferAttribute(pos, 3));
@@ -332,7 +328,7 @@ const CORONA_VS = `
       void main(){ vB=aBrightness; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize=aSize*(300.0/(-mv.z)); gl_Position=projectionMatrix*mv; }`,
     fragmentShader: `
       varying float vB;
-      void main(){ vec2 uv=gl_PointCoord-0.5; float r=length(uv); if(r>.5)discard; float a=smoothstep(.5,.0,r)*vB*0.7; gl_FragColor=vec4(vec3(0.12,0.10+vB*0.05,0.22+vB*0.08), a); }`,
+      void main(){ vec2 uv=gl_PointCoord-0.5; float r=length(uv); if(r>.5)discard; float a=smoothstep(.5,.0,r)*vB*0.55; gl_FragColor=vec4(vec3(0.08,0.08,0.14), a); }`,
     transparent: true, depthWrite: false
   });
   scene.add(new THREE.Points(geo, mat));
@@ -361,31 +357,31 @@ const CONFIGS = [
   {
     id:      'polyfdos-os',
     radius:  0.62,  orbitR: 5.2,   speed: 0.00044, angle0: 0.6,  incline: 0.07,
-    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 1.1,
+    color:   new THREE.Color(0x0d0d0d), atmo: new THREE.Color(0xc8c8c8), seed: 1.1,
     rings: false, moon: false, labelEl: 'lbl-polyfdos-os'
   },
   {
     id:      'matyos',
     radius:  0.50,  orbitR: 7.8,   speed: 0.00028, angle0: 2.2,  incline: 0.12,
-    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 2.7,
+    color:   new THREE.Color(0x0d0d0d), atmo: new THREE.Color(0xc8c8c8), seed: 2.7,
     rings: false, moon: false, labelEl: 'lbl-matyos'
   },
   {
     id:      'cookixdb',
     radius:  0.78,  orbitR: 10.8,  speed: 0.00018, angle0: 4.0,  incline: 0.04,
-    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 4.3,
+    color:   new THREE.Color(0x0d0d0d), atmo: new THREE.Color(0xc8c8c8), seed: 4.3,
     rings: false, moon: true,  labelEl: 'lbl-cookixdb'
   },
   {
     id:      'bring',
     radius:  0.44,  orbitR: 13.2,  speed: 0.00012, angle0: 1.0,  incline: 0.15,
-    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 6.1,
+    color:   new THREE.Color(0x0d0d0d), atmo: new THREE.Color(0xc8c8c8), seed: 6.1,
     rings: false, moon: false, labelEl: 'lbl-bring'
   },
   {
     id:      'research',
     radius:  0.70,  orbitR: 16.5,  speed: 0.00007, angle0: 3.2,  incline: 0.08,
-    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 8.8,
+    color:   new THREE.Color(0x0d0d0d), atmo: new THREE.Color(0xc8c8c8), seed: 8.8,
     rings: false, moon: false, labelEl: 'lbl-research'
   },
 ];
@@ -393,12 +389,12 @@ const CONFIGS = [
 // ── BUILD PLANETS ─────────────────────────────────────────────
 const planets = [];
 const ORBIT_MAT = new THREE.MeshBasicMaterial({
-  color: 0x223355, transparent: true, opacity: 0.15, side: THREE.DoubleSide
+  color: 0x111122, transparent: true, opacity: 0.18, side: THREE.DoubleSide
 });
 
 CONFIGS.forEach(cfg => {
   // Orbit ring
-  const orbitGeo = new THREE.TorusGeometry(cfg.orbitR, 0.02, 2, 200);
+  const orbitGeo = new THREE.TorusGeometry(cfg.orbitR, 0.025, 2, 220);
   const orbit = new THREE.Mesh(orbitGeo, ORBIT_MAT);
   orbit.rotation.x = Math.PI / 2 + cfg.incline;
   scene.add(orbit);
@@ -422,10 +418,10 @@ CONFIGS.forEach(cfg => {
 
   // Atmosphere glow shell
   const atmoMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(cfg.radius * 1.15, 32, 32),
+    new THREE.SphereGeometry(cfg.radius * 1.35, 32, 32),
     new THREE.MeshBasicMaterial({
       color: cfg.atmo, transparent: true,
-      opacity: 0.07, side: THREE.BackSide
+      opacity: 0.22, side: THREE.BackSide
     })
   );
   scene.add(atmoMesh);
