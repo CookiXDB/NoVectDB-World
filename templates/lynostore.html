@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LynoStore — Moroccan 3D Heritage Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --black:       #0a0a0a;
+  --white:       #ffffff;
+  --gray-50:     #fafafa;
+  --gray-100:    #f5f5f5;
+  --gray-200:    #e8e8e8;
+  --gray-400:    #999;
+  --gray-600:    #555;
+  --brand:       #C1175A;
+  --brand-light: #f9e5ee;
+  --brand-mid:   #e8a0bc;
+  --font-serif:  'EB Garamond', Georgia, serif;
+  --font-sans:   'Inter', system-ui, sans-serif;
+  --font-mono:   'JetBrains Mono', monospace;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--white);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  height: 54px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--brand);
+}
+.nav-left { display: flex; align-items: center; gap: 1.2rem; }
+.nav-logo video { height: 30px; width: auto; display: block; pointer-events: none; }
+.nav-sep { width: 1px; height: 20px; background: var(--gray-200); }
+.nav-store-name {
+  font-family: var(--font-mono);
+  font-size: 0.82rem; font-weight: 500; letter-spacing: 0.06em;
+  color: var(--brand);
+}
+.nav-right { display: flex; align-items: center; gap: 1.4rem; }
+.nav-link {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; color: var(--gray-400);
+  text-decoration: none; letter-spacing: 0.03em;
+  transition: color .15s;
+}
+.nav-link:hover { color: var(--brand); }
+.nav-cart {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  background: var(--brand); color: var(--white);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.06em;
+  text-decoration: none; cursor: pointer;
+  transition: opacity .15s;
+}
+.nav-cart:hover { opacity: 0.85; }
+
+/* ── BANNER ── */
+.banner {
+  margin-top: 54px;
+  background: var(--black);
+  padding: 5rem 2rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 1.4rem;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% 100%, rgba(193,23,90,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.banner-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--brand);
+}
+.banner-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 400; color: var(--white);
+  line-height: 1.2;
+}
+.banner-title em { font-style: italic; color: var(--brand-mid); }
+.banner-sub {
+  font-size: 0.95rem; color: rgba(255,255,255,0.5);
+  max-width: 480px; line-height: 1.7;
+}
+.banner-badges { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.4rem; }
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+}
+.badge-brand { background: var(--brand); color: var(--white); }
+.badge-outline { border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); }
+
+/* ── STORE LAYOUT ── */
+.store-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 3rem;
+  margin-top: 3rem;
+}
+@media (max-width: 768px) {
+  .store-wrap { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}
+
+/* ── SIDEBAR ── */
+.sidebar {}
+.sidebar-section { margin-bottom: 2rem; }
+.sidebar-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--brand); margin-bottom: 0.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--brand-light);
+}
+.filter-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.4rem 0;
+  font-size: 0.85rem; color: var(--gray-600);
+  cursor: pointer; transition: color .15s;
+  border-radius: 4px;
+}
+.filter-item:hover { color: var(--brand); }
+.filter-item.active { color: var(--brand); font-weight: 600; }
+.filter-count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; color: var(--gray-400);
+  background: var(--gray-100); padding: 1px 6px; border-radius: 10px;
+}
+.filter-item.active .filter-count { background: var(--brand-light); color: var(--brand); }
+
+/* ── MAIN AREA ── */
+.main-area {}
+.store-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+.store-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; color: var(--gray-400); letter-spacing: 0.04em;
+}
+.store-count span { color: var(--brand); font-weight: 600; }
+.sort-select {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; color: var(--gray-600);
+  border: 1px solid var(--gray-200); border-radius: 4px;
+  padding: 0.3rem 0.6rem; background: var(--white); cursor: pointer;
+  outline: none;
+}
+.sort-select:focus { border-color: var(--brand); }
+
+/* ── PRODUCT GRID ── */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ── PRODUCT CARD ── */
+.product-card {
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+  transition: border-color .2s, box-shadow .2s;
+  cursor: pointer;
+}
+.product-card:hover {
+  border-color: var(--brand-mid);
+  box-shadow: 0 4px 24px rgba(193,23,90,0.08);
+}
+.card-media {
+  position: relative;
+  background: #000;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+.card-media video, .card-media img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.card-badges {
+  position: absolute; top: 10px; left: 10px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.card-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 3px;
+  backdrop-filter: blur(6px);
+}
+.cb-ar   { background: rgba(193,23,90,0.85); color: #fff; }
+.cb-3d   { background: rgba(0,0,0,0.6); color: #fff; }
+.cb-lynoX { background: rgba(193,23,90,0.15); color: var(--brand); border: 1px solid rgba(193,23,90,0.3); }
+.card-format {
+  position: absolute; bottom: 10px; right: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem; letter-spacing: 0.08em;
+  background: rgba(0,0,0,0.65); color: rgba(255,255,255,0.7);
+  padding: 3px 7px; border-radius: 3px;
+  backdrop-filter: blur(4px);
+}
+.card-body { padding: 1.2rem; }
+.card-category {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--brand); margin-bottom: 0.4rem;
+}
+.card-name {
+  font-size: 1rem; font-weight: 600; color: var(--black);
+  margin-bottom: 0.15rem;
+}
+.card-arabic {
+  font-family: var(--font-serif);
+  font-size: 1rem; color: var(--gray-400);
+  margin-bottom: 0.7rem; direction: rtl;
+}
+.card-desc {
+  font-size: 0.82rem; line-height: 1.55; color: var(--gray-600);
+  margin-bottom: 1rem;
+}
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--brand-light);
+}
+.card-price {
+  font-family: var(--font-mono);
+  font-size: 0.88rem; font-weight: 600; color: var(--brand);
+}
+.card-price .price-label {
+  font-size: 0.62rem; font-weight: 400; color: var(--gray-400);
+  display: block; margin-bottom: 1px;
+}
+.card-buy {
+  padding: 0.45rem 1rem;
+  background: var(--brand); color: var(--white);
+  border: none; border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.06em;
+  cursor: pointer; transition: opacity .15s;
+}
+.card-buy:hover { opacity: 0.85; }
+
+/* ── COMING SOON CARD ── */
+.card-coming {
+  border: 1px dashed var(--gray-200);
+  border-radius: 12px;
+  background: var(--gray-50);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 320px; gap: 0.8rem; text-align: center;
+  padding: 2rem;
+}
+.card-coming .cs-icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--brand-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+.card-coming .cs-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gray-400);
+}
+.card-coming .cs-sub {
+  font-size: 0.8rem; color: var(--gray-400); line-height: 1.5;
+}
+
+/* ── FORMAT BANNER ── */
+.format-banner {
+  margin-top: 3rem;
+  background: var(--black);
+  border-radius: 12px;
+  padding: 2.4rem;
+  display: flex; align-items: center; gap: 2rem;
+  position: relative; overflow: hidden;
+}
+.format-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 40% 100% at 0% 50%, rgba(193,23,90,0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+.fb-icon {
+  flex-shrink: 0;
+  width: 56px; height: 56px; border-radius: 10px;
+  background: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--white); letter-spacing: 0.04em; font-weight: 600;
+}
+.fb-text .fb-title {
+  font-family: var(--font-mono);
+  font-size: 0.9rem; font-weight: 600; color: var(--white);
+  margin-bottom: 0.4rem; letter-spacing: 0.04em;
+}
+.fb-text .fb-sub {
+  font-size: 0.83rem; color: rgba(255,255,255,0.45); line-height: 1.6;
+}
+.fb-pills {
+  margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;
+}
+.fb-pill {
+  font-family: var(--font-mono);
+  font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 3px;
+  border: 1px solid rgba(193,23,90,0.4); color: var(--brand);
+}
+@media (max-width: 600px) {
+  .format-banner { flex-direction: column; }
+}
+
+/* ── HOW IT WORKS ── */
+.hiw {
+  margin-top: 3rem;
+  border: 1px solid var(--brand-light);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.hiw-header {
+  background: var(--brand-light);
+  padding: 1rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--brand);
+}
+.hiw-steps {
+  display: grid; grid-template-columns: repeat(3,1fr);
+}
+@media (max-width: 600px) { .hiw-steps { grid-template-columns: 1fr; } }
+.hiw-step {
+  padding: 1.4rem 1.5rem;
+  border-right: 1px solid var(--brand-light);
+}
+.hiw-step:last-child { border-right: none; }
+.hiw-num {
+  font-family: var(--font-mono);
+  font-size: 1.4rem; font-weight: 600; color: var(--brand);
+  opacity: 0.3; margin-bottom: 0.6rem;
+}
+.hiw-title {
+  font-size: 0.88rem; font-weight: 600; color: var(--black);
+  margin-bottom: 0.3rem;
+}
+.hiw-sub { font-size: 0.8rem; color: var(--gray-600); line-height: 1.55; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a class="nav-logo" href="/lynos">
+      <video src="/static/img/lynos_logo.mp4" autoplay loop muted playsinline></video>
+    </a>
+    <div class="nav-sep"></div>
+    <span class="nav-store-name">LynoStore</span>
+  </div>
+  <div class="nav-right">
+    <a class="nav-link" href="/lynos">← LynOS</a>
+    <a class="nav-link" href="/">Universe</a>
+    <div class="nav-cart">🛒 &nbsp;Cart (0)</div>
+  </div>
+</nav>
+
+<!-- BANNER -->
+<div class="banner">
+  <div class="banner-eyebrow">Made in Morocco &nbsp;·&nbsp; 100% Authentic</div>
+  <h1 class="banner-title">The marketplace for <em>Moroccan<br>heritage</em> in 3D</h1>
+  <p class="banner-sub">Browse authenticated .lynoX artifacts — secure 3D models of traditional Moroccan artisanat, ready for AR, VR, and digital collections.</p>
+  <div class="banner-badges">
+    <span class="badge badge-brand">AR Ready</span>
+    <span class="badge badge-outline">.lynoX format</span>
+    <span class="badge badge-outline">LynOV Viewer</span>
+    <span class="badge badge-outline">Artisan certified</span>
+  </div>
+</div>
+
+<!-- STORE -->
+<div class="store-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Category</div>
+      <div class="filter-item active">All artifacts <span class="filter-count">2</span></div>
+      <div class="filter-item">Ceramics <span class="filter-count">2</span></div>
+      <div class="filter-item">Textiles <span class="filter-count">0</span></div>
+      <div class="filter-item">Metalwork <span class="filter-count">0</span></div>
+      <div class="filter-item">Wood carving <span class="filter-count">0</span></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Format</div>
+      <div class="filter-item active">.lynoX <span class="filter-count">2</span></div>
+      <div class="filter-item">AR bundle <span class="filter-count">1</span></div>
+      <div class="filter-item">Educational <span class="filter-count">0</span></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">License</div>
+      <div class="filter-item active">All <span class="filter-count">2</span></div>
+      <div class="filter-item">Personal <span class="filter-count">2</span></div>
+      <div class="filter-item">Commercial <span class="filter-count">0</span></div>
+      <div class="filter-item">Institutional <span class="filter-count">0</span></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Region</div>
+      <div class="filter-item active">All Morocco <span class="filter-count">2</span></div>
+      <div class="filter-item">Fès <span class="filter-count">1</span></div>
+      <div class="filter-item">Marrakech <span class="filter-count">0</span></div>
+      <div class="filter-item">Safi <span class="filter-count">1</span></div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-area">
+
+    <div class="store-topbar">
+      <div class="store-count"><span>2</span> artifacts available</div>
+      <select class="sort-select">
+        <option>Newest first</option>
+        <option>Price: Low to high</option>
+        <option>Price: High to low</option>
+      </select>
+    </div>
+
+    <div class="product-grid">
+
+      <!-- PRODUCT 1: Kas Tine -->
+      <div class="product-card">
+        <div class="card-media">
+          <video src="/static/img/lynos_kastine_demo.mp4" autoplay loop muted playsinline></video>
+          <div class="card-badges">
+            <span class="card-badge cb-3d">3D</span>
+            <span class="card-badge cb-ar">AR</span>
+          </div>
+          <span class="card-format">.lynoX</span>
+        </div>
+        <div class="card-body">
+          <div class="card-category">Ceramics · Safi</div>
+          <div class="card-name">Kas Tine</div>
+          <div class="card-arabic">كاس طين</div>
+          <div class="card-desc">Traditional Moroccan clay cup for tea, coffee, and traditional drinks. Hand-thrown, kiln-fired earthenware. Full 3D model with AR support.</div>
+          <div class="card-footer">
+            <div class="card-price">
+              <span class="price-label">from</span>
+              9.00 MAD
+            </div>
+            <button class="card-buy">Add to cart</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCT 2: Qulla -->
+      <div class="product-card">
+        <div class="card-media">
+          <video src="/static/img/lynos_qulla_demo.mp4" autoplay loop muted playsinline></video>
+          <div class="card-badges">
+            <span class="card-badge cb-3d">3D</span>
+          </div>
+          <span class="card-format">.lynoX</span>
+        </div>
+        <div class="card-body">
+          <div class="card-category">Ceramics · Fès</div>
+          <div class="card-name">Qulla</div>
+          <div class="card-arabic">قُلّة</div>
+          <div class="card-desc">Traditional Moroccan water jar. Also called "Jarra" or "جرّة" depending on the region. Precise vessel geometry with cultural metadata embedded.</div>
+          <div class="card-footer">
+            <div class="card-price">
+              <span class="price-label">from</span>
+              12.00 MAD
+            </div>
+            <button class="card-buy">Add to cart</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMING SOON -->
+      <div class="card-coming">
+        <div class="cs-icon">🧵</div>
+        <div class="cs-title">Coming soon</div>
+        <div class="cs-sub">Handwoven textiles, Zellige tiles, and more artisanat being scanned now.</div>
+      </div>
+
+      <div class="card-coming">
+        <div class="cs-icon">🏺</div>
+        <div class="cs-title">Submit your craft</div>
+        <div class="cs-sub">Are you a Moroccan artisan? Upload your product photos — LynOS generates your 3D model.</div>
+      </div>
+
+    </div>
+
+    <!-- FORMAT INFO -->
+    <div class="format-banner">
+      <div class="fb-icon">.lynoX</div>
+      <div class="fb-text">
+        <div class="fb-title">Secure · Authenticated · Cultural</div>
+        <div class="fb-sub">Every artifact is sold as a .lynoX file — encrypted, artisan-attributed, and viewable only through the LynOV Viewer. Cultural context, Arabic names, and real-world dimensions are embedded in every file.</div>
+        <div class="fb-pills">
+          <span class="fb-pill">AES-256 encrypted</span>
+          <span class="fb-pill">DRM protected</span>
+          <span class="fb-pill">Artisan attributed</span>
+          <span class="fb-pill">AR ready</span>
+          <span class="fb-pill">Cultural metadata</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="hiw">
+      <div class="hiw-header">How LynoStore works</div>
+      <div class="hiw-steps">
+        <div class="hiw-step">
+          <div class="hiw-num">01</div>
+          <div class="hiw-title">Browse & choose</div>
+          <div class="hiw-sub">Explore authenticated Moroccan artifacts. Preview the 3D demo video before purchasing.</div>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-num">02</div>
+          <div class="hiw-title">Download .lynoX</div>
+          <div class="hiw-sub">Receive your secure file with full cultural metadata, artisan credit, and real dimensions.</div>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-num">03</div>
+          <div class="hiw-title">Open in LynOV</div>
+          <div class="hiw-sub">View in the LynOV Viewer — place in AR, inspect every detail, explore in 3D at true scale.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

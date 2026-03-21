@@ -65,6 +65,10 @@ def rockets():
 def lynos():
     return render_template("lynos.html")
 
+@app.route("/lynostore")
+def lynostore():
+    return render_template("lynostore.html")
+
 @app.route("/cookixdb")
 def cookixdb():
     return render_template("cookixdb.html")
