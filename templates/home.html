@@ -10,189 +10,200 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 :root {
-  --black: #0a0a0a;
-  --white: #ffffff;
-  --gray-100: #f5f5f5;
-  --gray-200: #e5e5e5;
-  --gray-400: #999;
-  --gray-600: #555;
+  --black:     #0a0a0a;
+  --white:     #ffffff;
+  --gray-100:  #f5f5f5;
+  --gray-200:  #e5e5e5;
+  --gray-400:  #999;
+  --gray-600:  #555;
   --font-serif: 'EB Garamond', Georgia, serif;
   --font-sans:  'Inter', system-ui, sans-serif;
   --font-mono:  'JetBrains Mono', monospace;
 }
 body {
   font-family: var(--font-sans);
-  background: var(--white);
-  color: var(--black);
+  background: #000005;
+  color: var(--white);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* ── NAV ─────────────────────────────────────────── */
+/* ── NAV ──────────────────────────────────────────────────────── */
 nav {
-  position: fixed; top:0; left:0; right:0; z-index:100;
-  background: rgba(255,255,255,0.96);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--gray-200);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   height: 52px;
   display: flex; align-items: center;
   padding: 0 2.5rem;
   justify-content: space-between;
+  background: rgba(0,0,5,0.7);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 .nav-brand {
   font-family: var(--font-mono);
-  font-size: 0.9rem; font-weight: 500;
-  letter-spacing: -0.03em;
-  text-decoration: none; color: var(--black);
+  font-size: 0.9rem; font-weight: 500; letter-spacing: -0.03em;
+  text-decoration: none; color: #fff;
 }
-.nav-brand span { opacity: 0.35; }
+.nav-brand span { opacity: 0.38; }
 .nav-links-right { display: flex; gap: 2rem; align-items: center; }
 .nav-links-right a {
-  font-size: 0.8rem; color: var(--gray-600);
-  text-decoration: none; transition: color .2s;
-  letter-spacing: 0.01em;
+  font-size: 0.8rem; color: rgba(255,255,255,0.5);
+  text-decoration: none; transition: color .2s; letter-spacing: 0.01em;
 }
-.nav-links-right a:hover { color: var(--black); }
-.nav-links-right a.active { color: var(--black); font-weight: 500; }
+.nav-links-right a:hover { color: #fff; }
 
-/* ── HERO ────────────────────────────────────────── */
-.hero {
-  height: 100vh;
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: flex-start;
-  padding: 0 2.5rem;
-  max-width: 900px; margin: 0 auto;
-  width: 100%;
+/* ── GALAXY SECTION ──────────────────────────────────────────── */
+#galaxy {
   position: relative;
+  width: 100%; height: 100vh;
+  overflow: hidden;
 }
-.hero-label {
+#solarCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+
+/* ── HERO OVERLAY ─────────────────────────────────────────────── */
+#heroOverlay {
+  position: absolute; top: 0; left: 0;
+  width: 40%; min-width: 320px;
+  padding: 7.5rem 2.5rem 3rem;
+  z-index: 10; pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,5,0.88) 60%, transparent 100%);
+}
+.hero-eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.7rem; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--gray-400);
-  margin-bottom: 2.5rem;
-  display: flex; align-items: center; gap: 1rem;
+  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 1.8rem;
+  display: flex; align-items: center; gap: 0.8rem;
 }
-.hero-label::after {
-  content: ''; display: block;
-  width: 40px; height: 1px; background: var(--gray-400);
+.hero-eyebrow::after {
+  content: ''; display: block; width: 30px; height: 1px;
+  background: rgba(255,255,255,0.3);
 }
 .hero-headline {
   font-family: var(--font-serif);
-  font-size: clamp(3.2rem, 8vw, 6.5rem);
-  font-weight: 400; line-height: 1.0;
-  letter-spacing: -0.025em;
-  margin-bottom: 1.5rem;
+  font-size: clamp(2.5rem, 5.5vw, 4.8rem);
+  font-weight: 400; line-height: 1.05;
+  letter-spacing: -0.02em; margin-bottom: 1.4rem;
+  color: #fff;
 }
-.hero-headline em { font-style: italic; }
+.hero-headline em { font-style: italic; opacity: 0.75; }
 .hero-tagline {
-  font-family: var(--font-serif);
-  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-  color: var(--gray-600); font-style: italic;
-  margin-bottom: 4rem;
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 1.05rem; color: rgba(255,255,255,0.45);
+  margin-bottom: 2.5rem; line-height: 1.6;
 }
 .hero-acronym {
-  display: flex; flex-direction: column; gap: 0.4rem;
-  margin-bottom: 4rem;
-  border-left: 2px solid var(--black);
-  padding-left: 1.2rem;
+  border-left: 1px solid rgba(255,255,255,0.2);
+  padding-left: 1rem; margin-bottom: 2.5rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
 }
 .acronym-row {
   font-family: var(--font-mono);
-  font-size: 0.8rem; color: var(--gray-600);
-  display: flex; gap: 0.8rem;
+  font-size: 0.72rem; color: rgba(255,255,255,0.4);
+  display: flex; gap: 0.6rem;
 }
-.acronym-key { color: var(--black); font-weight: 500; min-width: 40px; }
-.hero-scroll {
-  position: absolute; bottom: 2.5rem; left: 2.5rem;
-  font-family: var(--font-mono); font-size: 0.68rem;
-  color: var(--gray-400); letter-spacing: 0.08em;
-  display: flex; align-items: center; gap: 0.6rem;
-  text-transform: uppercase;
+.acronym-key { color: rgba(255,255,255,0.8); min-width: 38px; }
+
+/* ── SCROLL HINT ──────────────────────────────────────────────── */
+#scrollHint {
+  position: absolute; bottom: 2.2rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  z-index: 10; pointer-events: auto; text-decoration: none;
+  animation: floatHint 2.2s ease-in-out infinite;
 }
-.hero-scroll::before {
-  content: '';
-  display: block; width: 1px; height: 40px;
-  background: var(--gray-400);
+@keyframes floatHint {
+  0%,100%{ transform: translateX(-50%) translateY(0); }
+  50%    { transform: translateX(-50%) translateY(6px); }
+}
+.sh-label {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+.sh-arrow { font-size: 0.9rem; color: rgba(255,255,255,0.3); }
+
+/* ── PLANET LABELS ────────────────────────────────────────────── */
+.planet-label {
+  position: absolute;
+  transform: translate(-50%, -130%);
+  z-index: 50;
+  cursor: pointer;
+  pointer-events: auto;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity .2s;
+}
+.planet-label .pl-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  margin: 0 auto 0.5rem;
+}
+.planet-label .pl-name {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; font-weight: 500;
+  color: #fff; text-align: center; letter-spacing: 0.04em;
+  text-shadow: 0 0 12px rgba(0,0,0,0.9);
+}
+.planet-label .pl-name em { font-style: normal; opacity: 0.6; }
+.planet-label .pl-sub {
+  font-family: var(--font-mono); font-size: 0.58rem;
+  color: rgba(255,255,255,0.38); text-align: center;
+  margin-top: 0.18rem; letter-spacing: 0.06em;
+}
+.planet-label .pl-tag {
+  display: none; /* shown on hover */
+  margin-top: 0.5rem;
+  background: rgba(5,5,20,0.85);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 3px; padding: 0.35rem 0.8rem;
+  backdrop-filter: blur(10px);
+}
+.planet-label:hover .pl-tag { display: block; }
+.pl-tag-inner {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  color: rgba(255,255,255,0.8);
 }
 
-/* ── DIVIDER ─────────────────────────────────────── */
-.rule { border: none; border-top: 1px solid var(--gray-200); }
+/* ── SUN LABEL ────────────────────────────────────────────────── */
+#sunLabel {
+  position: absolute; z-index: 50;
+  transform: translate(-50%, -210%);
+  text-align: center; pointer-events: none;
+}
+.sun-name {
+  font-family: var(--font-serif);
+  font-size: 1.05rem; font-style: italic;
+  color: rgba(255, 230, 150, 0.9);
+  text-shadow: 0 0 20px rgba(255,180,60,0.8);
+  letter-spacing: 0.02em;
+}
+.sun-sub {
+  font-family: var(--font-mono); font-size: 0.58rem;
+  color: rgba(255,200,80,0.45); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-top: 0.15rem;
+}
 
-/* ── WORLDS SECTION ──────────────────────────────── */
-.worlds {
+/* ── PAPERS (white section below) ────────────────────────────── */
+.papers-wrap {
+  background: var(--white);
+  color: var(--black);
+}
+.papers {
   padding: 8rem 2.5rem;
   max-width: 1100px; margin: 0 auto;
 }
 .section-eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.68rem; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--gray-400);
-  margin-bottom: 3rem;
+  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gray-400); margin-bottom: 3rem;
   display: flex; align-items: center; gap: 1rem;
 }
-.section-eyebrow::after {
-  content: ''; flex: 1; height: 1px; background: var(--gray-200);
-}
-.worlds-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  border: 1px solid var(--gray-200);
-}
-.world-card {
-  padding: 2.5rem;
-  border-right: 1px solid var(--gray-200);
-  text-decoration: none; color: inherit;
-  display: flex; flex-direction: column;
-  transition: background .15s;
-  position: relative;
-}
-.world-card:last-child { border-right: none; }
-.world-card:hover { background: var(--gray-100); }
-.world-card.disabled { opacity: 0.4; pointer-events: none; cursor: default; }
-.world-num {
-  font-family: var(--font-mono);
-  font-size: 0.65rem; color: var(--gray-400);
-  letter-spacing: 0.1em; margin-bottom: 2rem;
-}
-.world-name {
-  font-family: var(--font-serif);
-  font-size: 2rem; font-weight: 400;
-  line-height: 1.1; letter-spacing: -0.01em;
-  margin-bottom: 1rem;
-}
-.world-name em { font-style: italic; }
-.world-desc {
-  font-size: 0.85rem; color: var(--gray-600);
-  line-height: 1.65; flex: 1;
-  margin-bottom: 2rem;
-}
-.world-tag {
-  font-family: var(--font-mono);
-  font-size: 0.65rem; letter-spacing: 0.08em;
-  text-transform: uppercase;
-  display: inline-flex; align-items: center; gap: 0.4rem;
-}
-.world-tag.live::before {
-  content: ''; display: block;
-  width: 5px; height: 5px;
-  background: var(--black);
-  border-radius: 50%;
-}
-.world-tag.soon { color: var(--gray-400); }
-.world-arrow {
-  position: absolute; top: 2.5rem; right: 2.5rem;
-  font-size: 1.1rem; opacity: 0;
-  transition: opacity .2s, transform .2s;
-}
-.world-card:hover .world-arrow { opacity: 1; transform: translateX(3px); }
-
-/* ── PAPERS SECTION ──────────────────────────────── */
-.papers {
-  padding: 8rem 2.5rem;
-  max-width: 1100px; margin: 0 auto;
-  border-top: 1px solid var(--gray-200);
-}
+.section-eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
 .paper-row {
   display: grid;
   grid-template-columns: 80px 1fr auto;
@@ -200,78 +211,50 @@ nav {
   padding: 2.5rem 0;
   border-bottom: 1px solid var(--gray-200);
   text-decoration: none; color: inherit;
-  transition: background .15s;
-  cursor: pointer;
+  transition: background .15s; cursor: pointer;
 }
 .paper-row:hover .pr-title { text-decoration: underline; text-decoration-thickness: 1px; }
 .paper-row:hover .pr-arrow { transform: translateX(5px); }
 .pr-index {
-  font-family: var(--font-mono);
-  font-size: 0.65rem; color: var(--gray-400);
-  padding-top: 0.25rem;
-  letter-spacing: 0.06em;
+  font-family: var(--font-mono); font-size: 0.65rem; color: var(--gray-400);
+  padding-top: 0.25rem; letter-spacing: 0.06em;
 }
 .pr-title {
-  font-family: var(--font-serif);
-  font-size: 1.7rem; font-weight: 400;
-  letter-spacing: -0.01em; line-height: 1.15;
-  margin-bottom: 0.6rem;
+  font-family: var(--font-serif); font-size: 1.7rem; font-weight: 400;
+  letter-spacing: -0.01em; line-height: 1.15; margin-bottom: 0.6rem;
 }
 .pr-title em { font-style: italic; }
-.pr-meta {
-  font-size: 0.78rem; color: var(--gray-600);
-  margin-bottom: 0.5rem;
-}
-.pr-abstract {
-  font-size: 0.85rem; color: var(--gray-600);
-  line-height: 1.65; max-width: 580px;
-}
+.pr-meta { font-size: 0.78rem; color: var(--gray-600); margin-bottom: 0.5rem; }
+.pr-abstract { font-size: 0.85rem; color: var(--gray-600); line-height: 1.65; max-width: 580px; }
 .pr-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
-.pr-tag {
-  font-family: var(--font-mono);
-  font-size: 0.62rem; color: var(--gray-400);
-  letter-spacing: 0.04em;
-}
+.pr-tag { font-family: var(--font-mono); font-size: 0.62rem; color: var(--gray-400); letter-spacing: 0.04em; }
 .pr-tag::before { content: '#'; }
-.pr-arrow {
-  font-size: 1.2rem;
-  padding-top: 0.25rem;
-  transition: transform .2s;
-}
+.pr-arrow { font-size: 1.2rem; padding-top: 0.25rem; transition: transform .2s; }
 .pr-badge {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 0.6rem; letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.15rem 0.5rem;
-  border: 1px solid var(--black);
-  margin-right: 0.5rem;
-  vertical-align: middle;
+  display: inline-block; font-family: var(--font-mono);
+  font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.15rem 0.5rem; border: 1px solid var(--black);
+  margin-right: 0.5rem; vertical-align: middle;
 }
 
-/* ── FOOTER ──────────────────────────────────────── */
+/* ── FOOTER ───────────────────────────────────────────────────── */
 footer {
+  background: var(--white); color: var(--black);
   border-top: 1px solid var(--gray-200);
   padding: 2rem 2.5rem;
   display: flex; align-items: center; justify-content: space-between;
   max-width: 1100px; margin: 0 auto;
 }
-.footer-brand {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-}
+.footer-brand { font-family: var(--font-mono); font-size: 0.78rem; }
 .footer-brand span { opacity: 0.4; }
 .footer-note { font-size: 0.72rem; color: var(--gray-400); }
+.footer-note a { color: inherit; }
 
-/* ── RESPONSIVE ──────────────────────────────────── */
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 700px) {
   nav { padding: 0 1.2rem; }
-  .hero { padding: 0 1.2rem; }
-  .hero-headline { font-size: 3rem; }
-  .worlds { padding: 4rem 1.2rem; }
-  .worlds-grid { grid-template-columns: 1fr; }
-  .world-card { border-right: none; border-bottom: 1px solid var(--gray-200); }
-  .world-card:last-child { border-bottom: none; }
+  #heroOverlay { width: 100%; min-width: 0; padding: 5.5rem 1.2rem 2rem; background: linear-gradient(180deg, rgba(0,0,5,0.85) 60%, transparent 100%); }
+  .hero-headline { font-size: 2.4rem; }
   .papers { padding: 4rem 1.2rem; }
   .paper-row { grid-template-columns: 50px 1fr; }
   .pr-arrow { display: none; }
@@ -286,122 +269,88 @@ footer {
 <nav>
   <a class="nav-brand" href="/">Polyfd<span>o</span>S</a>
   <div class="nav-links-right">
-    <a href="#worlds">Worlds</a>
     <a href="#papers">Research</a>
     <a href="/polyfdor">PolyfdoR</a>
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-label">PolyfdoS World</div>
-  <h1 class="hero-headline">
-    Think Bigger<br>
-    Than the<br>
-    <em>Universe.</em>
-  </h1>
-  <p class="hero-tagline">Welcome to PolyfdoS World.</p>
-  <div class="hero-acronym">
-    <div class="acronym-row"><span class="acronym-key">POLY</span>→ Polymath — learning across many fields</div>
-    <div class="acronym-row"><span class="acronym-key">FD</span>→ Hafdi — the name behind the world</div>
-    <div class="acronym-row"><span class="acronym-key">OS</span>→ Open Systems &amp; open thinking</div>
+<!-- GALAXY -->
+<section id="galaxy">
+  <canvas id="solarCanvas"></canvas>
+
+  <!-- Hero text overlay -->
+  <div id="heroOverlay">
+    <div class="hero-eyebrow">PolyfdoS Universe</div>
+    <h1 class="hero-headline">
+      Think Bigger<br>
+      Than the<br>
+      <em>Universe.</em>
+    </h1>
+    <p class="hero-tagline">Every project is a planet. PolyfdoS is the universe.</p>
+    <div class="hero-acronym">
+      <div class="acronym-row"><span class="acronym-key">POLY</span>→ Polymath — learning across many fields</div>
+      <div class="acronym-row"><span class="acronym-key">FD</span>→ Hafdi — the name behind the world</div>
+      <div class="acronym-row"><span class="acronym-key">OS</span>→ Open Systems &amp; open thinking</div>
+    </div>
   </div>
-  <div class="hero-scroll">Scroll to explore</div>
-</section>
 
-<hr class="rule">
-
-<!-- WORLDS -->
-<section class="worlds" id="worlds">
-  <div class="section-eyebrow">Worlds inside PolyfdoS</div>
-  <div class="worlds-grid">
-
-    <a class="world-card" href="#papers">
-      <div class="world-num">01</div>
-      <div class="world-name">Research<br><em>&amp; Papers</em></div>
-      <p class="world-desc">
-        Open-access research on topology, knowledge representation,
-        and post-vector data systems. Every paper ships with an
-        interactive animated explainer.
-      </p>
-      <span class="world-tag live">Live</span>
-      <span class="world-arrow">→</span>
-    </a>
-
-    <a class="world-card" href="/matyos">
-      <div class="world-num">02</div>
-      <div class="world-name">Maty<em>OS</em></div>
-      <p class="world-desc">
-        A proof assistant programming language with formal verification
-        built into the syntax — theorems, axioms, and QED as first-class
-        language constructs. v1.0.9 · MIT.
-      </p>
-      <span class="world-tag live">Live</span>
-      <span class="world-arrow">↗</span>
-    </a>
-
-    <a class="world-card" href="/polyfdos">
-      <div class="world-num">03</div>
-      <div class="world-name">polyfd<em>OS</em></div>
-      <p class="world-desc">
-        A bare-metal x86 operating system built from scratch in Morocco —
-        protected mode, custom drivers, interactive shell, Snake game,
-        and three-valued logic at the kernel level. v1.4 · MIT.
-      </p>
-      <span class="world-tag live">Live</span>
-      <span class="world-arrow">↗</span>
-    </a>
-
-    <a class="world-card" href="/bring">
-      <div class="world-num">04</div>
-      <div class="world-name">Bring</div>
-      <p class="world-desc">
-        A modern, human-readable file format for configuration and package management —
-        combining JSON, YAML, and XML strengths with built-in schemas, inline attributes,
-        and zero ambiguity. By Daftyon. v1.0 · MIT.
-      </p>
-      <span class="world-tag live">Live</span>
-      <span class="world-arrow">↗</span>
-    </a>
-
-    <a class="world-card" href="/cookixdb">
-      <div class="world-num">05</div>
-      <div class="world-name">Cooxi<em>x</em>DB</div>
-      <p class="world-desc">
-        A post-vector database where data lives in <em>crumbs</em>, queries are <em>nibbles</em>,
-        and every embedding cluster is a <em>chip</em>. Built on the NoVectDB contextual indexing kernel.
-        Interactive 3D simulation included. v0.9-alpha · MIT.
-      </p>
-      <span class="world-tag live">Live</span>
-      <span class="world-arrow">↗</span>
-    </a>
-
+  <!-- Sun label -->
+  <div id="sunLabel">
+    <div class="sun-name">PolyfdoS</div>
+    <div class="sun-sub">The Universe</div>
   </div>
+
+  <!-- Planet labels -->
+  <a class="planet-label" href="/polyfdos" id="lbl-polyfdos-os">
+    <div class="pl-dot"></div>
+    <div class="pl-name">polyfd<em>OS</em></div>
+    <div class="pl-sub">Operating System</div>
+    <div class="pl-tag"><div class="pl-tag-inner">v1.4 · x86 · MIT →</div></div>
+  </a>
+  <a class="planet-label" href="/matyos" id="lbl-matyos">
+    <div class="pl-dot"></div>
+    <div class="pl-name">Maty<em>OS</em></div>
+    <div class="pl-sub">Proof Language</div>
+    <div class="pl-tag"><div class="pl-tag-inner">v1.0.9 · MIT →</div></div>
+  </a>
+  <a class="planet-label" href="/cookixdb" id="lbl-cookixdb">
+    <div class="pl-dot"></div>
+    <div class="pl-name">Cooxi<em>x</em>DB</div>
+    <div class="pl-sub">Vector Database</div>
+    <div class="pl-tag"><div class="pl-tag-inner">NoVectDB kernel →</div></div>
+  </a>
+  <a class="planet-label" href="/bring" id="lbl-bring">
+    <div class="pl-dot"></div>
+    <div class="pl-name">Bring</div>
+    <div class="pl-sub">File Format</div>
+    <div class="pl-tag"><div class="pl-tag-inner">v1.0 · Daftyon →</div></div>
+  </a>
+  <a class="planet-label" href="#papers" id="lbl-research">
+    <div class="pl-dot"></div>
+    <div class="pl-name">Research</div>
+    <div class="pl-sub">Papers &amp; Theory</div>
+    <div class="pl-tag"><div class="pl-tag-inner">6 papers · scroll →</div></div>
+  </a>
+
+  <!-- Scroll hint -->
+  <a href="#papers" id="scrollHint">
+    <span class="sh-label">Explore Research</span>
+    <span class="sh-arrow">↓</span>
+  </a>
 </section>
 
 <!-- PAPERS -->
+<div class="papers-wrap">
 <section class="papers" id="papers">
   <div class="section-eyebrow">Published Research</div>
 
   <a class="paper-row" href="/papers/novectDB">
     <div class="pr-index">CKX<br>001</div>
     <div class="pr-body">
-      <div class="pr-title">
-        <span class="pr-badge">New</span>
-        NoVect<em>DB</em>
-      </div>
+      <div class="pr-title"><span class="pr-badge">New</span>NoVect<em>DB</em></div>
       <div class="pr-meta">Ahmed Hafdi · CookiX Project · February 2026</div>
-      <p class="pr-abstract">
-        A topological–relational paradigm for post-vector data management.
-        Replaces embedding similarity with sheaf-theoretic composition on
-        dynamic graph manifolds — exact retrieval, no approximation.
-      </p>
-      <div class="pr-tags">
-        <span class="pr-tag">topology</span>
-        <span class="pr-tag">sheaf-theory</span>
-        <span class="pr-tag">knowledge-graphs</span>
-        <span class="pr-tag">persistent-homology</span>
-      </div>
+      <p class="pr-abstract">A topological–relational paradigm for post-vector data management. Replaces embedding similarity with sheaf-theoretic composition on dynamic graph manifolds — exact retrieval, no approximation.</p>
+      <div class="pr-tags"><span class="pr-tag">topology</span><span class="pr-tag">sheaf-theory</span><span class="pr-tag">knowledge-graphs</span><span class="pr-tag">persistent-homology</span></div>
     </div>
     <div class="pr-arrow">→</div>
   </a>
@@ -409,22 +358,10 @@ footer {
   <a class="paper-row" href="/papers/realistic">
     <div class="pr-index">CKX<br>003</div>
     <div class="pr-body">
-      <div class="pr-title">
-        <span class="pr-badge">New</span>
-        The <em>Realistic</em> Type
-      </div>
+      <div class="pr-title"><span class="pr-badge">New</span>The <em>Realistic</em> Type</div>
       <div class="pr-meta">Ahmed Hafdi · Matyos Language Project · January 2025</div>
-      <p class="pr-abstract">
-        Introducing <em>realistic</em>, a native type in the Matyos language implementing Kleene's
-        three-valued logic. Extends Boolean logic with a third truth value ⊙ for uncertainty —
-        with formal semantics, benchmarks, and applications in AI, quantum simulation, and paradox resolution.
-      </p>
-      <div class="pr-tags">
-        <span class="pr-tag">three-valued-logic</span>
-        <span class="pr-tag">programming-languages</span>
-        <span class="pr-tag">kleene-k3</span>
-        <span class="pr-tag">type-systems</span>
-      </div>
+      <p class="pr-abstract">Introducing <em>realistic</em>, a native type in the Matyos language implementing Kleene's three-valued logic. Extends Boolean logic with a third truth value ⊙ for uncertainty — with formal semantics, benchmarks, and applications in AI, quantum simulation, and paradox resolution.</p>
+      <div class="pr-tags"><span class="pr-tag">three-valued-logic</span><span class="pr-tag">programming-languages</span><span class="pr-tag">kleene-k3</span><span class="pr-tag">type-systems</span></div>
     </div>
     <div class="pr-arrow">→</div>
   </a>
@@ -432,22 +369,10 @@ footer {
   <a class="paper-row" href="/papers/hafdiConjecture">
     <div class="pr-index">CKX<br>002</div>
     <div class="pr-body">
-      <div class="pr-title">
-        <span class="pr-badge">New</span>
-        Hafdi<em> Conjecture</em>
-      </div>
+      <div class="pr-title"><span class="pr-badge">New</span>Hafdi<em> Conjecture</em></div>
       <div class="pr-meta">Ahmed Hafdi · Independent Research · October 2025</div>
-      <p class="pr-abstract">
-        A conjecture on the asymptotic bounds of half-prime gaps. Introduces
-        the normalized half-gap sequence {rₙ} and proposes an exponential upper
-        bound connecting gap growth to prime index — refining classical bounds on prime gaps.
-      </p>
-      <div class="pr-tags">
-        <span class="pr-tag">number-theory</span>
-        <span class="pr-tag">prime-gaps</span>
-        <span class="pr-tag">analytic-number-theory</span>
-        <span class="pr-tag">conjecture</span>
-      </div>
+      <p class="pr-abstract">A conjecture on the asymptotic bounds of half-prime gaps. Introduces the normalized half-gap sequence {rₙ} and proposes an exponential upper bound connecting gap growth to prime index — refining classical bounds on prime gaps.</p>
+      <div class="pr-tags"><span class="pr-tag">number-theory</span><span class="pr-tag">prime-gaps</span><span class="pr-tag">analytic-number-theory</span><span class="pr-tag">conjecture</span></div>
     </div>
     <div class="pr-arrow">→</div>
   </a>
@@ -455,21 +380,10 @@ footer {
   <a class="paper-row" href="/papers/contextOS">
     <div class="pr-index">CKX<br>004</div>
     <div class="pr-body">
-      <div class="pr-title">
-        <span class="pr-badge">New</span>
-        Context<em>OS</em>
-      </div>
+      <div class="pr-title"><span class="pr-badge">New</span>Context<em>OS</em></div>
       <div class="pr-meta">Ahmed Hafdi · System Design Proposal · September 2025</div>
-      <p class="pr-abstract">
-        A hierarchical architecture for managing context in Large Language Models. Proposes a three-tier caching system (L1/L2/L3) inspired by CPU cache design, with <em>context capsules</em> — multi-format containers that self-organize based on access patterns to reduce retrieval latency by 67–80%.
-      </p>
-      <div class="pr-tags">
-        <span class="pr-tag">LLM</span>
-        <span class="pr-tag">context-management</span>
-        <span class="pr-tag">caching</span>
-        <span class="pr-tag">system-design</span>
-        <span class="pr-tag">RAG</span>
-      </div>
+      <p class="pr-abstract">A hierarchical architecture for managing context in Large Language Models. Proposes a three-tier caching system (L1/L2/L3) inspired by CPU cache design, with <em>context capsules</em> — multi-format containers that self-organize based on access patterns to reduce retrieval latency by 67–80%.</p>
+      <div class="pr-tags"><span class="pr-tag">LLM</span><span class="pr-tag">context-management</span><span class="pr-tag">caching</span><span class="pr-tag">system-design</span><span class="pr-tag">RAG</span></div>
     </div>
     <div class="pr-arrow">→</div>
   </a>
@@ -477,23 +391,10 @@ footer {
   <a class="paper-row" href="/papers/pizzaSugar">
     <div class="pr-index">CKX<br>005</div>
     <div class="pr-body">
-      <div class="pr-title">
-        <span class="pr-badge">New</span>
-        Monohedral <em>Disc Tiling</em>
-      </div>
+      <div class="pr-title"><span class="pr-badge">New</span>Monohedral <em>Disc Tiling</em></div>
       <div class="pr-meta">Mathematical Processing Research Group · September 2025</div>
-      <p class="pr-abstract">
-        Adapting monohedral disc tiling from pizza cutting theory to frustum-shaped sugar loaves.
-        Curved polygonal patterns scaled layer-by-layer across the truncated cone achieve 92–98%
-        cutting efficiency — surpassing traditional sectorial and cubic decomposition methods.
-      </p>
-      <div class="pr-tags">
-        <span class="pr-tag">geometry</span>
-        <span class="pr-tag">tiling-theory</span>
-        <span class="pr-tag">food-processing</span>
-        <span class="pr-tag">frustum</span>
-        <span class="pr-tag">optimization</span>
-      </div>
+      <p class="pr-abstract">Adapting monohedral disc tiling from pizza cutting theory to frustum-shaped sugar loaves. Curved polygonal patterns scaled layer-by-layer across the truncated cone achieve 92–98% cutting efficiency — surpassing traditional sectorial and cubic decomposition methods.</p>
+      <div class="pr-tags"><span class="pr-tag">geometry</span><span class="pr-tag">tiling-theory</span><span class="pr-tag">food-processing</span><span class="pr-tag">frustum</span><span class="pr-tag">optimization</span></div>
     </div>
     <div class="pr-arrow">→</div>
   </a>
@@ -501,36 +402,475 @@ footer {
   <a class="paper-row" href="/papers/fromProbsToEcoSys">
     <div class="pr-index">CKX<br>006</div>
     <div class="pr-body">
-      <div class="pr-title">
-        <span class="pr-badge">New</span>
-        From Cascade <em>Chaos</em> to Ecosystem Harmony
-      </div>
+      <div class="pr-title"><span class="pr-badge">New</span>From Cascade <em>Chaos</em> to Ecosystem Harmony</div>
       <div class="pr-meta">Ahmed Hafdi · Independent Research · August 2025</div>
-      <p class="pr-abstract">
-        A complete mathematical framework for the solution-problem paradox. Proves
-        isolated solutions generate O(2<sup>n</sup>) exponential problem cascades,
-        and introduces the Homogeneous Solution Ecosystem (HSE) design achieving
-        O(log&nbsp;n) growth — validated by a smart city case study showing 67%&nbsp;→&nbsp;91%
-        resource utilization and 5.8&nbsp;→&nbsp;8.9/10 satisfaction.
-      </p>
-      <div class="pr-tags">
-        <span class="pr-tag">systems-theory</span>
-        <span class="pr-tag">network-cascades</span>
-        <span class="pr-tag">complexity</span>
-        <span class="pr-tag">ecosystem-design</span>
-        <span class="pr-tag">graph-theory</span>
-      </div>
+      <p class="pr-abstract">A complete mathematical framework for the solution-problem paradox. Proves isolated solutions generate O(2<sup>n</sup>) exponential problem cascades, and introduces the Homogeneous Solution Ecosystem (HSE) design achieving O(log&nbsp;n) growth — validated by a smart city case study showing 67%&nbsp;→&nbsp;91% resource utilization and 5.8&nbsp;→&nbsp;8.9/10 satisfaction.</p>
+      <div class="pr-tags"><span class="pr-tag">systems-theory</span><span class="pr-tag">network-cascades</span><span class="pr-tag">complexity</span><span class="pr-tag">ecosystem-design</span><span class="pr-tag">graph-theory</span></div>
     </div>
     <div class="pr-arrow">→</div>
   </a>
 
 </section>
+</div>
 
 <!-- FOOTER -->
 <footer>
   <span class="footer-brand">Polyfd<span>o</span>S</span>
-  <span class="footer-note">A world built by <a href="/polyfdor" style="color:inherit;">PolyfdoR</a> · 2026</span>
+  <span class="footer-note">A universe built by <a href="/polyfdor">PolyfdoR</a> · 2026</span>
 </footer>
 
+<!-- THREE.JS -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════
+   POLYFDOS SOLAR SYSTEM — Three.js
+   PolyfdoS = the Sun (center of everything)
+   Each project = a planet with custom GLSL shader
+   ═══════════════════════════════════════════════════════ */
+
+const galaxy  = document.getElementById('galaxy');
+const canvas  = document.getElementById('solarCanvas');
+const W = () => canvas.clientWidth;
+const H = () => canvas.clientHeight;
+
+// ── Renderer ─────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(W(), H());
+renderer.setClearColor(0x000005, 1);
+
+// ── Scene + Camera ────────────────────────────────────────────
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, W()/H(), 0.1, 600);
+// View from above at a slight angle — shows orbits clearly
+camera.position.set(0, 22, 26);
+camera.lookAt(0, 0, 0);
+
+// ── Fog ───────────────────────────────────────────────────────
+scene.fog = new THREE.FogExp2(0x000005, 0.008);
+
+// ── Lights ───────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x111122, 0.8));
+const sunLight = new THREE.PointLight(0xfff0cc, 3.5, 80, 1.5);
+scene.add(sunLight);
+const rimLight = new THREE.DirectionalLight(0x334466, 0.3);
+rimLight.position.set(-10, 15, -10); scene.add(rimLight);
+
+// ── SHARED PLANET SHADERS ─────────────────────────────────────
+const PLANET_VS = `
+  varying vec3 vNormal;
+  varying vec3 vViewPos;
+  varying vec2 vUv;
+  void main() {
+    vNormal   = normalize(normalMatrix * normal);
+    vec4 mvp  = modelViewMatrix * vec4(position, 1.0);
+    vViewPos  = mvp.xyz;
+    vUv       = uv;
+    gl_Position = projectionMatrix * mvp;
+  }`;
+
+const PLANET_FS = `
+  precision highp float;
+  uniform vec3  uColor;
+  uniform vec3  uAtmo;
+  uniform float uTime;
+  uniform float uSeed;
+  varying vec3  vNormal;
+  varying vec3  vViewPos;
+  varying vec2  vUv;
+
+  // Gradient noise
+  vec2 hash2(vec2 p) {
+    p = vec2(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)));
+    return -1.0 + 2.0*fract(sin(p)*43758.5453);
+  }
+  float gnoise(vec2 p) {
+    vec2 i=floor(p), f=fract(p);
+    vec2 u=f*f*(3.0-2.0*f);
+    return mix(mix(dot(hash2(i),f-vec2(0,0)),dot(hash2(i+vec2(1,0)),f-vec2(1,0)),u.x),
+               mix(dot(hash2(i+vec2(0,1)),f-vec2(0,1)),dot(hash2(i+vec2(1,1)),f-vec2(1,1)),u.x),u.y);
+  }
+  float fbm(vec2 p) {
+    float v=0.0, a=0.55;
+    mat2 rot=mat2(0.8660, 0.5000, -0.5000, 0.8660);
+    for(int i=0;i<5;i++){ v+=a*gnoise(p); p=rot*p*2.07; a*=0.48; }
+    return v;
+  }
+
+  void main() {
+    // Animated UV
+    vec2 uv = vUv * 3.0 + vec2(uTime * 0.007, uSeed * 0.5);
+    float n1 = fbm(uv + uSeed);
+    float n2 = fbm(uv * 2.1 + vec2(1.73 + uSeed, 0.91));
+    float surface = clamp(n1*0.65 + n2*0.35 + 0.45, 0.0, 1.0);
+
+    // Surface color bands
+    vec3 dark   = uColor * 0.35;
+    vec3 mid    = uColor;
+    vec3 bright = min(uColor * 1.7 + 0.1, vec3(1.0));
+    vec3 surfColor;
+    if(surface < 0.4)      surfColor = mix(dark, mid,    surface/0.4);
+    else                   surfColor = mix(mid,  bright, (surface-0.4)/0.6);
+
+    // Diffuse (light from sun = origin; approximate in view space)
+    vec3 lightV = normalize(-vViewPos);  // toward camera = crude sun approx
+    float diff = max(dot(vNormal, normalize(vec3(0.8,0.5,1.0))), 0.0);
+    float ambi = 0.12;
+
+    // Fresnel atmospheric rim
+    vec3 viewDir = normalize(-vViewPos);
+    float fres = pow(1.0 - max(dot(vNormal, viewDir), 0.0), 4.0);
+    vec3  atmo  = uAtmo * fres * 1.4;
+
+    // Specular
+    vec3  h     = normalize(normalize(vec3(0.8,0.5,1.0)) + viewDir);
+    float spec  = pow(max(dot(vNormal, h), 0.0), 20.0) * 0.25;
+
+    vec3 color = surfColor*(ambi + diff*0.88) + atmo + vec3(spec);
+    gl_FragColor = vec4(color, 1.0);
+  }`;
+
+// ── SUN SHADERS ───────────────────────────────────────────────
+const SUN_VS = PLANET_VS;
+const SUN_FS = `
+  precision highp float;
+  uniform float uTime;
+  varying vec3 vNormal;
+  varying vec3 vViewPos;
+  varying vec2 vUv;
+
+  vec2 hash2(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.0+2.0*fract(sin(p)*43758.5453);}
+  float gnoise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);return mix(mix(dot(hash2(i),f),dot(hash2(i+vec2(1,0)),f-vec2(1,0)),u.x),mix(dot(hash2(i+vec2(0,1)),f-vec2(0,1)),dot(hash2(i+vec2(1,1)),f-vec2(1,1)),u.x),u.y);}
+  float fbm(vec2 p){float v=0.0,a=0.55;mat2 r=mat2(0.866,0.5,-0.5,0.866);for(int i=0;i<6;i++){v+=a*gnoise(p);p=r*p*2.1;a*=0.47;}return v;}
+
+  void main() {
+    vec2 uv = vUv * 2.5 + vec2(uTime*0.018, uTime*0.009);
+    float n  = fbm(uv);
+    float n2 = fbm(uv * 2.2 + 3.1);
+    float s  = clamp(n*0.6 + n2*0.4 + 0.5, 0.0, 1.0);
+
+    vec3 col1 = vec3(1.0, 0.38, 0.04); // deep orange
+    vec3 col2 = vec3(1.0, 0.82, 0.30); // warm gold
+    vec3 col3 = vec3(1.0, 0.97, 0.78); // hot white
+    vec3 sun  = s < 0.5 ? mix(col1,col2,s*2.0) : mix(col2,col3,(s-0.5)*2.0);
+
+    // Corona rim
+    vec3  vd   = normalize(-vViewPos);
+    float fres = pow(1.0 - dot(vNormal, vd), 2.2);
+    sun += vec3(1.0, 0.55, 0.08) * fres * 2.0;
+
+    gl_FragColor = vec4(sun, 1.0);
+  }`;
+
+// ── CORONA GLOW SHADER ────────────────────────────────────────
+const CORONA_FS = `
+  precision highp float;
+  uniform float uTime;
+  void main() {
+    vec2  uv   = gl_PointCoord - 0.5;
+    float r    = length(uv);
+    if(r > 0.5) discard;
+    float glow = smoothstep(0.5, 0.0, r);
+    float pulse= 0.85 + 0.15*sin(uTime*1.4);
+    vec3  col  = mix(vec3(1.0,0.55,0.05), vec3(1.0,0.92,0.4), 1.0-r*2.0) * pulse;
+    gl_FragColor = vec4(col, glow * 0.55);
+  }`;
+
+const CORONA_VS = `
+  uniform float uSize;
+  void main() {
+    gl_PointSize = uSize;
+    gl_Position  = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  }`;
+
+// ── STAR FIELD ────────────────────────────────────────────────
+(function buildStars() {
+  const N = 5000;
+  const pos = new Float32Array(N * 3);
+  const siz = new Float32Array(N);
+  const bri = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const r = 60 + Math.random() * 200;
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(2 * Math.random() - 1);
+    pos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    pos[i*3+2] = r * Math.cos(phi);
+    siz[i] = 0.3 + Math.random() * 1.4;
+    bri[i] = 0.4 + Math.random() * 0.6;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position',  new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('aSize',     new THREE.BufferAttribute(siz, 1));
+  geo.setAttribute('aBrightness', new THREE.BufferAttribute(bri, 1));
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: `
+      attribute float aSize; attribute float aBrightness;
+      varying float vB;
+      void main(){ vB=aBrightness; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize=aSize*(300.0/(-mv.z)); gl_Position=projectionMatrix*mv; }`,
+    fragmentShader: `
+      varying float vB;
+      void main(){ vec2 uv=gl_PointCoord-0.5; float r=length(uv); if(r>.5)discard; float a=smoothstep(.5,.0,r); gl_FragColor=vec4(vec3(0.85+vB*0.15,0.88+vB*0.1,1.0)*vB, a); }`,
+    transparent: true, depthWrite: false
+  });
+  scene.add(new THREE.Points(geo, mat));
+})();
+
+// ── BUILD SUN ────────────────────────────────────────────────
+const sunUniforms = { uTime: { value: 0 } };
+const sun = new THREE.Mesh(
+  new THREE.SphereGeometry(2.0, 64, 64),
+  new THREE.ShaderMaterial({ vertexShader: SUN_VS, fragmentShader: SUN_FS, uniforms: sunUniforms })
+);
+scene.add(sun);
+
+// Sun glow corona sprite
+const coronaUniforms = { uTime: { value: 0 }, uSize: { value: 300 } };
+const coronaGeo = new THREE.BufferGeometry();
+coronaGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0,0,0]), 3));
+const corona = new THREE.Points(coronaGeo, new THREE.ShaderMaterial({
+  vertexShader: CORONA_VS, fragmentShader: CORONA_FS,
+  uniforms: coronaUniforms, transparent: true, depthWrite: false
+}));
+scene.add(corona);
+
+// ── PLANET CONFIGS ────────────────────────────────────────────
+const CONFIGS = [
+  {
+    id:      'polyfdos-os',
+    radius:  0.62,  orbitR: 5.2,   speed: 0.00044, angle0: 0.6,  incline: 0.07,
+    color:   new THREE.Color(0x5588bb), atmo: new THREE.Color(0x3366aa), seed: 1.1,
+    rings: false, moon: false, labelEl: 'lbl-polyfdos-os'
+  },
+  {
+    id:      'matyos',
+    radius:  0.50,  orbitR: 7.8,   speed: 0.00028, angle0: 2.2,  incline: 0.12,
+    color:   new THREE.Color(0x9944dd), atmo: new THREE.Color(0xbb55ff), seed: 2.7,
+    rings: false, moon: false, labelEl: 'lbl-matyos'
+  },
+  {
+    id:      'cookixdb',
+    radius:  0.78,  orbitR: 10.8,  speed: 0.00018, angle0: 4.0,  incline: 0.04,
+    color:   new THREE.Color(0xFEB763), atmo: new THREE.Color(0xff9922), seed: 4.3,
+    rings: false, moon: true,  labelEl: 'lbl-cookixdb'
+  },
+  {
+    id:      'bring',
+    radius:  0.44,  orbitR: 13.2,  speed: 0.00012, angle0: 1.0,  incline: 0.15,
+    color:   new THREE.Color(0x28c8ef), atmo: new THREE.Color(0x55eeff), seed: 6.1,
+    rings: false, moon: false, labelEl: 'lbl-bring'
+  },
+  {
+    id:      'research',
+    radius:  0.70,  orbitR: 16.5,  speed: 0.00007, angle0: 3.2,  incline: 0.08,
+    color:   new THREE.Color(0x99bbff), atmo: new THREE.Color(0xccddff), seed: 8.8,
+    rings: true,  moon: false, labelEl: 'lbl-research'
+  },
+];
+
+// ── BUILD PLANETS ─────────────────────────────────────────────
+const planets = [];
+const ORBIT_MAT = new THREE.MeshBasicMaterial({
+  color: 0xffffff, transparent: true, opacity: 0.06, side: THREE.DoubleSide
+});
+
+CONFIGS.forEach(cfg => {
+  // Orbit ring
+  const orbitGeo = new THREE.TorusGeometry(cfg.orbitR, 0.02, 2, 200);
+  const orbit = new THREE.Mesh(orbitGeo, ORBIT_MAT);
+  orbit.rotation.x = Math.PI / 2 + cfg.incline;
+  scene.add(orbit);
+
+  // Planet uniforms
+  const uniforms = {
+    uColor: { value: cfg.color },
+    uAtmo:  { value: cfg.atmo },
+    uTime:  { value: 0 },
+    uSeed:  { value: cfg.seed }
+  };
+
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(cfg.radius, 48, 48),
+    new THREE.ShaderMaterial({
+      vertexShader: PLANET_VS, fragmentShader: PLANET_FS,
+      uniforms
+    })
+  );
+  scene.add(mesh);
+
+  // Atmosphere glow shell
+  const atmoMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(cfg.radius * 1.22, 32, 32),
+    new THREE.MeshBasicMaterial({
+      color: cfg.atmo, transparent: true,
+      opacity: 0.12, side: THREE.BackSide
+    })
+  );
+  scene.add(atmoMesh);
+
+  // Saturn-style rings (Research planet)
+  const ringMeshes = [];
+  if (cfg.rings) {
+    [1.5, 1.85, 2.2].forEach((rm, ri) => {
+      const rg = new THREE.TorusGeometry(cfg.radius * rm, cfg.radius * 0.10, 2, 128);
+      const rmMesh = new THREE.Mesh(rg, new THREE.MeshBasicMaterial({
+        color: cfg.atmo, transparent: true, opacity: [0.25, 0.15, 0.10][ri], side: THREE.DoubleSide
+      }));
+      scene.add(rmMesh);
+      ringMeshes.push(rmMesh);
+    });
+  }
+
+  // Moon (CookixDB)
+  let moon = null;
+  if (cfg.moon) {
+    moon = new THREE.Mesh(
+      new THREE.SphereGeometry(0.14, 16, 16),
+      new THREE.MeshStandardMaterial({ color: 0xaabbcc, roughness: 0.9 })
+    );
+    scene.add(moon);
+  }
+
+  planets.push({ cfg, mesh, atmoMesh, uniforms, ringMeshes, moon, angle: cfg.angle0 });
+});
+
+// ── LABEL & SUN LABEL REFS ────────────────────────────────────
+const sunLabelEl = document.getElementById('sunLabel');
+const labelEls   = {};
+planets.forEach(p => { labelEls[p.cfg.id] = document.getElementById(p.cfg.labelEl); });
+
+// Project 3D position → galaxy-section pixel coords
+function toScreenPos(worldPos) {
+  const v = worldPos.clone().project(camera);
+  return {
+    x: (v.x * 0.5 + 0.5) * W(),
+    y: (-v.y * 0.5 + 0.5) * H(),
+    z: v.z
+  };
+}
+
+// ── RAYCASTER (click planets) ─────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2();
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = planets.map(p => p.mesh);
+  const hits   = raycaster.intersectObjects(meshes);
+  if (hits.length) {
+    const idx = meshes.indexOf(hits[0].object);
+    if (idx !== -1) {
+      const url = CONFIGS[idx].id === 'research'
+        ? '#papers' : '/' + CONFIGS[idx].id.replace('-', '');
+      // Special: polyfdos-os has route /polyfdos
+      if (CONFIGS[idx].id === 'polyfdos-os') window.location.href = '/polyfdos';
+      else if (CONFIGS[idx].id === 'research') document.getElementById('papers').scrollIntoView({behavior:'smooth'});
+      else window.location.href = url;
+    }
+  }
+});
+
+// Change cursor on hover
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(planets.map(p => p.mesh));
+  canvas.style.cursor = hits.length ? 'pointer' : 'default';
+});
+
+// ── RESIZE ────────────────────────────────────────────────────
+new ResizeObserver(() => {
+  renderer.setSize(W(), H());
+  camera.aspect = W() / H();
+  camera.updateProjectionMatrix();
+  coronaUniforms.uSize.value = Math.min(W(), H()) * 0.28;
+}).observe(canvas);
+coronaUniforms.uSize.value = Math.min(W(), H()) * 0.28;
+
+// ── ANIMATION LOOP ────────────────────────────────────────────
+let t = 0;
+const moonOffset = new THREE.Vector3();
+(function loop() {
+  requestAnimationFrame(loop);
+  t += 0.01;
+
+  // Update sun shaders
+  sunUniforms.uTime.value   = t;
+  coronaUniforms.uTime.value = t;
+
+  // Gentle camera drift (very slow)
+  const camAz = t * 0.006;
+  camera.position.set(
+    Math.sin(camAz) * 26,
+    18 + Math.sin(t * 0.05) * 1.5,
+    Math.cos(camAz) * 26
+  );
+  camera.lookAt(0, 0, 0);
+
+  // Update planets
+  planets.forEach(p => {
+    p.angle += p.cfg.speed;
+    const inc = p.cfg.incline;
+    const r   = p.cfg.orbitR;
+    const x   = r * Math.cos(p.angle);
+    const z   = r * Math.sin(p.angle);
+    const y   = Math.sin(p.angle) * r * Math.sin(inc);
+
+    p.mesh.position.set(x, y, z);
+    p.atmoMesh.position.set(x, y, z);
+
+    // Planet self-rotation
+    p.mesh.rotation.y += 0.004;
+
+    // Rings follow planet, tilt fixed
+    p.ringMeshes.forEach((rm, ri) => {
+      rm.position.set(x, y, z);
+      rm.rotation.x = Math.PI / 2 + 0.3;
+      rm.rotation.z = t * 0.001;
+    });
+
+    // Moon (CookixDB)
+    if (p.moon) {
+      const ma = t * 0.8;
+      p.moon.position.set(
+        x + Math.cos(ma) * (p.cfg.radius * 2.0),
+        y + Math.sin(ma) * (p.cfg.radius * 0.3),
+        z + Math.sin(ma) * (p.cfg.radius * 2.0)
+      );
+    }
+
+    // Emissive pulse for atmosphere
+    const pulse = 0.09 + 0.04 * Math.sin(t * 1.2 + p.cfg.seed);
+    p.atmoMesh.material.opacity = pulse;
+
+    // Update planet shader time
+    p.uniforms.uTime.value = t;
+
+    // Label positioning
+    const screenPos = toScreenPos(p.mesh.position.clone());
+    const lbl = labelEls[p.cfg.id];
+    if (lbl) {
+      if (screenPos.z < 1.0) {
+        lbl.style.display = 'block';
+        lbl.style.left = screenPos.x + 'px';
+        lbl.style.top  = (screenPos.y - p.cfg.radius * 55) + 'px';
+      } else {
+        lbl.style.display = 'none';
+      }
+    }
+  });
+
+  // Sun label
+  const sunScreen = toScreenPos(new THREE.Vector3(0, 2.2, 0));
+  sunLabelEl.style.left = sunScreen.x + 'px';
+  sunLabelEl.style.top  = sunScreen.y + 'px';
+
+  renderer.render(scene, camera);
+})();
+</script>
 </body>
 </html>
