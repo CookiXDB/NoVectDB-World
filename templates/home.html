@@ -831,6 +831,9 @@ new ResizeObserver(() => {
   camera.aspect = W() / H();
   camera.updateProjectionMatrix();
   coronaUniforms.uSize.value = Math.min(W(), H()) * 0.28;
+  // Re-clamp zoom to new responsive minimum on orientation change
+  const minR = responsiveRadius();
+  if (camRadius > minR + 10) camRadius = minR;
 }).observe(canvas);
 coronaUniforms.uSize.value = Math.min(W(), H()) * 0.28;
 
