@@ -522,6 +522,11 @@ h4 { font-family: var(--font-sans); font-size: 0.9rem; font-weight: 600; margin:
     </div>
 
     <div class="sidebar-group">
+      <div class="sidebar-group-title">MatyOS Runtime</div>
+      <a class="sidebar-link" href="#matyos-runtime">Run MatyOS</a>
+    </div>
+
+    <div class="sidebar-group">
       <div class="sidebar-group-title">Roadmap</div>
       <a class="sidebar-link" href="#roadmap">Phases</a>
     </div>
@@ -932,6 +937,67 @@ HOME_URL="https://github.com/PolyfdOS"</pre>
 
     <hr class="doc-divider"/>
 
+    <!-- ── MATYOS RUNTIME ─────────────────────────────────────── -->
+    <section class="doc-section reveal" id="matyos-runtime">
+      <div class="section-eyebrow">MatyOS Runtime</div>
+      <h2 class="section-title">Run MatyOS on polyfdOS</h2>
+      <div class="section-body">
+        <p>polyfdOS ships with a <strong>MatyOS runtime layer</strong> — the El interpreter runs natively on the kernel, giving you a proof-assistant shell directly inside the OS. Type El programs below and execute them as if you were at the polyfdOS terminal.</p>
+        <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:0.8rem;">
+          <a href="/matyos" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--c-acc2);text-decoration:none;">MatyOS language docs →</a>
+          <a href="/papers/realistic" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--c-acc2);text-decoration:none;">Realistic Type paper →</a>
+        </div>
+      </div>
+
+      <!-- polyfdOS-style terminal hosting the MatyOS El runner -->
+      <div style="margin-top:1.8rem;border:1px solid #2a2a2a;border-radius:6px;overflow:hidden;background:#0a0a0a;">
+
+        <!-- Terminal chrome -->
+        <div style="background:#161616;padding:0.55rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a2a2a;">
+          <div style="display:flex;align-items:center;gap:0.6rem;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#3a3a3a;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#3a3a3a;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--c-acc);opacity:0.7;"></div>
+          </div>
+          <span style="font-family:var(--font-mono);font-size:0.68rem;color:#555;letter-spacing:0.06em;">polyfdOS v1.4 &gt; matyos --run</span>
+          <div style="display:flex;gap:0.6rem;">
+            <button onclick="mrSetExample('hello')" style="font-family:var(--font-mono);font-size:0.62rem;background:transparent;border:1px solid #2a2a2a;color:#666;padding:2px 8px;border-radius:3px;cursor:pointer;">Hello</button>
+            <button onclick="mrSetExample('realistic')" style="font-family:var(--font-mono);font-size:0.62rem;background:transparent;border:1px solid #2a2a2a;color:#666;padding:2px 8px;border-radius:3px;cursor:pointer;">Realistic</button>
+            <button onclick="mrSetExample('proof')" style="font-family:var(--font-mono);font-size:0.62rem;background:transparent;border:1px solid #2a2a2a;color:#666;padding:2px 8px;border-radius:3px;cursor:pointer;">Proof</button>
+          </div>
+        </div>
+
+        <!-- Prompt line -->
+        <div style="padding:0.6rem 1rem 0;font-family:var(--font-mono);font-size:0.78rem;color:#555;">
+          <span style="color:var(--c-acc);">polyfdOS$</span> <span style="color:#888;">matyos --interactive</span>
+        </div>
+
+        <!-- Editor -->
+        <textarea id="mrEditor" spellcheck="false"
+          style="width:100%;min-height:180px;background:#0a0a0a;color:#c9d1d9;font-family:var(--font-mono);font-size:0.82rem;line-height:1.65;padding:0.8rem 1rem 0.8rem 2.2rem;border:none;outline:none;resize:vertical;caret-color:var(--c-acc);">ALGORITHM HelloWorld {
+  show "Hello from MatyOS running on polyfdOS!";
+  show "MatyOS v1.0.9 — El interpreter";
+}</textarea>
+
+        <!-- Output -->
+        <div style="border-top:1px solid #1e1e1e;padding:0.6rem 1rem 0;font-family:var(--font-mono);font-size:0.72rem;color:#555;">
+          <span style="color:var(--c-acc);">stdout</span>
+        </div>
+        <div id="mrOutput" style="min-height:80px;background:#050505;padding:0.7rem 1rem 1rem 2.2rem;font-family:var(--font-mono);font-size:0.82rem;line-height:1.7;color:#546e7a;">
+          // output will appear here
+        </div>
+
+        <!-- Footer bar -->
+        <div style="border-top:1px solid #1e1e1e;background:#0e0e0e;padding:0.5rem 1rem;display:flex;align-items:center;gap:0.8rem;">
+          <button id="mrRunBtn" onclick="mrRun()" style="background:var(--c-acc);color:#fff;border:none;border-radius:4px;font-family:var(--font-mono);font-size:0.72rem;padding:0.4rem 1rem;cursor:pointer;letter-spacing:0.04em;">▶ Run</button>
+          <button onclick="document.getElementById('mrOutput').innerHTML='<span style=color:#546e7a>// output will appear here</span>';document.getElementById('mrStatus').textContent='';" style="background:transparent;color:#555;border:1px solid #2a2a2a;border-radius:4px;font-family:var(--font-mono);font-size:0.72rem;padding:0.4rem 0.8rem;cursor:pointer;">Clear</button>
+          <span id="mrStatus" style="font-family:var(--font-mono);font-size:0.68rem;color:#555;margin-left:auto;"></span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
     <!-- ── ROADMAP ────────────────────────────────────────────── -->
     <section class="doc-section reveal" id="roadmap">
       <div class="section-eyebrow">Development</div>
@@ -1020,6 +1086,25 @@ HOME_URL="https://github.com/PolyfdOS"</pre>
       </div>
     </section>
 
+    <!-- ── CROSS-NAV ───────────────────────────────────────────── -->
+    <div style="border-top:1px solid var(--c-border);padding:2.5rem 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+      <a href="/matyos" style="text-decoration:none;border:1px solid var(--c-border);border-radius:6px;padding:1.4rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--c-acc)'" onmouseout="this.style.borderColor='var(--c-border)'">
+        <span style="font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--c-acc);">Language</span>
+        <span style="font-family:var(--font-serif);font-size:1.1rem;color:var(--c-text);">MatyOS</span>
+        <span style="font-size:0.78rem;color:var(--c-muted);">The language running inside this OS</span>
+      </a>
+      <a href="/papers/realistic" style="text-decoration:none;border:1px solid var(--c-border);border-radius:6px;padding:1.4rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--c-acc2)'" onmouseout="this.style.borderColor='var(--c-border)'">
+        <span style="font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--c-acc2);">Research Paper</span>
+        <span style="font-family:var(--font-serif);font-size:1.1rem;color:var(--c-text);">Realistic Type</span>
+        <span style="font-size:0.78rem;color:var(--c-muted);">Three-valued logic behind realistic_t</span>
+      </a>
+      <a href="/polyfdor" style="text-decoration:none;border:1px solid var(--c-border);border-radius:6px;padding:1.4rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--c-muted)'" onmouseout="this.style.borderColor='var(--c-border)'">
+        <span style="font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--c-muted);">Creator</span>
+        <span style="font-family:var(--font-serif);font-size:1.1rem;color:var(--c-text);">PolyfdoR</span>
+        <span style="font-size:0.78rem;color:var(--c-muted);">Ahmed Hafdi · @polyfdor</span>
+      </a>
+    </div>
+
     <!-- ── FOOTER ─────────────────────────────────────────────── -->
     <footer class="doc-footer">
       <div class="doc-footer-left">polyfdOS v1.4 · MIT License · Daftyon · Morocco 🇲🇦</div>
@@ -1052,7 +1137,7 @@ document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
 // ─── SIDEBAR SCROLLSPY ────────────────────────────────────────
 const sideLinks = document.querySelectorAll('.sidebar-link');
-const secIds = ['intro','quickstart','building','running','architecture','boot','memmap','tables','drivers','framebuffer','keyboard','serial','shell','filesystem','snake','shelldemo','realistic','hardware','roadmap'];
+const secIds = ['intro','quickstart','building','running','architecture','boot','memmap','tables','drivers','framebuffer','keyboard','serial','shell','filesystem','snake','shelldemo','realistic','hardware','matyos-runtime','roadmap'];
 const secEls = secIds.map(id => document.getElementById(id)).filter(Boolean);
 window.addEventListener('scroll', () => {
   const top = window.scrollY + 80;
@@ -1496,5 +1581,51 @@ Type <span style="color:#f78c6c">'help'</span> for commands.
       autocomplete="off" placeholder="type a command…"/>
   </div>
 </div>
+
+<script>
+// ── MATYOS RUNTIME (El runner inside polyfdOS terminal) ──────
+const mrExamples = {
+  hello: `ALGORITHM HelloWorld {\n  show "Hello from MatyOS running on polyfdOS!";\n  show "MatyOS v1.0.9 — El interpreter";\n}`,
+  realistic: `ALGORITHM RealisticDemo {\n  var sensor : boolean = realistic;\n  show sensor;\n  if sensor === true {\n    show "confirmed";\n  } elif sensor === false {\n    show "denied";\n  } else {\n    show "uncertain — realistic state";\n  }\n}`,
+  proof: `ALGORITHM ProofDemo {\n  axiom nat_pos : all n : Nat, n >= 0;\n  theorem zero_natural : 0 >= 0 {\n    proof { apply nat_pos; }\n  }\n  show "Proof complete: 0 is a natural number";\n}`
+};
+
+function mrSetExample(name) {
+  document.getElementById('mrEditor').value = mrExamples[name] || '';
+}
+
+async function mrRun() {
+  const code = document.getElementById('mrEditor').value;
+  const btn  = document.getElementById('mrRunBtn');
+  const out  = document.getElementById('mrOutput');
+  const st   = document.getElementById('mrStatus');
+  btn.disabled = true;
+  btn.textContent = '⏳ Running…';
+  st.textContent  = '';
+  out.innerHTML   = '<span style="color:#555">// executing…</span>';
+  try {
+    const r   = await fetch('/api/run-el', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code}) });
+    const { output, error } = await r.json();
+    if (error)  out.innerHTML = `<span style="color:#f48771">${escMr(error)}</span>`;
+    else if (output) out.innerHTML = `<span style="color:#c3e88d">${escMr(output)}</span>`;
+    else out.innerHTML = '<span style="color:#555">// no output</span>';
+    st.textContent = error ? 'error' : 'ok';
+    st.style.color = error ? '#f48771' : '#c3e88d';
+  } catch(e) {
+    out.innerHTML = `<span style="color:#f48771">${escMr(String(e))}</span>`;
+    st.textContent = 'error'; st.style.color = '#f48771';
+  } finally {
+    btn.disabled = false; btn.textContent = '▶ Run';
+  }
+}
+
+function escMr(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.getElementById('mrEditor').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); mrRun(); }
+});
+</script>
 </body>
 </html>

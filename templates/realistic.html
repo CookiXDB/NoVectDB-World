@@ -256,7 +256,8 @@ footer .container { display: flex; flex-direction: column; gap: 2rem; }
     <li><a href="#s2">§2 Formal Model</a></li>
     <li><a href="#s3">§3 Implementation</a></li>
     <li><a href="#s4">§4 Evaluation</a></li>
-    <li><a href="#s5">§5 Applications</a></li>
+    <li><a href="/matyos#realistic">MatyOS →</a></li>
+    <li><a href="/polyfdos#realistic">polyfdOS →</a></li>
     <li><a href="/static/realistic.pdf" target="_blank">Paper ↗</a></li>
   </ul>
   <button class="nav-burger" id="burger" aria-label="menu">
@@ -303,6 +304,20 @@ footer .container { display: flex; flex-direction: column; gap: 2rem; }
     </div>
   </div>
 </section>
+
+<!-- Ecosystem strip -->
+<div style="border-bottom:1px solid var(--black);background:var(--gray-50);padding:1.2rem 2rem;">
+  <div class="container" style="display:flex;align-items:center;gap:0;flex-wrap:wrap;max-width:860px;">
+    <a href="/papers/realistic" style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.06em;color:var(--black);text-decoration:none;font-weight:600;padding:0.3rem 0;">Realistic Type</a>
+    <span style="font-family:var(--font-mono);font-size:0.7rem;color:#999;padding:0 0.8rem;">→ implemented in</span>
+    <a href="/matyos#realistic" style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.06em;color:var(--black);text-decoration:none;padding:0.3rem 0;">MatyOS language</a>
+    <span style="font-family:var(--font-mono);font-size:0.7rem;color:#999;padding:0 0.8rem;">→ runs on</span>
+    <a href="/polyfdos#matyos-runtime" style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.06em;color:var(--black);text-decoration:none;padding:0.3rem 0;">polyfdOS</a>
+    <span style="margin-left:auto;font-family:var(--font-mono);font-size:0.65rem;color:#999;">
+      <a href="/polyfdor" style="color:#999;text-decoration:none;">by Ahmed Hafdi</a>
+    </span>
+  </div>
+</div>
 
 <!-- §1 INTRODUCTION -->
 <section id="s1">
@@ -462,6 +477,12 @@ footer .container { display: flex; flex-direction: column; gap: 2rem; }
       The Matyos language is extended with the <code>realistic</code> keyword and type. The implementation
       touches three layers: the lexer, the type system, and the runtime evaluator.
     </p>
+
+    <div class="reveal" style="margin-bottom:1.5rem;border:1px solid var(--black);border-radius:4px;padding:1rem 1.4rem;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+      <span style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#999;">Try it live</span>
+      <a href="/matyos#realistic" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--black);text-decoration:none;border-bottom:1px solid var(--black);">MatyOS playground →</a>
+      <a href="/polyfdos#matyos-runtime" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--black);text-decoration:none;border-bottom:1px solid var(--black);">Run on polyfdOS →</a>
+    </div>
 
     <h3 class="subsec reveal">3.1 Lexer Extension</h3>
     <p class="reveal">

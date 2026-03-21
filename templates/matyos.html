@@ -657,6 +657,8 @@ code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-
     <div class="sidebar-group">
       <div class="sidebar-group-label">Playground &amp; Examples</div>
       <a class="sidebar-link" href="#playground">Live El Playground</a>
+      <a class="sidebar-link sub" href="/polyfdos#matyos-runtime" style="color:#f78c6c;">▶ Run on polyfdOS</a>
+      <a class="sidebar-link sub" href="/papers/realistic">Realistic Type paper →</a>
       <a class="sidebar-link" href="#examples">Examples Gallery</a>
     </div>
   </aside>
@@ -1198,6 +1200,11 @@ el run src/hello_world.el</pre>
       <h3 class="section-sub">Realistic Logic</h3>
       <div class="section-body">
         <p>The <code>realistic</code> keyword introduces a third boolean state — uncertain. Classical logic operates on a closed world assumption; realistic logic acknowledges incomplete information.</p>
+        <p style="margin-top:0.6rem;">
+          <a href="/papers/realistic" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--c-pr);text-decoration:none;">→ Read the full Realistic Type paper</a>
+          &nbsp;&nbsp;
+          <a href="/polyfdos#realistic" style="font-family:var(--font-mono);font-size:0.78rem;color:#f78c6c;text-decoration:none;">→ See polyfdOS implementation</a>
+        </p>
       </div>
       <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Realistic <span class="op">{</span>
   <span class="kw">var</span> sensor_reading : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
@@ -1446,14 +1453,17 @@ neural_networks  = "^0.9.1"</pre></div>
         <p>Write and run El programs directly in the browser. Your code executes on the real MatyOS interpreter — proof traces, colored output and all.</p>
       </div>
 
-      <div class="playground">
+      <div class="playground" id="elPlayground">
         <div class="playground-header">
-          <span class="playground-title">El interpreter — live execution</span>
-          <div class="playground-examples">
-            <button class="playground-example-btn" onclick="setElExample('hello')">Hello World</button>
-            <button class="playground-example-btn" onclick="setElExample('proof')">Proof Demo</button>
-            <button class="playground-example-btn" onclick="setElExample('axiomatic')">Axiomatic</button>
-            <button class="playground-example-btn" onclick="setElExample('funcs')">Functions</button>
+          <span class="playground-title" id="playgroundTitle">El interpreter — live execution</span>
+          <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+            <button id="polyfdosToggle" onclick="togglePolyfdosMode()" style="font-family:var(--font-mono);font-size:0.62rem;background:transparent;border:1px solid #2a3550;color:#8892a4;padding:3px 10px;border-radius:3px;cursor:pointer;letter-spacing:0.04em;transition:all .2s;">▶ Run on polyfdOS</button>
+            <div class="playground-examples">
+              <button class="playground-example-btn" onclick="setElExample('hello')">Hello World</button>
+              <button class="playground-example-btn" onclick="setElExample('proof')">Proof Demo</button>
+              <button class="playground-example-btn" onclick="setElExample('axiomatic')">Axiomatic</button>
+              <button class="playground-example-btn" onclick="setElExample('funcs')">Functions</button>
+            </div>
           </div>
         </div>
         <div class="playground-body">
@@ -2039,5 +2049,58 @@ async function runFp() {
     <span class="fp-footer-hint">draggable · resizable · fullscreen</span>
   </div>
 </div>
+
+<!-- Cross-nav strip -->
+<div style="background:#0d1117;border-top:1px solid #1e2535;padding:2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;max-width:none;">
+  <a href="/polyfdos#matyos-runtime" style="text-decoration:none;border:1px solid #1e2535;border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='#f78c6c'" onmouseout="this.style.borderColor='#1e2535'">
+    <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:#f78c6c;">Operating System</span>
+    <span style="font-family:var(--font-serif);font-size:1.05rem;color:#c9d1d9;">polyfdOS</span>
+    <span style="font-size:0.76rem;color:#546e7a;">Run MatyOS inside the kernel shell</span>
+  </a>
+  <a href="/papers/realistic" style="text-decoration:none;border:1px solid #1e2535;border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--c-pr)'" onmouseout="this.style.borderColor='#1e2535'">
+    <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--c-pr);">Research Paper</span>
+    <span style="font-family:var(--font-serif);font-size:1.05rem;color:#c9d1d9;">Realistic Type</span>
+    <span style="font-size:0.76rem;color:#546e7a;">Three-valued logic formal paper</span>
+  </a>
+</div>
+
+<script>
+// ── polyfdOS mode toggle ──────────────────────────────────────
+let polyfdosMode = false;
+
+function togglePolyfdosMode() {
+  polyfdosMode = !polyfdosMode;
+  const pg   = document.getElementById('elPlayground');
+  const btn  = document.getElementById('polyfdosToggle');
+  const title = document.getElementById('playgroundTitle');
+  if (polyfdosMode) {
+    pg.style.background    = '#0a0a0a';
+    pg.style.border        = '1px solid #f78c6c55';
+    pg.style.borderRadius  = '6px';
+    pg.style.overflow      = 'hidden';
+    document.getElementById('elEditor').style.background  = '#0a0a0a';
+    document.getElementById('elEditor').style.color       = '#c9d1d9';
+    document.getElementById('elEditor').style.caretColor  = '#f78c6c';
+    document.getElementById('elOutput').style.background  = '#050505';
+    title.innerHTML = '<span style="color:#f78c6c">polyfdOS v1.4</span> &gt; matyos --interactive';
+    btn.textContent = '✕ Back to MatyOS mode';
+    btn.style.borderColor = '#f78c6c55';
+    btn.style.color = '#f78c6c';
+  } else {
+    pg.style.background   = '';
+    pg.style.border       = '';
+    pg.style.borderRadius = '';
+    pg.style.overflow     = '';
+    document.getElementById('elEditor').style.background  = '';
+    document.getElementById('elEditor').style.color       = '';
+    document.getElementById('elEditor').style.caretColor  = '';
+    document.getElementById('elOutput').style.background  = '';
+    title.textContent = 'El interpreter — live execution';
+    btn.textContent = '▶ Run on polyfdOS';
+    btn.style.borderColor = '#2a3550';
+    btn.style.color = '#8892a4';
+  }
+}
+</script>
 </body>
 </html>
