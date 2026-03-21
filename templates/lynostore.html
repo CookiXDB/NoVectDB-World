@@ -369,6 +369,74 @@ nav {
   margin-bottom: 0.3rem;
 }
 .hiw-sub { font-size: 0.8rem; color: var(--gray-600); line-height: 1.55; }
+
+/* ── MOBILE ── */
+@media (max-width: 480px) {
+
+  /* Nav — hide text links, keep logo + cart */
+  .nav-link { display: none; }
+  .nav-sep  { display: none; }
+  .nav-logo video { height: 24px; }
+  .nav-store-name { font-size: 0.72rem; }
+  .nav-cart { padding: 0.35rem 0.7rem; font-size: 0.65rem; }
+  nav { padding: 0 1rem; }
+
+  /* Banner */
+  .banner { padding: 3rem 1.2rem; gap: 1rem; }
+  .banner-sub { font-size: 0.85rem; }
+  .banner-badges { gap: 0.4rem; }
+  .badge { font-size: 0.58rem; padding: 0.25rem 0.6rem; }
+
+  /* Store wrap */
+  .store-wrap { padding: 0 1rem 4rem; margin-top: 1.5rem; gap: 1.5rem; }
+
+  /* Topbar */
+  .store-topbar { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .sort-select { width: 100%; }
+
+  /* Product grid — single column */
+  .product-grid { grid-template-columns: 1fr; gap: 1rem; }
+
+  /* Card */
+  .card-media { aspect-ratio: 16/9; }
+  .card-body { padding: 1rem; }
+  .card-buy { padding: 0.5rem 1rem; font-size: 0.7rem; }
+
+  /* Coming soon cards — smaller */
+  .card-coming { min-height: 160px; padding: 1.5rem; }
+
+  /* Format banner */
+  .format-banner { padding: 1.6rem; gap: 1.2rem; border-radius: 8px; }
+  .fb-icon { width: 44px; height: 44px; border-radius: 8px; font-size: 0.62rem; }
+  .fb-text .fb-title { font-size: 0.82rem; }
+  .fb-text .fb-sub { font-size: 0.78rem; }
+  .fb-pills { gap: 0.35rem; }
+  .fb-pill { font-size: 0.55rem; padding: 2px 6px; }
+
+  /* HIW steps — single column, no right border */
+  .hiw-steps { grid-template-columns: 1fr; }
+  .hiw-step { border-right: none; border-bottom: 1px solid var(--brand-light); }
+  .hiw-step:last-child { border-bottom: none; }
+  .hiw-step { padding: 1.2rem; }
+}
+
+@media (max-width: 768px) and (min-width: 481px) {
+
+  nav { padding: 0 1.2rem; }
+  .nav-link:first-child { display: none; } /* hide ← LynOS, keep Universe */
+
+  /* Banner */
+  .banner { padding: 3.5rem 1.5rem; }
+
+  /* Store wrap */
+  .store-wrap { padding: 0 1.2rem 5rem; margin-top: 2rem; }
+
+  /* Product grid — 2 columns */
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+
+  /* Format banner */
+  .format-banner { padding: 1.8rem; }
+}
 </style>
 </head>
 <body>
