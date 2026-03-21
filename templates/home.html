@@ -57,6 +57,8 @@ nav {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   display: block;
+  cursor: grab;
+  touch-action: none;
 }
 
 
@@ -64,19 +66,23 @@ nav {
 /* ── PLANET LABELS ────────────────────────────────────────────── */
 .planet-label {
   position: absolute;
-  transform: translate(-50%, -145%);
+  transform: translate(-50%, -150%);
   z-index: 50;
   cursor: pointer;
   pointer-events: auto;
   text-decoration: none;
   white-space: nowrap;
   transition: opacity .2s;
+  padding: 0.4rem 0.2rem;  /* larger touch target */
 }
-.planet-label:hover { opacity: 0.75; }
+.planet-label:hover { opacity: 0.6; }
 .planet-label .pl-name {
   font-family: var(--font-mono);
-  font-size: 0.65rem; font-weight: 400;
-  color: rgba(0,0,10,0.42); text-align: center; letter-spacing: 0.06em;
+  font-size: 0.62rem; font-weight: 400;
+  color: rgba(0,0,10,0.4); text-align: center; letter-spacing: 0.07em;
+}
+@media (max-width: 600px) {
+  .planet-label .pl-name { font-size: 0.7rem; letter-spacing: 0.05em; }
 }
 
 /* ── SUN LABEL ────────────────────────────────────────────────── */
@@ -96,6 +102,7 @@ nav {
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 700px) {
   nav { padding: 0 1.2rem; }
+  #sunLabel { transform: translate(-50%, -260%); }
 }
 </style>
 </head>
@@ -467,35 +474,119 @@ function toScreenPos(worldPos) {
   };
 }
 
-// ── RAYCASTER (click planets) ─────────────────────────────────
+// ── INTERACTIVE CAMERA ────────────────────────────────────────
+function responsiveRadius() {
+  const w = W();
+  if (w < 480) return 46;
+  if (w < 768) return 36;
+  return 28;
+}
+
+let camTheta  = 0.5;
+let camPhi    = 0.60;
+let camRadius = responsiveRadius();
+let isDragging   = false;
+let dragStartPos = null;
+let dragMoved    = false;
+
+function navigate(id) {
+  if (id === 'polyfdos-os') window.location.href = '/polyfdos';
+  else if (id === 'research') window.location.href = '/polyfdor';
+  else window.location.href = '/' + id.replace('-', '');
+}
+
+// ── Raycaster ─────────────────────────────────────────────────
 const raycaster = new THREE.Raycaster();
 const mouse     = new THREE.Vector2();
-canvas.addEventListener('click', e => {
+function raycastPlanet(cx, cy) {
   const rect = canvas.getBoundingClientRect();
-  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+  mouse.x =  ((cx - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((cy - rect.top)  / rect.height) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
   const meshes = planets.map(p => p.mesh);
-  const hits   = raycaster.intersectObjects(meshes);
+  const hits = raycaster.intersectObjects(meshes);
   if (hits.length) {
     const idx = meshes.indexOf(hits[0].object);
-    if (idx !== -1) {
-      if (CONFIGS[idx].id === 'polyfdos-os') window.location.href = '/polyfdos';
-      else if (CONFIGS[idx].id === 'research') window.location.href = '/polyfdor';
-      else window.location.href = '/' + CONFIGS[idx].id.replace('-', '');
-    }
+    if (idx !== -1) navigate(CONFIGS[idx].id);
+  }
+}
+
+// ── Mouse drag ────────────────────────────────────────────────
+canvas.addEventListener('mousedown', e => {
+  isDragging = true; dragMoved = false;
+  dragStartPos = { x: e.clientX, y: e.clientY };
+  canvas.style.cursor = 'grabbing';
+});
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  canvas.style.cursor = 'grab';
+});
+window.addEventListener('mousemove', e => {
+  if (isDragging) {
+    const dx = e.clientX - dragStartPos.x;
+    const dy = e.clientY - dragStartPos.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) dragMoved = true;
+    camTheta -= dx * 0.006;
+    camPhi = Math.max(0.08, Math.min(1.45, camPhi - dy * 0.004));
+    dragStartPos = { x: e.clientX, y: e.clientY };
+  } else {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+    mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(planets.map(p => p.mesh));
+    canvas.style.cursor = hits.length ? 'pointer' : 'grab';
   }
 });
-
-// Change cursor on hover
-canvas.addEventListener('mousemove', e => {
-  const rect = canvas.getBoundingClientRect();
-  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
-  const hits = raycaster.intersectObjects(planets.map(p => p.mesh));
-  canvas.style.cursor = hits.length ? 'pointer' : 'default';
+canvas.addEventListener('click', e => {
+  if (!dragMoved) raycastPlanet(e.clientX, e.clientY);
 });
+
+// ── Scroll to zoom ────────────────────────────────────────────
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  camRadius = Math.max(8, Math.min(60, camRadius + e.deltaY * 0.05));
+}, { passive: false });
+
+// ── Touch drag + pinch ────────────────────────────────────────
+let prevTouch = null, prevPinchDist = null;
+canvas.addEventListener('touchstart', e => {
+  dragMoved = false;
+  if (e.touches.length === 1) {
+    prevTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    dragStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  } else if (e.touches.length === 2) {
+    prevPinchDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+  }
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length === 1 && prevTouch) {
+    const dx = e.touches[0].clientX - prevTouch.x;
+    const dy = e.touches[0].clientY - prevTouch.y;
+    if (Math.abs(dx) + Math.abs(dy) > 8) dragMoved = true;
+    camTheta -= dx * 0.007;
+    camPhi = Math.max(0.08, Math.min(1.45, camPhi - dy * 0.005));
+    prevTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  } else if (e.touches.length === 2 && prevPinchDist !== null) {
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    camRadius = Math.max(8, Math.min(60, camRadius * (prevPinchDist / dist)));
+    prevPinchDist = dist;
+    dragMoved = true;
+  }
+}, { passive: true });
+canvas.addEventListener('touchend', e => {
+  if (!dragMoved && e.changedTouches.length === 1) {
+    const t = e.changedTouches[0];
+    raycastPlanet(t.clientX, t.clientY);
+  }
+  prevTouch = null; prevPinchDist = null;
+}, { passive: true });
 
 // ── RESIZE ────────────────────────────────────────────────────
 new ResizeObserver(() => {
@@ -517,12 +608,12 @@ const moonOffset = new THREE.Vector3();
   sunUniforms.uTime.value   = t;
   coronaUniforms.uTime.value = t;
 
-  // Gentle camera drift (very slow)
-  const camAz = t * 0.006;
+  // Auto-drift when idle; user can override by dragging
+  if (!isDragging) camTheta += 0.0004;
   camera.position.set(
-    Math.sin(camAz) * 26,
-    18 + Math.sin(t * 0.05) * 1.5,
-    Math.cos(camAz) * 26
+    camRadius * Math.cos(camPhi) * Math.sin(camTheta),
+    camRadius * Math.sin(camPhi),
+    camRadius * Math.cos(camPhi) * Math.cos(camTheta)
   );
   camera.lookAt(0, 0, 0);
 
@@ -558,7 +649,7 @@ const moonOffset = new THREE.Vector3();
       );
     }
 
-    p.atmoMesh.material.opacity = 0.06;
+    p.atmoMesh.material.opacity = 0.22;
 
     // Update planet shader time
     p.uniforms.uTime.value = t;
