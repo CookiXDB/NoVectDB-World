@@ -66,119 +66,40 @@ nav {
   display: block;
 }
 
-/* ── HERO OVERLAY ─────────────────────────────────────────────── */
-#heroOverlay {
-  position: absolute; top: 0; left: 0;
-  width: 40%; min-width: 320px;
-  padding: 7.5rem 2.5rem 3rem;
-  z-index: 10; pointer-events: none;
-  background: linear-gradient(90deg, rgba(245,244,240,0.92) 55%, transparent 100%);
-}
-.hero-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(0,0,20,0.4);
-  margin-bottom: 1.8rem;
-  display: flex; align-items: center; gap: 0.8rem;
-}
-.hero-eyebrow::after {
-  content: ''; display: block; width: 30px; height: 1px;
-  background: rgba(0,0,20,0.2);
-}
-.hero-headline {
-  font-family: var(--font-serif);
-  font-size: clamp(2.5rem, 5.5vw, 4.8rem);
-  font-weight: 400; line-height: 1.05;
-  letter-spacing: -0.02em; margin-bottom: 1.4rem;
-  color: #111;
-}
-.hero-headline em { font-style: italic; opacity: 0.6; }
-.hero-tagline {
-  font-family: var(--font-serif); font-style: italic;
-  font-size: 1.05rem; color: rgba(0,0,20,0.5);
-  margin-bottom: 2.5rem; line-height: 1.6;
-}
-.hero-acronym {
-  border-left: 1px solid rgba(0,0,20,0.18);
-  padding-left: 1rem; margin-bottom: 2.5rem;
-  display: flex; flex-direction: column; gap: 0.3rem;
-}
-.acronym-row {
-  font-family: var(--font-mono);
-  font-size: 0.72rem; color: rgba(0,0,20,0.4);
-  display: flex; gap: 0.6rem;
-}
-.acronym-key { color: rgba(0,0,20,0.75); min-width: 38px; }
 
 
 /* ── PLANET LABELS ────────────────────────────────────────────── */
 .planet-label {
   position: absolute;
-  transform: translate(-50%, -130%);
+  transform: translate(-50%, -140%);
   z-index: 50;
   cursor: pointer;
   pointer-events: auto;
   text-decoration: none;
   white-space: nowrap;
-  transition: opacity .2s;
-}
-.planet-label .pl-dot {
-  width: 4px; height: 4px; border-radius: 50%;
-  background: rgba(0,0,20,0.45);
-  margin: 0 auto 0.5rem;
 }
 .planet-label .pl-name {
   font-family: var(--font-mono);
-  font-size: 0.75rem; font-weight: 500;
-  color: #111; text-align: center; letter-spacing: 0.04em;
-  text-shadow: 0 1px 4px rgba(245,244,240,0.9);
-}
-.planet-label .pl-name em { font-style: normal; opacity: 0.55; }
-.planet-label .pl-sub {
-  font-family: var(--font-mono); font-size: 0.58rem;
-  color: rgba(0,0,20,0.4); text-align: center;
-  margin-top: 0.18rem; letter-spacing: 0.06em;
-}
-.planet-label .pl-tag {
-  display: none; /* shown on hover */
-  margin-top: 0.5rem;
-  background: rgba(245,244,240,0.92);
-  border: 1px solid rgba(0,0,20,0.12);
-  border-radius: 3px; padding: 0.35rem 0.8rem;
-  backdrop-filter: blur(10px);
-}
-.planet-label:hover .pl-tag { display: block; }
-.pl-tag-inner {
-  font-family: var(--font-mono); font-size: 0.65rem;
-  color: rgba(0,0,20,0.7);
+  font-size: 0.7rem; font-weight: 400;
+  color: rgba(0,0,10,0.55); text-align: center; letter-spacing: 0.05em;
 }
 
 /* ── SUN LABEL ────────────────────────────────────────────────── */
 #sunLabel {
   position: absolute; z-index: 50;
-  transform: translate(-50%, -210%);
+  transform: translate(-50%, -220%);
   text-align: center; pointer-events: none;
 }
 .sun-name {
-  font-family: var(--font-serif);
-  font-size: 1.05rem; font-style: italic;
-  color: rgba(255, 230, 150, 0.9);
-  text-shadow: 0 0 20px rgba(255,180,60,0.8);
-  letter-spacing: 0.02em;
-}
-.sun-sub {
-  font-family: var(--font-mono); font-size: 0.58rem;
-  color: rgba(255,200,80,0.45); letter-spacing: 0.1em;
-  text-transform: uppercase; margin-top: 0.15rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.1em;
+  color: rgba(180,120,20,0.7);
 }
 
 
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 700px) {
   nav { padding: 0 1.2rem; }
-  #heroOverlay { width: 100%; min-width: 0; padding: 5.5rem 1.2rem 2rem; background: linear-gradient(180deg, rgba(245,244,240,0.92) 60%, transparent 100%); }
-  .hero-headline { font-size: 2.4rem; }
-  .nav-links-right a:not(:last-child) { display: none; }
 }
 </style>
 </head>
@@ -196,58 +117,26 @@ nav {
 <section id="galaxy">
   <canvas id="solarCanvas"></canvas>
 
-  <!-- Hero text overlay -->
-  <div id="heroOverlay">
-    <div class="hero-eyebrow">PolyfdoS Universe</div>
-    <h1 class="hero-headline">
-      Think Bigger<br>
-      Than the<br>
-      <em>Universe.</em>
-    </h1>
-    <p class="hero-tagline">Every project is a planet. PolyfdoS is the universe.</p>
-    <div class="hero-acronym">
-      <div class="acronym-row"><span class="acronym-key">POLY</span>→ Polymath — learning across many fields</div>
-      <div class="acronym-row"><span class="acronym-key">FD</span>→ Hafdi — the name behind the world</div>
-      <div class="acronym-row"><span class="acronym-key">OS</span>→ Open Systems &amp; open thinking</div>
-    </div>
-  </div>
-
   <!-- Sun label -->
   <div id="sunLabel">
     <div class="sun-name">PolyfdoS</div>
-    <div class="sun-sub">The Universe</div>
   </div>
 
   <!-- Planet labels -->
   <a class="planet-label" href="/polyfdos" id="lbl-polyfdos-os">
-    <div class="pl-dot"></div>
-    <div class="pl-name">polyfd<em>OS</em></div>
-    <div class="pl-sub">Operating System</div>
-    <div class="pl-tag"><div class="pl-tag-inner">v1.4 · x86 · MIT →</div></div>
+    <div class="pl-name">polyfdOS</div>
   </a>
   <a class="planet-label" href="/matyos" id="lbl-matyos">
-    <div class="pl-dot"></div>
-    <div class="pl-name">Maty<em>OS</em></div>
-    <div class="pl-sub">Proof Language</div>
-    <div class="pl-tag"><div class="pl-tag-inner">v1.0.9 · MIT →</div></div>
+    <div class="pl-name">MatyOS</div>
   </a>
   <a class="planet-label" href="/cookixdb" id="lbl-cookixdb">
-    <div class="pl-dot"></div>
-    <div class="pl-name">Cooxi<em>x</em>DB</div>
-    <div class="pl-sub">Vector Database</div>
-    <div class="pl-tag"><div class="pl-tag-inner">NoVectDB kernel →</div></div>
+    <div class="pl-name">CookixDB</div>
   </a>
   <a class="planet-label" href="/bring" id="lbl-bring">
-    <div class="pl-dot"></div>
     <div class="pl-name">Bring</div>
-    <div class="pl-sub">File Format</div>
-    <div class="pl-tag"><div class="pl-tag-inner">v1.0 · Daftyon →</div></div>
   </a>
   <a class="planet-label" href="/polyfdor" id="lbl-research">
-    <div class="pl-dot"></div>
     <div class="pl-name">Research</div>
-    <div class="pl-sub">Papers &amp; Theory</div>
-    <div class="pl-tag"><div class="pl-tag-inner">6 papers · explore →</div></div>
   </a>
 </section>
 
@@ -472,32 +361,32 @@ const CONFIGS = [
   {
     id:      'polyfdos-os',
     radius:  0.62,  orbitR: 5.2,   speed: 0.00044, angle0: 0.6,  incline: 0.07,
-    color:   new THREE.Color(0x5588bb), atmo: new THREE.Color(0x3366aa), seed: 1.1,
+    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 1.1,
     rings: false, moon: false, labelEl: 'lbl-polyfdos-os'
   },
   {
     id:      'matyos',
     radius:  0.50,  orbitR: 7.8,   speed: 0.00028, angle0: 2.2,  incline: 0.12,
-    color:   new THREE.Color(0x9944dd), atmo: new THREE.Color(0xbb55ff), seed: 2.7,
+    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 2.7,
     rings: false, moon: false, labelEl: 'lbl-matyos'
   },
   {
     id:      'cookixdb',
     radius:  0.78,  orbitR: 10.8,  speed: 0.00018, angle0: 4.0,  incline: 0.04,
-    color:   new THREE.Color(0xFEB763), atmo: new THREE.Color(0xff9922), seed: 4.3,
+    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 4.3,
     rings: false, moon: true,  labelEl: 'lbl-cookixdb'
   },
   {
     id:      'bring',
     radius:  0.44,  orbitR: 13.2,  speed: 0.00012, angle0: 1.0,  incline: 0.15,
-    color:   new THREE.Color(0x28c8ef), atmo: new THREE.Color(0x55eeff), seed: 6.1,
+    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 6.1,
     rings: false, moon: false, labelEl: 'lbl-bring'
   },
   {
     id:      'research',
     radius:  0.70,  orbitR: 16.5,  speed: 0.00007, angle0: 3.2,  incline: 0.08,
-    color:   new THREE.Color(0x99bbff), atmo: new THREE.Color(0xccddff), seed: 8.8,
-    rings: true,  moon: false, labelEl: 'lbl-research'
+    color:   new THREE.Color(0x111111), atmo: new THREE.Color(0x222222), seed: 8.8,
+    rings: false, moon: false, labelEl: 'lbl-research'
   },
 ];
 
@@ -533,10 +422,10 @@ CONFIGS.forEach(cfg => {
 
   // Atmosphere glow shell
   const atmoMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(cfg.radius * 1.22, 32, 32),
+    new THREE.SphereGeometry(cfg.radius * 1.15, 32, 32),
     new THREE.MeshBasicMaterial({
       color: cfg.atmo, transparent: true,
-      opacity: 0.12, side: THREE.BackSide
+      opacity: 0.07, side: THREE.BackSide
     })
   );
   scene.add(atmoMesh);
@@ -559,7 +448,7 @@ CONFIGS.forEach(cfg => {
   if (cfg.moon) {
     moon = new THREE.Mesh(
       new THREE.SphereGeometry(0.14, 16, 16),
-      new THREE.MeshStandardMaterial({ color: 0xaabbcc, roughness: 0.9 })
+      new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
     );
     scene.add(moon);
   }
@@ -673,9 +562,7 @@ const moonOffset = new THREE.Vector3();
       );
     }
 
-    // Emissive pulse for atmosphere
-    const pulse = 0.09 + 0.04 * Math.sin(t * 1.2 + p.cfg.seed);
-    p.atmoMesh.material.opacity = pulse;
+    p.atmoMesh.material.opacity = 0.06;
 
     // Update planet shader time
     p.uniforms.uTime.value = t;
