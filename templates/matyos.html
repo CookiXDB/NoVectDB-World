@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MatyOS — Proof Assistant Programming Language</title>
-<meta name="description" content="MatyOS — a proof assistant programming language by Ahmed Hafdi for formal verification and mathematical reasoning.">
-<meta name="keywords" content="MatyOS, proof assistant, programming language, formal verification, Ahmed Hafdi, PolyfdoR">
+<title>MatyOS — Dependently-Typed Proof Assistant (LLM-native)</title>
+<meta name="description" content="MatyOS is a dependently-typed proof assistant in the tradition of Lean / Coq / Agda, designed to be LLM-native and uncertainty-aware. Sound kernel, .elk proof language, three-valued realistic logic, 233 tests passing.">
+<meta name="keywords" content="MatyOS, proof assistant, dependent types, formal verification, Lean, Coq, Agda, theorem prover, .elk, realistic logic, LLM-native, Ahmed Hafdi, PolyfdoR">
 <meta name="author" content="Ahmed Hafdi">
 <link rel="canonical" href="/matyos">
-<meta property="og:title" content="MatyOS — Proof Assistant Programming Language">
-<meta property="og:description" content="MatyOS — a proof assistant programming language by Ahmed Hafdi for formal verification and mathematical reasoning.">
+<meta property="og:title" content="MatyOS — Dependently-Typed Proof Assistant (LLM-native)">
+<meta property="og:description" content="A proof assistant in the tradition of Lean / Coq / Agda, designed to be LLM-native and uncertainty-aware. Sound kernel, .elk proof language, 233 tests passing.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MatyOS — Proof Assistant Programming Language">
-<meta name="twitter:description" content="MatyOS — a proof assistant programming language by Ahmed Hafdi for formal verification and mathematical reasoning.">
+<meta name="twitter:title" content="MatyOS — Dependently-Typed Proof Assistant">
+<meta name="twitter:description" content="A proof assistant in the tradition of Lean / Coq / Agda, designed to be LLM-native and uncertainty-aware.">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
 <style>
@@ -607,12 +607,12 @@ code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-
   <span class="nav-logo"><img class="nav-logo-img" src="/static/img/matyos.svg" alt=""><span>Maty<em>OS</em></span></span>
   <div class="nav-links">
     <a href="#introduction">Intro</a>
-    <a href="#quickstart">Quick Start</a>
-    <a href="#types">Reference</a>
-    <a href="#proofs">Proof System</a>
-    <a href="#bring">Bring Format</a>
-    <a href="#examples">Examples</a>
-    <span class="nav-badge">v1.1.0</span>
+    <a href="#quickstart">First Proof</a>
+    <a href="#types">Kernel</a>
+    <a href="#proofs">Proofs</a>
+    <a href="#projects">Projects</a>
+    <a href="#roadmap">Roadmap</a>
+    <span class="nav-badge">v0.7.0</span>
   </div>
 </nav>
 
@@ -627,50 +627,39 @@ code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-
     <div class="sidebar-group">
       <div class="sidebar-group-label">Getting Started</div>
       <a class="sidebar-link" href="#introduction">Introduction</a>
+      <a class="sidebar-link" href="#why">Why another assistant?</a>
       <a class="sidebar-link" href="#installation">Installation</a>
-      <a class="sidebar-link" href="#quickstart">Quick Start</a>
+      <a class="sidebar-link" href="#quickstart">First Proof</a>
     </div>
     <div class="sidebar-group">
-      <div class="sidebar-group-label">Language Reference</div>
-      <a class="sidebar-link" href="#variables">Variables &amp; Constants</a>
-      <a class="sidebar-link" href="#types">Type System</a>
-      <a class="sidebar-link" href="#operators">Operators</a>
-      <a class="sidebar-link" href="#control-flow">Control Flow</a>
-      <a class="sidebar-link" href="#functions">Functions</a>
-      <a class="sidebar-link" href="#builtins">Builtin Functions</a>
-      <a class="sidebar-link" href="#objects">Objects &amp; Arrays</a>
+      <div class="sidebar-group-label">The Kernel</div>
+      <a class="sidebar-link" href="#types">Dependent Types</a>
+      <a class="sidebar-link" href="#inductive">Inductive Types &amp; Recursors</a>
+      <a class="sidebar-link" href="#equality">Propositional Equality</a>
+      <a class="sidebar-link" href="#curry-howard">Curry–Howard</a>
     </div>
     <div class="sidebar-group">
-      <div class="sidebar-group-label">Proof System</div>
-      <a class="sidebar-link" href="#proofs">Overview</a>
-      <a class="sidebar-link sub" href="#axioms">Axioms</a>
-      <a class="sidebar-link sub" href="#theorems">Theorems</a>
-      <a class="sidebar-link sub" href="#proof-blocks">Proof Blocks</a>
-      <a class="sidebar-link sub" href="#proof-workflow">Workflow Animation</a>
+      <div class="sidebar-group-label">Proofs</div>
+      <a class="sidebar-link" href="#proofs">Terms vs Tactics</a>
+      <a class="sidebar-link sub" href="#tactics">Tactic Engine (by/qed)</a>
       <a class="sidebar-link sub" href="#realistic">Realistic Logic</a>
     </div>
     <div class="sidebar-group">
-      <div class="sidebar-group-label">Bring Format</div>
-      <a class="sidebar-link" href="#bring">Overview</a>
-      <a class="sidebar-link sub" href="#bring-syntax">Syntax</a>
-      <a class="sidebar-link sub" href="#bring-schemas">Schemas</a>
-      <a class="sidebar-link sub" href="#bring-playground">Live Playground</a>
+      <div class="sidebar-group-label">Projects (Scientific Method)</div>
+      <a class="sidebar-link" href="#projects">.hyp · .thm · .test · .prf</a>
+      <a class="sidebar-link sub" href="#sealed">Sealed .matyos archives</a>
     </div>
     <div class="sidebar-group">
-      <div class="sidebar-group-label">Packages &amp; CLI</div>
-      <a class="sidebar-link" href="#packages">Package System</a>
-      <a class="sidebar-link" href="#cli">CLI Reference</a>
+      <div class="sidebar-group-label">CLI &amp; Architecture</div>
+      <a class="sidebar-link" href="#cli">matyos CLI</a>
+      <a class="sidebar-link" href="#architecture">Trust Boundary</a>
+      <a class="sidebar-link" href="#roadmap">Roadmap &amp; Status</a>
     </div>
     <div class="sidebar-group">
-      <div class="sidebar-group-label">Architecture</div>
-      <a class="sidebar-link" href="#pipeline">Compiler Pipeline</a>
-    </div>
-    <div class="sidebar-group">
-      <div class="sidebar-group-label">Playground &amp; Examples</div>
-      <a class="sidebar-link" href="#playground">Live El Playground</a>
-      <a class="sidebar-link sub" href="/polyfdos#matyos-runtime" style="color:#f78c6c;">▶ Run on polyfdOS</a>
+      <div class="sidebar-group-label">Resources</div>
       <a class="sidebar-link sub" href="/papers/realistic">Realistic Type paper →</a>
-      <a class="sidebar-link" href="#examples">Examples Gallery</a>
+      <a class="sidebar-link sub" href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener" style="color:#f78c6c;">▶ GitHub repo</a>
+      <a class="sidebar-link sub" href="https://github.com/MatyOS-Project/MatyOS/releases" target="_blank" rel="noopener">Releases (binaries)</a>
     </div>
   </aside>
 
@@ -680,28 +669,30 @@ code { font-family: var(--font-mono); font-size: 0.82em; background: var(--gray-
     <!-- ══ HERO ══════════════════════════════════════════════════ -->
     <div class="hero-section">
       <img class="hero-logo-mark" src="/static/img/matyos.svg" alt="MatyOS logo">
-      <div class="section-eyebrow">Language · v1.1.0 · MIT License · .el extension</div>
+      <div class="section-eyebrow">Proof Assistant · v0.7.0 · MIT License · .elk proof language</div>
       <h1 class="hero-title">Maty<em>OS</em></h1>
       <p class="hero-tagline" id="tagline"><span id="typewriter"></span><span id="typewriter-cursor">|</span></p>
       <div class="hero-badges">
-        <span class="badge">Proof Assistant</span>
-        <span class="badge">3-valued boolean logic</span>
-        <span class="badge">12 proof keywords</span>
-        <span class="badge">Python runtime</span>
+        <span class="badge">Dependently-Typed</span>
+        <span class="badge">Sound Kernel</span>
+        <span class="badge">233 tests passing</span>
+        <span class="badge">LLM-native</span>
+        <span class="badge">Three-Valued Logic</span>
+        <span class="badge">Win · Linux · macOS</span>
         <span class="badge">MIT License</span>
       </div>
       <div class="hero-install">
-        <pre><span class="cm"># Run a source file</span>
-el run hello_world.el
-
-<span class="cm"># Compile from Python</span>
-from compiler.main import El
-El.compile_file('app')</pre>
+        <pre><span class="cm"># Download the matyos binary from the Releases page, then:</span>
+$ matyos check stdlib/arith.elk
+$ matyos new my_theory
+$ matyos check my_theory
+$ matyos build my_theory          <span class="cm"># seal a complete theory → .matyos archive</span></pre>
       </div>
       <a class="hero-link" href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener">
         → github.com/MatyOS-Project/MatyOS
       </a>
     </div>
+
 
     <hr class="doc-divider"/>
 
@@ -710,925 +701,424 @@ El.compile_file('app')</pre>
       <div class="section-eyebrow">Getting Started</div>
       <h2 class="section-title">Introduction</h2>
       <div class="section-body">
-        <p>MatyOS is a proof-assistant programming language where formal verification is first-class syntax, not an afterthought. Theorems, axioms, and QED live at the same level as variables and functions. The language is built on a Lexer → Parser → Semantic Analyzer → Interpreter pipeline written entirely in Python.</p>
-        <p>The source file extension is <code>.el</code> (for <em>Elnamic Language</em>). Programs are case-insensitive for keywords — <code>VAR</code>, <code>var</code>, and <code>Var</code> are all valid. Identifiers support alphanumeric characters and underscores.</p>
-        <p>Comments use <code>&#123;&#123; &#125;&#125;</code> for multi-line blocks and <code>//</code> for single-line, keeping the aesthetic close to traditional proof notation.</p>
+        <p>MatyOS is a proof assistant in the tradition of <strong>Lean, Coq and Agda</strong>: you state theorems as types and prove them by writing terms that a small, trusted <strong>kernel</strong> checks. Its long-term goal is to be a system that <strong>large language models can use to do mathematics</strong> — analysis, conjecture, and proof — with first-class support for <em>uncertainty</em> (the <code>realistic</code> truth value).</p>
+        <p>Proof files use the <code>.elk</code> extension. <code>matyos check</code> exits <code>0</code> when every proof in the file holds and non-zero when any proof fails, so it drops straight into CI.</p>
       </div>
       <div class="info-box">
-        <strong>Design Philosophy</strong>
-        Proof is syntax, not ceremony. A theorem that cannot be proven is a compile-time concern, not a runtime surprise.
+        <strong>Honest status.</strong> This is an early but <em>sound</em> core, not yet a Lean competitor in capability. What works today: a trusted dependent-type kernel, inductive types with recursors, propositional equality, proof by induction, strict-positivity checking, definitions, an impredicative <code>Prop</code>, a text front-end (<code>.elk</code>), a tactic engine (<code>by ... qed</code>), and a three-valued "realistic" logic — all covered by 233 tests.
       </div>
     </section>
+
+    <!-- ══ WHY ANOTHER PROOF ASSISTANT? ══════════════════════════ -->
+    <section class="doc-section reveal" id="why">
+      <h2 class="section-title">Why another proof assistant?</h2>
+      <div class="section-body">
+        <p>Lean / Coq / Agda were designed for humans, decades before LLMs. MatyOS is designed from day one around two bets:</p>
+        <ol>
+          <li><strong>Soundness is sacred.</strong> Every proof — however it is produced, including by an LLM — reduces to a term checked by a tiny trusted kernel. Nothing is ever "assumed proven".</li>
+          <li><strong>Uncertainty is first-class.</strong> Real mathematical work (especially an LLM's) is full of <em>plausible-but-unproven</em> steps. MatyOS treats this rigorously with a three-valued logic (<code>true</code> / <code>false</code> / <code>realistic</code>) that lives in an epistemic layer <em>above</em> the kernel, so conjecture and certainty never get confused.</li>
+        </ol>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
 
     <!-- ══ INSTALLATION ══════════════════════════════════════════ -->
     <section class="doc-section reveal" id="installation">
       <h2 class="section-title">Installation</h2>
       <div class="section-body">
-        <p>Clone the repository and use Python 3.8+ to run programs. No external dependencies are required for the core language runtime.</p>
+        <p>Download the <code>matyos</code> binary for your platform from the <a href="https://github.com/MatyOS-Project/MatyOS/releases" target="_blank" rel="noopener">Releases page</a>, then put it on your <code>PATH</code> — or let the installer scripts do it for you (per-user location, no admin required):</p>
       </div>
-      <div class="step-cards">
-        <div class="step-card">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <h4>Clone the repository</h4>
-            <div class="code-block-wrap">
-              <pre class="code-block">git clone https://github.com/MatyOS-Project/MatyOS.git
-cd MatyOS</pre>
-            </div>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <h4>Install (Mac / Linux — one-liner)</h4>
-            <div class="code-block-wrap">
-              <pre class="code-block">chmod +x install.sh &amp;&amp; ./install.sh
-<span class="cm"># adds `el` to ~/.local/bin — restart shell after</span></pre>
-            </div>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <h4>Or install via pip (editable)</h4>
-            <div class="code-block-wrap">
-              <pre class="code-block">pip install -e .
-<span class="cm"># pip install -r requirements.txt  (optional extras)</span></pre>
-            </div>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">4</div>
-          <div class="step-body">
-            <h4>Run a program</h4>
-            <div class="code-block-wrap">
-              <pre class="code-block">el run hello_world.el
-<span class="cm"># or: python -m compiler.main</span></pre>
-            </div>
-          </div>
-        </div>
+      <div class="code-block">
+        <pre><span class="cm">:: Windows  (run from the folder containing matyos.exe / the repo)</span>
+&gt; powershell -ExecutionPolicy Bypass -File install.ps1
+
+<span class="cm"># Linux / macOS</span>
+$ bash install-matyos.sh</pre>
       </div>
+      <p>Open a <strong>new terminal</strong>, and the <code>matyos</code> command is available everywhere:</p>
+      <div class="code-block">
+        <pre>$ matyos version
+$ matyos check demo.elk          <span class="cm"># type-check a proof file (exit 0 = all proofs hold)</span>
+$ matyos help</pre>
+      </div>
+      <p class="muted small">Want to build from source or run the 233-test suite? See the repo's <a href="https://github.com/MatyOS-Project/MatyOS/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">CONTRIBUTING.md</a>.</p>
     </section>
 
-    <!-- ══ QUICK START ═══════════════════════════════════════════ -->
+    <hr class="doc-divider"/>
+
+    <!-- ══ QUICK START — FIRST PROOF ═════════════════════════════ -->
     <section class="doc-section reveal" id="quickstart">
-      <h2 class="section-title">Quick Start</h2>
-      <h3 class="section-sub">Hello World</h3>
-      <div class="code-block-wrap">
-        <span class="code-block-label">hello_world.el</span>
-        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> HelloWorld <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"Hello, World!"</span>;
-<span class="op">}</span></pre></div>
+      <div class="section-eyebrow">Quick Start</div>
+      <h2 class="section-title">A first proof</h2>
+      <div class="section-body">
+        <p>Here is arithmetic <em>from scratch</em> — declaring the natural numbers, defining addition, and proving <code>n + 0 = n</code> by induction. This is <code>stdlib/arith.elk</code> in the repo:</p>
       </div>
+      <div class="code-block">
+        <pre>inductive Nat : Type :=
+  | zero : Nat
+  | succ : Nat -&gt; Nat
 
-      <h3 class="section-sub">Variables and Output</h3>
-      <div class="code-block-wrap">
-        <span class="code-block-label">variables.el</span>
-        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Variables <span class="op">{</span>
-  <span class="kw">var</span> name  : <span class="ty">string</span>  = <span class="str">"MatyOS"</span>;
-  <span class="kw">var</span> ver   : <span class="ty">real</span>    = <span class="num">1.0</span>;
-  <span class="kw">var</span> lines : <span class="ty">integer</span> = <span class="num">2800</span>;
+def add (m : Nat) (n : Nat) : Nat :=
+  Nat.rec (fun (_ : Nat) =&gt; Nat) n (fun (k : Nat) (ih : Nat) =&gt; succ ih) m
 
-  <span class="kw">show</span> name;
-  <span class="kw">show</span> ver;
-  <span class="kw">show</span> lines;
-<span class="op">}</span></pre></div>
+def cong (A : Type) (B : Type) (f : A -&gt; B) (a : A) (b : A) (e : Eq A a b)
+    : Eq B (f a) (f b) :=
+  Eq.J A a (fun (x : A) (_ : Eq A a x) =&gt; Eq B (f a) (f x)) (refl B (f a)) b e
+
+def add_zero_right (n : Nat) : Eq Nat (add n zero) n :=
+  Nat.rec (fun (m : Nat) =&gt; Eq Nat (add m zero) m)
+          (refl Nat zero)
+          (fun (k : Nat) (ih : Eq Nat (add k zero) k) =&gt;
+              cong Nat Nat succ (add k zero) k ih)
+          n
+
+example : forall (n : Nat), Eq Nat (add n zero) n := add_zero_right</pre>
       </div>
-
-      <h3 class="section-sub">First Proof</h3>
-      <div class="code-block-wrap">
-        <span class="code-block-label">first_proof.el</span>
-        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> FirstProof <span class="op">{</span>
-  <span class="pr">axiom</span> truth_holds : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-
-  <span class="pr">theorem</span> basic_truth : <span class="kw">true</span>;
-
-  <span class="pr">proof</span> basic_truth <span class="op">{</span>
-    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
-    <span class="pr">test</span> verify  : h1 : <span class="kw">true</span>;
-    <span class="pr">QED</span>;
-  <span class="op">}</span>
-
-  <span class="kw">show</span> <span class="str">"Proof complete."</span>;
-<span class="op">}</span></pre></div>
+      <div class="section-body">
+        <p>Run it:</p>
+      </div>
+      <div class="code-block">
+        <pre>$ matyos check stdlib/arith.elk
+inductive Nat : Type0  (2 constructors)
+def add : (Nat -&gt; (Nat -&gt; Nat))
+eval ... = (succ (succ (succ (succ (succ zero)))))        <span class="cm">-- 2 + 3 = 5</span>
+def cong : (Pi (x0 : Type0), ...)
+def add_zero_right : (Pi (x0 : Nat), (((Eq Nat) ((add x0) zero)) x0))
+example : (Pi (x0 : Nat), (((Eq Nat) ((add x0) zero)) x0))   [QED]</pre>
       </div>
     </section>
 
     <hr class="doc-divider"/>
 
-    <!-- ══ VARIABLES ═════════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="variables">
-      <div class="section-eyebrow">Language Reference</div>
-      <h2 class="section-title">Variables &amp; Constants</h2>
+    <!-- ══ THE KERNEL: Dependent Types ═══════════════════════════ -->
+    <section class="doc-section reveal" id="types">
+      <div class="section-eyebrow">The Kernel</div>
+      <h2 class="section-title">Dependent Types</h2>
       <div class="section-body">
-        <p>Variables are declared with <code>var</code>, constants with <code>const</code>. Constants are immutable after declaration — the semantic analyzer enforces this at compile time.</p>
+        <p>MatyOS's kernel is a predicative dependent type theory (Martin-Löf / λΠ-with-universes) plus an impredicative <code>Prop</code>. The core terms (in de Bruijn form) are:</p>
+        <ul>
+          <li><code>Univ i</code> — universe levels: <code>Univ 0 : Univ 1</code>, etc.</li>
+          <li><code>Prop</code> — the impredicative proposition sort: <code>Prop : Type0</code></li>
+          <li><code>Pi (x : A) -&gt; B</code> — dependent function type</li>
+          <li><code>fun (x : A) =&gt; b</code> — lambda</li>
+          <li><code>f a</code> — application</li>
+          <li><code>Const(name)</code> — references to defined inductive types, constructors, recursors, definitions</li>
+        </ul>
+        <p>The <strong>imax</strong> rule keeps a <code>Pi</code> into <code>Prop</code> in <code>Prop</code> (impredicative); otherwise it lands in the larger of the two universes (predicative max).</p>
+        <p><strong>Definitional equality</strong> = equality of normal forms (α-equivalence is free thanks to de Bruijn indices). Normalization includes β, δ-unfolding of definitions, and ι-reduction (recursors).</p>
       </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Vars <span class="op">{</span>
-  <span class="cm">// Variable declaration (mutable)</span>
-  <span class="kw">var</span> counter   : <span class="ty">integer</span> = <span class="num">0</span>;
-  <span class="kw">var</span> pi        : <span class="ty">real</span>    = <span class="num">3.14159</span>;
-  <span class="kw">var</span> greeting  : <span class="ty">string</span>  = <span class="str">"hello"</span>;
-  <span class="kw">var</span> flag      : <span class="ty">boolean</span> = <span class="kw">true</span>;
-  <span class="kw">var</span> uncertain : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
-
-  <span class="cm">// Constant declaration (immutable)</span>
-  <span class="kw">const</span> MAX_SIZE : <span class="ty">integer</span> = <span class="num">100</span>;
-
-  <span class="cm">// Assignment and output</span>
-  counter = counter + <span class="num">1</span>;
-  <span class="kw">show</span> counter;
-<span class="op">}</span></pre></div>
     </section>
 
-    <!-- ══ TYPES ══════════════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="types">
-      <h2 class="section-title">Type System</h2>
+    <!-- ══ INDUCTIVE TYPES &amp; RECURSORS ══════════════════════════ -->
+    <section class="doc-section reveal" id="inductive">
+      <h2 class="section-title">Inductive Types &amp; Recursors</h2>
       <div class="section-body">
-        <p>MatyOS is statically typed. The type of a variable is declared at definition time and enforced by the semantic analyzer. The type system includes the unique <code>realistic</code> three-valued boolean.</p>
+        <p>Declaring an inductive type registers, <em>as kernel terms</em>, the type former, every constructor, and the <strong>recursor</strong> (with a dependent motive and induction hypotheses). The kernel also generates an ι-reduction rule for the recursor.</p>
+        <p>A <strong>strict-positivity</strong> check rejects declarations that would make the logic unsound:</p>
       </div>
+      <div class="code-block">
+        <pre><span class="cm">-- accepted: Nat is strictly positive</span>
+inductive Nat : Type :=
+  | zero : Nat
+  | succ : Nat -&gt; Nat
 
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('types', 'primitives', this)">Primitives</button>
-        <button class="tab-btn" onclick="switchTab('types', 'boolean', this)">Boolean &amp; Realistic</button>
-        <button class="tab-btn" onclick="switchTab('types', 'strings', this)">Strings</button>
-        <button class="tab-btn" onclick="switchTab('types', 'objects', this)">Objects</button>
+<span class="cm">-- REJECTED: Bad would let us encode non-termination</span>
+inductive Bad : Type :=
+  | mk : (Bad -&gt; Bad) -&gt; Bad</pre>
       </div>
+      <div class="section-body">
+        <p>Termination holds <strong>by construction</strong>: the only recursion is via recursors (no general <code>fix</code>). Every program a user writes in MatyOS is total.</p>
+      </div>
+    </section>
 
-      <div id="types-primitives" class="tab-panel active">
-        <table class="type-table">
-          <thead><tr><th>Type</th><th>Description</th><th>Literal Example</th><th>Aliases</th></tr></thead>
+    <!-- ══ EQUALITY ══════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="equality">
+      <h2 class="section-title">Propositional Equality (Eq, J)</h2>
+      <div class="section-body">
+        <p>Equality lives in <code>Prop</code> via the inductive family <code>Eq : (A : Type) -&gt; A -&gt; A -&gt; Prop</code> with constructor <code>refl</code> and the based <strong>J</strong> eliminator:</p>
+      </div>
+      <div class="code-block">
+        <pre><span class="cm">-- Eq.J A a P d a (refl A a)  ⟹  d         (the ι-rule for J)</span>
+def cong (A : Type) (B : Type) (f : A -&gt; B)
+         (a : A) (b : A) (e : Eq A a b)
+    : Eq B (f a) (f b) :=
+  Eq.J A a (fun (x : A) (_ : Eq A a x) =&gt; Eq B (f a) (f x))
+       (refl B (f a)) b e</pre>
+      </div>
+      <div class="section-body">
+        <p>The standard library at <code>stdlib/eq.elk</code> derives the rest of the equality toolkit — <code>symm</code>, <code>trans</code>, <code>subst</code>, <code>cong</code> — all from this single primitive. <code>m + n = n + m</code> (commutativity of addition) is then a real, kernel-certified theorem built on this toolkit.</p>
+      </div>
+    </section>
+
+    <!-- ══ CURRY-HOWARD ══════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="curry-howard">
+      <h2 class="section-title">Curry–Howard: logic is just types</h2>
+      <div class="section-body">
+        <p>Propositions are types. Proofs are programs. The four "logical" theorems are exactly the standard combinators (<code>examples/proofs/curry_howard.elk</code>):</p>
+      </div>
+      <div class="code-block">
+        <pre><span class="cm">-- A implies A</span>
+def id (A : Type) (x : A) : A := x
+
+<span class="cm">-- A implies (B implies A)</span>
+def const (A : Type) (B : Type) (a : A) (b : B) : A := a
+
+<span class="cm">-- modus ponens: (A -&gt; B) -&gt; A -&gt; B</span>
+def modus_ponens (A : Type) (B : Type) (f : A -&gt; B) (a : A) : B := f a
+
+<span class="cm">-- composition: (B -&gt; C) -&gt; (A -&gt; B) -&gt; A -&gt; C</span>
+def compose (A : Type) (B : Type) (C : Type)
+            (g : B -&gt; C) (f : A -&gt; B) (x : A) : C := g (f x)
+
+example : forall (A : Type), A -&gt; A := id</pre>
+      </div>
+      <div class="section-body">
+        <p>The kernel <strong>rejects non-proofs</strong>: an ill-typed term like <code>fun (A:Type)(x:A) =&gt; x x</code> (self-application) does not type-check, so it cannot masquerade as a proof.</p>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ══ TERMS VS TACTICS ═════════════════════════════════════ -->
+    <section class="doc-section reveal" id="proofs">
+      <div class="section-eyebrow">Proofs</div>
+      <h2 class="section-title">Terms vs Tactics</h2>
+      <div class="section-body">
+        <p>MatyOS supports <strong>two writing styles</strong> for the same kernel terms:</p>
+        <ul>
+          <li><strong>Direct terms.</strong> Write the proof as a <code>def</code> whose body is the term that inhabits the type. The kernel re-checks it.</li>
+          <li><strong>Tactic scripts.</strong> Open a <code>by ... qed</code> block and apply tactics (<code>intro</code>, <code>exact</code>, <code>assumption</code>, …) that <em>build</em> a kernel term you don't have to write by hand. The kernel re-checks the result.</li>
+        </ul>
+        <p>Either way, the final artefact is a kernel term — there is no "trust me, the tactic worked" mode.</p>
+      </div>
+    </section>
+
+    <!-- ══ TACTICS ══════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="tactics">
+      <h2 class="section-title">Tactic Engine (<code>by … qed</code>)</h2>
+      <div class="section-body">
+        <p>Tactic scripts let you build proofs step-by-step instead of writing the raw term (<code>examples/proofs/tactics.elk</code>):</p>
+      </div>
+      <div class="code-block">
+        <pre><span class="cm">-- identity:  intro the binders, close with a hypothesis</span>
+theorem id_thm : forall (A : Type), A -&gt; A
+proof id_thm := by
+  intro A x
+  assumption
+qed
+
+<span class="cm">-- modus ponens:  intro, then apply the function to the argument</span>
+theorem mp_thm : forall (A : Type), forall (B : Type), (A -&gt; B) -&gt; A -&gt; B
+proof mp_thm := by
+  intro A B f a
+  exact f a
+qed
+
+<span class="cm">-- composition</span>
+theorem comp_thm :
+  forall (A : Type), forall (B : Type), forall (C : Type),
+  (B -&gt; C) -&gt; (A -&gt; B) -&gt; A -&gt; C
+proof comp_thm := by
+  intro A B C g f x
+  exact g (f x)
+qed</pre>
+      </div>
+    </section>
+
+    <!-- ══ REALISTIC LOGIC ══════════════════════════════════════ -->
+    <section class="doc-section reveal" id="realistic">
+      <h2 class="section-title">The <em>realistic</em> idea</h2>
+      <div class="section-body">
+        <p>Classical logic forces every proposition to be <code>true</code> or <code>false</code>. Real reasoning — and LLM reasoning especially — also needs <strong>"not (yet) known"</strong>. MatyOS gives this a precise, textbook semantics (Kleene <strong>K3</strong> and Łukasiewicz <strong>Ł3</strong> three-valued logics):</p>
+      </div>
+      <div class="info-table">
+        <table style="width:100%;border-collapse:collapse;margin:1rem 0;font-family:var(--font-mono);font-size:0.85rem">
+          <thead>
+            <tr style="background:var(--gray-100);text-align:left">
+              <th style="padding:.5rem;border-bottom:1px solid var(--gray-300)">formula</th>
+              <th style="padding:.5rem;border-bottom:1px solid var(--gray-300)">classical</th>
+              <th style="padding:.5rem;border-bottom:1px solid var(--gray-300)">with a <code>realistic</code> atom</th>
+            </tr>
+          </thead>
           <tbody>
-            <tr><td><code>integer</code></td><td>Whole number (64-bit)</td><td><code>42</code></td><td><code>int</code></td></tr>
-            <tr><td><code>real</code></td><td>Floating-point number</td><td><code>3.14</code></td><td><code>float</code></td></tr>
-            <tr><td><code>string</code></td><td>UTF-8 text sequence</td><td><code>"hello"</code></td><td><code>str</code></td></tr>
-            <tr><td><code>boolean</code></td><td>True/false logic value</td><td><code>true</code> / <code>false</code></td><td>—</td></tr>
-            <tr><td><code>realistic</code></td><td>Three-valued boolean: true, false, or uncertain</td><td><code>realistic</code></td><td>—</td></tr>
+            <tr><td style="padding:.5rem;border-bottom:1px solid var(--gray-200)"><code>P ∨ ¬P</code>  (excluded middle)</td><td style="padding:.5rem;border-bottom:1px solid var(--gray-200)">valid</td><td style="padding:.5rem;border-bottom:1px solid var(--gray-200)"><strong>not valid</strong> — undetermined when <code>P</code> is realistic</td></tr>
+            <tr><td style="padding:.5rem;border-bottom:1px solid var(--gray-200)"><code>¬(P ∧ ¬P)</code>  (non-contradiction)</td><td style="padding:.5rem;border-bottom:1px solid var(--gray-200)">valid</td><td style="padding:.5rem;border-bottom:1px solid var(--gray-200)"><strong>not valid</strong></td></tr>
+            <tr><td style="padding:.5rem"><code>P → P</code>  (self-implication)</td><td style="padding:.5rem">valid</td><td style="padding:.5rem">not valid in Kleene · valid in Łukasiewicz</td></tr>
           </tbody>
         </table>
       </div>
-
-      <div id="types-boolean" class="tab-panel">
-        <div class="realistic-card">
-          <div class="realistic-title">REALISTIC — THREE-VALUED BOOLEAN LOGIC</div>
-          <div class="realistic-states">
-            <span class="realistic-state t">true</span>
-            <span class="realistic-state f">false</span>
-            <span class="realistic-state r">realistic</span>
-          </div>
-          <p class="realistic-desc">The <code>realistic</code> value extends classical boolean logic with a third state representing uncertainty or incomplete knowledge. Useful for modeling real-world conditions where truth is not yet determined.</p>
-        </div>
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> BoolDemo <span class="op">{</span>
-  <span class="kw">var</span> confirmed  : <span class="ty">boolean</span> = <span class="kw">true</span>;
-  <span class="kw">var</span> confidence : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
-
-  <span class="kw">if</span> confirmed <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"confirmed"</span>;
-  <span class="op">}</span> <span class="kw">elif</span> confidence <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"uncertain"</span>;
-  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"rejected"</span>;
-  <span class="op">}</span>
-<span class="op">}</span></pre></div>
-      </div>
-
-      <div id="types-strings" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Strings <span class="op">{</span>
-  <span class="kw">var</span> s1 : <span class="ty">string</span> = <span class="str">"double quoted"</span>;
-  <span class="kw">var</span> s2 : <span class="ty">string</span> = <span class="str">'single quoted'</span>;
-
-  <span class="kw">show</span> s1;
-  <span class="kw">show</span> s2;
-
-  <span class="cm">// String function</span>
-  <span class="kw">function</span> <span class="fn">greet</span>() <span class="op">{</span>
-    <span class="kw">return</span> <span class="str">"Hello from MatyOS"</span>;
-  <span class="op">}</span>
-  <span class="kw">show</span> <span class="fn">greet</span>();
-<span class="op">}</span></pre></div>
-      </div>
-
-      <div id="types-objects" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Objects <span class="op">{</span>
-  <span class="cm">// Object declaration</span>
-  <span class="kw">object</span> <span class="fn">Point</span> <span class="op">{</span>
-    x : <span class="ty">integer</span>;
-    y : <span class="ty">integer</span>;
-  <span class="op">}</span>
-
-  <span class="kw">var</span> p : <span class="fn">Point</span>;
-  p.x = <span class="num">10</span>;
-  p.y = <span class="num">20</span>;
-
-  <span class="kw">show</span> p.x;
-  <span class="kw">show</span> p.y;
-<span class="op">}</span></pre></div>
-      </div>
-    </section>
-
-    <!-- ══ OPERATORS ══════════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="operators">
-      <h2 class="section-title">Operators</h2>
       <div class="section-body">
-        <p>MatyOS supports arithmetic, comparison, and logical operators. Notably, strict equality uses <code>===</code> (three equals), which mirrors proof-system notation for identity.</p>
-      </div>
-      <table class="type-table">
-        <thead><tr><th>Category</th><th>Operators</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr><td>Arithmetic</td><td><code>+  -  *  /  div</code></td><td><code>div</code> = integer division</td></tr>
-          <tr><td>Comparison</td><td><code>===  !=  &gt;  &lt;  &gt;=  &lt;=</code></td><td><code>===</code> strict identity</td></tr>
-          <tr><td>Logical</td><td><code>and  or  !</code></td><td><code>!</code> = logical NOT</td></tr>
-          <tr><td>Assignment</td><td><code>=</code></td><td>Only for mutable vars</td></tr>
-        </tbody>
-      </table>
-      <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Ops <span class="op">{</span>
-  <span class="kw">var</span> a : <span class="ty">integer</span> = <span class="num">10</span>;
-  <span class="kw">var</span> b : <span class="ty">integer</span> = <span class="num">3</span>;
-
-  <span class="kw">show</span> a + b;       <span class="cm">// 13</span>
-  <span class="kw">show</span> a - b;       <span class="cm">// 7</span>
-  <span class="kw">show</span> a * b;       <span class="cm">// 30</span>
-  <span class="kw">show</span> a <span class="kw">div</span> b;    <span class="cm">// 3  (integer division)</span>
-  <span class="kw">show</span> a / b;       <span class="cm">// 3.333...</span>
-
-  <span class="pr">axiom</span> ten_is_ten : a <span class="op">===</span> <span class="num">10</span>;
-<span class="op">}</span></pre></div>
-    </section>
-
-    <!-- ══ CONTROL FLOW ═══════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="control-flow">
-      <h2 class="section-title">Control Flow</h2>
-
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('cf', 'if', this)">if / elif / else</button>
-        <button class="tab-btn" onclick="switchTab('cf', 'for', this)">for loop</button>
-        <button class="tab-btn" onclick="switchTab('cf', 'while', this)">while</button>
-        <button class="tab-btn" onclick="switchTab('cf', 'switch', this)">switch</button>
-      </div>
-
-      <div id="cf-if" class="tab-panel active">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> IfDemo <span class="op">{</span>
-  <span class="kw">var</span> x : <span class="ty">integer</span> = <span class="num">42</span>;
-
-  <span class="kw">if</span> x > <span class="num">100</span> <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"big"</span>;
-  <span class="op">}</span> <span class="kw">elif</span> x > <span class="num">10</span> <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"medium"</span>;
-  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"small"</span>;
-  <span class="op">}</span>
-<span class="op">}</span></pre></div>
-      </div>
-
-      <div id="cf-for" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> ForDemo <span class="op">{</span>
-  <span class="cm">// for loop — no type annotation on counter</span>
-  <span class="kw">for</span> i = <span class="num">0</span>; i < <span class="num">5</span>; i = i + <span class="num">1</span> <span class="op">{</span>
-    <span class="kw">show</span> i;
-  <span class="op">}</span>
-
-  <span class="cm">// Count down</span>
-  <span class="kw">for</span> n = <span class="num">10</span>; n > <span class="num">0</span>; n = n - <span class="num">1</span> <span class="op">{</span>
-    <span class="kw">show</span> n;
-  <span class="op">}</span>
-<span class="op">}</span></pre></div>
-      </div>
-
-      <div id="cf-while" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> WhileDemo <span class="op">{</span>
-  <span class="kw">var</span> count : <span class="ty">integer</span> = <span class="num">0</span>;
-
-  <span class="kw">while</span> count < <span class="num">5</span> <span class="op">{</span>
-    <span class="kw">show</span> count;
-    count = count + <span class="num">1</span>;
-  <span class="op">}</span>
-<span class="op">}</span></pre></div>
-      </div>
-
-      <div id="cf-switch" class="tab-panel">
-        <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> SwitchDemo <span class="op">{</span>
-  <span class="kw">var</span> day : <span class="ty">integer</span> = <span class="num">3</span>;
-
-  <span class="kw">switch</span> day <span class="op">{</span>
-    <span class="kw">case</span> <span class="num">1</span>: <span class="kw">show</span> <span class="str">"Monday"</span>;
-    <span class="kw">case</span> <span class="num">2</span>: <span class="kw">show</span> <span class="str">"Tuesday"</span>;
-    <span class="kw">case</span> <span class="num">3</span>: <span class="kw">show</span> <span class="str">"Wednesday"</span>;
-    <span class="kw">default</span>: <span class="kw">show</span> <span class="str">"Other"</span>;
-  <span class="op">}</span>
-<span class="op">}</span></pre></div>
-      </div>
-    </section>
-
-    <!-- ══ FUNCTIONS ═════════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="functions">
-      <h2 class="section-title">Functions</h2>
-      <div class="section-body">
-        <p>Functions are declared with the <code>function</code> keyword, optionally accepting typed parameters and returning typed values. Recursive functions are supported.</p>
-      </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Functions <span class="op">{</span>
-  <span class="cm">// Function declaration — params grouped as (a, b: type)</span>
-  <span class="kw">function</span> <span class="fn">add</span>(a, b : <span class="ty">integer</span>) <span class="op">{</span>
-    <span class="kw">return</span> a + b;
-  <span class="op">}</span>
-
-  <span class="cm">// Recursive function</span>
-  <span class="kw">function</span> <span class="fn">factorial</span>(n : <span class="ty">integer</span>) <span class="op">{</span>
-    <span class="kw">if</span> n <= <span class="num">1</span> <span class="op">{</span>
-      <span class="kw">return</span> <span class="num">1</span>;
-    <span class="op">}</span>
-    <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>);
-  <span class="op">}</span>
-
-  <span class="kw">show</span> <span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>);         <span class="cm">// 7</span>
-  <span class="kw">show</span> <span class="fn">factorial</span>(<span class="num">5</span>);    <span class="cm">// 120</span>
-<span class="op">}</span></pre></div>
-    </section>
-
-    <!-- ══ BUILTIN FUNCTIONS ══════════════════════════════════════ -->
-    <section class="doc-section reveal" id="builtins">
-      <h2 class="section-title">Builtin Functions</h2>
-      <div class="section-body">
-        <p>These functions are available in every El program without any import. They are called like user-defined functions.</p>
-      </div>
-      <table class="cli-table">
-        <thead><tr><th>Call</th><th>Description</th><th>Example</th></tr></thead>
-        <tbody>
-          <tr><td>len(s)</td><td>Length of string</td><td>len("hello") → 5</td></tr>
-          <tr><td>upper(s)</td><td>Uppercase string</td><td>upper("hi") → "HI"</td></tr>
-          <tr><td>lower(s)</td><td>Lowercase string</td><td>lower("HI") → "hi"</td></tr>
-          <tr><td>trim(s)</td><td>Strip whitespace</td><td>trim("  hi  ") → "hi"</td></tr>
-          <tr><td>abs(n)</td><td>Absolute value</td><td>abs(-5) → 5</td></tr>
-          <tr><td>sqrt(n)</td><td>Square root</td><td>sqrt(144.0) → 12.0</td></tr>
-          <tr><td>pow(base, exp)</td><td>Power</td><td>pow(2, 10) → 1024</td></tr>
-          <tr><td>mod(a, b)</td><td>Modulo</td><td>mod(17, 5) → 2</td></tr>
-          <tr><td>max(a, b)</td><td>Maximum of two values</td><td>max(3, 7) → 7</td></tr>
-          <tr><td>min(a, b)</td><td>Minimum of two values</td><td>min(3, 7) → 3</td></tr>
-          <tr><td>type_of(v)</td><td>Type name as string</td><td>type_of(42) → "int"</td></tr>
-          <tr><td>is_integer(v)</td><td>Boolean type check</td><td>is_integer(5) → TRUE</td></tr>
-          <tr><td>is_string(v)</td><td>Boolean type check</td><td>is_string("x") → TRUE</td></tr>
-          <tr><td>input(prompt)</td><td>Read user input</td><td>input("Enter: ")</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- ══ OBJECTS ════════════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="objects">
-      <h2 class="section-title">Objects &amp; Arrays</h2>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> ObjectDemo <span class="op">{</span>
-  <span class="cm">// Object type definition</span>
-  <span class="kw">object</span> <span class="fn">Vector</span> <span class="op">{</span>
-    x : <span class="ty">real</span>;
-    y : <span class="ty">real</span>;
-  <span class="op">}</span>
-
-  <span class="kw">var</span> v : <span class="fn">Vector</span>;
-  v.x = <span class="num">1.0</span>;
-  v.y = <span class="num">2.5</span>;
-
-  <span class="kw">show</span> v.x;
-  <span class="kw">show</span> v.y;
-<span class="op">}</span></pre></div>
-    </section>
-
-    <hr class="doc-divider"/>
-
-    <!-- ══ PROOF SYSTEM ══════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="proofs">
-      <div class="section-eyebrow">Proof System</div>
-      <h2 class="section-title">Formal Verification</h2>
-      <div class="section-body">
-        <p>The proof system is MatyOS's defining feature. Formal mathematical proofs are written directly in source code. The semantic analyzer links theorems to their proofs and verifies structural correctness. The interpreter executes the proof steps and prints a verified trace.</p>
-        <p>The system draws from the axiomatic method: you state self-evident truths (axioms), declare propositions (theorems), and provide structured proofs using hypotheses, tests, and QED.</p>
-      </div>
-
-      <div class="proof-cards">
-        <div class="proof-card">
-          <span class="proof-card-sym">⊢</span>
-          <div class="proof-card-kw">axiom</div>
-          <div class="proof-card-desc">A self-evident truth that requires no proof. Foundation of all reasoning in the system.</div>
-        </div>
-        <div class="proof-card">
-          <span class="proof-card-sym">∀</span>
-          <div class="proof-card-kw">theorem</div>
-          <div class="proof-card-desc">A proposition declared to be provable. Must be matched by a corresponding proof block.</div>
-        </div>
-        <div class="proof-card">
-          <span class="proof-card-sym">{ }</span>
-          <div class="proof-card-kw">proof</div>
-          <div class="proof-card-desc">Block that provides the structured argument for a theorem. Contains hypotheses and tests.</div>
-        </div>
-        <div class="proof-card">
-          <span class="proof-card-sym">∃</span>
-          <div class="proof-card-kw">hypothesis</div>
-          <div class="proof-card-desc">An assumed truth scoped within the proof block. Forms the basis of the argument.</div>
-        </div>
-        <div class="proof-card">
-          <span class="proof-card-sym">?</span>
-          <div class="proof-card-kw">test</div>
-          <div class="proof-card-desc">An inline verification step. Tests that a hypothesis holds against declared axioms.</div>
-        </div>
-        <div class="proof-card">
-          <span class="proof-card-sym">∎</span>
-          <div class="proof-card-kw">QED</div>
-          <div class="proof-card-desc">Seals and terminates the proof. Quod Erat Demonstrandum — "which was to be demonstrated."</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- AXIOMS -->
-    <section class="doc-section reveal" id="axioms">
-      <h3 class="section-sub">Axioms</h3>
-      <div class="section-body">
-        <p>Axioms are self-evident truths. They require no proof. Every axiomatic system begins with a set of axioms that serve as the foundation for all theorems.</p>
-      </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Axioms <span class="op">{</span>
-  <span class="cm">// Identity axiom</span>
-  <span class="pr">axiom</span> identity : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-
-  <span class="cm">// Law of excluded middle</span>
-  <span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
-
-  <span class="cm">// Named with definition for documentation</span>
-  <span class="pr">definition</span> truth_is_stable : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-
-  <span class="kw">show</span> <span class="str">"axioms registered"</span>;
-<span class="op">}</span></pre></div>
-    </section>
-
-    <!-- THEOREMS -->
-    <section class="doc-section reveal" id="theorems">
-      <h3 class="section-sub">Theorems</h3>
-      <div class="section-body">
-        <p>A theorem declares a proposition. The semantic analyzer requires each theorem to be matched by a proof block of the same name. A theorem without a proof is a compile-time error.</p>
-      </div>
-      <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Theorems <span class="op">{</span>
-  <span class="pr">theorem</span> truth_is_consistent : <span class="kw">true</span>;
-  <span class="pr">theorem</span> conjunction_holds   : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
-  <span class="kw">show</span> <span class="str">"theorems declared"</span>;
-<span class="op">}</span></pre></div>
-    </section>
-
-    <!-- PROOF BLOCKS -->
-    <section class="doc-section reveal" id="proof-blocks">
-      <h3 class="section-sub">Proof Blocks</h3>
-      <div class="section-body">
-        <p>A proof block contains the structured argument for a theorem. It consists of hypotheses (assumed truths) and tests (verification steps), terminated with <code>QED</code>.</p>
-      </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> ProofDemo <span class="op">{</span>
-  <span class="pr">axiom</span> identity        : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-  <span class="pr">axiom</span> excluded_middle : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
-
-  <span class="pr">theorem</span> simple_theorem : <span class="kw">true</span>;
-
-  <span class="pr">proof</span> simple_theorem <span class="op">{</span>
-    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;          <span class="cm">// assume h1 holds</span>
-    <span class="pr">test</span> verify_h1 : h1 : <span class="kw">true</span>;    <span class="cm">// verify against axioms</span>
-    <span class="pr">QED</span>;                           <span class="cm">// ∎ proof complete</span>
-  <span class="op">}</span>
-
-  <span class="kw">show</span> <span class="str">"Theorem proved."</span>;
-<span class="op">}</span></pre></div>
-    </section>
-
-    <!-- PROOF WORKFLOW ANIMATION -->
-    <section class="doc-section reveal" id="proof-workflow">
-      <h3 class="section-sub">Proof Workflow</h3>
-      <div class="section-body">
-        <p>The proof pipeline runs through six stages. Each stage builds on the last, culminating in a verified QED seal.</p>
-      </div>
-
-      <div class="proof-workflow">
-        <div class="workflow-label">PROOF EXECUTION PIPELINE — CLICK PLAY TO ANIMATE</div>
-
-        <div class="workflow-stages" id="wfStages">
-          <div class="workflow-node" data-step="0">
-            <div class="workflow-node-circle">⊢</div>
-            <div class="workflow-node-label">Axiom</div>
-          </div>
-          <div class="workflow-connector" data-conn="0"><div class="workflow-connector-fill"></div></div>
-          <div class="workflow-node" data-step="1">
-            <div class="workflow-node-circle">∀</div>
-            <div class="workflow-node-label">Theorem</div>
-          </div>
-          <div class="workflow-connector" data-conn="1"><div class="workflow-connector-fill"></div></div>
-          <div class="workflow-node" data-step="2">
-            <div class="workflow-node-circle">{}</div>
-            <div class="workflow-node-label">Proof Context</div>
-          </div>
-          <div class="workflow-connector" data-conn="2"><div class="workflow-connector-fill"></div></div>
-          <div class="workflow-node" data-step="3">
-            <div class="workflow-node-circle">∃</div>
-            <div class="workflow-node-label">Hypothesis</div>
-          </div>
-          <div class="workflow-connector" data-conn="3"><div class="workflow-connector-fill"></div></div>
-          <div class="workflow-node" data-step="4">
-            <div class="workflow-node-circle">?</div>
-            <div class="workflow-node-label">Test</div>
-          </div>
-          <div class="workflow-connector" data-conn="4"><div class="workflow-connector-fill"></div></div>
-          <div class="workflow-node" data-step="5">
-            <div class="workflow-node-circle">∎</div>
-            <div class="workflow-node-label">QED</div>
-          </div>
-        </div>
-
-        <div class="workflow-panel">
-          <pre id="wfCode"><span class="cm">// Press Play to walk through the proof pipeline</span></pre>
-        </div>
-        <div class="workflow-desc" id="wfDesc">Each stage builds upon the last. Axioms ground the system; QED seals it.</div>
-
-        <div class="workflow-controls">
-          <button class="wf-btn primary" id="wfPlay" onclick="wfPlay()">▶ Play</button>
-          <button class="wf-btn" onclick="wfPause()">⏸ Pause</button>
-          <button class="wf-btn" onclick="wfReset()">↺ Reset</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- REALISTIC LOGIC -->
-    <section class="doc-section reveal" id="realistic">
-      <h3 class="section-sub">Realistic Logic</h3>
-      <div class="section-body">
-        <p>The <code>realistic</code> keyword introduces a third boolean state — uncertain. Classical logic operates on a closed world assumption; realistic logic acknowledges incomplete information.</p>
-        <p style="margin-top:0.6rem;">
-          <a href="/papers/realistic" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--c-pr);text-decoration:none;">→ Read the full Realistic Type paper</a>
-          &nbsp;&nbsp;
-          <a href="/polyfdos#realistic" style="font-family:var(--font-mono);font-size:0.78rem;color:#f78c6c;text-decoration:none;">→ See polyfdOS implementation</a>
-        </p>
-      </div>
-      <div class="code-block-wrap"><pre class="code-block"><span class="kw">ALGORITHM</span> Realistic <span class="op">{</span>
-  <span class="kw">var</span> sensor_reading : <span class="ty">boolean</span> = <span class="kw">realistic</span>;
-
-  <span class="cm">// Three-way branching with realistic state</span>
-  <span class="kw">if</span> sensor_reading <span class="op">===</span> <span class="kw">true</span> <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"confirmed"</span>;
-  <span class="op">}</span> <span class="kw">elif</span> sensor_reading <span class="op">===</span> <span class="kw">false</span> <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"denied"</span>;
-  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-    <span class="kw">show</span> <span class="str">"uncertain"</span>;
-  <span class="op">}</span>
-<span class="op">}</span></pre></div>
-    </section>
-
-    <hr class="doc-divider"/>
-
-    <!-- ══ BRING FORMAT ═══════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="bring">
-      <div class="section-eyebrow">Bring Format</div>
-      <h2 class="section-title">The Bring Data Format</h2>
-      <div class="section-body">
-        <p>Bring is a human-readable data serialization format designed for configuration files and package manifests. It is similar in spirit to TOML but with a simpler syntax and native schema support. MatyOS uses <code>.bring</code> files for package configuration and dependency management.</p>
-        <p>Bring is parsed by the <code>bring-parser</code> library and accessible from El programs via the <code>bring</code> import system.</p>
-      </div>
-    </section>
-
-    <!-- BRING SYNTAX -->
-    <section class="doc-section reveal" id="bring-syntax">
-      <h3 class="section-sub">Syntax</h3>
-      <div class="section-body">
-        <p>Bring files use <code>key = value</code> pairs. Values can be primitives, objects, or arrays. Objects use <code>{}</code> blocks and arrays use <code>[]</code>. Attributes annotate values with <code>@attr = val</code>.</p>
-      </div>
-      <div class="bring-syntax-cards">
-        <div class="bring-syntax-card">
-          <h4>Primitives</h4>
-          <pre class="code-block" style="border-radius:6px;padding:.75rem 1rem;font-size:.77rem;margin:0">name = "MatyOS"
-version = 1
-pi = 3.14
-active = true</pre>
-        </div>
-        <div class="bring-syntax-card">
-          <h4>Objects</h4>
-          <pre class="code-block" style="border-radius:6px;padding:.75rem 1rem;font-size:.77rem;margin:0">author {
-  name = "Daftyon"
-  email = "dev@daftyon.io"
-}</pre>
-        </div>
-        <div class="bring-syntax-card">
-          <h4>Arrays</h4>
-          <pre class="code-block" style="border-radius:6px;padding:.75rem 1rem;font-size:.77rem;margin:0">tags = ["math", "proof", "logic"]
-ports = [8080, 8443, 9000]</pre>
-        </div>
-        <div class="bring-syntax-card">
-          <h4>Attributes</h4>
-          <pre class="code-block" style="border-radius:6px;padding:.75rem 1rem;font-size:.77rem;margin:0">@required = true
-@type = "string"
-name = "MatyOS"</pre>
-        </div>
-      </div>
-
-      <h3 class="section-sub" style="margin-top:2rem">Complete Example</h3>
-      <div class="code-block-wrap">
-        <span class="code-block-label">package.bring</span>
-        <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>name    = "my-project"
-version = "1.0.0"
-stable  = true
-
-author {
-  name  = "Dev"
-  email = "dev@example.com"
-}
-
-dependencies = ["math_utils", "neural_networks"]
-
-config {
-  debug   = false
-  timeout = 30
-  tags    = ["production", "stable"]
-}</pre></div>
-      </div>
-    </section>
-
-    <!-- BRING SCHEMAS -->
-    <section class="doc-section reveal" id="bring-schemas">
-      <h3 class="section-sub">Schemas</h3>
-      <div class="section-body">
-        <p>Bring supports inline schema declarations using the <code>schema</code> keyword. Schemas define the structure of objects and their types, enabling validation at parse time.</p>
-      </div>
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>schema Package {
-  name    : string
-  version : string
-  stable  : bool
-}
-
-schema Author {
-  name  : string
-  email : string
-}
-
-name    = "my-project"
-version = "1.0.0"
-stable  = true</pre></div>
-    </section>
-
-    <!-- BRING PLAYGROUND -->
-    <section class="doc-section reveal" id="bring-playground">
-      <h3 class="section-sub">Live Bring Playground</h3>
-      <div class="section-body">
-        <p>Type or paste Bring content below and click Parse to see the parsed structure in real time.</p>
-      </div>
-
-      <div class="playground">
-        <div class="playground-header">
-          <span class="playground-title">bring playground — live parser</span>
-          <div class="playground-examples">
-            <button class="playground-example-btn" onclick="setBringExample('basic')">Basic</button>
-            <button class="playground-example-btn" onclick="setBringExample('nested')">Nested</button>
-            <button class="playground-example-btn" onclick="setBringExample('schema')">Schema</button>
-          </div>
-        </div>
-        <div class="playground-body">
-          <div class="playground-editor-wrap">
-            <textarea class="playground-editor" id="bringEditor" spellcheck="false" placeholder="name = &quot;example&quot;&#10;version = 1&#10;active = true">name    = "MatyOS"
-version = "1.0.9"
-stable  = true
-
-author {
-  name  = "MatyOS-Project"
-}</textarea>
-          </div>
-          <div class="playground-output" id="bringOutput">
-            <span style="color:#546e7a">// parsed tree will appear here</span>
-          </div>
-        </div>
-        <div class="playground-footer">
-          <button class="run-btn" id="bringRunBtn" onclick="runBring()">Parse</button>
-          <span class="run-status" id="bringStatus"></span>
-        </div>
+        <p>The failure of excluded middle for a <code>realistic</code> atom is the <em>point</em>: an uncertain proposition is neither affirmed nor denied. Crucially, <code>realistic</code> lives <strong>above</strong> the trusted kernel — conjectures carry evidence and confidence and a status (<code>conjectured → certified / refuted</code>), and the kernel only ever certifies real proofs.</p>
+        <p class="muted small">Full treatment in the <a href="/papers/realistic">Realistic Type paper →</a>.</p>
       </div>
     </section>
 
     <hr class="doc-divider"/>
 
-    <!-- ══ PACKAGE SYSTEM ════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="packages">
-      <div class="section-eyebrow">Packages &amp; CLI</div>
-      <h2 class="section-title">Package System</h2>
+    <!-- ══ PROJECTS / SCIENTIFIC METHOD ═════════════════════════ -->
+    <section class="doc-section reveal" id="projects">
+      <div class="section-eyebrow">The scientific-method workflow</div>
+      <h2 class="section-title">MatyOS Projects</h2>
       <div class="section-body">
-        <p>MatyOS uses the <code>bring</code> keyword for importing packages. Packages are resolved from the MatyOS package registry (Easier Hub) and cached locally. The <code>from</code> and <code>as</code> keywords enable named and aliased imports.</p>
+        <p>Real work is bigger than one proof. A <strong>MatyOS project</strong> is a directory that mirrors the scientific method — <em>assume</em> (hypothesis) → <em>state</em> (theorem) → <em>experiment</em> (test) → <em>certify</em> (proof) — and <code>matyos check</code> runs the whole thing and reports honestly per claim:</p>
       </div>
-
-      <div class="code-block-wrap"><pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> PackageDemo <span class="op">{</span>
-  <span class="cm">// Import full package</span>
-  <span class="kw">bring</span> math_utils;
-
-  <span class="cm">// Import with alias</span>
-  <span class="kw">bring</span> neural_networks <span class="kw">as</span> nn;
-
-  <span class="cm">// Named imports from package</span>
-  <span class="kw">bring</span> <span class="op">{</span> Vector, Matrix <span class="op">}</span> <span class="kw">from</span> math_package;
-
-  <span class="cm">// Scoped import from registry</span>
-  <span class="kw">bring</span> linear_algebra <span class="kw">from</span> scientific_hub;
-
-  <span class="kw">show</span> <span class="str">"packages loaded"</span>;
-<span class="op">}</span></pre></div>
-
-      <h3 class="section-sub">Package Manifest</h3>
+      <div class="code-block">
+        <pre><span class="cm">┌─ hypothesise ──┐</span>
+<span class="cm">│  .hyp           │   assume / conjecture  (epistemically REALISTIC)</span>
+<span class="cm">▼                 │</span>
+<span class="cm">state  ─ .thm ─────▶  a precise proposition (an open obligation)</span>
+<span class="cm">▼                 │</span>
+<span class="cm">experiment ─ .test ▶  computational checks the kernel runs</span>
+<span class="cm">▼                 │</span>
+<span class="cm">prove  ─ .prf ─────▶  a kernel-checked derivation  → CERTIFIED</span>
+<span class="cm">▼                 │           (or CONDITIONAL if it rests on a conjecture)</span>
+<span class="cm">bundle ─ theory ───▶  a verified body of knowledge</span>
+<span class="cm">▼                 │</span>
+<span class="cm">seal  ─ .matyos ──▶  a compressed, self-describing archive</span>
+<span class="cm">└─ distribute / build on ─┘</span></pre>
+      </div>
       <div class="section-body">
-        <p>Package dependencies are declared in a <code>.bring</code> file at the project root. The CLI installs and caches all declared dependencies.</p>
+        <p>Scaffold a project and check it:</p>
       </div>
-      <div class="code-block-wrap">
-        <span class="code-block-label">deps.bring</span>
-        <div class="code-block-wrap"><pre class="code-block">name = "my_project"
+      <div class="code-block">
+        <pre>$ matyos new my_theory
+Created project 'my_theory'.  Try:  matyos check my_theory
 
-[dependencies]
-math_utils       = "^1.2.0"
-neural_networks  = "^0.9.1"</pre></div>
+$ matyos check my_theory
+==========================================================
+ MatyOS project: my_theory
+==========================================================
+
+theory: theories/arithmetic
+  definitions: Nat, add, cong
+  hypotheses / conjectures (realistic):
+    [CONJ] add_comm : ...commutativity of addition...
+  theorems:
+    [PROVEN] add_zero_right   (certified)
+  tests:
+    [PASS] add_2_3
+    [PASS] add_0_4
+----------------------------------------------------------
+ Summary
+   theorems   : 1 proven (1 certified, 0 conditional), 0 open
+   conjectures: 1 (realistic)
+   tests      : 2 passed, 0 failed, 0 ran
+   status     : OK  (exit 0)
+----------------------------------------------------------</pre>
+      </div>
+      <div class="section-body">
+        <p>The report draws a hard line — tracked <strong>transitively</strong> — between <strong>certified</strong> theorems (depend on nothing unproven) and <strong>conditional / realistic</strong> ones (rest on an open conjecture). An assumption buried deep in a chain of lemmas can never launder itself into a certified result.</p>
       </div>
     </section>
 
-    <!-- ══ CLI ════════════════════════════════════════════════════ -->
+    <!-- ══ SEALED .matyos ARCHIVES ══════════════════════════════ -->
+    <section class="doc-section reveal" id="sealed">
+      <h2 class="section-title">Sealed <code>.matyos</code> archives</h2>
+      <div class="section-body">
+        <p>When a theory is <strong>complete</strong> (no open theorems, no failed checks), seal it into a single compressed, self-describing <code>.matyos</code> archive — a <em>sigma of files</em> bundling every theory, theorem, proof and test, plus a machine-readable <code>MANIFEST.json</code>:</p>
+      </div>
+      <div class="code-block">
+        <pre>$ matyos build my_theory          <span class="cm"># refuses to seal an incomplete project</span>
+sealed -&gt; my_theory.matyos  (1 certified, 0 conditional, 0 open)
+
+$ matyos info my_theory.matyos    <span class="cm"># read the manifest without re-checking</span></pre>
+      </div>
+      <div class="section-body">
+        <p>Each file type has its own black-and-white icon:</p>
+        <ul>
+          <li><code>.matyos</code> archive — <strong>Σ</strong></li>
+          <li><code>.thm</code> theorem — <strong>∀</strong></li>
+          <li><code>.prf</code> proof — <strong>∎</strong></li>
+          <li><code>.hyp</code> hypothesis — <strong>∃</strong></li>
+          <li><code>.test</code> test — <strong>✓</strong></li>
+          <li><code>.elk</code> definitions — <strong>λ</strong></li>
+        </ul>
+      </div>
+    </section>
+
+    <hr class="doc-divider"/>
+
+    <!-- ══ CLI ═══════════════════════════════════════════════════ -->
     <section class="doc-section reveal" id="cli">
-      <h2 class="section-title">CLI Reference</h2>
-      <table class="cli-table">
-        <thead><tr><th>Command</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td>el run &lt;file.el&gt;</td><td>Execute a source file</td></tr>
-          <tr><td>el run -c "code"</td><td>Run inline El code from string</td></tr>
-          <tr><td>el download [config]</td><td>Install packages from a <code>.bring</code> config file</td></tr>
-          <tr><td>el package cache list</td><td>List all cached packages</td></tr>
-          <tr><td>el package cache clear</td><td>Clear the local package cache</td></tr>
-          <tr><td>el check &lt;file.el&gt;</td><td>Run lexer + parser + semantic analysis only (no exec)</td></tr>
-        </tbody>
-      </table>
-    </section>
+      <div class="section-eyebrow">Reference</div>
+      <h2 class="section-title">The <code>matyos</code> CLI</h2>
+      <div class="code-block">
+        <pre>$ matyos version
+$ matyos help
 
-    <hr class="doc-divider"/>
+$ matyos check &lt;file.elk&gt;        <span class="cm"># type-check a single .elk file</span>
+$ matyos check &lt;project_dir/&gt;    <span class="cm"># run the whole scientific-method report</span>
 
-    <!-- ══ PIPELINE ═══════════════════════════════════════════════ -->
-    <section class="doc-section reveal" id="pipeline">
-      <div class="section-eyebrow">Architecture</div>
-      <h2 class="section-title">Compiler Pipeline</h2>
+$ matyos new &lt;project_name&gt;       <span class="cm"># scaffold a project (.hyp / .thm / .test / .prf layout)</span>
+
+$ matyos build &lt;project_dir/&gt;     <span class="cm"># seal a complete project → .matyos archive</span>
+$ matyos info &lt;file.matyos&gt;       <span class="cm"># read the manifest without re-checking</span></pre>
+      </div>
       <div class="section-body">
-        <p>Every El program passes through four stages. Each stage can raise a typed error (<code>LexerError</code>, <code>ParserError</code>, <code>SemanticError</code>) with line and column information.</p>
-      </div>
-
-      <div class="pipeline-flow">
-        <span class="pipeline-stage">Lexer</span>
-        <span class="pipeline-arrow">→</span>
-        <span class="pipeline-stage">Parser</span>
-        <span class="pipeline-arrow">→</span>
-        <span class="pipeline-stage">Semantic Analyzer</span>
-        <span class="pipeline-arrow">→</span>
-        <span class="pipeline-stage">Interpreter</span>
-      </div>
-
-      <div class="pipeline-cards">
-        <div class="pipeline-card">
-          <h4>Lexer</h4>
-          <p>Converts raw source text into a token stream. Case-insensitive keyword matching. Supports <code>&#123;&#123; &#125;&#125;</code> multi-line comments and <code>//</code> single-line. Recognizes <code>===</code>, <code>!=</code>, <code>&gt;=</code>, <code>&lt;=</code> as compound operators. Handles single- and double-quoted strings.</p>
-        </div>
-        <div class="pipeline-card">
-          <h4>Parser</h4>
-          <p>~1150-line recursive descent parser. Builds a full AST for all language constructs: variables, constants, functions, objects, control flow, proofs (axiom / theorem / proof / hypothesis / test / QED), and package imports.</p>
-        </div>
-        <div class="pipeline-card">
-          <h4>Semantic Analyzer</h4>
-          <p>Multi-pass AST visitor. Resolves scope chains and symbol tables. Enforces constant immutability. Links each <code>theorem</code> to its corresponding <code>proof</code> block. Detects undeclared identifiers and type mismatches before execution.</p>
-        </div>
-        <div class="pipeline-card">
-          <h4>Interpreter</h4>
-          <p>Tree-walking interpreter. Evaluates all AST nodes including proof steps, package imports (Easier Hub), built-in <code>show</code>, <code>involve</code>, and object access. Proof execution prints a colored verification trace to stdout: <code>[AXIOM]</code>, <code>[THEOREM]</code>, <code>[HYPOTHESIS]</code>, <code>[TEST ✓]</code>, <code>[QED ∎]</code>.</p>
-        </div>
+        <p><code>matyos check</code> exits <code>0</code> when every proof in the file or project holds and non-zero when any proof fails — so it drops straight into CI.</p>
       </div>
     </section>
 
-    <hr class="doc-divider"/>
-
-    <!-- ══ LIVE EL PLAYGROUND ══════════════════════════════════════ -->
-    <section class="doc-section reveal" id="playground">
-      <div class="section-eyebrow">Interactive</div>
-      <h2 class="section-title">Live El Playground</h2>
+    <!-- ══ ARCHITECTURE ═════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="architecture">
+      <h2 class="section-title">Trust Boundary</h2>
       <div class="section-body">
-        <p>Write and run El programs directly in the browser. Your code executes on the real MatyOS interpreter — proof traces, colored output and all.</p>
+        <p>MatyOS follows the <strong>de Bruijn criterion</strong>: correctness rests on a small, auditable kernel, and everything else is untrusted machinery that must produce terms the kernel re-checks.</p>
       </div>
+      <div class="code-block">
+        <pre>                 untrusted                          TRUSTED
+   ┌───────────────────────────────────┐     ┌──────────────────────┐
+   .elk file ──▶ frontend/surface.py ──▶│     │ matyos/kernel/core   │
+   LLM output ─▶ (parser → kernel terms)│ ──▶ │  infer / normalize    │ ──▶ ✓ / ✗
+   tactics    ─▶ (future)               │     │  (inductive, equality)│
+   realistic  ─▶ logic/realistic.py     │     └──────────────────────┘
+   └───────────────────────────────────┘</pre>
+      </div>
+      <div class="code-block">
+        <pre>matyos/             <span class="cm"># the proof assistant</span>
+├── kernel/         <span class="cm"># the TRUSTED core — small and auditable</span>
+│   ├── core        <span class="cm"># terms, normalization, definitional equality, type inference</span>
+│   ├── inductive   <span class="cm"># inductive types, recursors, iota-reduction, strict positivity</span>
+│   └── equality    <span class="cm"># propositional equality (Eq) + the J eliminator</span>
+├── frontend/       <span class="cm"># tokenizer + parser for the .elk proof language</span>
+├── logic/          <span class="cm"># three-valued ("realistic") logic</span>
+└── cli             <span class="cm"># the `matyos` command</span>
 
-      <div class="playground" id="elPlayground">
-        <div class="playground-header">
-          <span class="playground-title" id="playgroundTitle">El interpreter — live execution</span>
-          <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
-            <button id="polyfdosToggle" onclick="togglePolyfdosMode()" style="font-family:var(--font-mono);font-size:0.62rem;background:transparent;border:1px solid #2a3550;color:#8892a4;padding:3px 10px;border-radius:3px;cursor:pointer;letter-spacing:0.04em;transition:all .2s;">▶ Run on polyfdOS</button>
-            <div class="playground-examples">
-              <button class="playground-example-btn" onclick="setElExample('hello')">Hello World</button>
-              <button class="playground-example-btn" onclick="setElExample('proof')">Proof Demo</button>
-              <button class="playground-example-btn" onclick="setElExample('axiomatic')">Axiomatic</button>
-              <button class="playground-example-btn" onclick="setElExample('funcs')">Functions</button>
-              <button class="playground-example-btn" onclick="setElExample('builtins')">Builtins</button>
-              <button class="playground-example-btn" onclick="setElExample('fibonacci')">Fibonacci</button>
-            </div>
-          </div>
-        </div>
-        <div class="playground-body">
-          <div class="playground-editor-wrap">
-            <textarea class="playground-editor" id="elEditor" spellcheck="false" style="min-height:260px">ALGORITHM HelloWorld {
-  show "Hello, World!";
-  show "MatyOS v1.1.0";
-}</textarea>
-          </div>
-          <div class="playground-output" id="elOutput">
-            <span style="color:#546e7a">// output will appear here</span>
-          </div>
-        </div>
-        <div class="playground-footer">
-          <button class="run-btn" id="elRunBtn" onclick="runEl()">▶ Run</button>
-          <span class="run-status" id="elStatus"></span>
-        </div>
+stdlib/             <span class="cm"># standard library, written in MatyOS itself (.elk)</span>
+examples/           <span class="cm"># example proofs (.elk)</span>
+docs/               <span class="cm"># design + language reference</span>
+ROADMAP.md          <span class="cm"># the honest, phased plan toward a Lean-class system</span></pre>
+      </div>
+      <div class="info-box">
+        <strong>Trust boundary:</strong> only the <strong>kernel</strong> must be trusted. The parser, the standard library, the <code>realistic</code> layer, and any future tactics or LLM output all ultimately produce terms that the kernel re-checks. If the kernel is sound, a term that type-checks against a proposition <em>is</em> a proof of it.
       </div>
     </section>
 
-    <hr class="doc-divider"/>
-
-    <!-- ══ EXAMPLES GALLERY ═══════════════════════════════════════ -->
-    <section class="doc-section reveal" id="examples">
-      <div class="section-eyebrow">Examples</div>
-      <h2 class="section-title">Examples Gallery</h2>
+    <!-- ══ ROADMAP ══════════════════════════════════════════════ -->
+    <section class="doc-section reveal" id="roadmap">
+      <h2 class="section-title">Roadmap &amp; honest status</h2>
       <div class="section-body">
-        <p>Real programs from the MatyOS examples directory. Click any example to load it into the playground above.</p>
-      </div>
-
-      <div class="examples-grid">
-        <div class="example-card">
-          <div class="example-card-header">
-            <span class="example-card-title">Hello World</span>
-            <span class="example-card-tag">beginner</span>
-          </div>
-          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> HelloWorld <span class="op">{</span>
-  <span class="kw">show</span> <span class="str">"Hello, World!"</span>;
-  <span class="kw">show</span> <span class="str">"Welcome to El!"</span>;
-<span class="op">}</span></pre>
-        </div>
-
-        <div class="example-card">
-          <div class="example-card-header">
-            <span class="example-card-title">Proof Demo</span>
-            <span class="example-card-tag">proof system</span>
-          </div>
-          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> ProofDemo <span class="op">{</span>
-  <span class="pr">axiom</span> identity : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-  <span class="pr">axiom</span> excl_mid  : <span class="kw">true</span> <span class="kw">or</span> !<span class="kw">true</span>;
-
-  <span class="pr">theorem</span> basic_truth : <span class="kw">true</span>;
-
-  <span class="pr">proof</span> basic_truth <span class="op">{</span>
-    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
-    <span class="pr">test</span> v1 : h1 : <span class="kw">true</span>;
-    <span class="pr">QED</span>;
-  <span class="op">}</span>
-
-  <span class="kw">show</span> <span class="str">"theorem proved"</span>;
-<span class="op">}</span></pre>
-        </div>
-
-        <div class="example-card">
-          <div class="example-card-header">
-            <span class="example-card-title">Axiomatic Method</span>
-            <span class="example-card-tag">advanced proof</span>
-          </div>
-          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Axiomatic <span class="op">{</span>
-  <span class="pr">axiom</span> A1 : <span class="kw">true</span> <span class="op">===</span> <span class="kw">true</span>;
-  <span class="pr">definition</span> D1 : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
-
-  <span class="pr">theorem</span> compound : <span class="kw">true</span> <span class="kw">and</span> <span class="kw">true</span>;
-
-  <span class="pr">proof</span> compound <span class="op">{</span>
-    <span class="pr">hypothesis</span> h1 : <span class="kw">true</span>;
-    <span class="pr">hypothesis</span> h2 : <span class="kw">true</span>;
-    <span class="pr">test</span> t1 : h1 : <span class="kw">true</span>;
-    <span class="pr">test</span> t2 : h2 : <span class="kw">true</span>;
-    <span class="pr">QED</span>;
-  <span class="op">}</span>
-
-  <span class="kw">show</span> <span class="str">"compound proved"</span>;
-<span class="op">}</span></pre>
-        </div>
-
-        <div class="example-card">
-          <div class="example-card-header">
-            <span class="example-card-title">Recursive Factorial</span>
-            <span class="example-card-tag">functions</span>
-          </div>
-          <pre class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">ALGORITHM</span> Factorial <span class="op">{</span>
-  <span class="kw">function</span> <span class="fn">fact</span>(n : <span class="ty">integer</span>) <span class="op">{</span>
-    <span class="kw">if</span> n <= <span class="num">1</span> <span class="op">{</span>
-      <span class="kw">return</span> <span class="num">1</span>;
-    <span class="op">}</span>
-    <span class="kw">return</span> n * <span class="fn">fact</span>(n - <span class="num">1</span>);
-  <span class="op">}</span>
-
-  <span class="kw">show</span> <span class="fn">fact</span>(<span class="num">5</span>);
-  <span class="kw">show</span> <span class="fn">fact</span>(<span class="num">10</span>);
-<span class="op">}</span></pre>
-        </div>
+        <p>"Competitive with Lean for all of mathematics" is a decade-scale, community effort — Lean's Mathlib is ~1.7M lines, ~400 contributors, ~6 years. The realistic way to be <em>competitive in a niche soon</em> is to win on the axis Lean was never designed for: <strong>LLM-native authoring + uncertainty-aware reasoning</strong>, while bootstrapping the library by autoformalization.</p>
+        <p>Two parallel tracks run throughout the roadmap:</p>
+        <ul>
+          <li><strong>Core track (C):</strong> the trusted kernel growing to Lean-class expressiveness.</li>
+          <li><strong>Realistic track (R):</strong> the <code>realistic</code> / uncertainty layer — kept <em>above</em> the trusted core so it never threatens soundness.</li>
+        </ul>
+        <p>Current state (v0.7.0): kernel + inductives + equality + tactic engine + scientific-method projects + sealed archives + commutativity of <code>+</code> proven. Next on deck: richer evidence-bearing tests, a discharge queue surfacing the highest-leverage open conjectures, theory <code>import</code> across <code>.matyos</code> archives, and an LLM conjecture↔proof loop.</p>
+        <p class="muted small">Full phased plan: <a href="https://github.com/MatyOS-Project/MatyOS/blob/main/ROADMAP.md" target="_blank" rel="noopener">ROADMAP.md</a>.</p>
       </div>
     </section>
 
     <!-- FOOTER -->
     <div class="docs-footer">
       <div class="footer-left">
-        Maty<em style="font-family:var(--font-serif);font-style:italic">OS</em> · v1.1.0 · MIT License<br>
-        <span style="font-size:0.68rem;color:#aaa">El / Elnamic Language · Lexer + Parser + Semantic Analyzer + Interpreter</span>
+        Maty<em style="font-family:var(--font-serif);font-style:italic">OS</em> · v0.7.0 · MIT License<br>
+        <span style="font-size:0.68rem;color:#aaa">Dependently-typed proof assistant · 233 tests passing · Sound kernel + .elk + three-valued realistic logic</span>
       </div>
       <div class="footer-right">
         <a href="https://github.com/MatyOS-Project/MatyOS" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="https://github.com/MatyOS-Project/MatyOS/releases" target="_blank" rel="noopener">Releases ↗</a>
         <a href="/">← PolyfdoS</a>
       </div>
     </div>
@@ -1639,7 +1129,7 @@ neural_networks  = "^0.9.1"</pre></div>
 <script>
 // ─── TYPEWRITER ────────────────────────────────────────────────
 (function(){
-  const phrase = "Where proof is syntax, not ceremony.";
+  const phrase = "A dependently-typed proof assistant, built to be LLM-native.";
   let i = 0;
   const el = document.getElementById('typewriter');
   function type(){
@@ -1673,13 +1163,11 @@ sidebar.querySelectorAll('.sidebar-link').forEach(a=>{
 
 // ─── SCROLLSPY ──────────────────────────────────────────────────
 const sectionIds = [
-  'introduction','installation','quickstart',
-  'variables','types','operators','control-flow','functions','objects',
-  'proofs','axioms','theorems','proof-blocks','proof-workflow','realistic',
-  'bring','bring-syntax','bring-schemas','bring-playground',
-  'packages','cli',
-  'pipeline',
-  'playground','examples'
+  'introduction','why','installation','quickstart',
+  'types','inductive','equality','curry-howard',
+  'proofs','tactics','realistic',
+  'projects','sealed',
+  'cli','architecture','roadmap'
 ];
 const sideLinks = {};
 sectionIds.forEach(id=>{
@@ -2107,10 +1595,15 @@ async function runFp() {
 
 <!-- Cross-nav strip -->
 <div style="background:#0d1117;border-top:1px solid #1e2535;padding:2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;max-width:none;">
-  <a href="/polyfdos#matyos-runtime" style="text-decoration:none;border:1px solid #1e2535;border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='#f78c6c'" onmouseout="this.style.borderColor='#1e2535'">
-    <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:#f78c6c;">Operating System</span>
-    <span style="font-family:var(--font-serif);font-size:1.05rem;color:#c9d1d9;">polyfdOS</span>
-    <span style="font-size:0.76rem;color:#546e7a;">Run MatyOS inside the kernel shell</span>
+  <a href="https://github.com/MatyOS-Project/MatyOS/releases" target="_blank" rel="noopener" style="text-decoration:none;border:1px solid #1e2535;border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='#f78c6c'" onmouseout="this.style.borderColor='#1e2535'">
+    <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:#f78c6c;">Download</span>
+    <span style="font-family:var(--font-serif);font-size:1.05rem;color:#c9d1d9;">matyos binary</span>
+    <span style="font-size:0.76rem;color:#546e7a;">Win / Linux / macOS · v0.7.0 · 233 tests passing</span>
+  </a>
+  <a href="https://github.com/MatyOS-Project/MatyOS/blob/main/ROADMAP.md" target="_blank" rel="noopener" style="text-decoration:none;border:1px solid #1e2535;border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--c-fn)'" onmouseout="this.style.borderColor='#1e2535'">
+    <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--c-fn);">Roadmap</span>
+    <span style="font-family:var(--font-serif);font-size:1.05rem;color:#c9d1d9;">ROADMAP.md</span>
+    <span style="font-size:0.76rem;color:#546e7a;">Phased plan toward a Lean-class system</span>
   </a>
   <a href="/papers/realistic" style="text-decoration:none;border:1px solid #1e2535;border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--c-pr)'" onmouseout="this.style.borderColor='#1e2535'">
     <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--c-pr);">Research Paper</span>
