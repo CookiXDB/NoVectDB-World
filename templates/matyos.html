@@ -1293,7 +1293,7 @@ function wfReset(){
 
 // ─── EL PLAYGROUND ─────────────────────────────────────────────
 const elExamples = {
-  hello: `ALGORITHM HelloWorld {\n  show "Hello, World!";\n  show "MatyOS v1.1.0";\n}`,
+  hello: `ALGORITHM HelloWorld {\n  show "Hello, World!";\n  show "MatyOS v0.7.0";\n}`,
   proof: `ALGORITHM ProofDemo {\n  axiom identity        : true === true;\n  axiom excluded_middle : true or !true;\n\n  theorem simple_theorem : true;\n\n  proof simple_theorem {\n    hypothesis h1 : true;\n    test verify_h1 : h1 : true;\n    QED;\n  }\n\n  show "Theorem proved successfully.";\n}`,
   axiomatic: `ALGORITHM Axiomatic {\n  axiom A1 : true === true;\n  definition D1 : true and true;\n\n  theorem compound : true and true;\n\n  proof compound {\n    hypothesis h1 : true;\n    hypothesis h2 : true;\n    test t1 : h1 : true;\n    test t2 : h2 : true;\n    QED;\n  }\n\n  show "compound theorem proved";\n}`,
   funcs: `ALGORITHM Functions {\n  function add(a, b : integer) {\n    return a + b;\n  }\n\n  function square(n : integer) {\n    return n * n;\n  }\n\n  show add(3, 4);\n  show square(7);\n}`,
@@ -1581,7 +1581,7 @@ async function runFp() {
     <div class="fp-editor-wrap">
       <textarea class="fp-editor" id="fpEditor" spellcheck="false">ALGORITHM HelloWorld {
   show "Hello, World!";
-  show "MatyOS v1.1.0";
+  show "MatyOS v0.7.0";
 }</textarea>
     </div>
     <div class="fp-output" id="fpOutput">// output will appear here</div>
